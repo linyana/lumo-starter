@@ -46,7 +46,15 @@ export const LoginPage = () => {
 			title="Sign in to Lumo"
 			footer={
 				<>
-					No account? <Link to="/register">Create one</Link>
+					Don't have an account?{' '}
+					<Button
+						variant="link"
+						className="h-auto p-0"
+						nativeButton={false}
+						render={<Link to="/register" />}
+					>
+						Sign up now
+					</Button>
 				</>
 			}
 		>

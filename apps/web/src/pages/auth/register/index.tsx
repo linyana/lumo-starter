@@ -41,7 +41,15 @@ export const RegisterPage = () => {
 			description="The first account becomes the owner; later ones join as members."
 			footer={
 				<>
-					Already registered? <Link to="/login">Sign in</Link>
+					Already have an account?{' '}
+					<Button
+						variant="link"
+						className="h-auto p-0"
+						nativeButton={false}
+						render={<Link to="/login" />}
+					>
+						Sign in now
+					</Button>
 				</>
 			}
 		>
