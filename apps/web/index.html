@@ -7,17 +7,17 @@
 		<link rel="icon" type="image/svg+xml" href="/logo.svg" />
 		<title>Lumo Starter</title>
 		<!--
-			Applies the persisted theme before the first paint, so a dark reload never flashes light.
-			The key and the default are `hooks/use-global`: change them there and here together.
+			Applies the remembered theme before the first paint, so a dark reload never flashes light.
+			The key and what counts as dark are `providers/theme/context`: change them there and here
+			together.
 		-->
 		<script>
 			try {
-				const persisted = JSON.parse(localStorage.getItem('lumo') ?? 'null');
-				if (persisted?.state?.theme === 'dark') {
+				if (localStorage.getItem('lumo-theme') === 'dark') {
 					document.documentElement.classList.add('dark');
 				}
 			} catch {
-				// Storage can be unavailable; the store applies the default once it loads.
+				// Storage can be unavailable; the provider applies the default once it mounts.
 			}
 		</script>
 	</head>

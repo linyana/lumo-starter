@@ -1,10 +1,13 @@
 import { Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useGlobal } from '@/hooks';
+import { useTheme } from '../context';
 
+/**
+ * The one control for the theme: both frames — the rail's brand row and the anonymous screens'
+ * header — draw this, so neither owns the behaviour.
+ */
 export const ThemeToggle = () => {
-	const theme = useGlobal((state) => state.theme);
-	const actions = useGlobal((state) => state.actions);
+	const { theme, toggle } = useTheme();
 	const dark = theme === 'dark';
 
 	return (
@@ -15,7 +18,7 @@ export const ThemeToggle = () => {
 			aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
 			aria-pressed={dark}
 			icon={dark ? <Sun /> : <Moon />}
-			onClick={() => actions.set({ theme: dark ? 'light' : 'dark' })}
+			onClick={toggle}
 		/>
 	);
 };

@@ -1,32 +1,31 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { GlobalState, GlobalStore, Theme } from './types';
+import { persist, type PersistOptions } from 'zustand/middleware';
+import type { GlobalState, GlobalStore } from './types';
 
-export type { GlobalActions, GlobalState, GlobalStore, Theme } from './types';
+export type { GlobalActions, GlobalState, GlobalStore } from './types';
 
-/** What a first visit starts from: light, and an open rail. */
+/** What a first visit starts from: the rail open. */
 const initial: GlobalState = {
-	theme: 'light',
 	collapsed: false,
 };
 
 /**
- * `.dark` on <html> is how the stylesheet picks its token block — see
- * `@custom-variant dark` in `index.css`. `colorScheme` carries the choice to the native
- * chrome: scrollbars and form controls would otherwise follow the operating system instead.
+ * The only shape a snapshot may contribute, field by field and with the default as the floor. Both
+ * ends of `persist` go through it: `partialize` decides what is written, `merge` decides what may be
+ * read back — so a stale snapshot that also carried `actions: {}` cannot replace the live methods,
+ * and a field the store has since dropped cannot return. Storage is an input, not the state.
  */
-const applyTheme = (theme: Theme) => {
-	document.documentElement.classList.toggle('dark', theme === 'dark');
-	document.documentElement.style.colorScheme = theme;
-};
+const stored = ({ collapsed }: Partial<GlobalState>): GlobalState => ({
+	collapsed: collapsed ?? initial.collapsed,
+});
 
 /**
- * What belongs to the app rather than to a screen: the theme and the rail's width. A store rather
- * than a context, so a screen re-renders for the field it reads and a component outside the tree —
- * an http interceptor, say — can reach it too.
+ * What belongs to the app rather than to a screen, and to no external system either: the rail's
+ * width. That is the whole reason this is a store and not a context — a field can be read without a
+ * provider above it. The theme is the opposite case and lives in `providers/theme`.
  *
- *   const { theme, actions } = useGlobal();
- *   actions.set({ theme: 'light' });
+ *   const { collapsed, actions } = useGlobal();
+ *   actions.set({ collapsed: true });
  */
 export const useGlobal = create<GlobalStore>()(
 	persist(
@@ -38,17 +37,13 @@ export const useGlobal = create<GlobalStore>()(
 				reset: (state) => set({ ...initial, ...state }),
 			},
 		}),
-		// The whole store is worth remembering, so nothing is filtered out: `actions` is made of
-		// functions, which `JSON.stringify` drops on the way to storage. `index.html` reads this
-		// key before the first paint, so a dark reload never flashes light.
-		{ name: 'lumo' },
+		{
+			name: 'lumo',
+			partialize: stored,
+			merge: (persisted, current) => ({
+				...current,
+				...stored(persisted as Partial<GlobalState>),
+			}),
+		} satisfies PersistOptions<GlobalStore, GlobalState>,
 	),
 );
-
-// There is no provider to run this from, and a reload has to land on the stored theme before
-// React's first render: apply it as the store is created, then on every change of the one field
-// that decides it.
-applyTheme(useGlobal.getState().theme);
-useGlobal.subscribe((state, previous) => {
-	if (state.theme !== previous.theme) applyTheme(state.theme);
-});

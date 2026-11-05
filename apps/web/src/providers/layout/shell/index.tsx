@@ -1,9 +1,10 @@
-import { LogOut, Moon, Sun } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 import { Layout, type LayoutNavEntry } from '@/components/blocks/layout';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/providers/auth';
 import { useGlobal } from '@/hooks';
+import { useAuth } from '@/providers/auth';
+import { ThemeToggle } from '@/providers/theme';
 import type { AppShellProps } from './types';
 
 export type { AppShellProps } from './types';
@@ -31,8 +32,7 @@ export const AppShell = ({ nav }: AppShellProps) => {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const { user, logout } = useAuth();
-	const { theme, collapsed, actions } = useGlobal();
-	const dark = theme === 'dark';
+	const { collapsed, actions } = useGlobal();
 
 	return (
 		<Layout
@@ -56,14 +56,7 @@ export const AppShell = ({ nav }: AppShellProps) => {
 			}
 			brandActions={
 				<>
-					<Button
-						variant="ghost"
-						size="icon"
-						aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
-						aria-pressed={dark}
-						icon={dark ? <Sun /> : <Moon />}
-						onClick={() => actions.set({ theme: dark ? 'light' : 'dark' })}
-					/>
+					<ThemeToggle />
 					<Button
 						variant="ghost"
 						size="icon"

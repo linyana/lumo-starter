@@ -1,4 +1,4 @@
-import { ThemeToggle } from './theme-toggle';
+import { ThemeToggle } from '@/providers/theme';
 import type { AuthLayoutProps } from './types';
 
 export type { AuthLayoutProps } from './types';
