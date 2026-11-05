@@ -1,0 +1,31 @@
+{
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		// Node 16+ resolution. `node10` and `baseUrl` no longer exist in TS 7, so
+		// the config targets the modern modes even though the compiler is 5.9.
+		// Output stays ESM: apps/api/package.json declares `"type": "module"`, which
+		// is why every relative import carries its `.js` suffix.
+		"module": "node16",
+		"moduleResolution": "node16",
+		"target": "ES2022",
+		"lib": ["ES2023"],
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+		// Nest emits CommonJS with decorator metadata; `verbatimModuleSyntax`
+		// rejects that combination, and `isolatedModules` breaks metadata too.
+		"verbatimModuleSyntax": false,
+		"isolatedModules": false,
+		"types": ["node"],
+		"outDir": "./dist",
+		// TypeScript 6 no longer infers the common source directory, so emit fails
+		// with TS5011 unless `rootDir` is explicit. Pinning it to src/ keeps the
+		// output layout flat (src/main.ts -> dist/main.js), which is what
+		// package.json's "start": "node dist/main.js" expects.
+		"rootDir": "./src",
+		"incremental": true,
+		"strictPropertyInitialization": false,
+		"noUnusedLocals": false
+	},
+	"include": ["src/**/*.ts"],
+	"exclude": ["node_modules", "dist"]
+}

@@ -1,0 +1,35 @@
+{
+	"$schema": "https://turbo.build/schema.json",
+	"ui": "stream",
+	"globalEnv": ["NODE_ENV"],
+	// Root files every task reads but that live outside the package hashes, so
+	// editing them has to invalidate the cache.
+	"globalDependencies": [".oxlintrc.json", ".oxfmtrc.json", "tsconfig.base.json"],
+	"tasks": {
+		"build": {
+			"dependsOn": ["^build"],
+			"outputs": ["dist/**", "!.vite", "!.turbo", "!node_modules"]
+		},
+		"dev": {
+			"dependsOn": ["^build"],
+			"cache": false,
+			"persistent": true
+		},
+		// The web app compiles shared from source (vite alias), but the API loads
+		// its built output, so shared keeps a watcher alive next to `pnpm dev`.
+		// `build` is ordered first so the watcher never cleans `dist` under a
+		// consumer that is already booting.
+		"@lumo/shared#dev": {
+			"dependsOn": ["build"],
+			"cache": false,
+			"persistent": true
+		},
+		"typecheck": {
+			"dependsOn": ["^build"],
+			"outputs": []
+		},
+		"lint": {
+			"outputs": []
+		}
+	}
+}

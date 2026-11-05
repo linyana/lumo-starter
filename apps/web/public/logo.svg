@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+	<!-- The mark is the Meki cat, taken from the supplied family's mono variant:
+	     the head alone, no carrier. It is set white on a black tile, so the mark
+	     carries the brand on its own and a light or dark rail both read it the same
+	     way. The group centres it and scales it to 0.7565, so the head spans 278 of
+	     the 480 tile and keeps 101px of air a side: a solid silhouette needs more air
+	     than the hairline mark it replaces. -->
+	<rect x="16" y="16" width="480" height="480" rx="96" fill="#000000" />
+	<g transform="translate(256 256) scale(0.7565) translate(-255.5 -254.5)">
+		<path
+			fill="#FFFFFF"
+			fill-rule="evenodd"
+			d="M136.4 58.3 L72.3 334.3 C76.1 374.2 130.1 434.5 210 448.5 C231.6 452.3 279.8 452.3 301.4 448.5 C381.3 434.5 435.2 374.2 439.7 334.3 L375.6 58.3 C345.1 86.2 329.9 106.5 312.2 127.4 L199.8 127.4 C182.1 106.5 166.9 86.2 136.4 58.3 Z M182.1 217.2 A20.3 20.3 0 0 1 222.7 217.2 L222.7 247 A20.3 20.3 0 0 1 182.1 247 Z M286.2 217.2 A20.3 20.3 0 0 1 326.7 217.2 L326.7 247 A20.3 20.3 0 0 1 286.2 247 Z"
+		/>
+	</g>
+</svg>

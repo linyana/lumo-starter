@@ -1,0 +1,39 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build
+dist/
+build/
+out/
+.turbo/
+.vite/
+*.tsbuildinfo
+
+# env
+.env
+.env.*
+!.env.example
+
+# generated
+apps/api/src/generated/
+apps/api/prisma/migrations/dev.db*
+
+# test
+coverage/
+playwright-report/
+test-results/
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# editors / os
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+
+# agent skill symlinks (the .agents/skills copy is committed)
+.claude/

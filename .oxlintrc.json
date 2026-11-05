@@ -1,0 +1,56 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	// Generated and vendored code, kept in sync by hand with `ignorePatterns` in
+	// `.oxfmtrc.json`: the linter and the formatter skip the same files.
+	"ignorePatterns": [
+		"**/node_modules/",
+		"**/dist/",
+		"**/build/",
+		"**/out/",
+		"**/coverage/",
+		"**/.turbo/",
+		"**/*.tsbuildinfo",
+		"pnpm-lock.yaml",
+		"apps/api/prisma/migrations/",
+		"apps/api/src/generated/",
+		// Vendored from the @lumo registry — written upstream, leave it alone.
+		"apps/web/src/components/",
+		"apps/web/src/lib/control/index.ts",
+		"apps/web/src/lib/measure/index.ts",
+		"apps/web/src/lib/motion/index.ts",
+		"apps/web/src/lib/surface/index.ts",
+		"apps/web/src/lib/utils/index.ts",
+		// Committed agent skill.
+		".agents/"
+	],
+	"rules": {
+		"no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+		"typescript/no-explicit-any": "warn"
+	},
+	"overrides": [
+		{
+			// Only outside the API: Nest's `emitDecoratorMetadata` turns a
+			// constructor parameter's class into a *value* import, so `import type`
+			// there would erase the very reference dependency injection needs.
+			"files": ["apps/web/**/*.{ts,tsx}", "packages/**/*.ts"],
+			"rules": {
+				"typescript/consistent-type-imports": [
+					"warn",
+					{ "prefer": "type-imports", "fixStyle": "inline-type-imports" }
+				]
+			}
+		},
+		{
+			"files": ["apps/api/**/*.ts", "packages/**/*.ts"],
+			"env": { "node": true }
+		},
+		{
+			"files": ["apps/web/src/**/*.{ts,tsx}"],
+			"env": { "browser": true }
+		},
+		{
+			"files": ["apps/web/*.config.ts"],
+			"env": { "node": true }
+		}
+	]
+}

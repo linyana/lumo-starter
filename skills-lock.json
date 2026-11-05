@@ -1,0 +1,11 @@
+{
+	"version": 1,
+	"skills": {
+		"lumo-ui": {
+			"source": "linyana/lumo-ui",
+			"sourceType": "github",
+			"skillPath": "skills/lumo-ui/SKILL.md",
+			"computedHash": "89ae7c7e0c48367299148bd0121610738646a2cf67e4c3f2b1a4b27af182e2bc"
+		}
+	}
+}
