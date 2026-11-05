@@ -43,24 +43,34 @@ export const LoginPage = () => {
 
 	return (
 		<AuthLayout
-			title="Sign in"
-			description="Use one of the seeded accounts to explore the permission matrix."
+			title="Sign in to Lumo"
 			footer={
 				<>
 					No account? <Link to="/register">Create one</Link>
 				</>
 			}
 		>
-			<Form errors={errors} onFormSubmit={handleSubmit}>
+			<Form className="gap-6" errors={errors} onFormSubmit={handleSubmit}>
 				<Field.Root name="email">
-					<Field.Label>Email</Field.Label>
-					<Field.Control render={<Input type="email" autoComplete="email" />} />
+					<Field.Control
+						render={
+							<Input type="email" autoComplete="username" placeholder="Email" aria-label="Email" />
+						}
+					/>
 					<Field.Error />
 				</Field.Root>
 
 				<Field.Root name="password">
-					<Field.Label>Password</Field.Label>
-					<Field.Control render={<Input type="password" autoComplete="current-password" />} />
+					<Field.Control
+						render={
+							<Input
+								type="password"
+								autoComplete="current-password"
+								placeholder="Password"
+								aria-label="Password"
+							/>
+						}
+					/>
 					<Field.Error />
 				</Field.Root>
 

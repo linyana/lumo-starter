@@ -16,7 +16,9 @@ export const AuthLayout = ({ title, description, children, footer }: AuthLayoutP
 				<div className="w-full max-w-sm">
 					<div className="space-y-1.5">
 						<h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-						<p className="text-sm text-pretty text-muted-foreground">{description}</p>
+						{description && (
+							<p className="text-sm text-pretty text-muted-foreground">{description}</p>
+						)}
 					</div>
 
 					<div className="mt-8">{children}</div>
