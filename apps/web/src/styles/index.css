@@ -1,3 +1,4 @@
+@import '@fontsource-variable/geist';
 @import 'tailwindcss';
 
 /* @lumo/theme and @lumo/palette are merged into this file by the shadcn CLI. */
@@ -6,7 +7,7 @@
 
 @theme inline {
 	--font-sans:
-		'Inter Variable', 'Inter', 'Noto Sans SC Variable', 'Noto Sans SC', system-ui, -apple-system,
+		'Geist Variable', 'Geist', 'Noto Sans SC Variable', 'Noto Sans SC', system-ui, -apple-system,
 		BlinkMacSystemFont, 'Segoe UI', sans-serif;
 	--font-mono:
 		'Geist Mono Variable', 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas,
