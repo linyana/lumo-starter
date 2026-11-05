@@ -1,5 +1,8 @@
-/** Everything the app remembers between visits. The theme is not here — see `providers/theme`. */
+export type Theme = 'light' | 'dark';
+
+/** Everything the app remembers between visits. */
 export type GlobalState = {
+	theme: Theme;
 	/** Whether the shell's rail is narrowed to its icons. */
 	collapsed: boolean;
 };

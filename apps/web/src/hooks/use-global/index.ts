@@ -2,10 +2,11 @@ import { create } from 'zustand';
 import { persist, type PersistOptions } from 'zustand/middleware';
 import type { GlobalState, GlobalStore } from './types';
 
-export type { GlobalActions, GlobalState, GlobalStore } from './types';
+export type { GlobalActions, GlobalState, GlobalStore, Theme } from './types';
 
-/** What a first visit starts from: the rail open. */
+/** What a first visit starts from: light, and an open rail. */
 const initial: GlobalState = {
+	theme: 'light',
 	collapsed: false,
 };
 
@@ -15,17 +16,19 @@ const initial: GlobalState = {
  * read back — so a stale snapshot that also carried `actions: {}` cannot replace the live methods,
  * and a field the store has since dropped cannot return. Storage is an input, not the state.
  */
-const stored = ({ collapsed }: Partial<GlobalState>): GlobalState => ({
+const stored = ({ theme, collapsed }: Partial<GlobalState>): GlobalState => ({
+	theme: theme ?? initial.theme,
 	collapsed: collapsed ?? initial.collapsed,
 });
 
 /**
- * What belongs to the app rather than to a screen, and to no external system either: the rail's
- * width. That is the whole reason this is a store and not a context — a field can be read without a
- * provider above it. The theme is the opposite case and lives in `providers/theme`.
+ * What the app remembers between visits: the theme and the rail's width. Data only — the store
+ * never touches the document, so importing it (a test, an interceptor) has no side effect. `.dark`
+ * on <html> is decided by `theme` and applied in `providers/theme`, which is the one place that
+ * keeps the two in step.
  *
- *   const { collapsed, actions } = useGlobal();
- *   actions.set({ collapsed: true });
+ *   const { theme, actions } = useGlobal();
+ *   actions.set({ theme: 'dark' });
  */
 export const useGlobal = create<GlobalStore>()(
 	persist(
@@ -38,6 +41,8 @@ export const useGlobal = create<GlobalStore>()(
 			},
 		}),
 		{
+			// `index.html` reads this key before the first paint, so a dark reload never flashes
+			// light: change the key or the shape here and there together.
 			name: 'lumo',
 			partialize: stored,
 			merge: (persisted, current) => ({
