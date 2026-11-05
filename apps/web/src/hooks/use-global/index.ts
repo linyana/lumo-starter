@@ -1,18 +1,26 @@
 import { create } from 'zustand';
 import { persist, type PersistOptions } from 'zustand/middleware';
-import { initial, snapshotSchema } from './schema';
 import type { GlobalState, GlobalStore } from './types';
 
 export type { GlobalActions, GlobalState, GlobalStore, Theme } from './types';
 
+/** What a first visit starts from: light, and an open rail. */
+const initial: GlobalState = {
+	theme: 'light',
+	collapsed: false,
+};
+
 /**
- * Whatever storage holds, this is the state: every field falls back to its default, and keys the
- * store does not declare are dropped. Both ends of `persist` go through it — `partialize` writes
- * with it, `merge` reads with it — so a snapshot that carried `actions: {}` cannot replace the live
- * methods, a field that is present but wrong cannot arrive, and neither can a field that has since
- * been removed. Storage is an input, not the state.
+ * The only shape a snapshot may contribute, field by field and with the default as the floor. Both
+ * ends of `persist` go through it: `partialize` decides what is written, `merge` decides what may be
+ * read back — so a stale snapshot that also carried `actions: {}` cannot replace the live methods,
+ * and a field the store has since dropped cannot return. Storage is an input, not the state: a field
+ * that is present but wrong is rejected the same way a missing one is.
  */
-const stored = (snapshot: unknown): GlobalState => snapshotSchema.parse(snapshot);
+const stored = ({ theme, collapsed }: Partial<GlobalState>): GlobalState => ({
+	theme: theme === 'dark' ? 'dark' : initial.theme,
+	collapsed: typeof collapsed === 'boolean' ? collapsed : initial.collapsed,
+});
 
 /**
  * What the app remembers between visits: the theme and the rail's width. Data only — the store
@@ -38,7 +46,10 @@ export const useGlobal = create<GlobalStore>()(
 			// light: change the key or the shape here and there together.
 			name: 'lumo',
 			partialize: stored,
-			merge: (persisted, current) => ({ ...current, ...stored(persisted) }),
+			merge: (persisted, current) => ({
+				...current,
+				...stored(persisted as Partial<GlobalState>),
+			}),
 		} satisfies PersistOptions<GlobalStore, GlobalState>,
 	),
 );

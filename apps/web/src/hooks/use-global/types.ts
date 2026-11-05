@@ -1,11 +1,11 @@
-import type { z } from 'zod';
-import type { globalSchema, themeSchema } from './schema';
-
-/** One of the entries in `THEMES`, by construction. */
-export type Theme = z.infer<typeof themeSchema>;
+export type Theme = 'light' | 'dark';
 
 /** Everything the app remembers between visits. */
-export type GlobalState = z.infer<typeof globalSchema>;
+export type GlobalState = {
+	theme: Theme;
+	/** Whether the shell's rail is narrowed to its icons. */
+	collapsed: boolean;
+};
 
 export type GlobalActions = {
 	/**
