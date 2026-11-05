@@ -8,8 +8,13 @@ export type GlobalState = {
 };
 
 export type GlobalActions = {
-	/** Merges a slice in, the way a `useState` setter would replace the whole. */
-	set: (state: Partial<GlobalState>) => void;
+	/**
+	 * Merges a slice in. Both forms are zustand's own: the object, or `(state) => slice`, which reads
+	 * the current value instead of one captured by an older render — a counter written as
+	 * `count + 1` loses increments, `(state) => state.count + 1` cannot. The `replace` overload is
+	 * deliberately absent: it would drop `actions` itself, which lives in the same object.
+	 */
+	set: (state: Partial<GlobalState> | ((state: GlobalState) => Partial<GlobalState>)) => void;
 	/** Back to the initial values, with a slice on top for what the caller means to keep. */
 	reset: (state?: Partial<GlobalState>) => void;
 };

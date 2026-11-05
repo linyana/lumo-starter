@@ -14,11 +14,12 @@ const initial: GlobalState = {
  * The only shape a snapshot may contribute, field by field and with the default as the floor. Both
  * ends of `persist` go through it: `partialize` decides what is written, `merge` decides what may be
  * read back — so a stale snapshot that also carried `actions: {}` cannot replace the live methods,
- * and a field the store has since dropped cannot return. Storage is an input, not the state.
+ * and a field the store has since dropped cannot return. Storage is an input, not the state: a field
+ * that is present but wrong is rejected the same way a missing one is.
  */
 const stored = ({ theme, collapsed }: Partial<GlobalState>): GlobalState => ({
-	theme: theme ?? initial.theme,
-	collapsed: collapsed ?? initial.collapsed,
+	theme: theme === 'dark' ? 'dark' : initial.theme,
+	collapsed: typeof collapsed === 'boolean' ? collapsed : initial.collapsed,
 });
 
 /**
