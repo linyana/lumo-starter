@@ -173,6 +173,9 @@ helper), and hold its result with `useHttp`.
 
 **Change a table** — edit `prisma/schema.prisma`, `pnpm db:migrate`, `pnpm db:generate`.
 
+**Watch a loading state** — set `API_DELAY_MS=1200` in `.env` and restart the API: every response,
+including failures, arrives that many milliseconds later. Back to `0` when the spinner is believable.
+
 ---
 
 ## Gotchas
@@ -190,7 +193,9 @@ the action to take.
   updates stay diff-able.
 - **The AI skill** lives in `.agents/skills/lumo-ui`; refresh with `bunx skills update`.
 - **`.env` holds only `DATABASE_URL` and `JWT_ACCESS_SECRET`** — everything else is a constant in
-  `apps/api/src/common/config/runtime.ts` (port, log level, token lifetimes, throttling).
+  `apps/api/src/common/config/runtime.ts` (port, log level, token lifetimes, throttling). The one
+  exception, `API_DELAY_MS`, is a test knob rather than config: it holds every response back so
+  spinners and empty states are visible, and production ignores it.
 - **Cookies are host-only**, `Secure` outside development. Subdomain deployments edit
   `refresh-cookie/index.ts` deliberately (§5).
 - **Roles are `String[]`, not an enum** — adding a role never needs a migration (§4).

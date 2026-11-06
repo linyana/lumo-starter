@@ -232,6 +232,12 @@ A guard, a filter and a handler each name the request they were given.
 refresh lifetime, throttling and cookie security are constants in
 `apps/api/src/common/config/runtime.ts`. `NODE_ENV` is read from the process, not from `envSchema`.
 
+**One exception.** `API_DELAY_MS` is the third schema key, and it is a test knob instead of a
+setting: it holds every response back so a frontend can watch its spinners and empty states, and it
+differs per machine and per afternoon. Defaulting to 0 keeps it out of `.env.example`'s way, and
+`DelayInterceptor` reads it as 0 under `NODE_ENV=production`, so a forgotten value cannot slow a
+deployment.
+
 **Why.** The previous `.env.example` had seventeen keys, of which fifteen never changed — and four of
 those did not exist in the schema at all. Config surface nobody turns costs attention on every read
 and invites "did I set that?" doubt. A constant in a typed file is greppable, reviewed in the same

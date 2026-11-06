@@ -10,6 +10,7 @@ import { PrismaModule } from './common/db/prisma.module.js';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter.js';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard.js';
 import { PermissionsGuard } from './common/guards/permissions.guard.js';
+import { DelayInterceptor } from './common/interceptors/delay.interceptor.js';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { HealthModule } from './modules/health/health.module.js';
@@ -54,6 +55,8 @@ import { UsersModule } from './modules/users/users.module.js';
 		{ provide: APP_GUARD, useClass: JwtAuthGuard },
 		{ provide: APP_GUARD, useClass: PermissionsGuard },
 		{ provide: APP_FILTER, useClass: AllExceptionsFilter },
+		// Outermost of the two, so the delay covers whatever the envelope does.
+		{ provide: APP_INTERCEPTOR, useClass: DelayInterceptor },
 		{ provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
 	],
 })
