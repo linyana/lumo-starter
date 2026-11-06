@@ -9,13 +9,16 @@ import type { AppRoute, NavEntry } from './types';
 export type { AppRoute, NavEntry, RouteAccess } from './types';
 
 /**
- * The one place where route data meets React: guards wrap a page in the order
- * they must run, and the shell is handed the rows that belong inside it. `routes`
- * itself stays a plain table — see `src/routes.tsx`.
+ * The one place where route data meets React: guards wrap a page in the order they must run, and
+ * the shell is handed the rows that belong inside it. `routes` itself stays a plain table — see
+ * `src/routes.tsx`.
  */
 
+/** A row that renders inside the shell — the frame is what requires the session, not the row. */
+type ShellRoute = Extract<AppRoute, { layout: 'shell' }>;
+
 /** Only rows the table gave a `nav` block: a screen without one is reachable, just not listed. */
-type NavRoute = AppRoute & { nav: NavEntry };
+type NavRoute = ShellRoute & { nav: NavEntry };
 
 /**
  * A row's identity and its link target, derived here and nowhere else: the table
@@ -61,8 +64,9 @@ const NotFoundPage = () => (
 );
 
 /**
- * Access first, permission second: a visitor who is not signed in is redirected,
- * not told which permission is missing.
+ * Access first, permission second: a visitor who is not signed in is redirected, not told which
+ * permission is missing. A shell page needs neither access branch — the frame it renders inside
+ * asked the question for the whole rail.
  */
 const elementFor = (route: AppRoute) => {
 	const Page = route.page;
@@ -74,6 +78,7 @@ const elementFor = (route: AppRoute) => {
 		<Page />
 	);
 
+	if (route.layout === 'shell') return page;
 	if (route.access === 'anonymous')
 		return <RedirectIfAuthenticated>{page}</RedirectIfAuthenticated>;
 	if (route.access === 'authenticated') return <RequireAuth>{page}</RequireAuth>;
@@ -85,9 +90,20 @@ const routeObjectFor = (route: AppRoute): RouteObject =>
 		? { index: true, element: elementFor(route) }
 		: { path: route.path, element: elementFor(route) };
 
-const shellRoutes = routes.filter((route) => route.layout === 'shell');
+const shellRoutes = routes.filter((route): route is ShellRoute => route.layout === 'shell');
 const bareRoutes = routes.filter((route) => route.layout === 'bare');
 const nav = navFor(shellRoutes.filter((route): route is NavRoute => route.nav !== undefined));
+
+/**
+ * The rail is the signed-in app, so its guard wraps the frame rather than each row: a reload shows
+ * one full-page loader instead of a rail with a spinner where the page goes, and a session the
+ * server cannot confirm takes the whole screen. A row's `permission` still hides that one page.
+ */
+const shell = (
+	<RequireAuth>
+		<AppShell nav={nav} />
+	</RequireAuth>
+);
 
 /**
  * Data mode: no server, no file-based routes — just an object the router can
@@ -95,7 +111,7 @@ const nav = navFor(shellRoutes.filter((route): route is NavRoute => route.nav !=
  * the deployment needs.
  */
 const router = createBrowserRouter([
-	{ element: <AppShell nav={nav} />, children: shellRoutes.map(routeObjectFor) },
+	{ element: shell, children: shellRoutes.map(routeObjectFor) },
 	...bareRoutes.map(routeObjectFor),
 	{ path: '*', element: <NotFoundPage /> },
 ]);

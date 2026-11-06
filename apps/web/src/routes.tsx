@@ -12,14 +12,12 @@ export const routes: AppRoute[] = [
 	{
 		layout: 'shell',
 		page: DashboardPage,
-		access: 'authenticated',
 		nav: { group: 'Workspace', label: 'Overview', icon: LayoutDashboard },
 	},
 	{
 		path: 'users',
 		layout: 'shell',
 		page: UsersPage,
-		access: 'authenticated',
 		permission: 'user:read',
 		nav: { group: 'Workspace', label: 'Users', icon: Users },
 	},
