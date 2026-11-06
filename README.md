@@ -178,8 +178,9 @@ helper), and hold its result with `useHttp`.
 **Change a table** — edit `prisma/schema.prisma`, `pnpm db:migrate`, `pnpm db:generate`.
 
 **Watch a loading state** — set `API_DELAY_MS=1200` in `.env` and restart the API: every response,
-including failures, arrives that many milliseconds later. `POST /auth/refresh` opts out with
-`@SkipDelay()`: nothing waits on it, and a reload can abort it. Back to `0` when the spinner is
+including failures and `POST /auth/refresh`, arrives that many milliseconds later, so the app's own
+startup loader keeps time with the screens behind it. A reload that aborts the refresh costs nothing:
+the same cookie still returns a pair inside the reuse grace window. Back to `0` when the spinner is
 believable.
 
 ---
