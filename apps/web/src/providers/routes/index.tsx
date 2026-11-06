@@ -1,7 +1,8 @@
+import { useMemo } from 'react';
 import { NavLink, createBrowserRouter, Link, type RouteObject } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import type { LayoutNavEntry, LayoutNavItem } from '@/components/blocks/layout';
-import { RedirectIfAuthenticated, RequireAuth, RequirePermission } from '@/providers/auth';
+import { RedirectIfAuthenticated, RequireAuth, RequirePermission, useAuth } from '@/providers/auth';
 import { AppShell } from '@/providers/layout';
 import { routes } from '@/routes';
 import type { AppRoute, NavEntry } from './types';
@@ -92,16 +93,36 @@ const routeObjectFor = (route: AppRoute): RouteObject =>
 
 const shellRoutes = routes.filter((route): route is ShellRoute => route.layout === 'shell');
 const bareRoutes = routes.filter((route) => route.layout === 'bare');
-const nav = navFor(shellRoutes.filter((route): route is NavRoute => route.nav !== undefined));
+const navRoutes = shellRoutes.filter((route): route is NavRoute => route.nav !== undefined);
+
+/**
+ * The frame that draws the rail, with only the rows this session can open. Which rows exist depends
+ * on the role, and the role only exists inside `AuthProvider` — so the filter lives here rather
+ * than at module scope, and the shell keeps receiving its rows instead of deriving them.
+ *
+ * Hiding a row is an affordance, not a boundary: `RequirePermission` still answers for a URL typed
+ * by hand, and the API still enforces the same permission.
+ */
+const AuthorizedShell = () => {
+	const { can } = useAuth();
+	// `can` is stable per session, so the rows keep their identity until the roles change.
+	const nav = useMemo(
+		() =>
+			navFor(navRoutes.filter((route) => route.permission === undefined || can(route.permission))),
+		[can],
+	);
+
+	return <AppShell nav={nav} />;
+};
 
 /**
  * The rail is the signed-in app, so its guard wraps the frame rather than each row: a reload shows
  * one full-page loader instead of a rail with a spinner where the page goes, and a session the
- * server cannot confirm takes the whole screen. A row's `permission` still hides that one page.
+ * server cannot confirm takes the whole screen.
  */
 const shell = (
 	<RequireAuth>
-		<AppShell nav={nav} />
+		<AuthorizedShell />
 	</RequireAuth>
 );
 
