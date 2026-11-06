@@ -62,8 +62,12 @@ export const AppShell = ({ nav }: AppShellProps) => {
 						size="icon"
 						aria-label="Sign out"
 						icon={<LogOut />}
-						onClick={() => {
-							void logout().then(() => navigate('/login', { replace: true }));
+						onClick={async () => {
+							// `logout` drops the local session in its own `finally`, so a failed request
+							// must not keep the user here: swallow it and leave anyway. Awaiting the
+							// `catch` also keeps the rejection from floating.
+							await logout().catch(() => undefined);
+							navigate('/login', { replace: true });
 						}}
 					/>
 				</>
