@@ -136,6 +136,8 @@ Success: `{ "data": … }`. Failure: `{ "error": { code, message, details? } }` 
 - **CSRF** — the access token travels in `Authorization`, so a forged form post has nothing to ride
   on. The cookie is `SameSite=Lax` and same-origin in dev via the Vite proxy.
 - **Client refresh** — `refreshSession()` is single-flight: ten parallel 401s produce one refresh.
+  Its outcome keeps _expired_ (the server rejected the cookie) apart from _unavailable_ (the server
+  did not answer), so a failed check at boot shows a retry screen instead of signing the user out.
 
 Deploy the SPA and the API on the same origin behind a reverse proxy (`/api` → api). Cross-site
 cookies would require `SameSite=None; Secure` and a CSRF token, which this starter deliberately

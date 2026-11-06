@@ -61,9 +61,10 @@ const REFRESH_PATH = '/auth/refresh';
 
 /**
  * What a refresh attempt amounted to. Only `expired` signs anyone out;
- * `unavailable` is a failure to *check* the session, not to renew it.
+ * `unavailable` is a failure to *check* the session, not to renew it — the
+ * distinction is the caller's, so it survives as a value rather than a `null`.
  */
-type RefreshOutcome =
+export type RefreshOutcome =
 	| { status: 'refreshed'; result: AuthResult }
 	| { status: 'expired' }
 	| { status: 'unavailable' };
@@ -75,7 +76,11 @@ type RefreshOutcome =
  */
 let refreshing: Promise<RefreshOutcome> | null = null;
 
-const attemptRefresh = (): Promise<RefreshOutcome> => {
+/**
+ * Asks the server who this tab is. The auth provider's view of a reload: one
+ * call per app, and the retry behind the "unreachable" screen.
+ */
+export const refreshSession = (): Promise<RefreshOutcome> => {
 	refreshing ??= refreshClient
 		.post<ApiSuccess<AuthResult>>(REFRESH_PATH)
 		.then((response): RefreshOutcome => {
@@ -99,10 +104,6 @@ const attemptRefresh = (): Promise<RefreshOutcome> => {
 	return refreshing;
 };
 
-/** The auth provider's view: who this reload is, or `null` when signed out. */
-export const refreshSession = (): Promise<AuthResult | null> =>
-	attemptRefresh().then((outcome) => (outcome.status === 'refreshed' ? outcome.result : null));
-
 type RetriableConfig = InternalAxiosRequestConfig & { _retried?: boolean };
 
 const NO_REFRESH_PATHS = new Set([REFRESH_PATH, '/auth/login', '/auth/register', '/auth/logout']);
@@ -124,7 +125,7 @@ http.interceptors.response.use(
 		if (NO_REFRESH_PATHS.has(config.url ?? '')) throw toApiError(error);
 
 		config._retried = true;
-		const outcome = await attemptRefresh();
+		const outcome = await refreshSession();
 
 		if (outcome.status === 'refreshed') {
 			config.headers.Authorization = `Bearer ${outcome.result.accessToken}`;

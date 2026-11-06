@@ -17,7 +17,7 @@ import {
 import { onUnauthorized, refreshSession, setAccessToken } from '@/lib';
 import { loginRequest, logoutRequest, registerRequest } from '../api';
 
-type AuthStatus = 'loading' | 'anonymous' | 'authenticated';
+type AuthStatus = 'loading' | 'anonymous' | 'authenticated' | 'unreachable';
 
 type AuthContextValue = {
 	user: User | null;
@@ -25,6 +25,8 @@ type AuthContextValue = {
 	login: (input: LoginInput) => Promise<void>;
 	register: (input: RegisterInput) => Promise<void>;
 	logout: () => Promise<void>;
+	/** Asks the server who this tab is again — what the unreachable screen offers. */
+	refresh: () => Promise<void>;
 	/** Same expression the API guard evaluates — see ROLE_PERMISSIONS in @lumo/shared. */
 	can: (permission: Permission) => boolean;
 };
@@ -35,25 +37,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	const [user, setUser] = useState<User | null>(null);
 	const [status, setStatus] = useState<AuthStatus>('loading');
 
-	// A reload has no access token in memory; the httpOnly refresh cookie is the
-	// only thing that survives, so the app's first act is trading it for a pair.
-	useEffect(() => {
-		let cancelled = false;
+	/**
+	 * A reload has no access token in memory; the httpOnly refresh cookie is the
+	 * only thing that survives, so the app's first act is trading it for a pair.
+	 * `refreshSession` reports every failure as an outcome instead of throwing,
+	 * which is why the three ended states are all read from one value.
+	 */
+	const refresh = useCallback(async () => {
+		setStatus('loading');
 
-		void refreshSession().then((result) => {
-			if (cancelled) return;
-			if (result) {
-				setUser(result.user);
-				setStatus('authenticated');
-			} else {
-				setStatus('anonymous');
-			}
-		});
+		const outcome = await refreshSession();
 
-		return () => {
-			cancelled = true;
-		};
+		if (outcome.status === 'refreshed') {
+			setUser(outcome.result.user);
+			setStatus('authenticated');
+		} else {
+			// Expired: the server rejected the cookie. Unavailable: it did not answer,
+			// which says nothing about the session — the guard keeps it, and retries.
+			setStatus(outcome.status === 'expired' ? 'anonymous' : 'unreachable');
+		}
 	}, []);
+
+	useEffect(() => {
+		void refresh();
+	}, [refresh]);
 
 	// The http layer gives up on a 401 only once the refresh cookie is gone, so
 	// there is nothing to keep: the guards take it from here.
@@ -102,8 +109,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	);
 
 	const value = useMemo<AuthContextValue>(
-		() => ({ user, status, login, register, logout, can }),
-		[user, status, login, register, logout, can],
+		() => ({ user, status, login, register, logout, refresh, can }),
+		[user, status, login, register, logout, refresh, can],
 	);
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
