@@ -4,6 +4,7 @@ import { loginSchema, registerSchema, type LoginInput, type RegisterInput } from
 import type { NodeResponse } from '@nestjs/platform-node';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { Public } from '../../common/decorators/public.decorator.js';
+import { SkipDelay } from '../../common/decorators/skip-delay.decorator.js';
 import { SkipEnvelope } from '../../common/decorators/skip-envelope.decorator.js';
 import { AppException } from '../../common/errors/app.exception.js';
 import { ZodBody } from '../../common/pipes/zod-validation.pipe.js';
@@ -45,10 +46,13 @@ export class AuthController {
 
 	/**
 	 * The access token lives in memory on the client, so a page reload always
-	 * starts here: the refresh cookie is the only durable credential.
+	 * starts here: the refresh cookie is the only durable credential. Not delayed:
+	 * a reload aborts this response, and the successor it carries is what the next
+	 * page load needs.
 	 */
 	@Public()
 	@Post('refresh')
+	@SkipDelay()
 	@HttpCode(HttpStatus.OK)
 	async refresh(
 		@Cookies(REFRESH_COOKIE) raw: string | undefined,

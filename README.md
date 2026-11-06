@@ -130,7 +130,9 @@ Success: `{ "data": … }`. Failure: `{ "error": { code, message, details? } }` 
 - **Refresh token** — opaque random string in an `httpOnly` cookie scoped to `Path=/api/auth`,
   stored server-side only as a SHA-256 hash, rotated on every use.
 - **Reuse detection** — presenting an already-rotated token revokes every live session for that user
-  and answers `UNAUTHORIZED` with a message saying so.
+  and answers `UNAUTHORIZED` with a message saying so. The exception is a token rotated seconds ago:
+  a reload aborts the response carrying its successor, so inside `REUSE_GRACE_MS` (30 s) it rotates
+  again instead of killing the family. Logout and theft leave `replacedBy` empty, so they stay final.
 - **CSRF** — the access token travels in `Authorization`, so a forged form post has nothing to ride
   on. The cookie is `SameSite=Lax` and same-origin in dev via the Vite proxy.
 - **Client refresh** — `refreshSession()` is single-flight: ten parallel 401s produce one refresh.
@@ -174,7 +176,9 @@ helper), and hold its result with `useHttp`.
 **Change a table** — edit `prisma/schema.prisma`, `pnpm db:migrate`, `pnpm db:generate`.
 
 **Watch a loading state** — set `API_DELAY_MS=1200` in `.env` and restart the API: every response,
-including failures, arrives that many milliseconds later. Back to `0` when the spinner is believable.
+including failures, arrives that many milliseconds later. `POST /auth/refresh` opts out with
+`@SkipDelay()`: nothing waits on it, and a reload can abort it. Back to `0` when the spinner is
+believable.
 
 ---
 
@@ -195,7 +199,7 @@ the action to take.
 - **`.env` holds only `DATABASE_URL` and `JWT_ACCESS_SECRET`** — everything else is a constant in
   `apps/api/src/common/config/runtime.ts` (port, log level, token lifetimes, throttling). The one
   exception, `API_DELAY_MS`, is a test knob rather than config: it holds every response back so
-  spinners and empty states are visible, and production ignores it.
+  spinners and empty states are visible, `@SkipDelay()` opts a route out, and production ignores it.
 - **Cookies are host-only**, `Secure` outside development. Subdomain deployments edit
   `refresh-cookie/index.ts` deliberately (§5).
 - **Roles are `String[]`, not an enum** — adding a role never needs a migration (§4).
