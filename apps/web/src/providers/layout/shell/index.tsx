@@ -1,4 +1,4 @@
-import { EllipsisVertical, LogOut } from 'lucide-react';
+import { Bell, CircleUserRound, CreditCard, EllipsisVertical, LogOut } from 'lucide-react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 import { Layout, type LayoutNavEntry } from '../frame';
 import { LumoButton } from '@/components/ui/button';
@@ -51,9 +51,32 @@ export const AppShell = ({ nav }: AppShellProps) => {
 				user ? (
 					<Menu
 						side="right"
-						items={[{
-							label: '1'
-						}]}
+						className="min-w-64"
+						items={[
+							{
+								type: 'content',
+								content: (
+									<Flex gap="md" align="center" className="px-3 py-2">
+										<Avatar alt={user.name} shape="square" />
+										<Flex direction="column" align="start">
+											<p className="text-sm font-medium">{user.name}</p>
+											<p className="text-xs text-muted-foreground">{user.email}</p>
+										</Flex>
+									</Flex>
+								),
+							},
+							{ label: 'Account', icon: <CircleUserRound />, disabled: true, separatorBefore: true },
+							{ label: 'Billing', icon: <CreditCard />, disabled: true },
+							{ label: 'Notifications', icon: <Bell />, disabled: true },
+							{
+								label: 'Log out',
+								icon: <LogOut />,
+								separatorBefore: true,
+								onClick: () => {
+									void logout().catch(() => undefined).then(() => navigate('/login', { replace: true }));
+								},
+							},
+						]}
 						trigger={
 							<Button
 								variant="ghost"
