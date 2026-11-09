@@ -36,7 +36,7 @@ type PaginationState = {
 const PaginationContext = createContext<PaginationState | null>(null);
 
 /**
- * The box every part is drawn in. `sm` and `md` sit on the same 32 / 36 tiers as a Button, so a
+ * The box every part is drawn in. `sm` and `md` sit on the same 32 / 36 tiers as a LumoButton, so a
  * pagination in a table's footer lines up with the controls beside it.
  */
 export const paginationItemVariants = tv({
@@ -60,7 +60,7 @@ export const paginationItemVariants = tv({
 
 /**
  * What a part that can be pressed adds to that box. The page in view keeps the tint the pointer
- * leaves behind instead of filling, which is how a chosen row in `Nav` says it is current: a footer
+ * leaves behind instead of filling, which is how a chosen row in `LumoNav` says it is current: a footer
  * of solid chips would outweigh the records it pages through.
  */
 const paginationItemStates = cn(
@@ -143,7 +143,7 @@ export function Root({
 /** The page the parts are drawn for. A part outside a `Root` is a mistake, not a case. */
 function usePagination(part: string) {
 	const state = use(PaginationContext);
-	if (state === null) throw new Error(`Pagination.${part} must be inside Pagination.Root`);
+	if (state === null) throw new Error(`LumoPagination.${part} must be inside LumoPagination.Root`);
 	return state;
 }
 
@@ -337,4 +337,4 @@ export function Range({ className, ...props }: RangeProps) {
 }
 
 /** A page control: the frame, the two arrows, the numbers, and the line that summarises them. */
-export const Pagination = { Root, Prev, Next, Pages, Page, Ellipsis, Range };
+export const LumoPagination = { Root, Prev, Next, Pages, Page, Ellipsis, Range };

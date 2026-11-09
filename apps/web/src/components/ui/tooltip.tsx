@@ -75,7 +75,7 @@ export function Viewport({ className, ...props }: ViewportProps) {
 }
 
 /** Base UI supplies behaviour, these parts supply appearance. Compose with `render`. */
-export const Tooltip = {
+export const LumoTooltip = {
 	Provider,
 	Root,
 	Trigger,

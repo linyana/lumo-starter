@@ -21,14 +21,14 @@ import {
 	type RefObject,
 } from 'react';
 import { tv, type VariantProps } from 'tailwind-variants';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Menu } from '@/components/ui/menu';
-import { Popover } from '@/components/ui/popover';
-import { RadioGroup } from '@/components/ui/radio-group';
-import { Spinner } from '@/components/ui/spinner';
-import { Tooltip } from '@/components/ui/tooltip';
+import { LumoButton } from '@/components/ui/button';
+import { LumoCheckbox } from '@/components/ui/checkbox';
+import { LumoInput } from '@/components/ui/input';
+import { LumoMenu } from '@/components/ui/menu';
+import { LumoPopover } from '@/components/ui/popover';
+import { LumoRadioGroup } from '@/components/ui/radio-group';
+import { LumoSpinner } from '@/components/ui/spinner';
+import { LumoTooltip } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { iconSlot } from '@/lib/control';
 
@@ -345,7 +345,7 @@ function fixedClass(fixed: TableFixed | undefined) {
 }
 
 /**
- * Frameless by default so records can sit inside a Card or panel. Standalone tables can choose
+ * Frameless by default so records can sit inside a LumoCard or panel. Standalone tables can choose
  * an outlined or filled surface; neither adds a grid between the columns.
  *
  * Two measurements, inherited by every part. `--cell-py` and `--cell-px` are the whole density of
@@ -488,7 +488,7 @@ export function Root({
 						)}
 					>
 						<span className="inline-flex items-center gap-2 text-sm">
-							<Spinner label={null} />
+							<LumoSpinner label={null} />
 							{value.locale.loading}
 						</span>
 					</div>
@@ -572,7 +572,7 @@ export const tableRowVariants = tv({
 export type RowProps = ComponentProps<'tr'> & {
 	/**
 	 * How deep the record sits under the one above it. It is written as `--table-depth`, which
-	 * `Table.Branch` insets by, so a tree reads as a tree and a row keeps one class at every level.
+	 * `LumoTable.Branch` insets by, so a tree reads as a tree and a row keeps one class at every level.
 	 */
 	depth?: number;
 };
@@ -698,22 +698,22 @@ function FilterPanel({
 				data-disabled={option.disabled ? '' : undefined}
 			>
 				{multiple ? (
-					<Checkbox.Root
+					<LumoCheckbox.Root
 						aria-label={name}
 						checked={draft.includes(option.value)}
 						disabled={option.disabled}
 						onCheckedChange={(next) => toggle(option.value, next === true)}
 					>
-						<Checkbox.Indicator />
-					</Checkbox.Root>
+						<LumoCheckbox.Indicator />
+					</LumoCheckbox.Root>
 				) : (
-					<RadioGroup.Item
+					<LumoRadioGroup.Item
 						aria-label={name}
 						value={option.value}
 						disabled={option.disabled}
 					>
-						<RadioGroup.Indicator />
-					</RadioGroup.Item>
+						<LumoRadioGroup.Indicator />
+					</LumoRadioGroup.Item>
 				)}
 				<span className="min-w-0 truncate">{option.label}</span>
 			</label>
@@ -724,7 +724,7 @@ function FilterPanel({
 		<div data-slot="table-filter-panel" className="flex max-h-80 flex-col">
 			{searchable && (
 				<div className="border-b p-2">
-					<Input
+					<LumoInput
 						size="sm"
 						value={query}
 						aria-label={
@@ -745,22 +745,22 @@ function FilterPanel({
 				) : multiple ? (
 					visible.map(optionRow)
 				) : (
-					<RadioGroup.Root
+					<LumoRadioGroup.Root
 						className="gap-0"
 						value={draft[0] ?? null}
 						onValueChange={(next) => setDraft(next == null ? [] : [String(next)])}
 					>
 						{visible.map(optionRow)}
-					</RadioGroup.Root>
+					</LumoRadioGroup.Root>
 				)}
 			</div>
 			<div className="flex items-center justify-end gap-2 border-t p-2">
-				<Button variant="ghost" size="sm" disabled={draft.length === 0} onClick={reset}>
+				<LumoButton variant="ghost" size="sm" disabled={draft.length === 0} onClick={reset}>
 					{locale.filterReset}
-				</Button>
-				<Button size="sm" onClick={apply}>
+				</LumoButton>
+				<LumoButton size="sm" onClick={apply}>
 					{locale.filterApply}
-				</Button>
+				</LumoButton>
 			</div>
 		</div>
 	);
@@ -783,28 +783,28 @@ function FilterControl({
 	const active = (filter.value?.length ?? 0) > 0;
 
 	return (
-		<Popover.Root open={open} onOpenChange={setOpen}>
-			<Popover.Trigger
+		<LumoPopover.Root open={open} onOpenChange={setOpen}>
+			<LumoPopover.Trigger
 				data-slot="table-filter"
 				data-active={active ? '' : undefined}
 				aria-label={label === undefined ? locale.filter : `${locale.filter} ${label}`}
 				className={cn(headControl, 'data-active:text-primary', iconSlot)}
 			>
 				<ListFilter />
-			</Popover.Trigger>
-			<Popover.Portal>
-				<Popover.Positioner sideOffset={6} align="end">
-					<Popover.Popup className={cn('w-60 p-0', filter.className)}>
+			</LumoPopover.Trigger>
+			<LumoPopover.Portal>
+				<LumoPopover.Positioner sideOffset={6} align="end">
+					<LumoPopover.Popup className={cn('w-60 p-0', filter.className)}>
 						<FilterPanel
 							filter={filter}
 							locale={locale}
 							label={label}
 							onClose={() => setOpen(false)}
 						/>
-					</Popover.Popup>
-				</Popover.Positioner>
-			</Popover.Portal>
-		</Popover.Root>
+					</LumoPopover.Popup>
+				</LumoPopover.Positioner>
+			</LumoPopover.Portal>
+		</LumoPopover.Root>
 	);
 }
 
@@ -831,7 +831,7 @@ export type HeadProps = Omit<ComponentProps<'th'>, 'align'> &
 		 * The offset is measured from the columns beside it; nothing has to be declared beyond the edge.
 		 */
 		fixed?: TableFixed;
-		/** Show the column from a breakpoint up. Give the same list to its `Table.Cell`s. */
+		/** Show the column from a breakpoint up. Give the same list to its `LumoTable.Cell`s. */
 		responsive?: TableBreakpoint[];
 		/** Cut the title off at the column's width, and keep the whole of it in `title`. */
 		ellipsis?: boolean | { showTitle?: boolean };
@@ -968,14 +968,14 @@ export function Head({
 	if (!sortable) return cell;
 
 	return (
-		<Tooltip.Root>
-			<Tooltip.Trigger render={cell} />
-			<Tooltip.Portal>
-				<Tooltip.Positioner>
-					<Tooltip.Popup>{hint}</Tooltip.Popup>
-				</Tooltip.Positioner>
-			</Tooltip.Portal>
-		</Tooltip.Root>
+		<LumoTooltip.Root>
+			<LumoTooltip.Trigger render={cell} />
+			<LumoTooltip.Portal>
+				<LumoTooltip.Positioner>
+					<LumoTooltip.Popup>{hint}</LumoTooltip.Popup>
+				</LumoTooltip.Positioner>
+			</LumoTooltip.Portal>
+		</LumoTooltip.Root>
 	);
 }
 
@@ -984,16 +984,16 @@ export type CellProps = Omit<ComponentProps<'td'>, 'align'> &
 		/** Cut the cell off at the column's width, and keep the whole of it in `title`. */
 		ellipsis?: boolean | { showTitle?: boolean };
 		/**
-		 * The direction its column is displayed in, as `Table.Head` was told. A sorted column shades its
+		 * The direction its column is displayed in, as `LumoTable.Head` was told. A sorted column shades its
 		 * cells, so it reads as one band from the header down; `none` shades nothing.
 		 */
 		sort?: TableSort;
 		/**
-		 * Pin the column to an edge of the frame, exactly as its `Table.Head` does: the offset is
+		 * Pin the column to an edge of the frame, exactly as its `LumoTable.Head` does: the offset is
 		 * measured from the columns beside it, so the two only have to agree on the edge.
 		 */
 		fixed?: TableFixed;
-		/** Show the column from a breakpoint up. Give the same list to its `Table.Head`. */
+		/** Show the column from a breakpoint up. Give the same list to its `LumoTable.Head`. */
 		responsive?: TableBreakpoint[];
 	};
 
@@ -1046,7 +1046,7 @@ export type SelectionHeadProps = Omit<ComponentProps<'th'>, 'children' | 'align'
 	align?: 'start' | 'center' | 'end';
 	/** The chosen rows, and the way back. */
 	selection: TableSelection;
-	/** Pin the column, exactly as `Table.Head` does. */
+	/** Pin the column, exactly as `LumoTable.Head` does. */
 	fixed?: TableFixed;
 	/** Merged last through `cn()`. */
 	className?: string;
@@ -1077,7 +1077,7 @@ export function SelectionHead({ selection, fixed, className, ...props }: Selecti
 		>
 			<span data-slot="table-selection" className="flex items-center gap-1">
 				{type === 'checkbox' && (
-					<Checkbox.Root
+					<LumoCheckbox.Root
 						aria-label={table.locale.selectAll}
 						checked={all}
 						indeterminate={some}
@@ -1085,12 +1085,12 @@ export function SelectionHead({ selection, fixed, className, ...props }: Selecti
 							keep(next === true ? [...value, ...keys] : clear)
 						}
 					>
-						<Checkbox.Indicator />
-					</Checkbox.Root>
+						<LumoCheckbox.Indicator />
+					</LumoCheckbox.Root>
 				)}
 				{type === 'checkbox' && menu && (
-					<Menu.Root>
-						<Menu.Trigger
+					<LumoMenu.Root>
+						<LumoMenu.Trigger
 							aria-label={table.locale.selectOptions}
 							render={
 								<button
@@ -1101,14 +1101,14 @@ export function SelectionHead({ selection, fixed, className, ...props }: Selecti
 							}
 						>
 							<ChevronDown />
-						</Menu.Trigger>
-						<Menu.Portal>
-							<Menu.Positioner sideOffset={6} align="start">
-								<Menu.Popup>
-									<Menu.Item onClick={() => keep([...value, ...keys])}>
+						</LumoMenu.Trigger>
+						<LumoMenu.Portal>
+							<LumoMenu.Positioner sideOffset={6} align="start">
+								<LumoMenu.Popup>
+									<LumoMenu.Item onClick={() => keep([...value, ...keys])}>
 										{table.locale.selectAll}
-									</Menu.Item>
-									<Menu.Item
+									</LumoMenu.Item>
+									<LumoMenu.Item
 										onClick={() =>
 											keep(
 												clear.concat(
@@ -1118,14 +1118,14 @@ export function SelectionHead({ selection, fixed, className, ...props }: Selecti
 										}
 									>
 										{table.locale.selectInvert}
-									</Menu.Item>
-									<Menu.Item onClick={() => keep(clear)}>
+									</LumoMenu.Item>
+									<LumoMenu.Item onClick={() => keep(clear)}>
 										{table.locale.selectNone}
-									</Menu.Item>
-								</Menu.Popup>
-							</Menu.Positioner>
-						</Menu.Portal>
-					</Menu.Root>
+									</LumoMenu.Item>
+								</LumoMenu.Popup>
+							</LumoMenu.Positioner>
+						</LumoMenu.Portal>
+					</LumoMenu.Root>
 				)}
 			</span>
 		</Head>
@@ -1143,7 +1143,7 @@ export type SelectionCellProps = Omit<ComponentProps<'td'>, 'children' | 'align'
 	label?: string;
 	/** A record that cannot be chosen. */
 	disabled?: boolean;
-	/** Pin the column, exactly as `Table.Cell` does. */
+	/** Pin the column, exactly as `LumoTable.Cell` does. */
 	fixed?: TableFixed;
 	/** Merged last through `cn()`. */
 	className?: string;
@@ -1171,17 +1171,17 @@ export function SelectionCell({
 			{...props}
 		>
 			{type === 'radio' ? (
-				<RadioGroup.Root
+				<LumoRadioGroup.Root
 					value={checked ? value : null}
 					disabled={disabled}
 					onValueChange={() => onChange([value])}
 				>
-					<RadioGroup.Item value={value} aria-label={name}>
-						<RadioGroup.Indicator />
-					</RadioGroup.Item>
-				</RadioGroup.Root>
+					<LumoRadioGroup.Item value={value} aria-label={name}>
+						<LumoRadioGroup.Indicator />
+					</LumoRadioGroup.Item>
+				</LumoRadioGroup.Root>
 			) : (
-				<Checkbox.Root
+				<LumoCheckbox.Root
 					aria-label={name}
 					checked={checked}
 					disabled={disabled}
@@ -1193,8 +1193,8 @@ export function SelectionCell({
 						)
 					}
 				>
-					<Checkbox.Indicator />
-				</Checkbox.Root>
+					<LumoCheckbox.Indicator />
+				</LumoCheckbox.Root>
 			)}
 		</Cell>
 	);
@@ -1371,7 +1371,7 @@ export function Caption({ className, ...props }: CaptionProps) {
 }
 
 /** Records, in columns: the box that scrolls, the names across the top, and the rows under them. */
-export const Table = {
+export const LumoTable = {
 	Root,
 	Header,
 	Body,

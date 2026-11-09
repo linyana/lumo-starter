@@ -30,20 +30,20 @@ export function Label({ className, ...props }: LabelProps) {
 export const selectTriggerVariants = tv({
 	base: [
 		fieldShell,
-		// A field with a caret in it: the same shell an Input draws, laid out as a row so the value
+		// A field with a caret in it: the same shell a LumoInput draws, laid out as a row so the value
 		// takes the slack and the caret stays where it was put.
 		'group relative flex cursor-pointer items-center justify-between gap-2 text-left select-none',
-		// The resting look is an Input's: white, bordered, whatever the value is. The fill marks the
+		// The resting look is a LumoInput's: white, bordered, whatever the value is. The fill marks the
 		// one state the field is in the middle of — open, and being chosen from — the way the state
 		// layer marks a pressed button.
 		'data-popup-open:bg-muted',
-		// A button carries these as Base UI flags rather than as the pseudo-classes Input reads.
+		// A button carries these as Base UI flags rather than as the pseudo-classes LumoInput reads.
 		'data-readonly:bg-muted data-readonly:cursor-default',
 		iconSlot,
 	],
 	variants: {
 		size: {
-			// The same 32 / 36 / 40 an Input and a Button take, so a row of controls lines up.
+			// The same 32 / 36 / 40 a LumoInput and a LumoButton take, so a row of controls lines up.
 			sm: 'h-8 px-2.5 text-sm',
 			md: 'h-9 px-3 text-sm',
 			lg: 'h-10 px-3.5 text-base',
@@ -103,7 +103,7 @@ export type IconProps = Omit<ComponentProps<typeof BaseSelect.Icon>, 'children'>
 
 /**
  * The caret. It owns its turn, because it is the only part that knows the popup is open — the same
- * reason `Collapsible.Icon` owns its own.
+ * reason `LumoCollapsible.Icon` owns its own.
  */
 export function Icon({ className, children, ...props }: IconProps) {
 	return (
@@ -327,7 +327,7 @@ export function Separator({ className, ...props }: SeparatorProps) {
  * A list that has to be filtered to be usable is not this: a select is for options a reader can
  * recognise on sight. Base UI's Combobox is the one that searches.
  */
-export const Select = {
+export const LumoSelect = {
 	Root,
 	Label,
 	Trigger,

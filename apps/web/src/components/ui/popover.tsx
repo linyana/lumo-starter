@@ -101,7 +101,7 @@ export function Viewport({ className, ...props }: ViewportProps) {
 }
 
 /** Base UI supplies behaviour, these parts supply appearance. Compose with `render`. */
-export const Popover = {
+export const LumoPopover = {
 	Root,
 	Trigger,
 	Close,

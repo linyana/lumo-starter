@@ -32,9 +32,9 @@ export const badgeVariants = tv({
 	},
 });
 
-export type BadgeProps = ComponentProps<'span'> & VariantProps<typeof badgeVariants>;
+export type LumoBadgeProps = ComponentProps<'span'> & VariantProps<typeof badgeVariants>;
 
-export function Badge({ className, variant = 'default', ...props }: BadgeProps) {
+export function LumoBadge({ className, variant = 'default', ...props }: LumoBadgeProps) {
 	return (
 		<span
 			data-slot="badge"

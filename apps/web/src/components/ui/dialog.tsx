@@ -64,7 +64,7 @@ export function Viewport({ className, ...props }: ViewportProps) {
 }
 
 /** Base UI supplies behaviour, these parts supply appearance. Compose with `render`. */
-export const Dialog = {
+export const LumoDialog = {
 	Root,
 	Trigger,
 	Portal,

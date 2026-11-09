@@ -25,17 +25,17 @@ export const inputVariants = tv({
 	},
 });
 
-export type InputProps = Omit<ComponentProps<typeof BaseInput>, 'className' | 'size'> &
+export type LumoInputProps = Omit<ComponentProps<typeof BaseInput>, 'className' | 'size'> &
 	VariantProps<typeof inputVariants> & {
 		/** Merged with `cn()`, so a Base UI state callback is not accepted here. */
 		className?: string;
 	};
 
-type PointerDownEvent = Parameters<NonNullable<InputProps['onPointerDown']>>[0];
-type FocusEvent = Parameters<NonNullable<InputProps['onFocus']>>[0];
+type PointerDownEvent = Parameters<NonNullable<LumoInputProps['onPointerDown']>>[0];
+type FocusEvent = Parameters<NonNullable<LumoInputProps['onFocus']>>[0];
 
 /**
- * A single line of text. `size` is its height — the same 32/36/40 a Button takes, so the two line
+ * A single line of text. `size` is its height — the same 32/36/40 a LumoButton takes, so the two line
  * up in a row — and never the browser's character count: the width comes from the container.
  *
  * A field opens read-only and turns editable at the first sign of the reader's intent. A browser
@@ -48,14 +48,14 @@ type FocusEvent = Parameters<NonNullable<InputProps['onFocus']>>[0];
  * alone. A field the caller withholds is a different thing entirely and keeps the tint of a value
  * being shown rather than being typed.
  */
-export function Input({
+export function LumoInput({
 	className,
 	size = 'md',
 	readOnly,
 	onPointerDown,
 	onFocus,
 	...props
-}: InputProps) {
+}: LumoInputProps) {
 	const gate = useContext(FieldGateContext);
 	const [untouched, setUntouched] = useState(true);
 	const touched = gate === null ? !untouched : gate.touched;

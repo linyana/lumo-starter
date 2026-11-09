@@ -34,7 +34,7 @@ export type LayoutNavGroup = {
 	label?: string;
 	/**
 	 * A control of the group's own, such as an add button. Rendered as given, so pass one that
-	 * positions itself — `Nav.GroupAction` already does.
+	 * positions itself — `LumoNav.GroupAction` already does.
 	 */
 	action?: ReactNode;
 	children: LayoutNavEntry[];

@@ -2,9 +2,9 @@ import type { ComponentProps } from 'react';
 import { Separator as BaseSeparator } from '@base-ui/react/separator';
 import { cn } from '@/lib/utils';
 
-export type SeparatorProps = ComponentProps<typeof BaseSeparator>;
+export type LumoSeparatorProps = ComponentProps<typeof BaseSeparator>;
 
-export function Separator({ className, orientation = 'horizontal', ...props }: SeparatorProps) {
+export function LumoSeparator({ className, orientation = 'horizontal', ...props }: LumoSeparatorProps) {
 	return (
 		<BaseSeparator
 			data-slot="separator"

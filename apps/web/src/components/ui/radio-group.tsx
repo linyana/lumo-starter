@@ -58,5 +58,5 @@ export function Indicator({ className, ...props }: IndicatorProps) {
 	);
 }
 
-/** Exactly one of these. Give the group a name with `Field`, and each item one with `Field.Item`. */
-export const RadioGroup = { Root, Item, Indicator };
+/** Exactly one of these. Give the group a name with `LumoField`, and each item one with `LumoField.Item`. */
+export const LumoRadioGroup = { Root, Item, Indicator };

@@ -1,7 +1,7 @@
 import { Button as BaseButton } from '@base-ui/react/button';
 import type { ComponentProps, ReactNode } from 'react';
 import { tv, type VariantProps } from 'tailwind-variants';
-import { Spinner } from '@/components/ui/spinner';
+import { LumoSpinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
 import { iconSlot, stateLayer } from '@/lib/control';
 
@@ -52,7 +52,7 @@ export const buttonVariants = tv({
 	},
 });
 
-export type ButtonProps = Omit<ComponentProps<typeof BaseButton>, 'className'> &
+export type LumoButtonProps = Omit<ComponentProps<typeof BaseButton>, 'className'> &
 	VariantProps<typeof buttonVariants> & {
 		/** Merged with `cn()`, so a Base UI state callback is not accepted here. */
 		className?: string;
@@ -63,7 +63,7 @@ export type ButtonProps = Omit<ComponentProps<typeof BaseButton>, 'className'> &
 		loading?: boolean;
 	};
 
-export function Button({
+export function LumoButton({
 	className,
 	variant = 'default',
 	size = 'md',
@@ -73,8 +73,8 @@ export function Button({
 	disabled = false,
 	children,
 	...props
-}: ButtonProps) {
-	const spinner = loadingIcon ?? <Spinner label={null} />;
+}: LumoButtonProps) {
+	const spinner = loadingIcon ?? <LumoSpinner size={1} label={null} />;
 
 	return (
 		<BaseButton

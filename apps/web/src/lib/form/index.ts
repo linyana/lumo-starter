@@ -3,7 +3,7 @@ import type { FormErrors } from '@/components/ui/form';
 
 /**
  * Converts zod issues into the `errors` object Base UI's Form hands back to
- * each `Field.Root`. Keys are dot paths, which is also what a `Field.Root`
+ * each `LumoField.Root`. Keys are dot paths, which is also what a `LumoField.Root`
  * `name` uses — so a nested field's message lands on the right row.
  *
  * The shared schemas state their own sentences, so the form and the API say the

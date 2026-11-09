@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 
 /**
  * A control is labelled and validated by the field around it, so this part owns no look: whatever
- * element it renders — Base UI's Input, a native `<textarea>`, a Checkbox — keeps its own.
+ * element it renders — Base UI's Input, a native `<textarea>`, a LumoCheckbox — keeps its own.
  */
 export const Control = BaseField.Control;
 
@@ -125,4 +125,4 @@ export function Root({ className, ...props }: RootProps) {
 export const Validity = BaseField.Validity;
 
 /** One control, its name, and the line under it that explains or complains. */
-export const Field = { Root, Label, Control, Description, Error, Item, Validity };
+export const LumoField = { Root, Label, Control, Description, Error, Item, Validity };

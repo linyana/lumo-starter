@@ -80,4 +80,4 @@ export function Trigger({ className, ...props }: TriggerProps) {
 }
 
 /** Base UI supplies behaviour, these parts supply appearance. Compose with `render`. */
-export const Collapsible = { Root, Trigger, Icon, Panel };
+export const LumoCollapsible = { Root, Trigger, Icon, Panel };

@@ -1,8 +1,8 @@
 import { PanelLeft } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { Button } from '@/components/ui/button';
-import { Nav } from '@/components/ui/nav';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { LumoButton } from '@/components/ui/button';
+import { LumoNav } from '@/components/ui/nav';
+import { LumoScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import type { LayoutNavEntry, LayoutNavItem } from '../types';
 
@@ -54,7 +54,7 @@ function RailSlot({
 }) {
 	return (
 		<div data-slot={slot} className="shrink-0 p-2">
-			<Nav.Root compact={compact}>{children}</Nav.Root>
+			<LumoNav.Root compact={compact}>{children}</LumoNav.Root>
 		</div>
 	);
 }
@@ -102,8 +102,8 @@ export function SidebarContent({
 
 		if (item.children !== undefined) {
 			return (
-				<Nav.Item key={item.key}>
-					<Nav.Sub
+				<LumoNav.Item key={item.key}>
+					<LumoNav.Sub
 						icon={item.icon}
 						label={item.label}
 						className={row}
@@ -115,8 +115,8 @@ export function SidebarContent({
 						disabled={item.disabled}
 					>
 						{item.children.map((child) => (
-							<Nav.SubItem key={child.key}>
-								<Nav.SubButton
+							<LumoNav.SubItem key={child.key}>
+								<LumoNav.SubButton
 									icon={child.icon}
 									className={subRow}
 									isActive={isActive(child.key, child.isActive)}
@@ -129,17 +129,17 @@ export function SidebarContent({
 									}}
 								>
 									{child.label}
-								</Nav.SubButton>
-							</Nav.SubItem>
+								</LumoNav.SubButton>
+							</LumoNav.SubItem>
 						))}
-					</Nav.Sub>
-				</Nav.Item>
+					</LumoNav.Sub>
+				</LumoNav.Item>
 			);
 		}
 
 		return (
-			<Nav.Item key={item.key}>
-				<Nav.Button
+			<LumoNav.Item key={item.key}>
+				<LumoNav.Button
 					icon={item.icon}
 					label={item.label}
 					className={row}
@@ -153,18 +153,18 @@ export function SidebarContent({
 					}}
 				/>
 				{item.badge !== undefined && (
-					<Nav.Badge className="text-muted-foreground">{item.badge}</Nav.Badge>
+					<LumoNav.Badge className="text-muted-foreground">{item.badge}</LumoNav.Badge>
 				)}
-			</Nav.Item>
+			</LumoNav.Item>
 		);
 	}
 
 	function renderEntry(entry: LayoutNavEntry, index: number) {
-		if (entry.type === 'separator') return <Nav.Separator key={`separator-${index}`} />;
+		if (entry.type === 'separator') return <LumoNav.Separator key={`separator-${index}`} />;
 
 		if (entry.type === 'skeleton') {
 			return (
-				<Nav.Skeleton
+				<LumoNav.Skeleton
 					key={`skeleton-${index}`}
 					showIcon={entry.showIcon}
 					width={entry.width}
@@ -174,13 +174,13 @@ export function SidebarContent({
 
 		if (entry.type === 'group') {
 			return (
-				<Nav.Group key={entry.label ?? `group-${index}`}>
-					{entry.label !== undefined && <Nav.GroupLabel>{entry.label}</Nav.GroupLabel>}
+				<LumoNav.Group key={entry.label ?? `group-${index}`}>
+					{entry.label !== undefined && <LumoNav.GroupLabel>{entry.label}</LumoNav.GroupLabel>}
 					{entry.action}
-					<Nav.List>
+					<LumoNav.List>
 						{entry.children.map((child, childIndex) => renderEntry(child, childIndex))}
-					</Nav.List>
-				</Nav.Group>
+					</LumoNav.List>
+				</LumoNav.Group>
 			);
 		}
 
@@ -205,11 +205,11 @@ export function SidebarContent({
 
 		return blocks.map((block, index) =>
 			Array.isArray(block) ? (
-				<Nav.Group
+				<LumoNav.Group
 					key={`loose-${block.map((entry) => ('key' in entry ? entry.key : entry.type)).join('-')}`}
 				>
-					<Nav.List>{block.map(renderEntry)}</Nav.List>
-				</Nav.Group>
+					<LumoNav.List>{block.map(renderEntry)}</LumoNav.List>
+				</LumoNav.Group>
 			) : (
 				renderEntry(block, index)
 			),
@@ -250,7 +250,7 @@ export function SidebarContent({
 						>
 							{brandActions}
 							{collapsible && (
-								<Button
+								<LumoButton
 									variant="ghost"
 									size="icon"
 									className="size-8 shrink-0"
@@ -259,7 +259,7 @@ export function SidebarContent({
 									onClick={onToggle}
 								>
 									<PanelLeft />
-								</Button>
+								</LumoButton>
 							)}
 						</div>
 					)}
@@ -270,14 +270,14 @@ export function SidebarContent({
 					{toolbar}
 				</RailSlot>
 			)}
-			<ScrollArea.Root className="flex-1">
-				<ScrollArea.Viewport>
-					<ScrollArea.Content>
-						<Nav.Root compact={collapsed}>{renderEntries(nav)}</Nav.Root>
-					</ScrollArea.Content>
-				</ScrollArea.Viewport>
-				<ScrollArea.Scrollbar />
-			</ScrollArea.Root>
+			<LumoScrollArea.Root className="flex-1">
+				<LumoScrollArea.Viewport>
+					<LumoScrollArea.Content>
+						<LumoNav.Root compact={collapsed}>{renderEntries(nav)}</LumoNav.Root>
+					</LumoScrollArea.Content>
+				</LumoScrollArea.Viewport>
+				<LumoScrollArea.Scrollbar />
+			</LumoScrollArea.Root>
 			{footer !== undefined && (
 				<RailSlot slot="layout-footer" compact={collapsed}>
 					{footer}

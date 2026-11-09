@@ -171,7 +171,7 @@ export function Viewport({ className, ...props }: ViewportProps) {
 export const VirtualKeyboardProvider = BaseDrawer.VirtualKeyboardProvider;
 
 /** Base UI supplies behaviour, these parts supply appearance. Compose with `render`. */
-export const Drawer = {
+export const LumoDrawer = {
 	Provider,
 	IndentBackground,
 	Indent,

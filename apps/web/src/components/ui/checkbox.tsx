@@ -68,4 +68,4 @@ export function Indicator({ className, children, ...props }: IndicatorProps) {
 }
 
 /** A box, and the tick that says it is ticked — or the dash that says only some of it is. */
-export const Checkbox = { Root, Indicator };
+export const LumoCheckbox = { Root, Indicator };

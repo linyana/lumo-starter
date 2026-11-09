@@ -3,10 +3,10 @@ import { Toast as BaseToast, type ToastRootToastObject } from '@base-ui/react/to
 import { cn } from '@/lib/utils';
 import { X, CircleCheck, CircleX, Info, TriangleAlert } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
+import { LumoSpinner } from '@/components/ui/spinner';
 
 /**
- * A toast's action is a Button's small secondary shape, pulled up a pixel so it sits on the text's
+ * A toast's action is a LumoButton's small secondary shape, pulled up a pixel so it sits on the text's
  * line rather than the row's full height.
  */
 const actionClasses = cn(
@@ -122,7 +122,7 @@ function glyphOf(type: string | undefined): ReactNode {
 		case 'info':
 			return <Info />;
 		case 'loading':
-			return <Spinner className="size-4" label={null} />;
+			return <LumoSpinner className="size-4" label={null} />;
 		default:
 			return null;
 	}
@@ -285,7 +285,7 @@ function Interior({ toast }: { toast: ToastRootToastObject }) {
 	);
 }
 
-export type ToasterProps = Omit<ViewportProps, 'children'> & {
+export type LumoToasterProps = Omit<ViewportProps, 'children'> & {
 	/** Draws each toast yourself, given the toast being drawn. */
 	children?: (toast: ToastRootToastObject) => ReactNode;
 };
@@ -294,7 +294,7 @@ export type ToasterProps = Omit<ViewportProps, 'children'> & {
  * The stack, mounted once inside a `Provider`. It maps the queue to parts — the one piece of a
  * toast nobody should have to write twice — and leaves everything else to them.
  */
-export function Toaster({ className, children, ...props }: ToasterProps) {
+export function LumoToaster({ className, children, ...props }: LumoToasterProps) {
 	const { toasts } = BaseToast.useToastManager();
 
 	return (
@@ -313,7 +313,7 @@ export function Toaster({ className, children, ...props }: ToasterProps) {
 }
 
 /** Base UI supplies behaviour, these parts supply appearance. Compose with `render`. */
-export const Toast = {
+export const LumoToast = {
 	Provider,
 	Portal,
 	Viewport,
@@ -325,7 +325,7 @@ export const Toast = {
 	Action,
 	Close,
 	/** Provider, portal and viewport assembled, with the queue already mapped to parts. */
-	Toaster,
+	Toaster: LumoToaster,
 	useToastManager: BaseToast.useToastManager,
 	/** Queues a toast from outside React — pass it to `Provider` and use it anywhere. */
 	createToastManager: BaseToast.createToastManager,

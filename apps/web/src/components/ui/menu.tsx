@@ -81,7 +81,7 @@ export function Separator({ className, ...props }: SeparatorProps) {
 
 export type TriggerProps<Payload = unknown> = BaseMenu.Trigger.Props<Payload>;
 
-/** The button that opens it, appearance-free: compose a `Button` through `render`. */
+/** The button that opens it, appearance-free: compose a `LumoButton` through `render`. */
 export const Trigger = BaseMenu.Trigger;
 
 export type ViewportProps = ComponentProps<typeof BaseMenu.Viewport>;
@@ -101,10 +101,10 @@ export function Viewport({ className, ...props }: ViewportProps) {
  * Base UI supplies behaviour — the roving highlight, the typeahead, the focus that returns to the
  * trigger — and these parts supply appearance. Compose with `render`.
  *
- * Not to be confused with `Nav`, which is a list of destinations that is always in the layout: a
+ * Not to be confused with `LumoNav`, which is a list of destinations that is always in the layout: a
  * menu is opened, holds actions, and closes.
  */
-export const Menu = {
+export const LumoMenu = {
 	Root,
 	Trigger,
 	Portal,

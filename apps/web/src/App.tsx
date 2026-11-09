@@ -1,4 +1,4 @@
-import { Toast } from '@/components/ui/toast';
+import { LumoToast } from '@/components/ui/toast';
 import { toastManager } from '@/lib';
 import { AuthProvider, Routes, ThemeProvider } from '@/providers';
 
@@ -13,11 +13,11 @@ import { AuthProvider, Routes, ThemeProvider } from '@/providers';
  */
 export const App = () => (
 	<ThemeProvider>
-		<Toast.Provider toastManager={toastManager}>
+		<LumoToast.Provider toastManager={toastManager}>
 			<AuthProvider>
 				<Routes />
-				<Toast.Toaster />
+				<LumoToast.Toaster />
 			</AuthProvider>
-		</Toast.Provider>
+		</LumoToast.Provider>
 	</ThemeProvider>
 );

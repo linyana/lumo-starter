@@ -1,7 +1,7 @@
 import { Menu, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Drawer } from '@/components/ui/drawer';
+import { LumoButton } from '@/components/ui/button';
+import { LumoDrawer } from '@/components/ui/drawer';
 import { SidebarContent, type SidebarProps } from '../sidebar';
 
 export type MobileNavigationProps = Pick<
@@ -46,15 +46,15 @@ export function MobileNavigation({
 	}, [open]);
 
 	return (
-		<Drawer.Root open={open} onOpenChange={setOpen} swipeDirection="left">
+		<LumoDrawer.Root open={open} onOpenChange={setOpen} swipeDirection="left">
 			<div
 				ref={bar}
 				data-slot="layout-mobile-bar"
 				className="flex h-14 shrink-0 items-center gap-2 bg-layout-background px-2 md:hidden"
 			>
-				<Drawer.Trigger
+				<LumoDrawer.Trigger
 					render={
-						<Button
+						<LumoButton
 							data-slot="layout-navigation-trigger"
 							variant="ghost"
 							size="icon"
@@ -83,10 +83,10 @@ export function MobileNavigation({
 					</div>
 				)}
 			</div>
-			<Drawer.Portal>
-				<Drawer.Backdrop />
-				<Drawer.Viewport>
-					<Drawer.Popup
+			<LumoDrawer.Portal>
+				<LumoDrawer.Backdrop />
+				<LumoDrawer.Viewport>
+					<LumoDrawer.Popup
 						data-slot="layout-mobile-navigation"
 						className="bg-layout-background"
 					>
@@ -99,14 +99,14 @@ export function MobileNavigation({
 							}}
 							logo={logo}
 							title={
-								<Drawer.Title render={<span />} className="text-sm">
+								<LumoDrawer.Title render={<span />} className="text-sm">
 									{title ?? 'Navigation'}
-								</Drawer.Title>
+								</LumoDrawer.Title>
 							}
 							brandActions={
-								<Drawer.Close
+								<LumoDrawer.Close
 									render={
-										<Button
+										<LumoButton
 											variant="ghost"
 											size="icon"
 											icon={<X />}
@@ -118,9 +118,9 @@ export function MobileNavigation({
 							toolbar={toolbar}
 							footer={footer}
 						/>
-					</Drawer.Popup>
-				</Drawer.Viewport>
-			</Drawer.Portal>
-		</Drawer.Root>
+					</LumoDrawer.Popup>
+				</LumoDrawer.Viewport>
+			</LumoDrawer.Portal>
+		</LumoDrawer.Root>
 	);
 }

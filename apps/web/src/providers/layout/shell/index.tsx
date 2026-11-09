@@ -1,11 +1,12 @@
 import { LogOut } from 'lucide-react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 import { Layout, type LayoutNavEntry } from '@/components/blocks/layout';
-import { Button } from '@/components/ui/button';
+import { LumoButton } from '@/components/ui/button';
 import { useGlobal } from '@/hooks';
 import { useAuth } from '@/providers/auth';
 import { ThemeToggle } from '@/providers/theme';
 import type { AppShellProps } from './types';
+import { Popover } from '@/components';
 
 export type { AppShellProps } from './types';
 
@@ -46,18 +47,11 @@ export const AppShell = ({ nav }: AppShellProps) => {
 			collapsed={collapsed}
 			onCollapsedChange={(next) => actions.set({ collapsed: next })}
 			resetScrollKey={location.pathname}
-			footer={
-				user ? (
-					<div className="flex flex-col gap-1 px-1 py-2">
-						<span className="truncate text-xs font-medium text-foreground">{user.name}</span>
-						<span className="truncate text-xs text-muted-foreground">{user.email}</span>
-					</div>
-				) : null
-			}
+			footer={user ? <Popover></Popover> : null}
 			brandActions={
 				<>
 					<ThemeToggle />
-					<Button
+					<LumoButton
 						variant="ghost"
 						size="icon"
 						aria-label="Sign out"

@@ -12,12 +12,12 @@ import { cn } from '@/lib/utils';
 import { Button as BaseButton } from '@base-ui/react/button';
 import { useRender } from '@base-ui/react/use-render';
 import { tv, type VariantProps } from 'tailwind-variants';
-import { Tooltip } from '@/components/ui/tooltip';
-import { Separator as BaseSeparator } from '@/components/ui/separator';
-import { Skeleton as BaseSkeleton } from '@/components/ui/skeleton';
+import { LumoTooltip } from '@/components/ui/tooltip';
+import { LumoSeparator as BaseSeparator } from '@/components/ui/separator';
+import { LumoSkeleton as BaseSkeleton } from '@/components/ui/skeleton';
 import { Collapsible as BaseCollapsible } from '@base-ui/react/collapsible';
-import { Collapsible } from '@/components/ui/collapsible';
-import { Popover } from '@/components/ui/popover';
+import { LumoCollapsible } from '@/components/ui/collapsible';
+import { LumoPopover } from '@/components/ui/popover';
 import { iconSlot, stateLayer } from '@/lib/control';
 
 export type ActionProps = ComponentProps<'button'> & {
@@ -299,14 +299,14 @@ export function Button({
 	if (hint === undefined || hint === false || !compact) return element;
 
 	return (
-		<Tooltip.Root>
-			<Tooltip.Trigger render={element} />
-			<Tooltip.Portal>
-				<Tooltip.Positioner side={tooltipSide} align="center">
-					<Tooltip.Popup>{hint}</Tooltip.Popup>
-				</Tooltip.Positioner>
-			</Tooltip.Portal>
-		</Tooltip.Root>
+		<LumoTooltip.Root>
+			<LumoTooltip.Trigger render={element} />
+			<LumoTooltip.Portal>
+				<LumoTooltip.Positioner side={tooltipSide} align="center">
+					<LumoTooltip.Popup>{hint}</LumoTooltip.Popup>
+				</LumoTooltip.Positioner>
+			</LumoTooltip.Portal>
+		</LumoTooltip.Root>
 	);
 }
 
@@ -505,8 +505,8 @@ export function Sub({
 
 	if (compact) {
 		return (
-			<Popover.Root>
-				<Popover.Trigger
+			<LumoPopover.Root>
+				<LumoPopover.Trigger
 					disabled={disabled}
 					openOnHover={!disabled}
 					delay={80}
@@ -521,25 +521,25 @@ export function Sub({
 						/>
 					}
 				/>
-				<Popover.Portal>
-					<Popover.Positioner side={popoverSide} align="start">
-						<Popover.Popup className="w-56 p-1.5">
-							<Popover.Title className="px-2 py-1 text-xs font-medium text-muted-foreground">
+				<LumoPopover.Portal>
+					<LumoPopover.Positioner side={popoverSide} align="start">
+						<LumoPopover.Popup className="w-56 p-1.5">
+							<LumoPopover.Title className="px-2 py-1 text-xs font-medium text-muted-foreground">
 								{label}
-							</Popover.Title>
+							</LumoPopover.Title>
 							<SubList inert={disabled} className="ms-0 me-0 border-s-0 ps-1">
 								{children}
 							</SubList>
-						</Popover.Popup>
-					</Popover.Positioner>
-				</Popover.Portal>
-			</Popover.Root>
+						</LumoPopover.Popup>
+					</LumoPopover.Positioner>
+				</LumoPopover.Portal>
+			</LumoPopover.Root>
 		);
 	}
 
 	return (
-		<Collapsible.Root defaultOpen={defaultOpen} disabled={disabled}>
-			{/* Base UI's own trigger rather than `Collapsible.Trigger`: that one paints a collapsible
+		<LumoCollapsible.Root defaultOpen={defaultOpen} disabled={disabled}>
+			{/* Base UI's own trigger rather than `LumoCollapsible.Trigger`: that one paints a collapsible
 			    header, and a nav row already has an appearance of its own. Two looks on one element
 			    mean every shared property — padding, text size, the icon's size — is settled by
 			    whichever rule lands later in the stylesheet, which is neither look. */}
@@ -553,14 +553,14 @@ export function Sub({
 						disabled={disabled}
 						className={cn('group', className)}
 					>
-						<Collapsible.Icon className="ms-auto" />
+						<LumoCollapsible.Icon className="ms-auto" />
 					</NavRow>
 				}
 			/>
-			<Collapsible.Panel>
+			<LumoCollapsible.Panel>
 				<SubList inert={disabled}>{children}</SubList>
-			</Collapsible.Panel>
-		</Collapsible.Root>
+			</LumoCollapsible.Panel>
+		</LumoCollapsible.Root>
 	);
 }
 
@@ -686,10 +686,10 @@ export function SubItem({ className, ...props }: SubItemProps) {
 /**
  * Base UI supplies behaviour, these parts supply appearance. Compose with `render`.
  *
- * A nav is a list of destinations that is always in the layout. Not to be confused with `Menu`,
+ * A nav is a list of destinations that is always in the layout. Not to be confused with `LumoMenu`,
  * which is opened on a trigger, holds actions, and closes.
  */
-export const Nav = {
+export const LumoNav = {
 	Root,
 	List,
 	Group,

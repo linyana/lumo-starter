@@ -92,4 +92,4 @@ export function Corner({ className, ...props }: CornerProps) {
 	);
 }
 
-export const ScrollArea = { Root, Viewport, Content, Scrollbar, Thumb, Corner };
+export const LumoScrollArea = { Root, Viewport, Content, Scrollbar, Thumb, Corner };

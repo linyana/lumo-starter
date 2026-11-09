@@ -160,7 +160,7 @@ export function Title({ className, ...props }: TitleProps) {
 }
 
 /** A surface that groups one thing. Every part is a plain element; the card adds the look. */
-export const Card = {
+export const LumoCard = {
 	Root,
 	Header,
 	Title,

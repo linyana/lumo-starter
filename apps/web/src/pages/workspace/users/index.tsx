@@ -1,11 +1,11 @@
 import { ROLE_META, type ListUsersQuery, type Role } from '@lumo/shared';
 import { Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Spinner } from '@/components/ui/spinner';
-import { Table } from '@/components/ui/table';
+import { LumoBadge } from '@/components/ui/badge';
+import { LumoButton } from '@/components/ui/button';
+import { LumoInput } from '@/components/ui/input';
+import { LumoSpinner } from '@/components/ui/spinner';
+import { LumoTable } from '@/components/ui/table';
 import { useAuth } from '@/providers/auth';
 import { useHttp } from '@/hooks';
 import { deleteUser, listUsers } from './api';
@@ -64,7 +64,7 @@ export const UsersPage = () => {
 				</div>
 
 				<div className="w-64">
-					<Input
+					<LumoInput
 						placeholder="Search email or name"
 						value={search}
 						onChange={(event) => {
@@ -77,37 +77,37 @@ export const UsersPage = () => {
 
 			{users.loading ? (
 				<div className="grid place-items-center p-12">
-					<Spinner />
+					<LumoSpinner />
 				</div>
 			) : users.error ? (
 				<p className="text-sm text-destructive">{users.error.message}</p>
 			) : (
-				<Table.Root>
-					<Table.Header>
-						<Table.Row>
-							<Table.Head>Name</Table.Head>
-							<Table.Head>Email</Table.Head>
-							<Table.Head>Roles</Table.Head>
-							<Table.Head className="text-right">Actions</Table.Head>
-						</Table.Row>
-					</Table.Header>
-					<Table.Body>
+				<LumoTable.Root>
+					<LumoTable.Header>
+						<LumoTable.Row>
+							<LumoTable.Head>Name</LumoTable.Head>
+							<LumoTable.Head>Email</LumoTable.Head>
+							<LumoTable.Head>Roles</LumoTable.Head>
+							<LumoTable.Head className="text-right">Actions</LumoTable.Head>
+						</LumoTable.Row>
+					</LumoTable.Header>
+					<LumoTable.Body>
 						{users.data?.items.map((row) => (
-							<Table.Row key={row.id}>
-								<Table.Cell className="font-medium">{row.name}</Table.Cell>
-								<Table.Cell className="text-muted-foreground">{row.email}</Table.Cell>
-								<Table.Cell>
+							<LumoTable.Row key={row.id}>
+								<LumoTable.Cell className="font-medium">{row.name}</LumoTable.Cell>
+								<LumoTable.Cell className="text-muted-foreground">{row.email}</LumoTable.Cell>
+								<LumoTable.Cell>
 									<div className="flex flex-wrap gap-1">
 										{row.roles.map((role) => (
-											<Badge key={role} variant={ROLE_VARIANT[role]}>
+											<LumoBadge key={role} variant={ROLE_VARIANT[role]}>
 												{ROLE_META[role]}
-											</Badge>
+											</LumoBadge>
 										))}
 									</div>
-								</Table.Cell>
-								<Table.Cell className="text-right">
+								</LumoTable.Cell>
+								<LumoTable.Cell className="text-right">
 									{can('user:delete') && row.id !== currentUser?.id ? (
-										<Button
+										<LumoButton
 											variant="ghost"
 											size="sm"
 											icon={<Trash2 />}
@@ -115,15 +115,15 @@ export const UsersPage = () => {
 											onClick={() => void remove.fetchData(row.id)}
 										>
 											Delete
-										</Button>
+										</LumoButton>
 									) : (
 										<span className="text-xs text-muted-foreground">—</span>
 									)}
-								</Table.Cell>
-							</Table.Row>
+								</LumoTable.Cell>
+							</LumoTable.Row>
 						))}
-					</Table.Body>
-				</Table.Root>
+					</LumoTable.Body>
+				</LumoTable.Root>
 			)}
 
 			<div className="flex items-center justify-between">
@@ -131,22 +131,22 @@ export const UsersPage = () => {
 					Page {page} of {pageCount}
 				</p>
 				<div className="flex gap-2">
-					<Button
+					<LumoButton
 						variant="outline"
 						size="sm"
 						disabled={page <= 1}
 						onClick={() => setPage((value) => Math.max(1, value - 1))}
 					>
 						Previous
-					</Button>
-					<Button
+					</LumoButton>
+					<LumoButton
 						variant="outline"
 						size="sm"
 						disabled={page >= pageCount}
 						onClick={() => setPage((value) => Math.min(pageCount, value + 1))}
 					>
 						Next
-					</Button>
+					</LumoButton>
 				</div>
 			</div>
 		</div>
