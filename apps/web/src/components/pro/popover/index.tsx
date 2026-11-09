@@ -1,17 +1,21 @@
-import { LumoButton } from '../../ui/button';
 import { LumoPopover } from '../../ui/popover';
+import type { PopoverProps } from './types';
 
-export const Popover = () => {
+export const Popover = ({
+	children,
+	trigger,
+	side = 'bottom',
+	align = 'start',
+	arrow = true,
+}: PopoverProps) => {
 	return (
 		<LumoPopover.Root>
-			<LumoPopover.Trigger render={<LumoButton>open</LumoButton>} />
+			<LumoPopover.Trigger render={trigger} />
 			<LumoPopover.Portal>
-				<LumoPopover.Positioner side="bottom" align="start">
+				<LumoPopover.Positioner side={side} align={align}>
 					<LumoPopover.Popup>
-						<LumoPopover.Arrow />
-						<LumoPopover.Title>deploy to production?</LumoPopover.Title>
-						<LumoPopover.Description>it rebuilds in about a minute.</LumoPopover.Description>
-						<LumoPopover.Close render={<LumoButton size="sm">deploy</LumoButton>} />
+						{arrow && <LumoPopover.Arrow />}
+						{children}
 					</LumoPopover.Popup>
 				</LumoPopover.Positioner>
 			</LumoPopover.Portal>

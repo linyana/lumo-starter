@@ -1,1 +1,2 @@
-export * from './pro'
+export * from './pro';
+export * from './common';

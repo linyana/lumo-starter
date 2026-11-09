@@ -6,7 +6,7 @@ import { useGlobal } from '@/hooks';
 import { useAuth } from '@/providers/auth';
 import { ThemeToggle } from '@/providers/theme';
 import type { AppShellProps } from './types';
-import { Popover } from '@/components';
+import { Button, Flex, Popover } from '@/components';
 
 export type { AppShellProps } from './types';
 
@@ -47,7 +47,24 @@ export const AppShell = ({ nav }: AppShellProps) => {
 			collapsed={collapsed}
 			onCollapsedChange={(next) => actions.set({ collapsed: next })}
 			resetScrollKey={location.pathname}
-			footer={user ? <Popover></Popover> : null}
+			footer={
+				user ? (
+					<Popover
+						side="right"
+						arrow={false}
+						trigger={
+							<Button variant="ghost">
+								<Flex justify="between">
+									<div>1</div>
+									<div>2</div>
+								</Flex>
+							</Button>
+						}
+					>
+						1
+					</Popover>
+				) : null
+			}
 			brandActions={
 				<>
 					<ThemeToggle />

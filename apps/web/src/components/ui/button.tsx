@@ -94,7 +94,12 @@ export function LumoButton({
 					{children}
 				</>
 			) : (
-				<span data-slot="button-content" className="grid">
+				// `w-full` is what lets a full-width button's width reach what is inside it: the grid
+				// item would otherwise be shrink-to-fit, and a child's own `w-full` — a layout that
+				// spreads its ends apart — would resolve against nothing and collapse to content.
+				// Against an indefinite button it stays `auto`, so a button that hugs its label is
+				// unchanged.
+				<span data-slot="button-content" className="w-full grid">
 					<span className={cn('col-start-1 row-start-1', loading && 'opacity-0')}>
 						{children}
 					</span>

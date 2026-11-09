@@ -14,7 +14,8 @@
 		"apps/api/prisma/migrations/",
 		"apps/api/src/generated/",
 		// Vendored from the @lumo registry — written upstream, leave it alone.
-		"apps/web/src/components/",
+		"apps/web/src/components/ui/",
+		"apps/web/src/components/blocks/",
 		"apps/web/src/lib/control/index.ts",
 		"apps/web/src/lib/measure/index.ts",
 		"apps/web/src/lib/motion/index.ts",
