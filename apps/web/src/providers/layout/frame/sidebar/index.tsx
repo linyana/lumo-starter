@@ -242,9 +242,8 @@ export function SidebarContent({
 									aria-label={collapsed ? 'expand sidebar' : 'collapse sidebar'}
 									aria-expanded={!collapsed}
 									onClick={onToggle}
-								>
-									<PanelLeft />
-								</LumoButton>
+									icon={<PanelLeft />}
+								/>
 							)}
 						</div>
 					)}

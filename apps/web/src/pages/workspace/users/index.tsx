@@ -1,11 +1,10 @@
-import { ROLE_META, type ListUsersQuery, type Role } from '@lumo/shared';
+import { ROLE_META, type ListUsersQuery, type Role, type User } from '@lumo/shared';
 import { Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { Table, type TableColumn } from '@/components/pro';
 import { LumoBadge } from '@/components/ui/badge';
 import { LumoButton } from '@/components/ui/button';
 import { LumoInput } from '@/components/ui/input';
-import { LumoSpinner } from '@/components/ui/spinner';
-import { LumoTable } from '@/components/ui/table';
 import { useAuth } from '@/providers/auth';
 import { useHttp } from '@/hooks';
 import { deleteUser, listUsers } from './api';
@@ -51,6 +50,50 @@ export const UsersPage = () => {
 
 	const total = users.data?.total ?? 0;
 	const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+	const columns: TableColumn<User>[] = [
+		{
+			key: 'name',
+			header: 'Name',
+			cell: (row) => <span className="font-medium">{row.name}</span>,
+		},
+		{
+			key: 'email',
+			header: 'Email',
+			cell: (row) => <span className="text-muted-foreground">{row.email}</span>,
+		},
+		{
+			key: 'roles',
+			header: 'Roles',
+			cell: (row) => (
+				<div className="flex flex-wrap gap-1">
+					{row.roles.map((role) => (
+						<LumoBadge key={role} variant={ROLE_VARIANT[role]}>
+							{ROLE_META[role]}
+						</LumoBadge>
+					))}
+				</div>
+			),
+		},
+		{
+			key: 'actions',
+			header: 'Actions',
+			align: 'end',
+			cell: (row) =>
+				can('user:delete') && row.id !== currentUser?.id ? (
+					<LumoButton
+						variant="ghost"
+						size="sm"
+						icon={<Trash2 />}
+						loading={remove.loading}
+						onClick={() => void remove.fetchData(row.id)}
+					>
+						Delete
+					</LumoButton>
+				) : (
+					<span className="text-xs text-muted-foreground">—</span>
+				),
+		},
+	];
 
 	return (
 		<div className="space-y-6">
@@ -75,55 +118,16 @@ export const UsersPage = () => {
 				</div>
 			</div>
 
-			{users.loading ? (
-				<div className="grid place-items-center p-12">
-					<LumoSpinner />
-				</div>
-			) : users.error ? (
+			{!users.loading && users.error ? (
 				<p className="text-sm text-destructive">{users.error.message}</p>
 			) : (
-				<LumoTable.Root>
-					<LumoTable.Header>
-						<LumoTable.Row>
-							<LumoTable.Head>Name</LumoTable.Head>
-							<LumoTable.Head>Email</LumoTable.Head>
-							<LumoTable.Head>Roles</LumoTable.Head>
-							<LumoTable.Head className="text-right">Actions</LumoTable.Head>
-						</LumoTable.Row>
-					</LumoTable.Header>
-					<LumoTable.Body>
-						{users.data?.items.map((row) => (
-							<LumoTable.Row key={row.id}>
-								<LumoTable.Cell className="font-medium">{row.name}</LumoTable.Cell>
-								<LumoTable.Cell className="text-muted-foreground">{row.email}</LumoTable.Cell>
-								<LumoTable.Cell>
-									<div className="flex flex-wrap gap-1">
-										{row.roles.map((role) => (
-											<LumoBadge key={role} variant={ROLE_VARIANT[role]}>
-												{ROLE_META[role]}
-											</LumoBadge>
-										))}
-									</div>
-								</LumoTable.Cell>
-								<LumoTable.Cell className="text-right">
-									{can('user:delete') && row.id !== currentUser?.id ? (
-										<LumoButton
-											variant="ghost"
-											size="sm"
-											icon={<Trash2 />}
-											loading={remove.loading}
-											onClick={() => void remove.fetchData(row.id)}
-										>
-											Delete
-										</LumoButton>
-									) : (
-										<span className="text-xs text-muted-foreground">—</span>
-									)}
-								</LumoTable.Cell>
-							</LumoTable.Row>
-						))}
-					</LumoTable.Body>
-				</LumoTable.Root>
+				<Table
+					columns={columns}
+					rows={users.data?.items ?? []}
+					rowKey={(row) => row.id}
+					loading={users.loading}
+					skeletonRows={PAGE_SIZE}
+				/>
 			)}
 
 			<div className="flex items-center justify-between">

@@ -2,13 +2,12 @@ import { Bell, CircleUserRound, CreditCard, EllipsisVertical, LogOut } from 'luc
 import { useRef, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 import { Layout, type LayoutNavEntry } from '../frame';
-import { LumoButton } from '@/components/ui/button';
 import { LumoSpinner } from '@/components/ui/spinner';
 import { useGlobal } from '@/hooks';
 import { useAuth } from '@/providers/auth';
 import { ThemeToggle } from '@/providers/theme';
 import type { AppShellProps } from './types';
-import { Avatar, Button, Flex, Menu, Popover } from '@/components';
+import { Avatar, Button, Flex, Menu } from '@/components';
 
 export type { AppShellProps } from './types';
 
@@ -113,14 +112,6 @@ export const AppShell = ({ nav }: AppShellProps) => {
 			brandActions={
 				<>
 					<ThemeToggle />
-					<LumoButton
-						variant="ghost"
-						size="icon"
-						aria-label={loggingOut ? 'Logging out' : 'Sign out'}
-						loading={loggingOut}
-						icon={<LogOut />}
-						onClick={() => void handleLogout()}
-					/>
 				</>
 			}
 		>

@@ -16,7 +16,15 @@ export type TableColumn<Row> = {
 	className?: string;
 };
 
-export type TableSlots = 'root' | 'header' | 'row' | 'head' | 'body' | 'cell' | 'empty';
+export type TableSlots =
+	| 'root'
+	| 'header'
+	| 'row'
+	| 'head'
+	| 'body'
+	| 'cell'
+	| 'empty'
+	| 'skeleton';
 
 export type TableProps<Row> = {
 	columns: TableColumn<Row>[];
@@ -26,8 +34,10 @@ export type TableProps<Row> = {
 	size?: RootProps['size'];
 	variant?: RootProps['variant'];
 	hoverable?: boolean;
-	/** Covers the records with a spinner while keeping them, and their column names, in place. */
+	/** Replaces the body with skeleton rows while keeping the column headers visible. */
 	loading?: boolean;
+	/** Number of placeholder rows shown while loading. Defaults to 5. */
+	skeletonRows?: number;
 	/** Shown in a row across every column when there are no records. */
 	empty?: ReactNode;
 	className?: string;
