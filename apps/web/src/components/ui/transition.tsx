@@ -11,7 +11,7 @@ import {
 	type Run,
 } from '@/lib/motion';
 
-export type TransitionProps = {
+export type LumoTransitionProps = {
 	/** Merged last through `cn()`, onto the box whose size glides. */
 	className?: string;
 	/**
@@ -103,7 +103,7 @@ function travels(live: Size, size: Size) {
  * The content is replaced in place, not remounted: no fade, no travel, no second copy of the
  * same text underneath — a clip and a measured glide are the whole of it.
  */
-export function Transition({ className, height, children }: TransitionProps) {
+export function LumoTransition({ className, height, children }: LumoTransitionProps) {
 	const spring = useSpring(springSize);
 	const quick = useSpring(quickSize);
 	const boxRef = useRef<HTMLDivElement>(null);

@@ -3,7 +3,7 @@ import type { ComponentProps } from 'react';
 import { Collapsible as BaseCollapsible } from '@base-ui/react/collapsible';
 import { cn } from '@/lib/utils';
 import { caret, iconSlot, stateLayer } from '@/lib/control';
-import { Transition } from './transition';
+import { LumoTransition } from './transition';
 
 export type IconProps = ComponentProps<typeof ChevronRight>;
 
@@ -30,7 +30,7 @@ export type PanelProps = Omit<ComponentProps<typeof BaseCollapsible.Panel>, 'cla
 };
 
 /**
- * The height belongs to `Transition`: one box, gliding between the peek it is closed to and the
+ * The height belongs to `LumoTransition`: one box, gliding between the peek it is closed to and the
  * size its body takes, on the library's one size spring. There is no second animation underneath it
  * to disagree — a fold that eased to `auto` and also followed its content would be two measurements
  * of the same box, and the content swapping while it opens would be followed twice.
@@ -50,7 +50,7 @@ export function Panel({ className, peek = 0, children, ...props }: PanelProps) {
 					inert={!state.open}
 					className={cn('overflow-clip', className)}
 				>
-					<Transition height={state.open ? undefined : peek}>{children}</Transition>
+					<LumoTransition height={state.open ? undefined : peek}>{children}</LumoTransition>
 				</div>
 			)}
 			{...props}

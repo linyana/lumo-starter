@@ -53,7 +53,7 @@ export function Action({ className, showOnHover = false, ...props }: ActionProps
 		<ActionGlyph
 			slot="nav-action"
 			className={cn(
-				'end-1',
+				'inset-e-1',
 				'peer-hover/nav-button:text-accent-foreground',
 				'peer-data-[size=sm]/nav-button:top-1',
 				'peer-data-[size=md]/nav-button:top-1.5',
@@ -83,14 +83,14 @@ export function Badge({ className, ...props }: BadgeProps) {
 		<div
 			data-slot="nav-badge"
 			className={cn(
-				'pointer-events-none absolute end-1 flex h-5 min-w-5 items-center justify-center',
+				'pointer-events-none absolute inset-e-1 flex h-5 min-w-5 items-center justify-center',
 				'rounded-md px-1 text-xs font-medium tabular-nums select-none',
 				'peer-hover/nav-button:text-accent-foreground',
-				'peer-data-[active]/nav-button:text-accent-foreground',
+				'peer-data-active/nav-button:text-accent-foreground',
 				'peer-data-[size=sm]/nav-button:top-1',
 				'peer-data-[size=md]/nav-button:top-1.5',
 				'peer-data-[size=lg]/nav-button:top-2.5',
-				'group-data-[compact]:hidden',
+				'group-data-compact:hidden',
 				className,
 			)}
 			{...props}
@@ -234,7 +234,7 @@ export function Button({
 						// `truncate` keeps the a11y name while `w-0` hides the text: overflow is what
 						// lets a flex item shrink past its content width, so it is the width that
 						// stops applying, not the text that disappears.
-						className="truncate group-data-[compact]:w-0"
+						className="truncate group-data-compact:w-0"
 					>
 						{label}
 					</span>
@@ -243,7 +243,7 @@ export function Button({
 					<span
 						data-slot="nav-button-initial"
 						aria-hidden="true"
-						className="hidden group-data-[compact]:block"
+						className="hidden group-data-compact:block"
 					>
 						{initial}
 					</span>
@@ -329,7 +329,7 @@ export function GroupAction({ className, ...props }: GroupActionProps) {
 	return (
 		<ActionGlyph
 			slot="nav-group-action"
-			className={cn('end-3 top-3.5', className)}
+			className={cn('inset-e-3 top-3.5', className)}
 			{...props}
 		/>
 	);
@@ -348,7 +348,7 @@ export function GroupLabel({ className, ...props }: GroupLabelProps) {
 				// pushing a horizontal scrollbar out of a 3rem column.
 				'truncate',
 				'transition-[margin,opacity] duration-(--duration-state) ease-linear',
-				'group-data-[compact]:-mt-8 group-data-[compact]:opacity-0',
+				'group-data-compact:-mt-8 group-data-compact:opacity-0',
 				iconSlot,
 				className,
 			)}
@@ -431,8 +431,8 @@ export function Skeleton({ className, showIcon = false, width = '70%', ...props 
 			className={cn(
 				'flex h-8 items-center gap-2 rounded-md px-2',
 				// Same square as a real row, so the rail loads into its final shape.
-				'group-data-[compact]:size-8! group-data-[compact]:justify-center',
-				'group-data-[compact]:gap-0 group-data-[compact]:px-0',
+				'group-data-compact:size-8! group-data-compact:justify-center',
+				'group-data-compact:gap-0 group-data-compact:px-0',
 				className,
 			)}
 			{...props}
@@ -442,12 +442,12 @@ export function Skeleton({ className, showIcon = false, width = '70%', ...props 
 			) : (
 				<BaseSkeleton
 					data-slot="nav-skeleton-initial"
-					className="hidden size-4 group-data-[compact]:block"
+					className="hidden size-4 group-data-compact:block"
 				/>
 			)}
 			<BaseSkeleton
 				data-slot="nav-skeleton-text"
-				className="h-4 flex-1 group-data-[compact]:hidden"
+				className="h-4 flex-1 group-data-compact:hidden"
 				style={{ maxWidth: width } as CSSProperties}
 			/>
 		</div>
@@ -463,7 +463,7 @@ export function SubList({ className, ...props }: SubListProps) {
 			data-slot="nav-sub-list"
 			className={cn(
 				'ms-4 me-2 mt-1 flex min-w-0 flex-col gap-1 border-s ps-3',
-				'group-data-[compact]:hidden',
+				'group-data-compact:hidden',
 				className,
 			)}
 			{...props}
