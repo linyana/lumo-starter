@@ -16,7 +16,7 @@ export const Menu = ({
 	<LumoMenu.Root>
 		<LumoMenu.Trigger render={trigger} />
 		<LumoMenu.Portal>
-			<LumoMenu.Positioner side={side} align={align}>
+			<LumoMenu.Positioner side={side} align={align} sideOffset={4}>
 				<LumoMenu.Popup className={cn(className, classNames?.popup)}>
 					<LumoMenu.Viewport className={classNames?.viewport}>
 						{(items || []).map((item, index) => (
@@ -27,6 +27,7 @@ export const Menu = ({
 								) : (
 									<LumoMenu.Item
 										disabled={item.disabled}
+										closeOnClick={item.closeOnClick}
 										onClick={item.onClick}
 										className={cn(
 											classNames?.item,

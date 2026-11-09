@@ -101,7 +101,7 @@ export function Group({ className, ...props }: GroupProps) {
 			data-slot="avatar-group"
 			className={cn(
 				'flex items-center -space-x-2',
-				'[&>[data-slot=avatar]]:ring-2 [&>[data-slot=avatar]]:ring-background',
+				'*:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background',
 				className,
 			)}
 			{...props}

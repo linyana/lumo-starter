@@ -1,7 +1,9 @@
 import { Bell, CircleUserRound, CreditCard, EllipsisVertical, LogOut } from 'lucide-react';
+import { useRef, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 import { Layout, type LayoutNavEntry } from '../frame';
 import { LumoButton } from '@/components/ui/button';
+import { LumoSpinner } from '@/components/ui/spinner';
 import { useGlobal } from '@/hooks';
 import { useAuth } from '@/providers/auth';
 import { ThemeToggle } from '@/providers/theme';
@@ -34,6 +36,16 @@ export const AppShell = ({ nav }: AppShellProps) => {
 	const location = useLocation();
 	const { user, logout } = useAuth();
 	const { collapsed, actions } = useGlobal();
+	const [loggingOut, setLoggingOut] = useState(false);
+	const logoutStarted = useRef(false);
+
+	const handleLogout = async () => {
+		if (logoutStarted.current) return;
+		logoutStarted.current = true;
+		setLoggingOut(true);
+		await logout().catch(() => undefined);
+		navigate('/login', { replace: true });
+	};
 
 	return (
 		<Layout
@@ -69,12 +81,12 @@ export const AppShell = ({ nav }: AppShellProps) => {
 							{ label: 'Billing', icon: <CreditCard />, disabled: true },
 							{ label: 'Notifications', icon: <Bell />, disabled: true },
 							{
-								label: 'Log out',
-								icon: <LogOut />,
+								label: loggingOut ? 'Logging out…' : 'Log out',
+								icon: loggingOut ? <LumoSpinner size={1} label="Logging out" /> : <LogOut />,
+								disabled: loggingOut,
+								closeOnClick: false,
 								separatorBefore: true,
-								onClick: () => {
-									void logout().catch(() => undefined).then(() => navigate('/login', { replace: true }));
-								},
+								onClick: () => void handleLogout(),
 							},
 						]}
 						trigger={
@@ -104,15 +116,10 @@ export const AppShell = ({ nav }: AppShellProps) => {
 					<LumoButton
 						variant="ghost"
 						size="icon"
-						aria-label="Sign out"
+						aria-label={loggingOut ? 'Logging out' : 'Sign out'}
+						loading={loggingOut}
 						icon={<LogOut />}
-						onClick={async () => {
-							// `logout` drops the local session in its own `finally`, so a failed request
-							// must not keep the user here: swallow it and leave anyway. Awaiting the
-							// `catch` also keeps the rejection from floating.
-							await logout().catch(() => undefined);
-							navigate('/login', { replace: true });
-						}}
+						onClick={() => void handleLogout()}
 					/>
 				</>
 			}

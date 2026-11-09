@@ -17,8 +17,10 @@ export type MenuItem = {
 	label: ReactNode;
 	icon?: ReactNode;
 	disabled?: boolean;
-	/** Drawn in the destructive colour. Closing the menu is still the caller's. */
+	/** Drawn in the destructive colour. */
 	destructive?: boolean;
+	/** Whether selecting the action closes the menu. Defaults to true. */
+	closeOnClick?: boolean;
 	/** Merged onto this row after `classNames.item`. */
 	className?: string;
 	onClick?: () => void;
