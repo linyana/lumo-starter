@@ -1,4 +1,4 @@
-import { LogOut } from 'lucide-react';
+import { EllipsisVertical, LogOut } from 'lucide-react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 import { Layout, type LayoutNavEntry } from '../frame';
 import { LumoButton } from '@/components/ui/button';
@@ -6,7 +6,7 @@ import { useGlobal } from '@/hooks';
 import { useAuth } from '@/providers/auth';
 import { ThemeToggle } from '@/providers/theme';
 import type { AppShellProps } from './types';
-import { Button, Flex, Popover } from '@/components';
+import { Avatar, Button, Flex, Popover } from '@/components';
 
 export type { AppShellProps } from './types';
 
@@ -53,10 +53,20 @@ export const AppShell = ({ nav }: AppShellProps) => {
 						side="right"
 						arrow={false}
 						trigger={
-							<Button variant="ghost">
-								<Flex justify="between">
-									<div>1</div>
-									<div>2</div>
+							<Button
+								variant="ghost"
+								aria-label="Account menu"
+								className="p-2 group-data-compact:p-0"
+							>
+								<Flex justify="between" align="center">
+									<Flex gap="md">
+										<Avatar alt={user.name} shape="square" className="bg-gray-200" />
+										<Flex direction="column" align="start">
+											<p className="text-sm font-medium">{user.name}</p>
+											<p className="text-xs text-muted-foreground">{user.email}</p>
+										</Flex>
+									</Flex>
+									<EllipsisVertical className="group-data-compact:hidden" />
 								</Flex>
 							</Button>
 						}
