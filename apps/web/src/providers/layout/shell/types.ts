@@ -1,4 +1,4 @@
-import type { LayoutNavEntry } from '@/components/blocks/layout';
+import type { LayoutNavEntry } from '../frame';
 
 export type AppShellProps = {
 	/**

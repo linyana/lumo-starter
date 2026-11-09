@@ -197,7 +197,9 @@ the action to take.
 - **TypeScript is pinned to 5.9** — Nest's DI needs `emitDecoratorMetadata` (Version notes).
 - **lumo-ui is copied, not installed** — `bunx shadcn@latest add @lumo/<name>`. The files under
   `apps/web/src/{components,lib}` belong to this repo, but oxfmt and oxlint skip them so registry
-  updates stay diff-able.
+  updates stay diff-able. The `layout` block is the exception: it is app shape rather than a
+  primitive, so it lives at `providers/layout/frame` and is linted, formatted and edited like the
+  rest of `src`.
 - **The AI skill** is installed locally, not committed: it lands in `.agents/skills/lumo-ui`
   (`bunx skills`), and `bunx skills update` refreshes it.
 - **`.env` holds only `DATABASE_URL` and `JWT_ACCESS_SECRET`** — everything else is a constant in
@@ -226,10 +228,10 @@ the action to take.
 │       ├── src/pages/{auth,workspace}   # screens, one folder each, grouped by domain
 │       ├── src/providers/auth          # the session and the guards a route asks for
 │       ├── src/providers/routes        # the table turned into route objects, plus the rail rows
-│       ├── src/providers/layout/{shell,auth} # the rail shell, the anonymous frame
+│       ├── src/providers/layout/{frame,shell,auth} # the rail block, the shell on it, the auth column
 │       ├── src/hooks/{use-http,use-global}    # request state, and the app-wide store
 │       ├── src/lib/{http,form,toast,…}  # transport and the small shared modules
-│       └── src/components/{ui,blocks}   # installed from @lumo
+│       └── src/components/ui            # installed from @lumo
 ├── packages/shared                      # the single source of truth
 └── docs/ARCHITECTURE.md                 # why each choice, and what it costs
 ```

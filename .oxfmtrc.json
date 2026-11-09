@@ -22,7 +22,6 @@
 		"apps/api/prisma/migrations/",
 		"apps/api/src/generated/",
 		"apps/web/src/components/ui/",
-		"apps/web/src/components/blocks/",
 		"apps/web/src/lib/control/index.ts",
 		"apps/web/src/lib/measure/index.ts",
 		"apps/web/src/lib/motion/index.ts",

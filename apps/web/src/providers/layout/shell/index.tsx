@@ -1,6 +1,6 @@
 import { LogOut } from 'lucide-react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
-import { Layout, type LayoutNavEntry } from '@/components/blocks/layout';
+import { Layout, type LayoutNavEntry } from '../frame';
 import { LumoButton } from '@/components/ui/button';
 import { useGlobal } from '@/hooks';
 import { useAuth } from '@/providers/auth';
@@ -21,9 +21,9 @@ const keysByHref = (entries: LayoutNavEntry[]): Map<string, string> =>
 	);
 
 /**
- * The shell is a lumo `layout` block: a rail, a mobile drawer and the scroll box all come with it.
- * Each row is a router link, so the router stays the single source of truth for "where am I" and a
- * click never leaves the document.
+ * The shell wraps `providers/layout/frame`: the lumo `layout` block, where a rail, a mobile drawer
+ * and the scroll box all come with it. Each row is a router link, so the router stays the single
+ * source of truth for "where am I" and a click never leaves the document.
  *
  * The rows arrive as a prop: `providers/routes` builds them from the table in `src/routes.tsx`, so
  * a new screen is still one row there and no write here, and this module stays a renderer — it

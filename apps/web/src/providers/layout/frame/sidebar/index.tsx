@@ -107,10 +107,7 @@ export function SidebarContent({
 						icon={item.icon}
 						label={item.label}
 						className={row}
-						isActive={
-							active ||
-							item.children.some((child) => isActive(child.key, child.isActive))
-						}
+						isActive={active || item.children.some((child) => isActive(child.key, child.isActive))}
 						defaultOpen={item.defaultOpen}
 						disabled={item.disabled}
 					>
@@ -164,11 +161,7 @@ export function SidebarContent({
 
 		if (entry.type === 'skeleton') {
 			return (
-				<LumoNav.Skeleton
-					key={`skeleton-${index}`}
-					showIcon={entry.showIcon}
-					width={entry.width}
-				/>
+				<LumoNav.Skeleton key={`skeleton-${index}`} showIcon={entry.showIcon} width={entry.width} />
 			);
 		}
 
@@ -198,9 +191,7 @@ export function SidebarContent({
 			if (entry.type === 'group' || entry.type === 'separator') return [...acc, entry];
 
 			const last = acc[acc.length - 1];
-			return Array.isArray(last)
-				? [...acc.slice(0, -1), [...last, entry]]
-				: [...acc, [entry]];
+			return Array.isArray(last) ? [...acc.slice(0, -1), [...last, entry]] : [...acc, [entry]];
 		}, []);
 
 		return blocks.map((block, index) =>
@@ -221,10 +212,7 @@ export function SidebarContent({
 			data-slot="layout-sidebar-content"
 			className={cn('flex h-full min-h-0 w-full flex-col', className)}
 		>
-			{(logo !== undefined ||
-				title !== undefined ||
-				brandActions !== undefined ||
-				collapsible) && (
+			{(logo !== undefined || title !== undefined || brandActions !== undefined || collapsible) && (
 				<div
 					data-slot="layout-brand"
 					className={cn(
@@ -243,10 +231,7 @@ export function SidebarContent({
 					{(brandActions !== undefined || collapsible) && (
 						<div
 							data-slot="layout-brand-actions"
-							className={cn(
-								'ms-auto flex shrink-0 items-center gap-1',
-								collapsed && 'flex-col',
-							)}
+							className={cn('ms-auto flex shrink-0 items-center gap-1', collapsed && 'flex-col')}
 						>
 							{brandActions}
 							{collapsible && (

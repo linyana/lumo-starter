@@ -34,9 +34,7 @@ export function Header({
 		>
 			{(title !== undefined || description !== undefined) && (
 				<div data-slot="layout-header-text" className="flex min-w-0 flex-col gap-0.5">
-					{title !== undefined && (
-						<h1 className="truncate text-sm font-semibold">{title}</h1>
-					)}
+					{title !== undefined && <h1 className="truncate text-sm font-semibold">{title}</h1>}
 					{description !== undefined && (
 						<p className="truncate text-xs text-muted-foreground">{description}</p>
 					)}
@@ -44,10 +42,7 @@ export function Header({
 			)}
 			{children}
 			{actions !== undefined && (
-				<div
-					data-slot="layout-header-actions"
-					className="ms-auto flex shrink-0 items-center gap-2"
-				>
+				<div data-slot="layout-header-actions" className="ms-auto flex shrink-0 items-center gap-2">
 					{actions}
 				</div>
 			)}

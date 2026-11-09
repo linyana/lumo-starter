@@ -75,10 +75,7 @@ export function MobileNavigation({
 					)}
 				</div>
 				{brandActions !== undefined && (
-					<div
-						data-slot="layout-mobile-actions"
-						className="flex shrink-0 items-center gap-1"
-					>
+					<div data-slot="layout-mobile-actions" className="flex shrink-0 items-center gap-1">
 						{brandActions}
 					</div>
 				)}
@@ -86,10 +83,7 @@ export function MobileNavigation({
 			<LumoDrawer.Portal>
 				<LumoDrawer.Backdrop />
 				<LumoDrawer.Viewport>
-					<LumoDrawer.Popup
-						data-slot="layout-mobile-navigation"
-						className="bg-layout-background"
-					>
+					<LumoDrawer.Popup data-slot="layout-mobile-navigation" className="bg-layout-background">
 						<SidebarContent
 							nav={nav}
 							selectedKey={selectedKey}

@@ -17,7 +17,8 @@ other name is a folder with its own `index.ts` — `constants/index.ts`, `schema
 ```
 pages/<domain>/<screen>/index.tsx    screens, grouped by the rail's own groups
 providers/<concern>/{index, api/, session/, guards/}
-providers/layout/{shell,auth}/       one frame per kind, `index` is the barrel
+providers/layout/{frame,shell,auth}/  the block a screen sits in, the frames built on it,
+                                     `index` is the barrel
 hooks/<name>/{index, types}          request state, the app-wide store
 lib/<module>/{index, client/, error/}
 routes.tsx                           the route table, importing screens from `@/pages`
