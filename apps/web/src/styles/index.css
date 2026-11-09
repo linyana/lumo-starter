@@ -1,0 +1,240 @@
+@import '@fontsource-variable/geist';
+@import 'tailwindcss';
+
+/* @lumo/theme and @lumo/palette are merged into this file by the shadcn CLI. */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+	--font-sans:
+		'Geist Variable', 'Geist', 'Noto Sans SC Variable', 'Noto Sans SC', system-ui, -apple-system,
+		BlinkMacSystemFont, 'Segoe UI', sans-serif;
+	--font-mono:
+		'Geist Mono Variable', 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas,
+		'Liberation Mono', 'Noto Sans SC Variable', 'Noto Sans SC', monospace;
+	--color-background: var(--background);
+	--color-layout-background: var(--layout-background);
+	--color-layout-content: var(--layout-content);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-popover: var(--popover);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-destructive: var(--destructive);
+	--color-destructive-foreground: var(--destructive-foreground);
+	--color-success: var(--success);
+	--color-warning: var(--warning);
+	--color-info: var(--info);
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--shadow-surface: var(--shadow-surface);
+	--shadow-lifted: var(--shadow-lifted);
+	--shadow-overlay: var(--shadow-overlay);
+	--color-input-strong: var(--input-strong);
+	--color-ring: var(--ring);
+	--color-table-head: color-mix(
+		in oklch,
+		var(--foreground) 2%,
+		var(--table-surface, var(--background))
+	);
+	--color-table-head-hover: color-mix(
+		in oklch,
+		var(--foreground) 8%,
+		var(--table-surface, var(--background))
+	);
+	--color-row-hover: color-mix(in oklch, var(--foreground) 5%, transparent);
+	--color-row-selected: color-mix(in oklch, var(--primary) 8%, transparent);
+	--color-row-selected-hover: color-mix(in oklch, var(--primary) 12%, transparent);
+	--color-column-sorted: color-mix(in oklch, var(--foreground) 3%, transparent);
+	--radius-sm: calc(var(--radius) * 0.6);
+	--radius-md: calc(var(--radius) * 0.8);
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) * 1.4);
+	--radius-2xl: calc(var(--radius) * 1.8);
+	--animate-progress-sweep: lumo-progress-sweep 1.2s ease-in-out infinite;
+	--color-overlay: var(--overlay);
+	--duration-overlay: var(--duration-overlay);
+	--ease-overlay: var(--ease-overlay);
+	--duration-press: var(--duration-press);
+	--duration-turn: var(--duration-turn);
+	--duration-state: var(--duration-state);
+	--ease-spring: var(--ease-spring);
+	--blur-inactive: var(--blur-inactive);
+	--shift-content: var(--shift-content);
+	--press-offset: var(--press-offset);
+	--state-layer-selected-hover-opacity: var(--state-layer-selected-hover-opacity);
+	--state-layer-fill-pressed-opacity: var(--state-layer-fill-pressed-opacity);
+	--state-layer-fill-hover-opacity: var(--state-layer-fill-hover-opacity);
+	--state-layer-pressed-opacity: var(--state-layer-pressed-opacity);
+	--state-layer-hover-opacity: var(--state-layer-hover-opacity);
+	@keyframes lumo-progress-sweep {
+		from {
+			translate: -100% 0;
+		}
+		to {
+			translate: 250% 0;
+		}
+	}
+	@keyframes focus-ring {
+		from {
+			outline-color: transparent;
+		}
+	}
+	--radius-3xl: calc(var(--radius) * 2.2);
+	--radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+	--layout-background: rgb(239 239 240);
+	--layout-content: rgb(249 249 250);
+	--state-layer-hover-opacity: 0.06;
+	--state-layer-pressed-opacity: 0.14;
+	--state-layer-fill-hover-opacity: 0.16;
+	--state-layer-fill-pressed-opacity: 0.26;
+	--state-layer-selected-hover-opacity: 0.1;
+	--press-offset: 1px;
+	--shift-content: 8px;
+	--blur-inactive: 4px;
+	--ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+	--duration-state: 150ms;
+	--duration-turn: 200ms;
+	--duration-press: 80ms;
+	--ease-overlay: cubic-bezier(0.22, 1, 0.36, 1);
+	--duration-overlay: 350ms;
+	--success: oklch(0.627 0.194 149.214);
+	--warning: oklch(0.666 0.179 58.318);
+	--info: oklch(0.546 0.245 262.881);
+	--input-strong: oklch(0.78 0 0);
+	--overlay: oklch(0 0 0 / 50%);
+	--shadow-surface:
+		0 0 0 1px rgb(0 0 0 / 2.9%), 0 3px 6px -2px rgb(0 0 0 / 2%), 0 1px 1px rgb(0 0 0 / 4%);
+	--shadow-lifted:
+		0 17.5px 23.4px rgb(0 0 0 / 4%), 0 9.4px 12.5px rgb(0 0 0 / 3%), 0 5.25px 7px rgb(0 0 0 / 2%),
+		0 2.8px 3.7px -2px rgb(0 0 0 / 1%), 0 1.2px 1.5px rgb(0 0 0 / 1%);
+	--shadow-overlay:
+		0 40px 80px rgb(0 0 0 / 6%), 0 20px 40px rgb(0 0 0 / 5%), 0 10px 20px rgb(0 0 0 / 4%),
+		0 5px 10px rgb(0 0 0 / 3%), 0 2px 4px rgb(0 0 0 / 2%);
+	--radius: 0.625rem;
+	--background: oklch(1 0 0);
+	--foreground: oklch(0.145 0 0);
+	--card: oklch(1 0 0);
+	--card-foreground: oklch(0.145 0 0);
+	--popover: oklch(1 0 0);
+	--popover-foreground: oklch(0.145 0 0);
+	--primary: oklch(0.205 0 0);
+	--primary-foreground: oklch(0.985 0 0);
+	--secondary: oklch(0.94 0 0);
+	--secondary-foreground: oklch(0.205 0 0);
+	--muted: oklch(0.94 0 0);
+	--muted-foreground: oklch(0.556 0 0);
+	--accent: oklch(0.97 0 0);
+	--accent-foreground: oklch(0.205 0 0);
+	--destructive: oklch(0.577 0.245 27.325);
+	--destructive-foreground: oklch(0.985 0 0);
+	--border: oklch(0.922 0 0);
+	--input: oklch(0.922 0 0);
+	--ring: oklch(0.708 0 0);
+}
+
+.dark {
+	--layout-background: color-mix(in srgb, var(--background) 75%, black);
+	--layout-content: var(--background);
+	--success: oklch(0.723 0.219 149.579);
+	--warning: oklch(0.769 0.188 70.08);
+	--info: oklch(0.623 0.214 259.815);
+	--input-strong: oklch(1 0 0 / 30%);
+	--overlay: oklch(0 0 0 / 65%);
+	--shadow-surface:
+		0 0 0 1px rgb(255 255 255 / 10%), 0 3px 6px -2px rgb(0 0 0 / 3%), 0 1px 1px rgb(0 0 0 / 6%);
+	--shadow-lifted:
+		0 17.5px 23.4px rgb(0 0 0 / 6%), 0 9.4px 12.5px rgb(0 0 0 / 5%), 0 5.25px 7px rgb(0 0 0 / 3%),
+		0 2.8px 3.7px -2px rgb(0 0 0 / 2%), 0 1.2px 1.5px rgb(0 0 0 / 2%);
+	--shadow-overlay:
+		0 40px 80px rgb(0 0 0 / 9%), 0 20px 40px rgb(0 0 0 / 8%), 0 10px 20px rgb(0 0 0 / 6%),
+		0 5px 10px rgb(0 0 0 / 5%), 0 2px 4px rgb(0 0 0 / 3%);
+	--background: rgb(28 29 32);
+	--foreground: oklch(0.985 0 0);
+	--card: rgb(34 35 38);
+	--card-foreground: oklch(0.985 0 0);
+	--popover: rgb(34 35 38);
+	--popover-foreground: oklch(0.985 0 0);
+	--primary: oklch(0.922 0 0);
+	--primary-foreground: oklch(0.205 0 0);
+	--secondary: rgb(40 41 44);
+	--secondary-foreground: oklch(0.985 0 0);
+	--muted: oklch(0.295 0 0);
+	--muted-foreground: oklch(0.708 0 0);
+	--accent: oklch(0.269 0 0);
+	--accent-foreground: oklch(0.985 0 0);
+	--destructive: oklch(0.704 0.191 22.216);
+	--destructive-foreground: oklch(0.205 0 0);
+	--border: oklch(1 0 0 / 10%);
+	--input: oklch(1 0 0 / 15%);
+	--ring: oklch(0.556 0 0);
+}
+
+@layer base {
+	* {
+		border-color: var(--border);
+	}
+	body {
+		background-color: var(--background);
+		color: var(--foreground);
+		-webkit-font-smoothing: antialiased;
+	}
+	::selection {
+		background-color: var(--primary);
+		color: var(--primary-foreground);
+	}
+	:focus-visible {
+		outline: 2px solid var(--ring);
+		outline-offset: 2px;
+		animation: focus-ring var(--duration-state) var(--ease-spring);
+	}
+
+	@supports not selector(::-webkit-scrollbar) {
+		* {
+			scrollbar-width: thin;
+			scrollbar-color: var(--ring) transparent;
+		}
+	}
+	*::-webkit-scrollbar {
+		width: 10px;
+		height: 10px;
+	}
+	*::-webkit-scrollbar-track,
+	*::-webkit-scrollbar-corner {
+		background-color: transparent;
+	}
+	*::-webkit-scrollbar-thumb {
+		background-color: var(--ring);
+		background-clip: content-box;
+		border: 2px solid transparent;
+		border-radius: 9999px;
+	}
+	*::-webkit-scrollbar-thumb:hover {
+		background-color: var(--muted-foreground);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	:root {
+		--press-offset: 0;
+		--shift-content: 0px;
+		--blur-inactive: 0px;
+		--ease-spring: linear;
+		--duration-state: 1ms;
+		--duration-turn: 1ms;
+		--duration-press: 1ms;
+		--ease-overlay: linear;
+		--duration-overlay: 1ms;
+	}
+}

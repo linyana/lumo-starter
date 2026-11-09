@@ -1,0 +1,39 @@
+{
+	"name": "@lumo/web",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc --noEmit && vite build",
+		"preview": "vite preview",
+		"typecheck": "tsc --noEmit",
+		"lint": "oxlint"
+	},
+	"dependencies": {
+		"@base-ui/react": "^1.9.0",
+		"@fontsource-variable/geist": "^5.3.0",
+		"@lumo/shared": "workspace:*",
+		"axios": "^1.21.0",
+		"clsx": "^2.1.1",
+		"lucide-react": "^1.66.0",
+		"motion": "^14.9.0",
+		"react": "^19.3.1",
+		"react-dom": "^19.3.1",
+		"react-router": "^8.5.1",
+		"tailwind-merge": "^3.7.0",
+		"tailwind-variants": "^4.0.1",
+		"zod": "catalog:",
+		"zustand": "^5.0.16"
+	},
+	"devDependencies": {
+		"@tailwindcss/vite": "^4.3.4",
+		"@types/node": "catalog:",
+		"@types/react": "^19.3.0",
+		"@types/react-dom": "^19.3.0",
+		"@vitejs/plugin-react": "^6.2.1",
+		"tailwindcss": "^4.3.4",
+		"typescript": "catalog:",
+		"vite": "^8.3.5"
+	}
+}

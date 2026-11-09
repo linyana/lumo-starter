@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    # `prisma generate` reads DATABASE_URL through prisma.config.ts, so the
+    # variable has to exist even though nothing connects during CI.
+    env:
+      DATABASE_URL: postgresql://lumo:lumo@localhost:5432/lumo?schema=public
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Version comes from the `packageManager` field in package.json.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Shared first: both apps consume its build output.
+      - run: pnpm --filter @lumo/shared build
+
+      - run: pnpm --filter @lumo/api db:generate
+
+      - run: pnpm check
+      - run: pnpm build

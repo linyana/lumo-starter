@@ -1,0 +1,35 @@
+packages:
+  - apps/*
+  - packages/*
+
+# One version per shared dependency: `"typescript": "catalog:"` in a package.json
+# points here, so a bump is one line instead of four file edits that can drift.
+# Dependency-only — peer ranges stay written out, because a peer is a contract
+# rather than an installed version.
+catalog:
+  '@types/node': ^24.19.2
+  typescript: ^5.9.3
+  zod: ^4.6.7
+
+# pnpm 11 blocks postinstall scripts by default (`allowBuilds`, replacing the
+# older `onlyBuiltDependencies`). These genuinely need theirs: native binaries
+# and Prisma's client generation.
+allowBuilds:
+  '@parcel/watcher': true
+  '@prisma/client': true
+  '@prisma/engines': true
+  '@scarf/scarf': false
+  '@swc/core': true
+  argon2: true
+  esbuild: true
+  prisma: true
+  unrs-resolver: true
+
+# @nestjs/core lists Express as an optional peer; the NodeAdapter replaced it, so
+# nothing in this workspace should install it.
+ignoredOptionalDependencies:
+  - '@nestjs/platform-express'
+
+minimumReleaseAgeExclude:
+  - '@nestjs/platform-node@12.3.3'
+  - framer-motion@14.9.1

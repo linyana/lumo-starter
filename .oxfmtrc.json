@@ -1,0 +1,32 @@
+{
+	"$schema": "./node_modules/oxfmt/configuration_schema.json",
+	"useTabs": true,
+	"tabWidth": 2,
+	"singleQuote": true,
+	"printWidth": 100,
+	"semi": true,
+	"trailingComma": "all",
+	"endOfLine": "lf",
+	"arrowParens": "always",
+	// Reordering a package.json is not a formatting decision this repo makes.
+	"sortPackageJson": false,
+	"ignorePatterns": [
+		"**/node_modules/",
+		"**/dist/",
+		"**/build/",
+		"**/out/",
+		"**/coverage/",
+		"**/.turbo/",
+		"**/*.tsbuildinfo",
+		"pnpm-lock.yaml",
+		"apps/api/prisma/migrations/",
+		"apps/api/src/generated/",
+		"apps/web/src/components/",
+		"apps/web/src/lib/control/index.ts",
+		"apps/web/src/lib/measure/index.ts",
+		"apps/web/src/lib/motion/index.ts",
+		"apps/web/src/lib/surface/index.ts",
+		"apps/web/src/lib/utils/index.ts",
+		".agents/"
+	]
+}
