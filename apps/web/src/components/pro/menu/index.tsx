@@ -18,7 +18,7 @@ export const Menu = ({
 			<LumoMenu.Positioner side={side} align={align}>
 				<LumoMenu.Popup className={cn(className, classNames?.popup)}>
 					<LumoMenu.Viewport className={classNames?.viewport}>
-						{items.map((item, index) => (
+						{(items || []).map((item, index) => (
 							<Fragment key={index}>
 								{item.separatorBefore && <LumoMenu.Separator className={classNames?.separator} />}
 								<LumoMenu.Item

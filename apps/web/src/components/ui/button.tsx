@@ -31,9 +31,13 @@ export const buttonVariants = tv({
 			link: 'text-primary underline-offset-4 hover:underline after:hidden',
 		},
 		size: {
-			sm: 'h-8 gap-1.5 px-3 text-sm',
-			md: 'h-9 px-4 text-sm',
-			lg: 'h-10 px-6 text-base',
+			// A height is a floor, not a ceiling: one line of text still lands on the 32/36/40 step,
+			// but a label that carries two lines — the account menu at the foot of the rail — grows
+			// the button instead of spilling out of a box that was told how tall to be. The icon
+			// button is a square drawn around a glyph and nothing more, so it stays fixed.
+			sm: 'min-h-8 gap-1.5 px-3 text-sm',
+			md: 'min-h-9 px-4 text-sm',
+			lg: 'min-h-10 px-6 text-base',
 			icon: 'size-9 text-sm',
 		},
 	},

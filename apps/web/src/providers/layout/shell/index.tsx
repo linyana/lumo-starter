@@ -6,7 +6,7 @@ import { useGlobal } from '@/hooks';
 import { useAuth } from '@/providers/auth';
 import { ThemeToggle } from '@/providers/theme';
 import type { AppShellProps } from './types';
-import { Avatar, Button, Flex, Popover } from '@/components';
+import { Avatar, Button, Flex, Menu, Popover } from '@/components';
 
 export type { AppShellProps } from './types';
 
@@ -49,9 +49,11 @@ export const AppShell = ({ nav }: AppShellProps) => {
 			resetScrollKey={location.pathname}
 			footer={
 				user ? (
-					<Popover
+					<Menu
 						side="right"
-						arrow={false}
+						items={[{
+							label: '1'
+						}]}
 						trigger={
 							<Button
 								variant="ghost"
@@ -59,7 +61,7 @@ export const AppShell = ({ nav }: AppShellProps) => {
 								className="p-2 group-data-compact:p-0"
 							>
 								<Flex justify="between" align="center">
-									<Flex gap="md">
+									<Flex gap="md" align="center">
 										<Avatar alt={user.name} shape="square" className="bg-gray-200" />
 										<Flex direction="column" align="start">
 											<p className="text-sm font-medium">{user.name}</p>
@@ -70,9 +72,7 @@ export const AppShell = ({ nav }: AppShellProps) => {
 								</Flex>
 							</Button>
 						}
-					>
-						1
-					</Popover>
+					/>
 				) : null
 			}
 			brandActions={
