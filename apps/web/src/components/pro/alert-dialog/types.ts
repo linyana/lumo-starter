@@ -1,0 +1,33 @@
+import type { ComponentProps, ReactElement, ReactNode } from 'react';
+import type { LumoAlertDialog } from '@/components/ui/alert-dialog';
+import type { SlotClassNames } from '../types';
+
+type AlertDialogRootProps = ComponentProps<typeof LumoAlertDialog.Root>;
+
+export type AlertDialogSlots =
+	| 'backdrop'
+	| 'viewport'
+	| 'popup'
+	| 'title'
+	| 'description'
+	| 'actions';
+
+export type AlertDialogProps = Pick<
+	AlertDialogRootProps,
+	'open' | 'defaultOpen' | 'onOpenChange'
+> & {
+	trigger: ReactElement;
+	title: ReactNode;
+	description?: ReactNode;
+	/** More to read between the description and the two buttons. */
+	children?: ReactNode;
+	confirmLabel?: string;
+	cancelLabel?: string;
+	/** Runs after the dialog has closed itself on confirm. */
+	onConfirm?: () => void;
+	/** Draws confirm in the destructive fill. */
+	destructive?: boolean;
+	/** The panel itself — the shorthand for `classNames.popup`. */
+	className?: string;
+	classNames?: SlotClassNames<AlertDialogSlots>;
+};

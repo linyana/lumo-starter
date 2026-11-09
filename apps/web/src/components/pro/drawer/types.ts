@@ -1,0 +1,30 @@
+import type { ComponentProps, ReactElement, ReactNode } from 'react';
+import type { LumoDrawer } from '@/components/ui/drawer';
+import type { SlotClassNames } from '../types';
+
+type DrawerRootProps = ComponentProps<typeof LumoDrawer.Root>;
+
+/** The edge the panel is anchored to. `down` is a bottom sheet. */
+export type DrawerSide = NonNullable<DrawerRootProps['swipeDirection']>;
+
+export type DrawerSlots =
+	| 'backdrop'
+	| 'viewport'
+	| 'popup'
+	| 'content'
+	| 'title'
+	| 'description'
+	| 'footer';
+
+export type DrawerProps = Pick<DrawerRootProps, 'open' | 'defaultOpen' | 'onOpenChange'> & {
+	trigger: ReactElement;
+	title: ReactNode;
+	description?: ReactNode;
+	children?: ReactNode;
+	/** Drawn on the bottom edge of the panel, past the body. */
+	footer?: ReactNode;
+	side?: DrawerSide;
+	/** The panel itself — the shorthand for `classNames.popup`. */
+	className?: string;
+	classNames?: SlotClassNames<DrawerSlots>;
+};
