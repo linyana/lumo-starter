@@ -1,7 +1,6 @@
 import { Menu, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { LumoButton } from '@/components/ui/button';
-import { LumoDrawer } from '@/components/ui/drawer';
+import { Button, Drawer } from '@/components';
 import { SidebarContent, type SidebarProps } from '../sidebar';
 
 export type MobileNavigationProps = Pick<
@@ -46,75 +45,69 @@ export function MobileNavigation({
 	}, [open]);
 
 	return (
-		<LumoDrawer.Root open={open} onOpenChange={setOpen} swipeDirection="left">
-			<div
-				ref={bar}
-				data-slot="layout-mobile-bar"
-				className="flex h-14 shrink-0 items-center gap-2 bg-layout-background px-2 md:hidden"
+		<div
+			ref={bar}
+			data-slot="layout-mobile-bar"
+			className="flex h-14 shrink-0 items-center gap-2 bg-layout-background px-2 md:hidden"
+		>
+			<Drawer
+				open={open}
+				onOpenChange={setOpen}
+				side="left"
+				title={title ?? 'Navigation'}
+				data-slot="layout-mobile-navigation"
+				className="bg-layout-background"
+				classNames={{ title: 'truncate text-sm' }}
+				trigger={
+					<Button
+						data-slot="layout-navigation-trigger"
+						variant="ghost"
+						size="icon"
+						icon={<Menu />}
+						aria-label="Open navigation"
+					/>
+				}
 			>
-				<LumoDrawer.Trigger
-					render={
-						<LumoButton
-							data-slot="layout-navigation-trigger"
-							variant="ghost"
-							size="icon"
-							icon={<Menu />}
-							aria-label="Open navigation"
-						/>
-					}
-				/>
-				<div
-					data-slot="layout-mobile-brand"
-					className="flex min-w-0 flex-1 items-center gap-2 text-sm font-semibold"
-				>
-					{logo}
-					{title !== undefined && (
-						<span data-slot="layout-mobile-title" className="truncate">
-							{title}
-						</span>
-					)}
-				</div>
-				{brandActions !== undefined && (
-					<div data-slot="layout-mobile-actions" className="flex shrink-0 items-center gap-1">
-						{brandActions}
-					</div>
+				{({ title: drawerTitle }) => (
+					<SidebarContent
+						nav={nav}
+						selectedKey={selectedKey}
+						onSelect={(key) => {
+							onSelect?.(key);
+							setOpen(false);
+						}}
+						logo={logo}
+						title={drawerTitle}
+						brandActions={
+							<Button
+								variant="ghost"
+								size="icon"
+								icon={<X />}
+								aria-label="Close navigation"
+								onClick={() => setOpen(false)}
+							/>
+						}
+						toolbar={toolbar}
+						footer={footer}
+					/>
+				)}
+			</Drawer>
+			<div
+				data-slot="layout-mobile-brand"
+				className="flex min-w-0 flex-1 items-center gap-2 text-sm font-semibold"
+			>
+				{logo}
+				{title !== undefined && (
+					<span data-slot="layout-mobile-title" className="truncate">
+						{title}
+					</span>
 				)}
 			</div>
-			<LumoDrawer.Portal>
-				<LumoDrawer.Backdrop />
-				<LumoDrawer.Viewport>
-					<LumoDrawer.Popup data-slot="layout-mobile-navigation" className="bg-layout-background">
-						<SidebarContent
-							nav={nav}
-							selectedKey={selectedKey}
-							onSelect={(key) => {
-								onSelect?.(key);
-								setOpen(false);
-							}}
-							logo={logo}
-							title={
-								<LumoDrawer.Title render={<span />} className="text-sm">
-									{title ?? 'Navigation'}
-								</LumoDrawer.Title>
-							}
-							brandActions={
-								<LumoDrawer.Close
-									render={
-										<LumoButton
-											variant="ghost"
-											size="icon"
-											icon={<X />}
-											aria-label="Close navigation"
-										/>
-									}
-								/>
-							}
-							toolbar={toolbar}
-							footer={footer}
-						/>
-					</LumoDrawer.Popup>
-				</LumoDrawer.Viewport>
-			</LumoDrawer.Portal>
-		</LumoDrawer.Root>
+			{brandActions !== undefined && (
+				<div data-slot="layout-mobile-actions" className="flex shrink-0 items-center gap-1">
+					{brandActions}
+				</div>
+			)}
+		</div>
 	);
 }

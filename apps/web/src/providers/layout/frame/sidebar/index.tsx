@@ -1,10 +1,8 @@
 import { PanelLeft } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { LumoButton } from '@/components/ui/button';
-import { LumoNav } from '@/components/ui/nav';
-import { LumoScrollArea } from '@/components/ui/scroll-area';
+import { Button, Nav, ScrollArea } from '@/components';
 import { cn } from '@/lib/utils';
-import type { LayoutNavEntry, LayoutNavItem } from '../types';
+import type { LayoutNavEntry } from '../types';
 
 export type SidebarProps = {
 	nav?: LayoutNavEntry[];
@@ -54,7 +52,7 @@ function RailSlot({
 }) {
 	return (
 		<div data-slot={slot} className="shrink-0 p-2">
-			<LumoNav.Root compact={compact}>{children}</LumoNav.Root>
+			<Nav compact={compact}>{children}</Nav>
 		</div>
 	);
 }
@@ -95,118 +93,6 @@ export function SidebarContent({
 	onToggle,
 	className,
 }: SidebarProps) {
-	const isActive = (key: string, explicit?: boolean) => explicit ?? key === selectedKey;
-
-	function renderItem(item: LayoutNavItem) {
-		const active = isActive(item.key, item.isActive);
-
-		if (item.children !== undefined) {
-			return (
-				<LumoNav.Item key={item.key}>
-					<LumoNav.Sub
-						icon={item.icon}
-						label={item.label}
-						className={row}
-						isActive={active || item.children.some((child) => isActive(child.key, child.isActive))}
-						defaultOpen={item.defaultOpen}
-						disabled={item.disabled}
-					>
-						{item.children.map((child) => (
-							<LumoNav.SubItem key={child.key}>
-								<LumoNav.SubButton
-									icon={child.icon}
-									className={subRow}
-									isActive={isActive(child.key, child.isActive)}
-									disabled={item.disabled || child.disabled}
-									href={child.href}
-									render={child.render}
-									onClick={() => {
-										child.onClick?.();
-										onSelect?.(child.key);
-									}}
-								>
-									{child.label}
-								</LumoNav.SubButton>
-							</LumoNav.SubItem>
-						))}
-					</LumoNav.Sub>
-				</LumoNav.Item>
-			);
-		}
-
-		return (
-			<LumoNav.Item key={item.key}>
-				<LumoNav.Button
-					icon={item.icon}
-					label={item.label}
-					className={row}
-					isActive={active}
-					disabled={item.disabled}
-					href={item.href}
-					render={item.render}
-					onClick={() => {
-						item.onClick?.();
-						onSelect?.(item.key);
-					}}
-				/>
-				{item.badge !== undefined && (
-					<LumoNav.Badge className="text-muted-foreground">{item.badge}</LumoNav.Badge>
-				)}
-			</LumoNav.Item>
-		);
-	}
-
-	function renderEntry(entry: LayoutNavEntry, index: number) {
-		if (entry.type === 'separator') return <LumoNav.Separator key={`separator-${index}`} />;
-
-		if (entry.type === 'skeleton') {
-			return (
-				<LumoNav.Skeleton key={`skeleton-${index}`} showIcon={entry.showIcon} width={entry.width} />
-			);
-		}
-
-		if (entry.type === 'group') {
-			return (
-				<LumoNav.Group key={entry.label ?? `group-${index}`}>
-					{entry.label !== undefined && <LumoNav.GroupLabel>{entry.label}</LumoNav.GroupLabel>}
-					{entry.action}
-					<LumoNav.List>
-						{entry.children.map((child, childIndex) => renderEntry(child, childIndex))}
-					</LumoNav.List>
-				</LumoNav.Group>
-			);
-		}
-
-		return renderItem(entry);
-	}
-
-	/**
-	 * Groups are padded; a loose row is not, so a row typed straight into the array would sit
-	 * against the rail's edge while its neighbours sit 8px in. Everything outside a group is
-	 * wrapped in one, and an unbroken run of them shares a single group instead of gaining a
-	 * gap per row.
-	 */
-	function renderEntries(entries: LayoutNavEntry[]) {
-		const blocks = entries.reduce<(LayoutNavEntry | LayoutNavEntry[])[]>((acc, entry) => {
-			if (entry.type === 'group' || entry.type === 'separator') return [...acc, entry];
-
-			const last = acc[acc.length - 1];
-			return Array.isArray(last) ? [...acc.slice(0, -1), [...last, entry]] : [...acc, [entry]];
-		}, []);
-
-		return blocks.map((block, index) =>
-			Array.isArray(block) ? (
-				<LumoNav.Group
-					key={`loose-${block.map((entry) => ('key' in entry ? entry.key : entry.type)).join('-')}`}
-				>
-					<LumoNav.List>{block.map(renderEntry)}</LumoNav.List>
-				</LumoNav.Group>
-			) : (
-				renderEntry(block, index)
-			),
-		);
-	}
-
 	return (
 		<div
 			data-slot="layout-sidebar-content"
@@ -225,7 +111,7 @@ export function SidebarContent({
 					{!collapsed && (logo !== undefined || title !== undefined) && (
 						<div className="flex min-w-0 flex-1 items-center gap-2 ps-2">
 							{logo}
-							{title !== undefined && <span className="truncate">{title}</span>}
+							{title !== undefined && <div className="min-w-0 truncate">{title}</div>}
 						</div>
 					)}
 					{(brandActions !== undefined || collapsible) && (
@@ -235,7 +121,7 @@ export function SidebarContent({
 						>
 							{brandActions}
 							{collapsible && (
-								<LumoButton
+								<Button
 									variant="ghost"
 									size="icon"
 									className="size-8 shrink-0"
@@ -254,14 +140,15 @@ export function SidebarContent({
 					{toolbar}
 				</RailSlot>
 			)}
-			<LumoScrollArea.Root className="flex-1">
-				<LumoScrollArea.Viewport>
-					<LumoScrollArea.Content>
-						<LumoNav.Root compact={collapsed}>{renderEntries(nav)}</LumoNav.Root>
-					</LumoScrollArea.Content>
-				</LumoScrollArea.Viewport>
-				<LumoScrollArea.Scrollbar />
-			</LumoScrollArea.Root>
+			<ScrollArea className="flex-1">
+				<Nav
+					items={nav}
+					compact={collapsed}
+					selectedKey={selectedKey}
+					onSelect={onSelect}
+					classNames={{ button: row, subButton: subRow, badge: 'text-muted-foreground' }}
+				/>
+			</ScrollArea>
 			{footer !== undefined && (
 				<RailSlot slot="layout-footer" compact={collapsed}>
 					{footer}

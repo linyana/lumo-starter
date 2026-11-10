@@ -1,13 +1,12 @@
 import type { Permission } from '@lumo/shared';
 import type { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router';
-import { LumoButton } from '@/components/ui/button';
-import { LumoSpinner } from '@/components/ui/spinner';
+import { Button, Spinner } from '@/components';
 import { useAuth } from '../session';
 
 export const FullPageLoader = () => (
 	<div className="grid min-h-svh place-items-center bg-layout-background">
-		<LumoSpinner />
+		<Spinner />
 	</div>
 );
 
@@ -26,9 +25,9 @@ export const SessionUnavailable = () => {
 				<p className="text-sm text-muted-foreground">
 					The server did not answer. Check your connection and try again.
 				</p>
-				<LumoButton className="mt-2" onClick={() => void refresh()}>
+				<Button className="mt-2" onClick={() => void refresh()}>
 					Try again
-				</LumoButton>
+				</Button>
 			</div>
 		</div>
 	);

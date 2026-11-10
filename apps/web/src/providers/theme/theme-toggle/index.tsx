@@ -1,5 +1,5 @@
 import { Moon, Sun } from 'lucide-react';
-import { LumoButton } from '@/components/ui/button';
+import { Button } from '@/components';
 import { useGlobal } from '@/hooks';
 
 /**
@@ -13,7 +13,7 @@ export const ThemeToggle = () => {
 	const dark = theme === 'dark';
 
 	return (
-		<LumoButton
+		<Button
 			type="button"
 			variant="ghost"
 			size="icon"

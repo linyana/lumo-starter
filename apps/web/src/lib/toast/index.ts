@@ -1,11 +1,11 @@
-import { LumoToast } from '@/components/ui/toast';
+import { createToastManager } from '@/components/pro/toast';
 
 /**
  * One manager for the whole app, so anything may queue a toast — a request
  * failure included, which happens outside React. `App` hands it to the
- * `LumoToast.Provider`; parts below read the same queue through `useToastManager`.
+ * `ToastProvider`; parts below read the same queue through `useToastManager`.
  */
-export const toastManager = LumoToast.createToastManager();
+export const toastManager = createToastManager();
 
 /** The one failure notice the request layer raises: the API's own sentence. */
 export const toastError = (message: string): void => {

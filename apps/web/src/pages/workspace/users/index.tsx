@@ -1,10 +1,7 @@
 import { ROLE_META, type ListUsersQuery, type Role, type User } from '@lumo/shared';
 import { Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Table, type TableColumn } from '@/components/pro';
-import { LumoBadge } from '@/components/ui/badge';
-import { LumoButton } from '@/components/ui/button';
-import { LumoInput } from '@/components/ui/input';
+import { Badge, Button, Input, Table, type TableColumn } from '@/components';
 import { useAuth } from '@/providers/auth';
 import { useHttp } from '@/hooks';
 import { deleteUser, listUsers } from './api';
@@ -67,9 +64,9 @@ export const UsersPage = () => {
 			cell: (row) => (
 				<div className="flex flex-wrap gap-1">
 					{row.roles.map((role) => (
-						<LumoBadge key={role} variant={ROLE_VARIANT[role]}>
+						<Badge key={role} variant={ROLE_VARIANT[role]}>
 							{ROLE_META[role]}
-						</LumoBadge>
+						</Badge>
 					))}
 				</div>
 			),
@@ -80,7 +77,7 @@ export const UsersPage = () => {
 			align: 'end',
 			cell: (row) =>
 				can('user:delete') && row.id !== currentUser?.id ? (
-					<LumoButton
+					<Button
 						variant="ghost"
 						size="sm"
 						icon={<Trash2 />}
@@ -88,7 +85,7 @@ export const UsersPage = () => {
 						onClick={() => void remove.fetchData(row.id)}
 					>
 						Delete
-					</LumoButton>
+					</Button>
 				) : (
 					<span className="text-xs text-muted-foreground">—</span>
 				),
@@ -107,7 +104,7 @@ export const UsersPage = () => {
 				</div>
 
 				<div className="w-64">
-					<LumoInput
+					<Input
 						placeholder="Search email or name"
 						value={search}
 						onChange={(event) => {
@@ -135,22 +132,22 @@ export const UsersPage = () => {
 					Page {page} of {pageCount}
 				</p>
 				<div className="flex gap-2">
-					<LumoButton
+					<Button
 						variant="outline"
 						size="sm"
 						disabled={page <= 1}
 						onClick={() => setPage((value) => Math.max(1, value - 1))}
 					>
 						Previous
-					</LumoButton>
-					<LumoButton
+					</Button>
+					<Button
 						variant="outline"
 						size="sm"
 						disabled={page >= pageCount}
 						onClick={() => setPage((value) => Math.min(pageCount, value + 1))}
 					>
 						Next
-					</LumoButton>
+					</Button>
 				</div>
 			</div>
 		</div>

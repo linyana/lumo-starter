@@ -1,10 +1,7 @@
 import { loginSchema, type LoginInput } from '@lumo/shared';
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
-import { LumoButton } from '@/components/ui/button';
-import { LumoField } from '@/components/ui/field';
-import { LumoForm, type FormErrors } from '@/components/ui/form';
-import { LumoInput } from '@/components/ui/input';
+import { Button, Field, Form, type FormErrors, Input } from '@/components';
 import { errorFields, toFormErrors, toastError } from '@/lib';
 import { useHttp } from '@/hooks';
 import { useAuth } from '@/providers/auth';
@@ -47,50 +44,35 @@ export const LoginPage = () => {
 			footer={
 				<>
 					Don't have an account?{' '}
-					<LumoButton
+					<Button
 						variant="link"
 						className="h-auto p-0"
 						nativeButton={false}
 						render={<Link to="/register" />}
 					>
 						Sign up now
-					</LumoButton>
+					</Button>
 				</>
 			}
 		>
-			<LumoForm className="gap-6" errors={errors} onFormSubmit={handleSubmit}>
-				<LumoField.Root name="email">
-					<LumoField.Control
-						render={
-							<LumoInput
-								type="email"
-								autoComplete="username"
-								placeholder="Email"
-								aria-label="Email"
-							/>
-						}
-					/>
-					<LumoField.Error />
-				</LumoField.Root>
+			<Form className="gap-6" errors={errors} onFormSubmit={handleSubmit}>
+				<Field name="email">
+					<Input type="email" autoComplete="username" placeholder="Email" aria-label="Email" />
+				</Field>
 
-				<LumoField.Root name="password">
-					<LumoField.Control
-						render={
-							<LumoInput
-								type="password"
-								autoComplete="current-password"
-								placeholder="Password"
-								aria-label="Password"
-							/>
-						}
+				<Field name="password">
+					<Input
+						type="password"
+						autoComplete="current-password"
+						placeholder="Password"
+						aria-label="Password"
 					/>
-					<LumoField.Error />
-				</LumoField.Root>
+				</Field>
 
-				<LumoButton type="submit" loading={submit.loading} className="mt-2 w-full">
+				<Button type="submit" loading={submit.loading} className="mt-2 w-full">
 					Sign in
-				</LumoButton>
-			</LumoForm>
+				</Button>
+			</Form>
 		</AuthLayout>
 	);
 };

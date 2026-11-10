@@ -57,7 +57,7 @@ export const fieldShell = cn(
 	'focus-visible:border-input-strong focus-visible:outline-none',
 	'disabled:cursor-not-allowed disabled:opacity-50',
 	'data-disabled:cursor-not-allowed data-disabled:opacity-50',
-	// Written by LumoField when the control fails validation; aria-invalid is the same fact for a form
+	// Written by the field when the control fails validation; aria-invalid is the same fact for a form
 	// that is not Base UI's. Both sit after the hover and focus rules above, so a field that is
 	// wrong stays destructive while it is pointed at: the stronger thing it has to say wins.
 	'data-invalid:border-destructive aria-invalid:border-destructive',

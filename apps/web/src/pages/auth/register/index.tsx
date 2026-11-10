@@ -1,10 +1,7 @@
 import { registerSchema, type RegisterInput } from '@lumo/shared';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
-import { LumoButton } from '@/components/ui/button';
-import { LumoField } from '@/components/ui/field';
-import { LumoForm, type FormErrors } from '@/components/ui/form';
-import { LumoInput } from '@/components/ui/input';
+import { Button, Field, Form, type FormErrors, Input } from '@/components';
 import { errorFields, toFormErrors, toastError } from '@/lib';
 import { useHttp } from '@/hooks';
 import { useAuth } from '@/providers/auth';
@@ -42,49 +39,42 @@ export const RegisterPage = () => {
 			footer={
 				<>
 					Already have an account?{' '}
-					<LumoButton
+					<Button
 						variant="link"
 						className="h-auto p-0"
 						nativeButton={false}
 						render={<Link to="/login" />}
 					>
 						Sign in now
-					</LumoButton>
+					</Button>
 				</>
 			}
 		>
-			<LumoForm errors={errors} onFormSubmit={handleSubmit}>
-				<LumoField.Root name="email">
-					<LumoField.Label>Email</LumoField.Label>
-					<LumoField.Control render={<LumoInput type="email" autoComplete="email" />} />
-					<LumoField.Error />
-				</LumoField.Root>
+			<Form errors={errors} onFormSubmit={handleSubmit}>
+				<Field name="email" label="Email">
+					<Input type="email" autoComplete="email" />
+				</Field>
 
-				<LumoField.Root name="name">
-					<LumoField.Label>Display name</LumoField.Label>
-					<LumoField.Control render={<LumoInput autoComplete="name" />} />
-					<LumoField.Error />
-				</LumoField.Root>
+				<Field name="name" label="Display name">
+					<Input autoComplete="name" />
+				</Field>
 
-				<LumoField.Root name="password">
-					<LumoField.Label>Password</LumoField.Label>
-					<LumoField.Description>
-						At least 8 characters, mixing letters and numbers.
-					</LumoField.Description>
-					<LumoField.Control render={<LumoInput type="password" autoComplete="new-password" />} />
-					<LumoField.Error />
-				</LumoField.Root>
+				<Field
+					name="password"
+					label="Password"
+					description="At least 8 characters, mixing letters and numbers."
+				>
+					<Input type="password" autoComplete="new-password" />
+				</Field>
 
-				<LumoField.Root name="confirmPassword">
-					<LumoField.Label>Confirm password</LumoField.Label>
-					<LumoField.Control render={<LumoInput type="password" autoComplete="new-password" />} />
-					<LumoField.Error />
-				</LumoField.Root>
+				<Field name="confirmPassword" label="Confirm password">
+					<Input type="password" autoComplete="new-password" />
+				</Field>
 
-				<LumoButton type="submit" loading={submit.loading} className="mt-2 w-full">
+				<Button type="submit" loading={submit.loading} className="mt-2 w-full">
 					Create account
-				</LumoButton>
-			</LumoForm>
+				</Button>
+			</Form>
 		</AuthLayout>
 	);
 };

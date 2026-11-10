@@ -1,13 +1,12 @@
 import { Bell, CircleUserRound, CreditCard, EllipsisVertical, LogOut } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
-import { Layout, type LayoutNavEntry } from '../frame';
-import { LumoSpinner } from '@/components/ui/spinner';
+import { Avatar, Button, Flex, Menu, Spinner } from '@/components';
 import { useGlobal } from '@/hooks';
 import { useAuth } from '@/providers/auth';
 import { ThemeToggle } from '@/providers/theme';
+import { Layout, type LayoutNavEntry } from '../frame';
 import type { AppShellProps } from './types';
-import { Avatar, Button, Flex, Menu } from '@/components';
 
 export type { AppShellProps } from './types';
 
@@ -76,12 +75,17 @@ export const AppShell = ({ nav }: AppShellProps) => {
 									</Flex>
 								),
 							},
-							{ label: 'Account', icon: <CircleUserRound />, disabled: true, separatorBefore: true },
+							{
+								label: 'Account',
+								icon: <CircleUserRound />,
+								disabled: true,
+								separatorBefore: true,
+							},
 							{ label: 'Billing', icon: <CreditCard />, disabled: true },
 							{ label: 'Notifications', icon: <Bell />, disabled: true },
 							{
 								label: loggingOut ? 'Logging out…' : 'Log out',
-								icon: loggingOut ? <LumoSpinner size={1} label="Logging out" /> : <LogOut />,
+								icon: loggingOut ? <Spinner size={1} label="Logging out" /> : <LogOut />,
 								disabled: loggingOut,
 								closeOnClick: false,
 								separatorBefore: true,
