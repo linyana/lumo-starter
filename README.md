@@ -175,7 +175,9 @@ business sentences at the throw site.
 `permission`, optional `nav`); `providers/routes` wraps it in the guards and `providers/layout` draws
 its nav row. Call the API through `pages/<domain>/<screen>/api.ts` (which uses the typed `api`
 helper), and hold its result with `useHttp` — or `useList`, which is `useHttp` plus the page,
-the search and the sort, for a screen that shows a list. Give a table the same object and its
+the filters and the sort, for a screen that shows a list. A filter control is written as
+`<Input {...list.text('search')} />` (or `choice` / `flag`, by the shape the control reports a
+value in), so no screen names a `value` or a setter. Give a table the same object and its
 `sortKey`-ed columns become sortable titles; nothing else has to be wired.
 
 **Change a table** — edit `prisma/schema.prisma`, `pnpm db:migrate`, `pnpm db:generate`.

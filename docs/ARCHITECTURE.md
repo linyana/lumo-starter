@@ -120,8 +120,10 @@ in front of this would need its own rendering story.
 **Chosen.** `src/lib/http/` unwraps `{ data }`, attaches the bearer token, refreshes single-flight on
 401, and normalises every failure into `ApiError`. Components call endpoints through
 `pages/*/*/api.ts` with `useHttp`, which holds `data / error / loading`. A list puts
-`useList` on top of it: that one owns the page, the search and the sort as well, so a screen
+`useList` on top of it: that one owns the page, the filters and the sort as well, so a screen
 showing records holds no effect of its own and hands the whole result to the table as a single prop.
+Each filter control is handed its own props by shape — `text`, `choice`, `flag` — so a screen names
+neither the value nor the setter, and changing which control draws a filter never touches the query.
 
 **Why.** Mixing fetch state into component state is what makes large React apps rot — but a cache
 layer answers a question this app does not ask: every screen wants the server's answer _now_
@@ -148,6 +150,13 @@ would bypass the component library's own form semantics.
 
 **Cost.** Manual work for arrays/nested forms later; that is when react-hook-form is worth
 reconsidering (and it can coexist on individual screens).
+
+**Also rejected: antd's Form instance, for filters.** `Form.useForm()` + `onValuesChange` is how an
+antd screen narrows a list, but the store would be a second owner of the query beside `useList`
+(and a third beside the URL), and Base UI's `Form` has no `onValuesChange` at all — its non-native
+controls report through `onValueChange`, so the model does not carry over. What is worth taking is
+the half of `Form.Item` that removes `value`/`onChange` from the call site: a control bound by the
+shape it reports a value in. That is `useList`'s `text` / `choice` / `flag`, and it needs no store.
 
 ---
 

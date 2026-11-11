@@ -29,13 +29,7 @@ export const UsersPage = () => {
 
 				<div className="flex items-end gap-2">
 					<div className="w-64">
-						<Input
-							placeholder="Search email or name"
-							value={users.search}
-							onChange={(event) => {
-								users.setSearch(event.target.value);
-							}}
-						/>
+						<Input placeholder="Search email or name" {...users.text('search')} />
 					</div>
 
 					{canEdit && <CreateUser onCreated={users.reload} />}
