@@ -3,7 +3,7 @@ import { ChevronDown, X } from 'lucide-react';
 import type { ComponentProps, ReactNode } from 'react';
 import { tv, type VariantProps } from 'tailwind-variants';
 import { cn } from '@/lib/utils';
-import { fieldShell, iconSlot, row, rowGroupLabel, rowSeparator } from '@/lib/control';
+import { fieldShell, clearButton, iconSlot, row, rowGroupLabel, rowSeparator } from '@/lib/control';
 import { popup, positioner } from '@/lib/surface';
 
 /** The state: the items, the query, the chosen value, and whether the list is open. */
@@ -120,7 +120,8 @@ export type ClearProps = Omit<ComponentProps<typeof BaseCombobox.Clear>, 'childr
 
 /**
  * The way back to an empty field. Base UI mounts it only while there is something to clear, which is
- * what the field's extra room on the end is keyed to.
+ * what the field's extra room on the end is keyed to — and it is the library's cross, the same button
+ * an input, a textarea and a select draw, measured against the caret beside it rather than the edge.
  */
 export function Clear({
 	className,
@@ -132,7 +133,7 @@ export function Clear({
 		<BaseCombobox.Clear
 			data-slot="combobox-clear"
 			aria-label={label}
-			className={cn(adornmentClass, 'end-8', className)}
+			className={cn(clearButton, 'absolute inset-y-0 end-8 my-auto', className)}
 			{...props}
 		>
 			{children ?? <X />}

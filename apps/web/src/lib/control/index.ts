@@ -32,6 +32,23 @@ export const stateLayer = cn(
 export const iconSlot = '[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg]:size-[1em]';
 
 /**
+ * The way out of a field that can be emptied: a cross, drawn as a ghost icon button so it carries the
+ * same state layer every other quiet action does instead of a disc of its own. Where it sits is the
+ * field's — an input gives it the end of its line, a textarea the top of its corner, a select the
+ * room beside its caret — but what it looks like is this one line, so the three read as one family
+ * and a field never has to draw a glyph of its own.
+ */
+export const clearButton = cn(
+	'relative flex size-5 shrink-0 cursor-pointer items-center justify-center rounded-full text-sm',
+	'text-muted-foreground transition-colors duration-(--duration-state)',
+	'active:text-foreground',
+	'disabled:pointer-events-none disabled:opacity-50',
+	'data-disabled:pointer-events-none data-disabled:opacity-50',
+	iconSlot,
+	stateLayer,
+);
+
+/**
  * The shell of a text control — the input, and the textarea, which differ only in the element they
  * are drawn on and the shape of their size. Selection is not here: it is one rule in the theme,
  * because a reader expects the same colour wherever they drag across a page.

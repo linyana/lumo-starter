@@ -5,6 +5,7 @@ import { tv, type VariantProps } from 'tailwind-variants';
 import { cn } from '@/lib/utils';
 import { fieldShell, iconSlot, row, rowGroupLabel, rowSeparator } from '@/lib/control';
 import { backdrop, popup, positioner } from '@/lib/surface';
+import { Clear as ClearButton, type ClearProps as ClearButtonProps } from './clear';
 
 export type RootProps<Value, Multiple extends boolean | undefined = false> = BaseSelect.Root.Props<
 	Value,
@@ -116,6 +117,54 @@ export function Icon({ className, children, ...props }: IconProps) {
 		>
 			{children ?? <ChevronDown />}
 		</BaseSelect.Icon>
+	);
+}
+
+export type TriggerGroupProps = Omit<ComponentProps<'div'>, 'className'> & {
+	/** Merged with `cn()`. A `w-56` here is what narrows the field. */
+	className?: string;
+};
+
+/**
+ * The box the trigger and its way out share. It holds no look of its own — the trigger does — and
+ * exists to be the corner the cross is placed against. The room the cross takes from the value grows
+ * only while the cross is mounted, so a select with nothing chosen is not padded for a button that is
+ * not there.
+ */
+export function TriggerGroup({ className, ...props }: TriggerGroupProps) {
+	return (
+		<div
+			data-slot="select-trigger-group"
+			className={cn(
+				'relative',
+				'has-[[data-slot=select-clear]]:[&_[data-slot=select-value]]:pe-6',
+				className,
+			)}
+			{...props}
+		/>
+	);
+}
+
+export type ClearProps = Omit<ClearButtonProps, 'data-slot'> & {
+	/** Merged with `cn()`. */
+	className?: string;
+};
+
+/**
+ * The way back to no choice at all, beside the caret. It is the library's own cross — Base UI's select
+ * has no clear part — and it is drawn here rather than inside the trigger because that is a `<button>`
+ * and a button in a button is not one.
+ *
+ * Nothing is cleared by itself: the value belongs to the caller, so `onClick` is how it says what
+ * emptying means — which is also why the field, not this part, decides when one is mounted.
+ */
+export function Clear({ className, ...props }: ClearProps) {
+	return (
+		<ClearButton
+			data-slot="select-clear"
+			className={cn('absolute inset-y-0 end-8 my-auto', className)}
+			{...props}
+		/>
 	);
 }
 
@@ -326,7 +375,9 @@ export function Separator({ className, ...props }: SeparatorProps) {
 export const LumoSelect = {
 	Root,
 	Label,
+	TriggerGroup,
 	Trigger,
+	Clear,
 	Value,
 	Icon,
 	Portal,

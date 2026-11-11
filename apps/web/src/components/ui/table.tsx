@@ -1020,7 +1020,7 @@ export function Head({
 				// pinned column stands in front of the rest, so it is drawn above the other titles — and
 				// only a title may be given the top, since a pinned record still has to scroll away.
 				(fixed !== undefined || holds) && 'sticky',
-				holds && 'top-[var(--table-head-top,0px)]',
+				holds && 'top-(--table-head-top,0px)',
 				layerOf({ fixed, inHead: header !== null, holds }),
 				fixedClass(fixed),
 				responsiveClass(responsive),

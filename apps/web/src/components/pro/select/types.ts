@@ -10,7 +10,7 @@ export type SelectOption<Value extends string = string> = {
 	disabled?: boolean;
 };
 
-export type SelectSlots = 'trigger' | 'value' | 'popup' | 'list' | 'item';
+export type SelectSlots = 'group' | 'trigger' | 'clear' | 'value' | 'popup' | 'list' | 'item';
 
 export type SelectProps<Value extends string = string> = {
 	options: SelectOption<Value>[];
@@ -24,7 +24,14 @@ export type SelectProps<Value extends string = string> = {
 	name?: string;
 	id?: string;
 	required?: boolean;
-	/** The control itself — the shorthand for `classNames.trigger`. */
+	/**
+	 * Whether a chosen value can be given back. On by default — and never offered while the select is
+	 * `required` or `disabled`, because there is no way back from a field that must be answered.
+	 */
+	clearable?: boolean;
+	/** The words the clear button is labelled with, for a reader who cannot see the cross. */
+	clearLabel?: string;
+	/** The box the field and its way out share — the shorthand for `classNames.group`. */
 	className?: string;
 	classNames?: SlotClassNames<SelectSlots>;
 };
