@@ -7,7 +7,7 @@ export const DashboardPage = () => {
 	if (!user) return null;
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-3">
 			<div>
 				<h1 className="text-xl font-semibold">Welcome, {user.name}</h1>
 				<p className="text-sm text-muted-foreground">{user.email}</p>

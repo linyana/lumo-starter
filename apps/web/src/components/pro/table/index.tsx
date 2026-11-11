@@ -226,7 +226,7 @@ export const Table = <Row, Key extends string = string>({
 		);
 
 	return (
-		<>
+		<div data-slot="table-block" className="min-w-0">
 			<LumoTable.Root
 				size={size}
 				variant={variant}
@@ -386,15 +386,19 @@ export const Table = <Row, Key extends string = string>({
 					// The footer is the table's own density unless the caller says otherwise.
 					size={pager.size ?? size}
 					range={pager.range ?? true}
+					// A step below the last record, so the way through them reads as the table's and not as the
+					// next thing on the page. It is a default: `classNames.footer` and the pagination's own
+					// `className` are merged last, so a `pt-*` there replaces it.
 					className={cn('pt-3', pager.className, classNames?.footer)}
 				/>
 			)}
 
+			{/* Portalled, so where it is written changes nothing about where it lands. */}
 			<ContextMenu
 				anchor={menu?.anchor ?? null}
 				items={menu === null ? [] : actionsOf(menu.row)}
 				onClose={() => setMenu(null)}
 			/>
-		</>
+		</div>
 	);
 };

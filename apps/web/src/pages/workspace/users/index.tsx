@@ -17,14 +17,9 @@ export const UsersPage = () => {
 	const users = useList({ fetcher: usersApi.list, sort: 'createdAt', order: 'desc' });
 
 	return (
-		<div className="space-y-6">
-			<div className="flex flex-wrap items-end justify-between gap-3">
-				<div>
-					<h1 className="text-xl font-semibold">Users</h1>
-					<p className="text-sm text-muted-foreground">
-						Requires <code className="font-mono text-xs">user:read</code>
-					</p>
-				</div>
+		<div className="space-y-3">
+			<div className="flex flex-wrap items-center justify-between gap-3">
+				<h1 className="text-xl font-semibold">Users</h1>
 
 				{canEdit && <CreateUser onCreated={users.reload} />}
 			</div>
