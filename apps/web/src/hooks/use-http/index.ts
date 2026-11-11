@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toApiError, toastError as raiseToast } from '@/lib';
-import type { FetchResult, UseHttpOptions, UseHttpResult, UseHttpState } from './types';
+import type { FetchData, FetchResult, UseHttpOptions, UseHttpResult, UseHttpState } from './types';
 
-export type { FetchResult, UseHttpOptions, UseHttpResult, UseHttpState } from './types';
+export type { FetchData, FetchResult, UseHttpOptions, UseHttpResult, UseHttpState } from './types';
 
 const INITIAL_STATE = { data: null, error: null, loading: false } as const;
 
@@ -36,7 +36,7 @@ export const useHttp = <TData, TVariables = void>(
 
 	const requestId = useRef(0);
 
-	const fetchData = useCallback(
+	const fetchData = useCallback<FetchData<TData, TVariables>>(
 		async (variables?: TVariables): Promise<FetchResult<TData> | null> => {
 			const id = ++requestId.current;
 			const { fn: endpoint, options: current } = latest.current;

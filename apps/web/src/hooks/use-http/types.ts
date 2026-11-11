@@ -28,9 +28,19 @@ export interface UseHttpState<TData> {
  */
 export type FetchResult<TData> = { ok: true; data: TData } | { ok: false; error: ApiError };
 
+/**
+ * `fetchData`, shaped by whether the endpoint takes a payload. A `void` endpoint
+ * is called bare; anything else must be handed its variables, because an omitted
+ * argument reaches the endpoint as `undefined` and the type system would never
+ * notice. The tuple keeps the conditional from distributing over a union.
+ */
+export type FetchData<TData, TVariables> = [TVariables] extends [void]
+	? () => Promise<FetchResult<TData> | null>
+	: (variables: TVariables) => Promise<FetchResult<TData> | null>;
+
 export interface UseHttpResult<TData, TVariables> extends UseHttpState<TData> {
-	/** Runs the call, optionally replacing `variables` for this one. */
-	fetchData: (variables?: TVariables) => Promise<FetchResult<TData> | null>;
+	/** Runs the call. Bare when the endpoint takes no payload, else with its variables. */
+	fetchData: FetchData<TData, TVariables>;
 	/** Clears data and error. */
 	reset: () => void;
 }
