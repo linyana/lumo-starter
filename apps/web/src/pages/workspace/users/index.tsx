@@ -1,16 +1,10 @@
-import { ROLE_META, type ListUsersQuery, type Role, type User } from '@lumo/shared';
-import { Trash2 } from 'lucide-react';
+import type { ListUsersQuery } from '@lumo/shared';
 import { useEffect, useState } from 'react';
-import { Badge, Button, Input, Table, type TableColumn } from '@/components';
+import { Input } from '@/components';
 import { useAuth } from '@/providers/auth';
 import { useHttp } from '@/hooks';
 import { deleteUser, listUsers } from './api';
-
-const ROLE_VARIANT: Record<Role, 'default' | 'info' | 'secondary'> = {
-	OWNER: 'default',
-	ADMIN: 'info',
-	MEMBER: 'secondary',
-};
+import { UserList } from './list';
 
 const PAGE_SIZE = 10;
 
@@ -48,53 +42,6 @@ export const UsersPage = () => {
 	});
 
 	const total = users.data?.total ?? 0;
-	const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
-	const columns: TableColumn<User>[] = [
-		{
-			key: 'name',
-			header: 'Name',
-			cell: (row) => <span className="font-medium">{row.name}</span>,
-		},
-		{
-			key: 'email',
-			header: 'Email',
-			cell: (row) => <span className="text-muted-foreground">{row.email}</span>,
-		},
-		{
-			key: 'roles',
-			header: 'Roles',
-			cell: (row) => (
-				<div className="flex flex-wrap gap-1">
-					{row.roles.map((role) => (
-						<Badge key={role} variant={ROLE_VARIANT[role]}>
-							{ROLE_META[role]}
-						</Badge>
-					))}
-				</div>
-			),
-		},
-		{
-			key: 'actions',
-			header: 'Actions',
-			align: 'end',
-			cell: (row) =>
-				can('user:delete') && row.id !== currentUser?.id ? (
-					<Button
-						variant="ghost"
-						size="sm"
-						icon={<Trash2 />}
-						loading={remove.loading}
-						onClick={() => {
-							remove.fetchData(row.id);
-						}}
-					>
-						Delete
-					</Button>
-				) : (
-					<span className="text-xs text-muted-foreground">—</span>
-				),
-		},
-	];
 
 	return (
 		<div className="space-y-6">
@@ -119,41 +66,19 @@ export const UsersPage = () => {
 				</div>
 			</div>
 
-			{!users.loading && users.error ? (
-				<p className="text-sm text-destructive">{users.error.message}</p>
-			) : (
-				<Table
-					columns={columns}
-					rows={users.data?.items ?? []}
-					rowKey={(row) => row.id}
-					loading={users.loading}
-					skeletonRows={PAGE_SIZE}
-				/>
-			)}
-
-			<div className="flex items-center justify-between">
-				<p className="text-sm text-muted-foreground">
-					Page {page} of {pageCount}
-				</p>
-				<div className="flex gap-2">
-					<Button
-						variant="outline"
-						size="sm"
-						disabled={page <= 1}
-						onClick={() => setPage((value) => Math.max(1, value - 1))}
-					>
-						Previous
-					</Button>
-					<Button
-						variant="outline"
-						size="sm"
-						disabled={page >= pageCount}
-						onClick={() => setPage((value) => Math.min(pageCount, value + 1))}
-					>
-						Next
-					</Button>
-				</div>
-			</div>
+			<UserList
+				rows={users.data?.items ?? []}
+				total={total}
+				page={page}
+				pageSize={PAGE_SIZE}
+				loading={users.loading}
+				error={users.error?.message}
+				onPageChange={setPage}
+				canDelete={can('user:delete')}
+				currentUserId={currentUser?.id}
+				deleting={remove.loading}
+				onDelete={remove.fetchData}
+			/>
 		</div>
 	);
 };
