@@ -1,6 +1,6 @@
 import { ROLE_META, type ListUsersQuery, type Role, type User } from '@lumo/shared';
 import { RotateCcw } from 'lucide-react';
-import { Badge, Button, Pagination, Table, type TableColumn } from '@/components';
+import { Badge, Button, Input, Pagination, Table, type TableColumn } from '@/components';
 import type { SortKeyOf, UseListResult } from '@/hooks';
 import { useAuth } from '@/providers/auth';
 import { DeleteUser } from '../delete';
@@ -128,6 +128,13 @@ export const UserList = ({ users }: IPropsType) => {
 
 	return (
 		<>
+			<div>
+				<Input
+					aria-label="Search name or email"
+					placeholder="Search name or email"
+					{...users.text('search')}
+				/>
+			</div>
 			<Table
 				columns={columns}
 				rows={failed ? [] : users.items}

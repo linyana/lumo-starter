@@ -98,7 +98,10 @@ export const useList = <TItem, TQuery extends ListQuery>({
 	const [input, setInput] = useState<FilterInput<TQuery>>(
 		// A filter the URL named is the reader's own, so it is read over one written inline — and the
 		// object is built once, so a `defaultFilters` written inline is not read again every render.
-		() => ({ values: { ...defaultFilters, ...opened.filters } as ListFilters<TQuery>, typing: false }),
+		() => ({
+			values: { ...defaultFilters, ...opened.filters } as ListFilters<TQuery>,
+			typing: false,
+		}),
 	);
 
 	const filters = input.values;
@@ -227,8 +230,7 @@ export const useList = <TItem, TQuery extends ListQuery>({
 
 	const choice = <Key extends StringFilterKey<TQuery>>(key: Key) => ({
 		value: (filters[key] ?? null) as NonNullable<ListFilters<TQuery>[Key]> | null,
-		onValueChange: (value: ListFilters<TQuery>[Key] | null) =>
-			write({ key, value, typing: false }),
+		onValueChange: (value: ListFilters<TQuery>[Key] | null) => write({ key, value, typing: false }),
 	});
 
 	const flag = <Key extends BooleanFilterKey<TQuery>>(key: Key) => ({

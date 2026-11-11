@@ -22,12 +22,13 @@ export const buttonVariants = tv({
 		'cursor-pointer',
 	],
 	variants: {
+		// How loud the button is. It says nothing about what the button does, which is the other
+		// axis below: a ghost action and a filled one can both be the dangerous one.
 		variant: {
 			default: 'bg-primary text-primary-foreground',
 			secondary: 'bg-secondary text-secondary-foreground',
 			outline: 'border bg-background',
 			ghost: 'bg-transparent',
-			destructive: 'bg-destructive text-destructive-foreground',
 			link: 'text-primary underline-offset-4 hover:underline after:hidden',
 		},
 		size: {
@@ -40,19 +41,41 @@ export const buttonVariants = tv({
 			lg: 'min-h-10 px-6 text-base',
 			icon: 'size-9 text-sm',
 		},
+		/** What the button does, drawn in the colour of a consequence. Orthogonal to `variant`. */
+		tone: {
+			default: '',
+			destructive: '',
+		},
 	},
 	compoundVariants: [
+		// A block of colour takes the stronger tint: ink on a fill needs more of the tint under it to
+		// register than a quieter surface does, so only the loudest variant asks for it — in either
+		// tone, because a red fill is a fill.
 		{
-			variant: ['default', 'destructive'],
+			variant: 'default',
 			class: [
 				'[--state-layer-hover-opacity:var(--state-layer-fill-hover-opacity)]',
 				'[--state-layer-pressed-opacity:var(--state-layer-fill-pressed-opacity)]',
 			],
 		},
+		// `destructive` is one more colour for each thing a `variant` already says, not a sixth
+		// variant: the fill turns red, the quiet fill turns a tint of red, the drawn box keeps its
+		// edge and takes the red, and the two buttons that were only ever text become red text. The
+		// state layer is `currentColor`, so a danger button is already tinted red by its own ink.
+		{
+			tone: 'destructive',
+			variant: 'default',
+			class: 'bg-destructive text-destructive-foreground',
+		},
+		{ tone: 'destructive', variant: 'secondary', class: 'bg-destructive/10 text-destructive' },
+		{ tone: 'destructive', variant: 'outline', class: 'border-destructive text-destructive' },
+		{ tone: 'destructive', variant: 'ghost', class: 'text-destructive' },
+		{ tone: 'destructive', variant: 'link', class: 'text-destructive' },
 	],
 	defaultVariants: {
 		variant: 'default',
 		size: 'md',
+		tone: 'default',
 	},
 });
 
@@ -71,6 +94,7 @@ export function LumoButton({
 	className,
 	variant = 'default',
 	size = 'md',
+	tone = 'default',
 	icon = null,
 	loadingIcon,
 	loading = false,
@@ -84,12 +108,13 @@ export function LumoButton({
 		<BaseButton
 			data-slot="button"
 			data-variant={variant}
+			data-tone={tone}
 			data-size={size}
 			data-loading={loading ? '' : undefined}
 			aria-busy={loading || undefined}
 			disabled={disabled || loading}
 			focusableWhenDisabled={loading || undefined}
-			className={cn(buttonVariants({ variant, size }), className)}
+			className={cn(buttonVariants({ variant, size, tone }), className)}
 			{...props}
 		>
 			{icon ? (

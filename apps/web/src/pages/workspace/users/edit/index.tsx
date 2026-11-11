@@ -75,11 +75,7 @@ export const EditUser = ({ user, currentUserId, onUpdated }: IPropsType) => {
 				setErrors({});
 				if (next) setRoles(user.roles);
 			}}
-			trigger={
-				<Button variant="ghost" size="sm" icon={<Pencil />}>
-					Edit
-				</Button>
-			}
+			trigger={<Button variant="ghost" size="sm" icon={<Pencil />} />}
 			title={`Edit ${user.name}`}
 			description={user.email}
 		>

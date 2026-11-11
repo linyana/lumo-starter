@@ -28,18 +28,9 @@ export const UsersPage = () => {
 				</div>
 
 				<div className="flex items-end gap-2">
-					<div className="w-64">
-						<Input
-							aria-label="Search name or email"
-							placeholder="Search name or email"
-							{...users.text('search')}
-						/>
-					</div>
-
 					{canEdit && <CreateUser onCreated={users.reload} />}
 				</div>
 			</div>
-
 			<UserList users={users} />
 		</div>
 	);

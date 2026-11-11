@@ -25,7 +25,7 @@ export type AlertDialogProps = Pick<
 	cancelLabel?: string;
 	/** Runs after the dialog has closed itself on confirm. */
 	onConfirm?: () => void;
-	/** Draws confirm in the destructive fill. */
+	/** Draws confirm in the destructive tone. */
 	destructive?: boolean;
 	/** The panel itself — the shorthand for `classNames.popup`. */
 	className?: string;

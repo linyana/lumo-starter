@@ -46,16 +46,16 @@ export type ListFilters<TQuery extends ListQuery> = Omit<TQuery, ListOwnedKey>;
 
 /** The filter keys a text field or a choice can write: both produce a string. */
 export type StringFilterKey<TQuery extends ListQuery> = {
-	[Key in keyof ListFilters<TQuery>]: NonNullable<
-		ListFilters<TQuery>[Key]
-	> extends string ? Key : never;
+	[Key in keyof ListFilters<TQuery>]: NonNullable<ListFilters<TQuery>[Key]> extends string
+		? Key
+		: never;
 }[keyof ListFilters<TQuery>];
 
 /** The filter keys a flag can write: on, or off. */
 export type BooleanFilterKey<TQuery extends ListQuery> = {
-	[Key in keyof ListFilters<TQuery>]: NonNullable<
-		ListFilters<TQuery>[Key]
-	> extends boolean ? Key : never;
+	[Key in keyof ListFilters<TQuery>]: NonNullable<ListFilters<TQuery>[Key]> extends boolean
+		? Key
+		: never;
 }[keyof ListFilters<TQuery>];
 
 /**

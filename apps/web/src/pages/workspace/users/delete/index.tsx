@@ -22,11 +22,7 @@ export const DeleteUser = ({ user, onDeleted }: IPropsType) => {
 
 	return (
 		<AlertDialog
-			trigger={
-				<Button variant="ghost" size="sm" icon={<Trash2 />} loading={removal.loading}>
-					Delete
-				</Button>
-			}
+			trigger={<Button variant="ghost" size="sm" icon={<Trash2 />} loading={removal.loading} tone="destructive" />}
 			title={`Delete ${user.name}?`}
 			description={`${user.email} loses access immediately. What the account wrote stays. This cannot be undone.`}
 			confirmLabel="Delete"

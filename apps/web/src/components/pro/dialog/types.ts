@@ -14,6 +14,11 @@ export type DialogProps = Pick<DialogRootProps, 'open' | 'defaultOpen' | 'onOpen
 	children?: ReactNode;
 	/** Drawn on the right edge, under the body. */
 	footer?: ReactNode;
+	/**
+	 * Keeps a click on the page behind the panel from closing it. Off by default, which closes it —
+	 * set it on a form, where a stray click would throw away what was typed.
+	 */
+	disablePointerDismissal?: boolean;
 	/** The panel itself — the shorthand for `classNames.popup`. */
 	className?: string;
 	classNames?: SlotClassNames<DialogSlots>;
