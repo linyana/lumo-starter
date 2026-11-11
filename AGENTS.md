@@ -33,6 +33,11 @@ routes.tsx                           the route table, importing screens from `@/
   would close a cycle there.
 - A new screen is three edits: the folder, one line in its domain's `index.ts`, one row in
   `routes.tsx`.
+- **A props type nobody else names is not a declaration to share.** It lives in that component's own
+  `index.tsx`, unexported, as `IPropsType` — no `types.ts` beside it. `types.ts` keeps what a second
+  file has to name: a props type a sibling derives from (`Pick<SidebarProps, …>`), or the row and
+  column shapes a caller is written against. So a screen and the panels under it say `IPropsType`,
+  and `components/` publishes `XxxProps` from its `types.ts`, because every screen may name those.
 
 ### `apps/api/src`
 

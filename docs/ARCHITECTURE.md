@@ -119,7 +119,9 @@ in front of this would need its own rendering story.
 
 **Chosen.** `src/lib/http/` unwraps `{ data }`, attaches the bearer token, refreshes single-flight on
 401, and normalises every failure into `ApiError`. Components call endpoints through
-`pages/*/*/api.ts` with `useHttp`, which holds `data / error / loading`.
+`pages/*/*/api.ts` with `useHttp`, which holds `data / error / loading`. A list puts
+`useList` on top of it: that one owns the page, the search and the sort as well, so a screen
+showing records holds no effect of its own and hands the whole result to the table as a single prop.
 
 **Why.** Mixing fetch state into component state is what makes large React apps rot — but a cache
 layer answers a question this app does not ask: every screen wants the server's answer _now_

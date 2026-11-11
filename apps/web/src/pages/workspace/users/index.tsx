@@ -1,47 +1,21 @@
-import type { ListUsersQuery } from '@lumo/shared';
-import { useEffect, useState } from 'react';
 import { Input } from '@/components';
+import { useList } from '@/hooks';
 import { useAuth } from '@/providers/auth';
-import { useHttp } from '@/hooks';
-import { deleteUser, listUsers } from './api';
+import { listUsers } from './api';
+import { CreateUser } from './create';
 import { UserList } from './list';
 
-const PAGE_SIZE = 10;
-
-const buildQuery = (page: number, search: string): ListUsersQuery => ({
-	page,
-	pageSize: PAGE_SIZE,
-	sort: 'createdAt',
-	order: 'desc',
-	...(search.trim() ? { search: search.trim() } : {}),
-});
-
 /**
- * The list is deliberately plain: its job is proving the wiring — shared query
- * schema, permission-gated controls, pagination.
+ * The list is deliberately plain: its job is proving the wiring — shared query schema,
+ * permission-gated controls, pagination. Every write lives in the folder beside it, and every one of
+ * them ends with this screen reading the list again.
  */
 export const UsersPage = () => {
-	const { user: currentUser, can } = useAuth();
+	const { can } = useAuth();
+	const canEdit = can('user:write');
 
-	const [page, setPage] = useState(1);
-	const [search, setSearch] = useState('');
-
-	// Rendered inline below, so the toast is off: one failure, one notice.
-	const users = useHttp(listUsers, { toastError: false });
-	const { fetchData } = users;
-
-	useEffect(() => {
-		fetchData(buildQuery(page, search));
-	}, [fetchData, page, search]);
-
-	// A delete that fails has nowhere else to go, so it takes the default toast.
-	const remove = useHttp(deleteUser, {
-		onSuccess: () => {
-			fetchData(buildQuery(page, search));
-		},
-	});
-
-	const total = users.data?.total ?? 0;
+	// Opens newest first; the columns re-read it once a title is pressed.
+	const users = useList(listUsers, { sort: 'createdAt', order: 'desc' });
 
 	return (
 		<div className="space-y-6">
@@ -49,36 +23,26 @@ export const UsersPage = () => {
 				<div>
 					<h1 className="text-xl font-semibold">Users</h1>
 					<p className="text-sm text-muted-foreground">
-						{total} {total === 1 ? 'account' : 'accounts'} · requires{' '}
-						<code className="font-mono text-xs">user:read</code>
+						Requires <code className="font-mono text-xs">user:read</code>
 					</p>
 				</div>
 
-				<div className="w-64">
-					<Input
-						placeholder="Search email or name"
-						value={search}
-						onChange={(event) => {
-							setSearch(event.target.value);
-							setPage(1);
-						}}
-					/>
+				<div className="flex items-end gap-2">
+					<div className="w-64">
+						<Input
+							placeholder="Search email or name"
+							value={users.search}
+							onChange={(event) => {
+								users.setSearch(event.target.value);
+							}}
+						/>
+					</div>
+
+					{canEdit && <CreateUser onCreated={users.reload} />}
 				</div>
 			</div>
 
-			<UserList
-				rows={users.data?.items ?? []}
-				total={total}
-				page={page}
-				pageSize={PAGE_SIZE}
-				loading={users.loading}
-				error={users.error?.message}
-				onPageChange={setPage}
-				canDelete={can('user:delete')}
-				currentUserId={currentUser?.id}
-				deleting={remove.loading}
-				onDelete={remove.fetchData}
-			/>
+			<UserList users={users} />
 		</div>
 	);
 };

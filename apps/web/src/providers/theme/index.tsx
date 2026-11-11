@@ -1,9 +1,10 @@
+import type { ReactNode } from 'react';
 import { useLayoutEffect } from 'react';
 import { useGlobal } from '@/hooks';
-import type { ThemeProviderProps } from './types';
 
 export { ThemeToggle } from './theme-toggle';
-export type { ThemeProviderProps } from './types';
+
+type IPropsType = { children: ReactNode };
 
 /**
  * The theme itself is data and lives in `hooks/use-global`; this component is the only place that
@@ -17,7 +18,7 @@ export type { ThemeProviderProps } from './types';
  * painted, or the old theme shows for one frame. The first paint is not this component's job —
  * `index.html` sets the class before React runs, and this repeats the same value, idempotently.
  */
-export const ThemeProvider = ({ children }: ThemeProviderProps) => {
+export const ThemeProvider = ({ children }: IPropsType) => {
 	const theme = useGlobal((state) => state.theme);
 
 	useLayoutEffect(() => {

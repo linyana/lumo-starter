@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Button, Drawer } from '@/components';
 import { SidebarContent, type SidebarProps } from '../sidebar';
 
-export type MobileNavigationProps = Pick<
+/** What the drawer is handed: the rail's rows, narrowed to the ones a drawer shows. */
+type IPropsType = Pick<
 	SidebarProps,
 	'nav' | 'selectedKey' | 'onSelect' | 'logo' | 'title' | 'brandActions' | 'toolbar' | 'footer'
 > & {
@@ -20,7 +21,7 @@ export function MobileNavigation({
 	toolbar,
 	footer,
 	resetScrollKey,
-}: MobileNavigationProps) {
+}: IPropsType) {
 	const [open, setOpen] = useState(false);
 	const [route, setRoute] = useState([selectedKey, resetScrollKey]);
 	const bar = useRef<HTMLDivElement>(null);

@@ -6,9 +6,15 @@ import { useGlobal } from '@/hooks';
 import { useAuth } from '@/providers/auth';
 import { ThemeToggle } from '@/providers/theme';
 import { Layout, type LayoutNavEntry } from '../frame';
-import type { AppShellProps } from './types';
 
-export type { AppShellProps } from './types';
+type IPropsType = {
+	/**
+	 * The rows the rail draws, handed over by `providers/routes` — derived there from the route
+	 * table, so the shell never reads `src/routes.tsx` and a screen can import this module without
+	 * closing a cycle through `@/pages`.
+	 */
+	nav: LayoutNavEntry[];
+};
 
 /** Every row that goes somewhere, by the href it goes to — the rows are the only key map. */
 const keysByHref = (entries: LayoutNavEntry[]): Map<string, string> =>
@@ -29,7 +35,7 @@ const keysByHref = (entries: LayoutNavEntry[]): Map<string, string> =>
  * a new screen is still one row there and no write here, and this module stays a renderer — it
  * imports the session, never the route table or the pages behind it.
  */
-export const AppShell = ({ nav }: AppShellProps) => {
+export const AppShell = ({ nav }: IPropsType) => {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const { user, logout } = useAuth();

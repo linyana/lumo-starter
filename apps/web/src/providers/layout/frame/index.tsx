@@ -45,7 +45,7 @@ export const layoutVariants = tv({
 });
 
 // `onSelect` is a div's own event; here the name belongs to the nav, so the DOM handler goes.
-export type LayoutProps = Omit<ComponentProps<'div'>, 'title' | 'onSelect'> & {
+type IPropsType = Omit<ComponentProps<'div'>, 'title' | 'onSelect'> & {
 	variant?: VariantProps<typeof layoutVariants>['variant'];
 	/** Shared by the desktop rail and the mobile drawer. Supplying it enables mobile navigation. */
 	nav?: LayoutNavEntry[];
@@ -95,7 +95,7 @@ function LayoutRoot({
 	className,
 	children,
 	...props
-}: LayoutProps) {
+}: IPropsType) {
 	const { root, main, surface } = layoutVariants({ variant });
 	const [uncontrolled, setUncontrolled] = useState(defaultCollapsed);
 	const isCollapsed = collapsed ?? uncontrolled;
@@ -184,6 +184,4 @@ function LayoutRoot({
 export const Layout = Object.assign(LayoutRoot, { Header, Content });
 
 export type { LayoutNavEntry, LayoutNavItem } from './types';
-export type { HeaderProps } from './header';
-export type { ContentProps } from './content';
 export type { SidebarProps } from './sidebar';

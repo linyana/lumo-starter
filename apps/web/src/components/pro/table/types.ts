@@ -4,7 +4,13 @@ import type { SlotClassNames } from '../types';
 
 type ColumnAlign = HeadProps['align'];
 
-export type TableColumn<Row> = {
+/** Which way round a sorted column reads. */
+export type TableOrder = 'asc' | 'desc';
+
+/** The column the records arrived in, and which way round. */
+export type TableSort<Key extends string = string> = { key: Key; order: TableOrder };
+
+export type TableColumn<Row, Key extends string = string> = {
 	/** Stable across renders: it is the column's key and the header's. */
 	key: string;
 	header: ReactNode;
@@ -14,6 +20,12 @@ export type TableColumn<Row> = {
 	width?: string;
 	/** Merged onto this column's header and cells, after `classNames.head` and `classNames.cell`. */
 	className?: string;
+	/**
+	 * The key the records are re-read by when this title is pressed. Left out, the column cannot be
+	 * sorted: a column of buttons, or one the endpoint does not sort on. Its own `key` is the one the
+	 * records are drawn under and is often not a sort key at all.
+	 */
+	sortKey?: Key;
 };
 
 export type TableSlots =
@@ -26,11 +38,20 @@ export type TableSlots =
 	| 'empty'
 	| 'skeleton';
 
-export type TableProps<Row> = {
-	columns: TableColumn<Row>[];
+export type TableProps<Row, Key extends string = string> = {
+	columns: TableColumn<Row, Key>[];
 	rows: Row[];
 	/** How a row is known — an id, not an index. */
 	rowKey: (row: Row) => string;
+	/** The column the records arrived sorted by, and which way round. Left out, no title is marked. */
+	sort?: TableSort<Key>;
+	/**
+	 * A sortable title was pressed, with the state it now means. The step after the last direction
+	 * is `undefined`: the reader has stopped sorting, and the order the records arrived in is back.
+	 * Ordering them is still the caller's — a table that sorted what it was handed would be quietly
+	 * disagreeing with whoever fetched it.
+	 */
+	onSortChange?: (next: TableSort<Key> | undefined) => void;
 	size?: RootProps['size'];
 	variant?: RootProps['variant'];
 	hoverable?: boolean;
