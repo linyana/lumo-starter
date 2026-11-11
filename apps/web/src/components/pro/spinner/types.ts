@@ -1,3 +1,6 @@
 import type { LumoSpinnerProps } from '@/components/ui/spinner';
 
-export type SpinnerProps = Pick<LumoSpinnerProps, 'size' | 'label' | 'className'>;
+export type SpinnerProps = Pick<
+	LumoSpinnerProps,
+	'size' | 'label' | 'className' | 'mask' | 'caption' | 'captionDelay'
+>;

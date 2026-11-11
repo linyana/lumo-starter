@@ -102,6 +102,14 @@ export const Table = <Row, Key extends string = string>({
 
 	const actionsOf = (row: Row) => rowActions?.(row) ?? [];
 
+	// Two waits, not one. A read with no records to keep has nothing to hold still, so it asks with
+	// the shape of the records it is waiting for; a read that has records on the screen keeps them —
+	// with the column names, the row the reader was on, the scroll they were at — and says so over
+	// the top of them. Replacing a page the reader is reading with five grey bars is a change of
+	// subject they did not ask for.
+	const skeleton = loading && rows.length === 0;
+	const masked = loading && rows.length > 0;
+
 	// A record with nothing it may be asked to do opens nothing: a right press on it is the browser's,
 	// and its row keeps no "..." to press either.
 	const openMenu = ({ row, anchor }: { row: Row; anchor: ContextMenuAnchor }) => {
@@ -122,7 +130,7 @@ export const Table = <Row, Key extends string = string>({
 	// each of them offers — the row's own "..." and the menu under a right press draw the same list.
 	const records = rows.map((row) => ({ row, key: rowKey(row), items: actionsOf(row) }));
 	const withActions =
-		rowActions !== undefined && (loading || records.some((record) => record.items.length > 0));
+		rowActions !== undefined && (skeleton || records.some((record) => record.items.length > 0));
 
 	return (
 		<>
@@ -130,6 +138,7 @@ export const Table = <Row, Key extends string = string>({
 				size={size}
 				variant={variant}
 				hoverable={hoverable && !loading}
+				loading={masked}
 				aria-busy={loading || undefined}
 				className={cn(className, classNames?.root)}
 			>
@@ -159,8 +168,8 @@ export const Table = <Row, Key extends string = string>({
 						)}
 					</LumoTable.Row>
 				</LumoTable.Header>
-				<LumoTable.Body aria-hidden={loading || undefined} className={classNames?.body}>
-					{loading ? (
+				<LumoTable.Body aria-hidden={skeleton || undefined} className={classNames?.body}>
+					{skeleton ? (
 						Array.from({ length: skeletonRows }, (_, index) => (
 							<LumoTable.Row key={index} className={classNames?.row}>
 								{columns.map((column) => (

@@ -65,9 +65,15 @@ export type TableProps<Row, Key extends string = string> = {
 	size?: RootProps['size'];
 	variant?: RootProps['variant'];
 	hoverable?: boolean;
-	/** Replaces the body with skeleton rows while keeping the column headers visible. */
+	/**
+	 * A read is in flight. What that looks like is the table's to decide from what it was handed: with
+	 * no records to keep it replaces the body with skeleton rows under the column names — the shape of
+	 * what is coming — and with records it keeps them and covers them with a spinner, so a page, a sort
+	 * or a narrowed column does not move the row the reader was on. So the first wait is the skeleton
+	 * and every wait after it is the mask.
+	 */
 	loading?: boolean;
-	/** Number of placeholder rows shown while loading. Defaults to 5. */
+	/** Number of placeholder rows shown while the first wait is in flight. Defaults to 5. */
 	skeletonRows?: number;
 	/** Shown in a row across every column when there are no records. */
 	empty?: ReactNode;

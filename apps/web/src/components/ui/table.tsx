@@ -451,7 +451,11 @@ export type RootProps = Omit<ComponentProps<'table'>, 'className'> &
 		sortDirections?: TableSort[];
 		/** The words behind the controls the table draws itself: sort hints, the filter panel. */
 		locale?: TableLocale;
-		/** Cover the records with a spinner while keeping them, and their column names, in place. */
+		/**
+		 * Cover the records with a spinner while keeping them, and their column names, in place. The
+		 * word under it is said only once the wait has run long enough to be worth naming — a read that
+		 * answers in a moment never needs it.
+		 */
 		loading?: boolean;
 		/**
 		 * `fixed` gives every column the width it was declared, which is what `ellipsis` needs: an
@@ -521,20 +525,12 @@ export function Root({
 					</table>
 				</div>
 				{loading && (
-					<div
-						data-slot="table-loading"
-						role="status"
-						className={cn(
-							'absolute inset-0 z-20 grid place-items-center',
-							'bg-background/70 text-muted-foreground',
-							variant !== 'borderless' && 'rounded-lg',
-						)}
-					>
-						<span className="inline-flex items-center gap-2 text-sm">
-							<LumoSpinner label={null} />
-							{value.locale.loading}
-						</span>
-					</div>
+					<LumoSpinner
+						mask
+						label={value.locale.loading}
+						caption={value.locale.loading}
+						className={variant === 'borderless' ? undefined : 'rounded-lg'}
+					/>
 				)}
 			</div>
 		</TableContext>
