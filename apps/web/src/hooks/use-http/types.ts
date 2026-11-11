@@ -17,6 +17,13 @@ export interface UseHttpState<TData> {
 	data: TData | null;
 	error: ApiError | null;
 	loading: boolean;
+	/**
+	 * Nothing has answered yet: true from the mount until the first call comes back, and again after
+	 * `reset`. It is where a `data === null` cannot be read instead — a failure leaves the data empty
+	 * too — and what tells a first wait apart from every later one, a screen that opens with skeleton
+	 * rows or a blank panel and then keeps what it has while it reads again.
+	 */
+	initial: boolean;
 }
 
 /**
@@ -41,6 +48,9 @@ export type FetchData<TData, TVariables> = [TVariables] extends [void]
 export interface UseHttpResult<TData, TVariables> extends UseHttpState<TData> {
 	/** Runs the call. Bare when the endpoint takes no payload, else with its variables. */
 	fetchData: FetchData<TData, TVariables>;
-	/** Clears data and error. */
+	/**
+	 * Clears data and error, and puts the hook back where it opened: `initial` is true again, so the
+	 * next wait is a first wait.
+	 */
 	reset: () => void;
 }

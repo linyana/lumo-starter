@@ -131,9 +131,20 @@ export type UseListResult<TItem, TQuery extends ListQuery> = {
 	pageSize: number;
 	/** What the controls show the reader narrowed on. The wire reads it one pause later. */
 	filters: ListFilters<TQuery>;
+	/**
+	 * Whether anything is narrowed. It is what a blank list is asked to explain: a search that matched
+	 * nothing is not a list that has nothing, and the two are the same empty row.
+	 */
+	narrowed: boolean;
 	/** The column the records were read by, and which way. The table draws its arrow from this. */
 	sort: ListSort<SortKeyOf<TQuery>>;
 	loading: boolean;
+	/**
+	 * No read has answered yet, so there is nothing on the page to keep: what a screen asks with while
+	 * the list is being read for the first time. An empty answer is not this — it is an answer, and the
+	 * read after it is a later one.
+	 */
+	initial: boolean;
 	/** The API's sentence when the last read failed. The caller renders it where the records go. */
 	error?: string;
 	setPage: (page: number) => void;
@@ -156,6 +167,12 @@ export type UseListResult<TItem, TQuery extends ListQuery> = {
 	onSort: (next: ListSort<SortKeyOf<TQuery>> | undefined) => void;
 	/** Read the same page again — what a write elsewhere in the domain ends with. */
 	reload: () => void;
+	/**
+	 * Drops every filter in one write, so it is one read and not one per key, and goes back to a page
+	 * of the whole list. The narrowing the list opened with goes too: a reader asking for everything
+	 * wants everything.
+	 */
+	clearFilters: () => void;
 	/** The field the reader types into, by the key it narrows. Its writes are read after `debounce`. */
 	text: <Key extends StringFilterKey<TQuery>>(key: Key) => TextBinding;
 	/** The control that picks one of a set, by the key it narrows. Its writes are read at once. */

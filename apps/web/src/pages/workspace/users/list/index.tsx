@@ -1,9 +1,11 @@
 import { ROLE_META, type ListUsersQuery, type Role, type User } from '@lumo/shared';
-import { RotateCcw } from 'lucide-react';
-import { Badge, Button, Input, Pagination, Table, type TableColumn } from '@/components';
+import { Pencil, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { Badge, Input, Table, type MenuItem, type TableColumn } from '@/components';
 import type { SortKeyOf, UseListResult } from '@/hooks';
 import { useAuth } from '@/providers/auth';
-import { useUserActions } from '../actions';
+import { DeleteUser } from '../delete';
+import { EditUser } from '../edit';
 
 /** The keys `GET /users` sorts on, which are the columns a title may report. */
 type UserSortKey = SortKeyOf<ListUsersQuery>;
@@ -23,22 +25,63 @@ const ROLE_VARIANT: Record<Role, 'default' | 'info' | 'secondary'> = {
 };
 
 /**
- * The accounts in columns and the way through them. It draws what it is handed: the screen owns the
- * query and hands it over whole, this owns the columns and the footer.
+ * The accounts in columns and the way through them. The screen owns the query: it hands the whole
+ * read to the table, which is what draws the wait, the footer and the three ways a list can be blank.
+ * What is left here is what the table cannot know — the columns, and what a row's actions open.
  */
 export const UserList = ({ users }: IPropsType) => {
 	const { user: currentUser, can } = useAuth();
 	const canEdit = can('user:write');
 	const canDelete = can('user:delete');
 
-	// The rows' actions are data, because the table draws them twice: the last column's "..." and the
-	// menu a right press opens. What those actions open is this screen's, so it owns the panels too.
-	const { itemsOf: rowActions, dialogs } = useUserActions({
-		currentUserId: currentUser?.id,
-		canEdit,
-		canDelete,
-		onChanged: users.reload,
-	});
+	// The one panel a row has open, if any: the same row cannot be edited and deleted at once.
+	const [panel, setPanel] = useState<{ user: User; kind: 'edit' | 'delete' } | null>(null);
+
+	// A row's actions are data, because the table draws them twice — the last column's "..." and the
+	// menu a right press opens are one list. What they open is mounted beside the table and not inside
+	// a row: a menu closes on the press that picks an action, so a panel opened from within it would
+	// close with it.
+	const rowActions = (user: User): MenuItem[] => {
+		const items: MenuItem[] = [];
+
+		if (canEdit) {
+			items.push({
+				label: 'Edit',
+				icon: <Pencil />,
+				onClick: () => setPanel({ user, kind: 'edit' }),
+			});
+		}
+
+		// An account cannot delete itself — a rule of this screen's, not of the endpoint's.
+		if (canDelete && user.id !== currentUser?.id) {
+			items.push({
+				label: 'Delete',
+				icon: <Trash2 />,
+				destructive: true,
+				separatorBefore: true,
+				onClick: () => setPanel({ user, kind: 'delete' }),
+			});
+		}
+
+		return items;
+	};
+
+	const closePanel = (next: boolean) => {
+		if (!next) setPanel(null);
+	};
+
+	const dialogs =
+		panel === null ? null : panel.kind === 'edit' ? (
+			<EditUser
+				user={panel.user}
+				currentUserId={currentUser?.id}
+				open
+				onOpenChange={closePanel}
+				onUpdated={users.reload}
+			/>
+		) : (
+			<DeleteUser user={panel.user} open onOpenChange={closePanel} onDeleted={users.reload} />
+		);
 
 	const columns: TableColumn<User, UserSortKey>[] = [
 		{
@@ -51,8 +94,6 @@ export const UserList = ({ users }: IPropsType) => {
 			key: 'email',
 			header: 'Email',
 			sortKey: 'email',
-			// The column narrows itself, and the field behind its icon is the same binding a header field
-			// would take: what is typed is written, the hook waits for the pause, and the icon says it is on.
 			filter: { kind: 'text', placeholder: 'Filter by email', ...users.text('email') },
 			cell: (row) => <span className="text-muted-foreground">{row.email}</span>,
 		},
@@ -71,48 +112,6 @@ export const UserList = ({ users }: IPropsType) => {
 		},
 	];
 
-	// One failure, one notice, and the way to ask again. The records are dropped rather than left
-	// under a message that says the last read did not answer: what is on the page would be a guess.
-	const failed = users.error !== undefined;
-
-	// The two fields the screen narrows with, and the one press that clears both: a narrowed list that
-	// found nothing says so, and offers the way back to the whole list.
-	const narrowed = users.filters.search !== undefined || users.filters.email !== undefined;
-	const clearFilters = () => {
-		users.setFilter('search', null);
-		users.setFilter('email', null);
-	};
-
-	/**
-	 * The row a table shows when it has no records — which is three different situations and not one,
-	 * so each says its own thing: the read failed, nothing matched, the list is empty.
-	 */
-	const empty = failed ? (
-		<>
-			<p role="alert" className="text-destructive">
-				{users.error}
-			</p>
-			<Button
-				variant="outline"
-				size="sm"
-				icon={<RotateCcw />}
-				loading={users.loading}
-				onClick={users.reload}
-			>
-				Try again
-			</Button>
-		</>
-	) : narrowed ? (
-		<>
-			<p>No accounts match.</p>
-			<Button variant="ghost" size="sm" onClick={clearFilters}>
-				Clear filters
-			</Button>
-		</>
-	) : (
-		<p>No accounts yet.</p>
-	);
-
 	return (
 		<>
 			<div>
@@ -124,33 +123,11 @@ export const UserList = ({ users }: IPropsType) => {
 			</div>
 			<Table
 				columns={columns}
-				rows={failed ? [] : users.items}
-				rowKey={(row) => row.id}
+				// The wait, the order, the footer's numbers and the three ways a list can be blank are the
+				// read's own, so the read is handed over whole rather than told again one prop at a time.
+				list={users}
 				rowActions={rowActions}
-				rowActionsLabel={(row) => `Actions for ${row.name}`}
-				sort={users.sort}
-				onSortChange={users.onSort}
-				loading={users.loading}
-				skeletonRows={users.pageSize}
-				empty={empty}
 			/>
-
-			{/* There is nothing to page through while a failure is being reported, or at all. */}
-			{!failed && users.total > 0 && (
-				<div className="flex items-center justify-between">
-					<p className="text-sm text-muted-foreground">
-						Page {users.page} of {users.pageCount}
-					</p>
-					<Pagination
-						size="sm"
-						page={users.page}
-						pageCount={users.pageCount}
-						total={users.total}
-						pageSize={users.pageSize}
-						onPageChange={users.setPage}
-					/>
-				</div>
-			)}
 
 			{dialogs}
 		</>

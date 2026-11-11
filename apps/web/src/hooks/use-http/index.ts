@@ -4,7 +4,7 @@ import type { FetchData, FetchResult, UseHttpOptions, UseHttpResult, UseHttpStat
 
 export type { FetchData, FetchResult, UseHttpOptions, UseHttpResult, UseHttpState } from './types';
 
-const INITIAL_STATE = { data: null, error: null, loading: false } as const;
+const INITIAL_STATE = { data: null, error: null, loading: false, initial: true } as const;
 
 /**
  * One hook for both reads and writes: hand it an endpoint function, then call
@@ -20,6 +20,14 @@ const INITIAL_STATE = { data: null, error: null, loading: false } as const;
  *
  * Only the latest call may write state, so a slow response cannot overwrite a
  * newer one. `fetchData` is stable and safe to use in an effect's dependencies.
+ *
+ * `initial` is true until the first call comes back, success or failure — the one
+ * wait that has nothing behind it, and so the only one worth a skeleton:
+ *
+ * ```tsx
+ * const first = loading && initial; // the shape of what is coming
+ * const later = loading && !initial; // what is already there, covered
+ * ```
  */
 export const useHttp = <TData, TVariables = void>({
 	fn,
@@ -49,7 +57,7 @@ export const useHttp = <TData, TVariables = void>({
 				const data = await endpoint(variables as TVariables);
 				if (id !== requestId.current) return null;
 
-				setState({ data, error: null, loading: false });
+				setState({ data, error: null, loading: false, initial: false });
 				current.onSuccess?.(data, variables as TVariables);
 				return { ok: true, data };
 			} catch (cause) {
@@ -61,7 +69,7 @@ export const useHttp = <TData, TVariables = void>({
 					// A dead session is announced by the auth provider, exactly once.
 					raiseToast(error.message);
 				}
-				setState((previous) => ({ ...previous, error, loading: false }));
+				setState((previous) => ({ ...previous, error, loading: false, initial: false }));
 				return { ok: false, error };
 			}
 		},

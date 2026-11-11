@@ -106,6 +106,13 @@ export const useList = <TItem, TQuery extends ListQuery>({
 
 	const filters = input.values;
 
+	// Whether anything is narrowed, which is what a blank list is asked to explain: "nothing matched"
+	// and "there is nothing yet" are two sentences about the same empty row. An empty list is a
+	// filter that is not on either — the same rule `write` keeps when it drops a blank value.
+	const narrowed = Object.values(filters).some((value) =>
+		Array.isArray(value) ? value.length > 0 : value !== undefined && value !== null && value !== '',
+	);
+
 	/**
 	 * What the wire reads: the filters the controls show, once the reader has stopped writing them.
 	 * The pause is the field's and not the control's — a keystroke is one of many, a pick is one — and
@@ -133,7 +140,7 @@ export const useList = <TItem, TQuery extends ListQuery>({
 		return () => clearTimeout(timer);
 	}, [input, settled, debounce]);
 
-	const { data, loading, error, fetchData } = useHttp({ fn: fetcher, toastError: false });
+	const { data, loading, error, initial, fetchData } = useHttp({ fn: fetcher, toastError: false });
 
 	const total = data?.total ?? 0;
 	const pageCount = Math.max(1, Math.ceil(total / pageSize));
@@ -171,6 +178,14 @@ export const useList = <TItem, TQuery extends ListQuery>({
 			value: ListFilters<TQuery>[Key] | null | undefined,
 		): void => write({ key, value, typing: false }),
 		[write],
+	);
+
+	// The way back to the whole list: every filter dropped in one write, so it is one read and not one
+	// per key. The narrowing the list was opened with goes too — a reader who asks for everything
+	// wants everything, not the filters they were handed on arrival.
+	const clearFilters = useCallback(
+		() => setInput({ values: {} as ListFilters<TQuery>, typing: false }),
+		[],
 	);
 
 	const reload = useCallback(() => {
@@ -246,11 +261,14 @@ export const useList = <TItem, TQuery extends ListQuery>({
 		page,
 		pageSize,
 		filters,
+		narrowed,
 		sort,
 		loading,
+		initial,
 		error: error?.message,
 		setPage,
 		setFilter,
+		clearFilters,
 		onSort,
 		reload,
 		text,

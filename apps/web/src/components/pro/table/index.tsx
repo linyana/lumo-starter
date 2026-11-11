@@ -1,17 +1,19 @@
-import { Ellipsis } from 'lucide-react';
-import { useState } from 'react';
+import { Ellipsis, RotateCcw } from 'lucide-react';
+import { useId, useState } from 'react';
 import { LumoSkeleton } from '@/components/ui/skeleton';
 import { LumoTable, type TableSort as AriaSort } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { Button } from '../button';
 import { ContextMenu, type ContextMenuAnchor } from '../context-menu';
-import type { TableProps, TableSort } from './types';
+import { Pagination, type PaginationProps } from '../pagination';
+import type { TableList, TableProps, TableSort } from './types';
 
 export type {
 	TableColumn,
 	TableFilterProps,
 	TableOptionsFilter,
 	TableOrder,
+	TableList,
 	TableProps,
 	TableSlots,
 	TableSort,
@@ -20,6 +22,30 @@ export type {
 
 /** What the column the table draws itself is called when the caller does not name the press. */
 const actions = 'Actions';
+
+/** One empty list for every table that has none, so the records keep their identity between reads. */
+const noRecords: never[] = [];
+
+/**
+ * A record is known by its `id` unless the caller names its own — an id and never an index, which is
+ * what a row's identity has to survive a page, a sort and a deletion above it.
+ */
+const idOf = (row: unknown) => String((row as { id: unknown }).id);
+
+/** The footer's numbers, read off the list a table was handed — none when it was handed nothing. */
+function pagerOf<Row, Key extends string>(
+	list: TableList<Row, Key> | undefined,
+): PaginationProps | undefined {
+	if (list === undefined) return undefined;
+
+	return {
+		page: list.page,
+		pageCount: list.pageCount,
+		total: list.total,
+		pageSize: list.pageSize,
+		onPageChange: list.setPage,
+	};
+}
 
 /**
  * The "..." is there when its row is the one being read: the pointer is on it, a control in it has
@@ -79,36 +105,70 @@ function sortPressOf<Key extends string>({
  */
 export const Table = <Row, Key extends string = string>({
 	columns,
+	list,
 	rows,
-	rowKey,
+	rowKey = idOf,
 	sort,
 	onSortChange,
 	rowActions,
 	rowActionsLabel,
+	pagination,
 	size = 'md',
 	variant = 'borderless',
 	hoverable = true,
-	loading = false,
-	skeletonRows = 5,
+	loading,
+	initial,
+	skeletonRows,
+	error,
+	onRetry,
 	empty,
 	className,
 	classNames,
 }: TableProps<Row, Key>) => {
-	// The record the open menu is about, and the place it opened at. It is the table's only state,
-	// because a menu is opened and closed by the reader rather than by the records handed in.
+	// The record the open menu is about, and the place it opened at. A menu is opened and closed by
+	// the reader rather than by the records handed in, so it is state of the table's own.
 	const [menu, setMenu] = useState<{ row: Row; key: string; anchor: ContextMenuAnchor } | null>(
 		null,
 	);
 
-	const actionsOf = (row: Row) => rowActions?.(row) ?? [];
+	// One list, many props: the records, what the wait is doing, the order, the footer's numbers and
+	// the failure all come from the same read, so a screen hands the read over and the table asks it
+	// the questions a table has. Anything given outright wins — a table read from somewhere other than
+	// a list is still a table.
+	const data = rows ?? list?.items ?? noRecords;
+	const busy = loading ?? list?.loading ?? false;
+	const first = initial ?? list?.initial ?? false;
+	const failure = error ?? list?.error;
+	const retry = onRetry ?? list?.reload;
+	const pager = pagination ?? pagerOf(list);
+	// The shape of what is coming: one placeholder row per record a page holds.
+	const skeletonCount = skeletonRows ?? list?.pageSize ?? 5;
 
-	// Two waits, not one. A read with no records to keep has nothing to hold still, so it asks with
-	// the shape of the records it is waiting for; a read that has records on the screen keeps them —
-	// with the column names, the row the reader was on, the scroll they were at — and says so over
-	// the top of them. Replacing a page the reader is reading with five grey bars is a change of
-	// subject they did not ask for.
-	const skeleton = loading && rows.length === 0;
-	const masked = loading && rows.length > 0;
+	// Two waits, not one, and which one it is comes from the hook rather than from what the rows
+	// hold: a search that matched nothing is still an answer, so the wait after it keeps that answer
+	// — and the sentence saying so — on the screen instead of starting over in grey. A read with
+	// nothing behind it asks with the shape of the records it is waiting for; one that has an answer
+	// keeps it, with the column names, the row the reader was on and the scroll they were at, and says
+	// so over the top of it.
+	const skeleton = busy && first;
+	const masked = busy && !first;
+
+	// A footer is drawn when it has something to say: some records in all, or more than one page of
+	// them, and no failure standing in for those records. A line saying "1 / 1" over an empty table is
+	// a control that can only be looked at, and the row above it has already said there are no records.
+	const paging =
+		failure === undefined &&
+		pager !== undefined &&
+		(pager.total === undefined ? (pager.pageCount ?? 1) > 1 : pager.total > 0);
+
+	// Two ids and not two words: the "..." is named by the row's own first cell and by the strip it
+	// stands in — "Ada Lovelace Actions" — because a table of buttons all called "Actions" says which
+	// one is which to nobody. The prefix is the table's, so two tables on a page never collide.
+	const prefix = useId();
+	const actionsId = `${prefix}-actions`;
+	const cellId = (index: number) => `${prefix}-row-${index}`;
+
+	const actionsOf = (row: Row) => rowActions?.(row) ?? [];
 
 	// A record with nothing it may be asked to do opens nothing: a right press on it is the browser's,
 	// and its row keeps no "..." to press either.
@@ -121,25 +181,58 @@ export const Table = <Row, Key extends string = string>({
 	// the same column and the cells have to shade with the same answer.
 	const headed = columns.map((column) => ({
 		column,
-		sort: column.sortKey === undefined ? undefined : ariaSortOf({ sortKey: column.sortKey, sort }),
-		onSort: sortPressOf({ sortKey: column.sortKey, onSortChange }),
+		sort:
+			column.sortKey === undefined
+				? undefined
+				: ariaSortOf({ sortKey: column.sortKey, sort: sort ?? list?.sort }),
+		onSort: sortPressOf({ sortKey: column.sortKey, onSortChange: onSortChange ?? list?.onSort }),
 	}));
 
 	// The column is worth a strip of its own only while some record has something to offer: a reader
 	// who may not act on any row is not shown a column of nothing. One pass over the rows builds what
 	// each of them offers — the row's own "..." and the menu under a right press draw the same list.
-	const records = rows.map((row) => ({ row, key: rowKey(row), items: actionsOf(row) }));
+	const records = data.map((row) => ({ row, key: rowKey(row), items: actionsOf(row) }));
 	const withActions =
 		rowActions !== undefined && (skeleton || records.some((record) => record.items.length > 0));
+
+	// The row that stands where the records would be, and the reason it is there: the read failed and
+	// its press reads again; the caller's own words, when the domain has a better word for it; a
+	// narrowing that matched nothing, with the way back to everything; or simply nothing yet. A page
+	// left standing under a message that says the last read did not answer is a guess, which is why the
+	// failure takes the records' place rather than sitting beside them.
+	const blank =
+		failure !== undefined ? (
+			<>
+				<p role="alert" className="text-destructive">
+					{failure}
+				</p>
+				{retry !== undefined && (
+					<Button variant="outline" size="sm" icon={<RotateCcw />} loading={busy} onClick={retry}>
+						Try again
+					</Button>
+				)}
+			</>
+		) : empty !== undefined ? (
+			empty
+		) : list?.narrowed === true ? (
+			<>
+				<p>No records match.</p>
+				<Button variant="ghost" size="sm" onClick={list.clearFilters}>
+					Clear filters
+				</Button>
+			</>
+		) : (
+			<p>No records yet.</p>
+		);
 
 	return (
 		<>
 			<LumoTable.Root
 				size={size}
 				variant={variant}
-				hoverable={hoverable && !loading}
+				hoverable={hoverable && !busy}
 				loading={masked}
-				aria-busy={loading || undefined}
+				aria-busy={busy || undefined}
 				className={cn(className, classNames?.root)}
 			>
 				<LumoTable.Header className={classNames?.header}>
@@ -161,6 +254,7 @@ export const Table = <Row, Key extends string = string>({
 							// The column has no word of its own — the "..." says what it is to the row it is on —
 							// so it is named for a reader and drawn as narrow as its control.
 							<LumoTable.Head
+								id={actionsId}
 								align="end"
 								aria-label={actions}
 								className={cn(classNames?.head, 'w-px', classNames?.actions)}
@@ -170,7 +264,7 @@ export const Table = <Row, Key extends string = string>({
 				</LumoTable.Header>
 				<LumoTable.Body aria-hidden={skeleton || undefined} className={classNames?.body}>
 					{skeleton ? (
-						Array.from({ length: skeletonRows }, (_, index) => (
+						Array.from({ length: skeletonCount }, (_, index) => (
 							<LumoTable.Row key={index} className={classNames?.row}>
 								{columns.map((column) => (
 									<LumoTable.Cell
@@ -198,15 +292,15 @@ export const Table = <Row, Key extends string = string>({
 								)}
 							</LumoTable.Row>
 						))
-					) : rows.length === 0 ? (
+					) : failure !== undefined || data.length === 0 ? (
 						<LumoTable.Empty
 							columns={columns.length + (withActions ? 1 : 0)}
 							className={classNames?.empty}
 						>
-							{empty}
+							{blank}
 						</LumoTable.Empty>
 					) : (
-						records.map(({ row, key, items }) => (
+						records.map(({ row, key, items }, index) => (
 							<LumoTable.Row
 								key={key}
 								// The row its menu is open for keeps the wash the pointer would have left on it, so the
@@ -236,9 +330,11 @@ export const Table = <Row, Key extends string = string>({
 											}
 								}
 							>
-								{headed.map(({ column, sort: columnSort }) => (
+								{headed.map(({ column, sort: columnSort }, columnIndex) => (
 									<LumoTable.Cell
 										key={column.key}
+										// The first cell is what names the row, here and in the "..." beside it.
+										id={columnIndex === 0 ? cellId(index) : undefined}
 										align={column.align}
 										sort={columnSort}
 										className={cn(classNames?.cell, column.className)}
@@ -262,7 +358,14 @@ export const Table = <Row, Key extends string = string>({
 													variant="ghost"
 													size="icon"
 													icon={<Ellipsis />}
-													aria-label={rowActionsLabel?.(row) ?? actions}
+													// Named by the two things a reader needs to know it is this record's: which
+													// row it is on, and what pressing it does.
+													aria-labelledby={
+														rowActionsLabel === undefined && headed.length > 0
+															? `${cellId(index)} ${actionsId}`
+															: undefined
+													}
+													aria-label={rowActionsLabel?.(row)}
 													aria-haspopup="menu"
 													aria-expanded={menu?.key === key}
 													onClick={(event) => openMenu({ row, anchor: event.currentTarget })}
@@ -276,6 +379,16 @@ export const Table = <Row, Key extends string = string>({
 					)}
 				</LumoTable.Body>
 			</LumoTable.Root>
+
+			{paging && (
+				<Pagination
+					{...pager}
+					// The footer is the table's own density unless the caller says otherwise.
+					size={pager.size ?? size}
+					range={pager.range ?? true}
+					className={cn('pt-3', pager.className, classNames?.footer)}
+				/>
+			)}
 
 			<ContextMenu
 				anchor={menu?.anchor ?? null}
