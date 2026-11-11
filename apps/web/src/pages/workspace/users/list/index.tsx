@@ -1,5 +1,6 @@
 import { ROLE_META, type ListUsersQuery, type Role, type User } from '@lumo/shared';
-import { Badge, Pagination, Table, type TableColumn } from '@/components';
+import { RotateCcw } from 'lucide-react';
+import { Badge, Button, Pagination, Table, type TableColumn } from '@/components';
 import type { SortKeyOf, UseListResult } from '@/hooks';
 import { useAuth } from '@/providers/auth';
 import { DeleteUser } from '../delete';
@@ -80,35 +81,69 @@ export const UserList = ({ users }: IPropsType) => {
 		},
 	];
 
-	// One failure, one notice: the table is not drawn behind the message.
-	if (!users.loading && users.error)
-		return <p className="text-sm text-destructive">{users.error}</p>;
+	// One failure, one notice, and the way to ask again. The records are dropped rather than left
+	// under a message that says the last read did not answer: what is on the page would be a guess.
+	const failed = users.error !== undefined;
+
+	/**
+	 * The row a table shows when it has no records — which is three different situations and not one,
+	 * so each says its own thing: the read failed, the search found nothing, the list is empty.
+	 */
+	const empty = failed ? (
+		<>
+			<p role="alert" className="text-destructive">
+				{users.error}
+			</p>
+			<Button
+				variant="outline"
+				size="sm"
+				icon={<RotateCcw />}
+				loading={users.loading}
+				onClick={users.reload}
+			>
+				Try again
+			</Button>
+		</>
+	) : users.filters.search ? (
+		<>
+			<p>No account matches “{users.filters.search}”.</p>
+			<Button variant="ghost" size="sm" onClick={() => users.setFilter('search', null)}>
+				Clear search
+			</Button>
+		</>
+	) : (
+		<p>No accounts yet.</p>
+	);
 
 	return (
 		<>
 			<Table
 				columns={columns}
-				rows={users.items}
+				rows={failed ? [] : users.items}
 				rowKey={(row) => row.id}
 				sort={users.sort}
 				onSortChange={users.onSort}
 				loading={users.loading}
 				skeletonRows={users.pageSize}
+				empty={empty}
 			/>
 
-			<div className="flex items-center justify-between">
-				<p className="text-sm text-muted-foreground">
-					Page {users.page} of {users.pageCount}
-				</p>
-				<Pagination
-					size="sm"
-					page={users.page}
-					pageCount={users.pageCount}
-					total={users.total}
-					pageSize={users.pageSize}
-					onPageChange={users.setPage}
-				/>
-			</div>
+			{/* There is nothing to page through while a failure is being reported, or at all. */}
+			{!failed && users.total > 0 && (
+				<div className="flex items-center justify-between">
+					<p className="text-sm text-muted-foreground">
+						Page {users.page} of {users.pageCount}
+					</p>
+					<Pagination
+						size="sm"
+						page={users.page}
+						pageCount={users.pageCount}
+						total={users.total}
+						pageSize={users.pageSize}
+						onPageChange={users.setPage}
+					/>
+				</div>
+			)}
 		</>
 	);
 };
