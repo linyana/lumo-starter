@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
-import type { HeadProps, RootProps } from '@/components/ui/table';
+import type { HeadProps, RootProps, TableFilterProps } from '@/components/ui/table';
 import type { SlotClassNames } from '../types';
+
+export type { TableFilterProps, TableOptionsFilter, TableTextFilter } from '@/components/ui/table';
 
 type ColumnAlign = HeadProps['align'];
 
@@ -26,6 +28,12 @@ export type TableColumn<Row, Key extends string = string> = {
 	 * records are drawn under and is often not a sort key at all.
 	 */
 	sortKey?: Key;
+	/**
+	 * A panel behind an icon beside the title, narrowing this column: a set of its own values, or a
+	 * field the reader types into. The value and the way back are the caller's, exactly as the title's
+	 * sort is — the panel draws what it is handed and reports what was pressed.
+	 */
+	filter?: TableFilterProps;
 };
 
 export type TableSlots =

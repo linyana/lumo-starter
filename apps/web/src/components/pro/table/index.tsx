@@ -3,7 +3,16 @@ import { LumoTable, type TableSort as AriaSort } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import type { TableProps, TableSort } from './types';
 
-export type { TableColumn, TableOrder, TableProps, TableSlots, TableSort } from './types';
+export type {
+	TableColumn,
+	TableFilterProps,
+	TableOptionsFilter,
+	TableOrder,
+	TableProps,
+	TableSlots,
+	TableSort,
+	TableTextFilter,
+} from './types';
 
 /**
  * Which way a title's arrow points, in `aria-sort`'s own words. A sortable column that is not the
@@ -88,6 +97,7 @@ export const Table = <Row, Key extends string = string>({
 							className={cn(classNames?.head, column.className)}
 							sort={columnSort}
 							onSort={onSort}
+							filter={column.filter}
 						>
 							{column.header}
 						</LumoTable.Head>
