@@ -1,4 +1,3 @@
-import { Input } from '@/components';
 import { useList } from '@/hooks';
 import { useAuth } from '@/providers/auth';
 import { usersApi } from '@/api';
@@ -27,9 +26,7 @@ export const UsersPage = () => {
 					</p>
 				</div>
 
-				<div className="flex items-end gap-2">
-					{canEdit && <CreateUser onCreated={users.reload} />}
-				</div>
+				{canEdit && <CreateUser onCreated={users.reload} />}
 			</div>
 			<UserList users={users} />
 		</div>

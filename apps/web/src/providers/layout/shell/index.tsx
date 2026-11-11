@@ -1,7 +1,7 @@
 import { Bell, CircleUserRound, CreditCard, EllipsisVertical, LogOut } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
-import { Avatar, Button, Flex, Menu, Spinner } from '@/components';
+import { Avatar, Button, Menu, Spinner } from '@/components';
 import { useGlobal } from '@/hooks';
 import { useAuth } from '@/providers/auth';
 import { ThemeToggle } from '@/providers/theme';
@@ -72,13 +72,13 @@ export const AppShell = ({ nav }: IPropsType) => {
 							{
 								type: 'content',
 								content: (
-									<Flex gap="md" align="center" className="px-3 py-2">
+									<div className="flex items-center gap-3 px-3 py-2">
 										<Avatar alt={user.name} shape="square" />
-										<Flex direction="column" align="start">
+										<div className="flex flex-col items-start">
 											<p className="text-sm font-medium">{user.name}</p>
 											<p className="text-xs text-muted-foreground">{user.email}</p>
-										</Flex>
-									</Flex>
+										</div>
+									</div>
 								),
 							},
 							{
@@ -106,16 +106,16 @@ export const AppShell = ({ nav }: IPropsType) => {
 								aria-label="Account menu"
 								className="p-2 group-data-compact:p-0"
 							>
-								<Flex justify="between" align="center">
-									<Flex gap="md" align="center">
+								<div className="flex items-center justify-between">
+									<div className="flex items-center gap-3">
 										<Avatar alt={user.name} shape="square" className="bg-gray-200" />
-										<Flex direction="column" align="start">
+										<div className="flex flex-col items-start">
 											<p className="text-sm font-medium">{user.name}</p>
 											<p className="text-xs text-muted-foreground">{user.email}</p>
-										</Flex>
-									</Flex>
+										</div>
+									</div>
 									<EllipsisVertical className="group-data-compact:hidden" />
-								</Flex>
+								</div>
 							</Button>
 						}
 					/>
