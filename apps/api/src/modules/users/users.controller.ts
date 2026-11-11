@@ -1,8 +1,10 @@
-import { Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch } from '@nestjs/common';
+import { Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import {
+	createUserSchema,
 	listUsersQuerySchema,
 	updateUserSchema,
+	type CreateUserInput,
 	type ListUsersQuery,
 	type UpdateUserInput,
 } from '@lumo/shared';
@@ -29,6 +31,13 @@ export class UsersController {
 	@RequirePermissions('user:read')
 	async get(@Param('id') id: string) {
 		return { user: await this.users.getById(id) };
+	}
+
+	@Post()
+	@RequirePermissions('user:write')
+	@ApiZodBody(createUserSchema)
+	async create(@ZodBody(createUserSchema) input: CreateUserInput) {
+		return { user: await this.users.create(input) };
 	}
 
 	@Patch(':id')

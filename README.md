@@ -111,7 +111,8 @@ GET    /api/auth/me           → { user }
 
 GET    /api/users             ?page&pageSize&search&sort&order      (user:read)
 GET    /api/users/:id                                                (user:read)
-PATCH  /api/users/:id         { name?, roles? }                      (user:write)
+POST   /api/users             { email, name, password, roles? }      (user:write)
+PATCH  /api/users/:id         { email?, name?, roles? }              (user:write)
 DELETE /api/users/:id                                                (user:delete)
 
 GET    /api/health            terminus probe (not enveloped)

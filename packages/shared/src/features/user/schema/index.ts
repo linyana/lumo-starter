@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { nameSchema } from '../../../common/field';
+import { emailSchema, nameSchema, passwordSchema } from '../../../common/field';
 import { paginationSchema, sortOrderSchema } from '../../../common/pagination';
 import { permissionSchema } from '../../../common/rbac/permission';
 import { roleSchema } from '../../../common/rbac/role';
@@ -18,8 +18,20 @@ export const userSchema = z.object({
 	createdAt: z.iso.datetime(),
 });
 
+/**
+ * An account made by someone else, so the password is the one they are handed and not one they
+ * chose: the same rules as a sign-up, without the confirmation the typewriter needed.
+ */
+export const createUserSchema = z.object({
+	email: emailSchema,
+	name: nameSchema,
+	password: passwordSchema,
+	roles: z.array(roleSchema).min(1).default(['MEMBER']),
+});
+
 export const updateUserSchema = z
 	.object({
+		email: emailSchema.optional(),
 		name: nameSchema.optional(),
 		roles: z.array(roleSchema).min(1).optional(),
 	})
