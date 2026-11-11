@@ -24,6 +24,15 @@ export type SortKeyOf<TQuery> = NonNullable<TQuery extends { sort?: infer Key } 
 
 /** The column the records are read by, and which way round. */
 export type ListSort<Key extends string = string> = { key: Key; order: SortOrder };
+/**
+ * Everything a list screen says about itself — the page, the order and what the reader narrowed on.
+ * It is one object because it is one query: the wire takes it whole and so does the address bar.
+ */
+export type ListState<TQuery extends ListQuery> = {
+	page: number;
+	sort: ListSort<SortKeyOf<TQuery>>;
+	filters: ListFilters<TQuery>;
+};
 
 /** The keys the hook fills in itself, so a filter is every other key of the query. */
 export type ListOwnedKey = 'page' | 'pageSize' | 'sort' | 'order';
@@ -96,6 +105,18 @@ export type UseListOptions<TQuery extends ListQuery> = {
 	defaultFilters?: Partial<ListFilters<TQuery>>;
 	/** How many records one page holds. One table's worth by default. */
 	pageSize?: number;
+	/**
+	 * How long a field typed into waits before the list is read again, in milliseconds. A keystroke is
+	 * one of many, so the controls show what was typed at once and only the wire waits; a control that
+	 * is picked is one answer and is read immediately whatever this says. `0` reads on the next tick.
+	 */
+	debounce?: number;
+	/**
+	 * Whether the page, the order and the settled filters live in the address bar. On by default: a
+	 * list is a query, and a query is worth a link, a reload and a back button. Turn it off for a
+	 * second list sharing a screen with another — one URL cannot carry two queries.
+	 */
+	sync?: boolean;
 };
 
 export type UseListResult<TItem, TQuery extends ListQuery> = {
@@ -108,7 +129,7 @@ export type UseListResult<TItem, TQuery extends ListQuery> = {
 	/** The page in view, counted from one. */
 	page: number;
 	pageSize: number;
-	/** What is narrowing the records now, as the wire will read it. A blank filter is not in here. */
+	/** What the controls show the reader narrowed on. The wire reads it one pause later. */
 	filters: ListFilters<TQuery>;
 	/** The column the records were read by, and which way. The table draws its arrow from this. */
 	sort: ListSort<SortKeyOf<TQuery>>;
@@ -117,9 +138,12 @@ export type UseListResult<TItem, TQuery extends ListQuery> = {
 	error?: string;
 	setPage: (page: number) => void;
 	/**
-	 * Writes one filter and goes back to the first page, because the records under the cursor have
-	 * moved. A blank value — `undefined`, `null`, `''` — removes the filter instead of sending it,
-	 * so a cleared field narrows nothing and the next answer is the unnarrowed one.
+	 * Writes one filter and reads the list again at once — this is the way a control that is picked
+	 * writes one. A field typed into is not one answer but a burst of them, so it is the `text`
+	 * binding below, which reads after `debounce`. Either way the first page is where the read starts,
+	 * because the records under the cursor have moved. A blank value — `undefined`, `null`, `''` —
+	 * removes the filter instead of sending it, so a cleared field narrows nothing and the next answer
+	 * is the unnarrowed one.
 	 */
 	setFilter: <Key extends keyof ListFilters<TQuery>>(
 		key: Key,
@@ -132,12 +156,12 @@ export type UseListResult<TItem, TQuery extends ListQuery> = {
 	onSort: (next: ListSort<SortKeyOf<TQuery>> | undefined) => void;
 	/** Read the same page again — what a write elsewhere in the domain ends with. */
 	reload: () => void;
-	/** The field the reader types into, by the key it narrows. */
+	/** The field the reader types into, by the key it narrows. Its writes are read after `debounce`. */
 	text: <Key extends StringFilterKey<TQuery>>(key: Key) => TextBinding;
-	/** The control that picks one of a set, by the key it narrows. */
+	/** The control that picks one of a set, by the key it narrows. Its writes are read at once. */
 	choice: <Key extends StringFilterKey<TQuery>>(
 		key: Key,
 	) => ChoiceBinding<NonNullable<ListFilters<TQuery>[Key]>>;
-	/** The control that is on or off, by the key it narrows. */
+	/** The control that is on or off, by the key it narrows. Its writes are read at once. */
 	flag: <Key extends BooleanFilterKey<TQuery>>(key: Key) => FlagBinding;
 };
