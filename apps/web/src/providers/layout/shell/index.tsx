@@ -89,7 +89,9 @@ export const AppShell = ({ nav }: AppShellProps) => {
 								disabled: loggingOut,
 								closeOnClick: false,
 								separatorBefore: true,
-								onClick: () => void handleLogout(),
+								onClick: () => {
+									handleLogout();
+								},
 							},
 						]}
 						trigger={

@@ -38,4 +38,4 @@ async function bootstrap(): Promise<void> {
 	if (!isProduction()) NestLogger.log(`Swagger on http://localhost:${PORT}/docs`, 'Bootstrap');
 }
 
-void bootstrap();
+bootstrap();

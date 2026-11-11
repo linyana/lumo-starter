@@ -37,12 +37,14 @@ export const UsersPage = () => {
 	const { fetchData } = users;
 
 	useEffect(() => {
-		void fetchData(buildQuery(page, search));
+		fetchData(buildQuery(page, search));
 	}, [fetchData, page, search]);
 
 	// A delete that fails has nowhere else to go, so it takes the default toast.
 	const remove = useHttp(deleteUser, {
-		onSuccess: () => void fetchData(buildQuery(page, search)),
+		onSuccess: () => {
+			fetchData(buildQuery(page, search));
+		},
 	});
 
 	const total = users.data?.total ?? 0;
@@ -82,7 +84,9 @@ export const UsersPage = () => {
 						size="sm"
 						icon={<Trash2 />}
 						loading={remove.loading}
-						onClick={() => void remove.fetchData(row.id)}
+						onClick={() => {
+							remove.fetchData(row.id);
+						}}
 					>
 						Delete
 					</Button>

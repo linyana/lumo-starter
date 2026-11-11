@@ -35,7 +35,7 @@ export const LoginPage = () => {
 		}
 
 		setErrors({});
-		void submit.fetchData(parsed.data as LoginInput);
+		submit.fetchData(parsed.data as LoginInput);
 	};
 
 	return (

@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	}, []);
 
 	useEffect(() => {
-		void refresh();
+		refresh();
 	}, [refresh]);
 
 	// The http layer gives up on a 401 only once the refresh cookie is gone, so

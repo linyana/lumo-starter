@@ -29,7 +29,7 @@ export const RegisterPage = () => {
 		}
 
 		setErrors({});
-		void submit.fetchData(parsed.data as RegisterInput);
+		submit.fetchData(parsed.data as RegisterInput);
 	};
 
 	return (

@@ -25,7 +25,12 @@ export const SessionUnavailable = () => {
 				<p className="text-sm text-muted-foreground">
 					The server did not answer. Check your connection and try again.
 				</p>
-				<Button className="mt-2" onClick={() => void refresh()}>
+				<Button
+					className="mt-2"
+					onClick={() => {
+						refresh();
+					}}
+				>
 					Try again
 				</Button>
 			</div>

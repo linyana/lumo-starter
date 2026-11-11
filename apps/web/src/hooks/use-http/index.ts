@@ -12,7 +12,9 @@ const INITIAL_STATE = { data: null, error: null, loading: false } as const;
  *
  * ```tsx
  * const users = useHttp(listUsers);
- * useEffect(() => { void users.fetchData({ page }); }, [users.fetchData, page]);
+ * useEffect(() => {
+ * 	users.fetchData({ page });
+ * }, [users.fetchData, page]);
  * users.data / users.loading / users.error
  * ```
  *
