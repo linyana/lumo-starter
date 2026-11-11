@@ -142,6 +142,19 @@ export const row = cn(
 	'data-selected:data-highlighted:before:opacity-(--state-layer-selected-hover-opacity)',
 );
 
+/**
+ * A row that destroys rather than acts or navigates. A row's tint is its own text colour, so the ink
+ * is the whole of the appearance — and it has to outlast the highlight, which would otherwise step
+ * the row back to the ordinary accent while the pointer is still on it.
+ */
+export const rowDestructive = 'text-destructive data-highlighted:text-destructive';
+
+/**
+ * What a row does, drawn in the colour of a consequence. Orthogonal to the row itself, the way a
+ * button's `tone` is to its `variant`: an ordinary action and a destroying one are the same row.
+ */
+export type RowTone = 'default' | 'destructive';
+
 /** The name over a group of rows: quieter than the rows, and never one of them. */
 export const rowGroupLabel = 'px-4 py-2 text-sm leading-4 text-muted-foreground select-none';
 

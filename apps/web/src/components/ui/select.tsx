@@ -3,7 +3,15 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import type { ComponentProps, ReactNode } from 'react';
 import { tv, type VariantProps } from 'tailwind-variants';
 import { cn } from '@/lib/utils';
-import { fieldShell, iconSlot, row, rowGroupLabel, rowSeparator } from '@/lib/control';
+import {
+	fieldShell,
+	iconSlot,
+	row,
+	rowDestructive,
+	rowGroupLabel,
+	rowSeparator,
+	type RowTone,
+} from '@/lib/control';
 import { backdrop, popup, positioner } from '@/lib/surface';
 import { Clear as ClearButton, type ClearProps as ClearButtonProps } from './clear';
 
@@ -315,6 +323,8 @@ export function GroupLabel({ className, ...props }: GroupLabelProps) {
 export type ItemProps = Omit<ComponentProps<typeof BaseSelect.Item>, 'className'> & {
 	/** Merged with `cn()`, so a Base UI state callback is not accepted here. */
 	className?: string;
+	/** What choosing the option does, drawn in the colour of a consequence. */
+	tone?: RowTone;
 };
 
 /**
@@ -323,11 +333,17 @@ export type ItemProps = Omit<ComponentProps<typeof BaseSelect.Item>, 'className'
  * two states, deepening a notch while the pointer is still on it. The cursor is a pointer, unlike a
  * menu row's: this is a thing to pick out of a list.
  */
-export function Item({ className, ...props }: ItemProps) {
+export function Item({ className, tone = 'default', ...props }: ItemProps) {
 	return (
 		<BaseSelect.Item
 			data-slot="select-item"
-			className={cn(row, 'cursor-pointer pr-3 data-disabled:opacity-50', className)}
+			data-tone={tone}
+			className={cn(
+				row,
+				'cursor-pointer pr-3 data-disabled:opacity-50',
+				tone === 'destructive' && rowDestructive,
+				className,
+			)}
 			{...props}
 		/>
 	);

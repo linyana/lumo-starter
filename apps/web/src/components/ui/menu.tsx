@@ -1,7 +1,7 @@
 import { Menu as BaseMenu } from '@base-ui/react/menu';
 import type { ComponentProps } from 'react';
 import { cn } from '@/lib/utils';
-import { row, rowGroupLabel, rowSeparator } from '@/lib/control';
+import { row, rowDestructive, rowGroupLabel, rowSeparator, type RowTone } from '@/lib/control';
 import { popup, positioner, viewport } from '@/lib/surface';
 
 export const Group = BaseMenu.Group;
@@ -18,14 +18,23 @@ export function GroupLabel({ className, ...props }: GroupLabelProps) {
 	);
 }
 
-export type ItemProps = ComponentProps<typeof BaseMenu.Item>;
+export type ItemProps = ComponentProps<typeof BaseMenu.Item> & {
+	/** What selecting the row does, drawn in the colour of a consequence. */
+	tone?: RowTone;
+};
 
 /** A row, with extra room on the right for an action of its own. */
-export function Item({ className, ...props }: ItemProps) {
+export function Item({ className, tone = 'default', ...props }: ItemProps) {
 	return (
 		<BaseMenu.Item
 			data-slot="menu-item"
-			className={cn(row, 'cursor-pointer data-disabled:cursor-not-allowed pr-8', className)}
+			data-tone={tone}
+			className={cn(
+				row,
+				'cursor-pointer data-disabled:cursor-not-allowed pr-8',
+				tone === 'destructive' && rowDestructive,
+				className,
+			)}
 			{...props}
 		/>
 	);

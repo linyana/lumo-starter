@@ -31,11 +31,8 @@ export const Menu = ({
 										disabled={item.disabled}
 										closeOnClick={item.closeOnClick}
 										onClick={item.onClick}
-										className={cn(
-											classNames?.item,
-											item.destructive && 'text-destructive',
-											item.className,
-										)}
+										tone={item.destructive ? 'destructive' : 'default'}
+										className={cn(classNames?.item, item.className)}
 									>
 										{item.icon && (
 											<span className={cn('mr-2 inline-flex shrink-0 items-center', iconSlot)}>
