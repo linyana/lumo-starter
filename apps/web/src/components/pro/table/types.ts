@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { HeadProps, RootProps, TableFilterProps } from '@/components/ui/table';
+import type { MenuItem } from '../menu';
 import type { SlotClassNames } from '../types';
 
 export type { TableFilterProps, TableOptionsFilter, TableTextFilter } from '@/components/ui/table';
@@ -43,6 +44,7 @@ export type TableSlots =
 	| 'head'
 	| 'body'
 	| 'cell'
+	| 'actions'
 	| 'empty'
 	| 'skeleton';
 
@@ -69,6 +71,15 @@ export type TableProps<Row, Key extends string = string> = {
 	skeletonRows?: number;
 	/** Shown in a row across every column when there are no records. */
 	empty?: ReactNode;
+	/**
+	 * The actions a record offers, in the two places a reader looks for them: the last column keeps an
+	 * "..." on the row the pointer is on, and a right press anywhere on the row opens the same list at
+	 * the pointer. One list is drawn twice — a record with no actions gets neither, so a row a reader
+	 * may not act on says nothing about it.
+	 */
+	rowActions?: (row: Row) => MenuItem[];
+	/** What a record's "..." is called. Defaults to "Actions". */
+	rowActionsLabel?: (row: Row) => string;
 	className?: string;
 	classNames?: SlotClassNames<TableSlots>;
 };

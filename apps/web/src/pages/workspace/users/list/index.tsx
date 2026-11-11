@@ -3,7 +3,7 @@ import { RotateCcw } from 'lucide-react';
 import { Badge, Button, Input, Pagination, Table, type TableColumn } from '@/components';
 import type { SortKeyOf, UseListResult } from '@/hooks';
 import { useAuth } from '@/providers/auth';
-import { UserActions } from '../actions';
+import { useUserActions } from '../actions';
 
 /** The keys `GET /users` sorts on, which are the columns a title may report. */
 type UserSortKey = SortKeyOf<ListUsersQuery>;
@@ -30,6 +30,15 @@ export const UserList = ({ users }: IPropsType) => {
 	const { user: currentUser, can } = useAuth();
 	const canEdit = can('user:write');
 	const canDelete = can('user:delete');
+
+	// The rows' actions are data, because the table draws them twice: the last column's "..." and the
+	// menu a right press opens. What those actions open is this screen's, so it owns the panels too.
+	const { itemsOf: rowActions, dialogs } = useUserActions({
+		currentUserId: currentUser?.id,
+		canEdit,
+		canDelete,
+		onChanged: users.reload,
+	});
 
 	const columns: TableColumn<User, UserSortKey>[] = [
 		{
@@ -59,28 +68,6 @@ export const UserList = ({ users }: IPropsType) => {
 					))}
 				</div>
 			),
-		},
-		{
-			key: 'actions',
-			header: 'Actions',
-			align: 'end',
-			cell: (row) => {
-				const deletable = canDelete && row.id !== currentUser?.id;
-
-				if (!canEdit && !deletable) {
-					return <span className="text-xs text-muted-foreground">—</span>;
-				}
-
-				return (
-					<UserActions
-						user={row}
-						currentUserId={currentUser?.id}
-						canEdit={canEdit}
-						canDelete={deletable}
-						onChanged={users.reload}
-					/>
-				);
-			},
 		},
 	];
 
@@ -139,6 +126,8 @@ export const UserList = ({ users }: IPropsType) => {
 				columns={columns}
 				rows={failed ? [] : users.items}
 				rowKey={(row) => row.id}
+				rowActions={rowActions}
+				rowActionsLabel={(row) => `Actions for ${row.name}`}
 				sort={users.sort}
 				onSortChange={users.onSort}
 				loading={users.loading}
@@ -162,6 +151,8 @@ export const UserList = ({ users }: IPropsType) => {
 					/>
 				</div>
 			)}
+
+			{dialogs}
 		</>
 	);
 };

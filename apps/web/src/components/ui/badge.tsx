@@ -12,7 +12,7 @@ import { iconSlot } from '@/lib/control';
 export const badgeVariants = tv({
 	base: [
 		'inline-flex shrink-0 items-center gap-1 align-middle whitespace-nowrap',
-		'rounded-sm border border-transparent px-1.5 py-0.5',
+		'rounded-md border border-transparent px-1.5 py-0.5',
 		'text-xs leading-4 font-medium',
 		iconSlot,
 	],

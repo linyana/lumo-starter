@@ -1,91 +1,86 @@
 import type { User } from '@lumo/shared';
-import { Ellipsis, Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { Button, Menu, type MenuItem } from '@/components';
+import type { MenuItem } from '@/components';
 import { DeleteUser } from '../delete';
 import { EditUser } from '../edit';
 
 /** The panels a row can open, one at a time — the same row cannot edit and be deleted at once. */
 type Panel = 'edit' | 'delete';
 
-/** One row's actions: the menu it shows, and the two panels behind it. */
-type IPropsType = {
-	/** The account the row is about. */
-	user: User;
+/** One row's actions: the list a row offers, and the panels behind it. */
+type UseUserActionsParams = {
 	/** The signed-in account — its own row cannot be deleted, which is this screen's rule. */
 	currentUserId?: string;
 	/** Whether the reader may open the edit panel. */
 	canEdit: boolean;
-	/** Whether the reader may delete this row, once its own account is excluded. */
+	/** Whether the reader may delete a row, once its own account is excluded. */
 	canDelete: boolean;
 	/** Runs once a write has answered, so the caller can re-read the list. */
 	onChanged: () => void;
 };
 
 /**
- * A row's actions, behind one button: a menu is opened, holds the actions the reader may take, and
- * closes — so the column stays one width however many actions a role unlocks. The panels it names
- * are mounted beside the menu rather than inside it: a menu closes on the press that picks a row,
- * and a panel opened from a part that just closed would close with it.
+ * A row's actions in the two halves a table needs: the list it draws — behind the row's "..." and
+ * under a right press, which are the same list — and the panels those rows open.
+ *
+ * The panels are handed back to be mounted beside the table rather than inside a row: a menu closes
+ * on the press that picks an action, and a panel opened from inside it would close with it.
  */
-export const UserActions = ({
-	user,
+export const useUserActions = ({
 	currentUserId,
 	canEdit,
 	canDelete,
 	onChanged,
-}: IPropsType) => {
-	const [panel, setPanel] = useState<Panel | null>(null);
+}: UseUserActionsParams) => {
+	const [panel, setPanel] = useState<{ user: User; kind: Panel } | null>(null);
+	const close = () => setPanel(null);
 
-	const items: MenuItem[] = [
-		...(canEdit ? [{ label: 'Edit', icon: <Pencil />, onClick: () => setPanel('edit') }] : []),
-		...(canDelete
-			? [
-					{
-						label: 'Delete',
-						icon: <Trash2 />,
-						destructive: true,
-						separatorBefore: true,
-						onClick: () => setPanel('delete'),
-					},
-				]
-			: []),
-	];
+	const itemsOf = (user: User): MenuItem[] => {
+		const items: MenuItem[] = [];
 
-	return (
-		<>
-			<Menu
-				align="end"
-				className="min-w-40"
-				trigger={
-					<Button
-						variant="ghost"
-						size="icon"
-						icon={<Ellipsis />}
-						aria-label={`Actions for ${user.name}`}
-					/>
-				}
-				items={items}
+		if (canEdit) {
+			items.push({
+				label: 'Edit',
+				icon: <Pencil />,
+				onClick: () => setPanel({ user, kind: 'edit' }),
+			});
+		}
+
+		if (canDelete && user.id !== currentUserId) {
+			items.push({
+				label: 'Delete',
+				icon: <Trash2 />,
+				destructive: true,
+				separatorBefore: true,
+				onClick: () => setPanel({ user, kind: 'delete' }),
+			});
+		}
+
+		return items;
+	};
+
+	const dialogs =
+		panel === null ? null : panel.kind === 'edit' ? (
+			<EditUser
+				user={panel.user}
+				currentUserId={currentUserId}
+				open
+				onOpenChange={(next) => {
+					if (!next) close();
+				}}
+				onUpdated={onChanged}
 			/>
+		) : (
+			<DeleteUser
+				user={panel.user}
+				open
+				onOpenChange={(next) => {
+					if (!next) close();
+				}}
+				onDeleted={onChanged}
+			/>
+		);
 
-			{canEdit && (
-				<EditUser
-					user={user}
-					currentUserId={currentUserId}
-					open={panel === 'edit'}
-					onOpenChange={(next) => setPanel(next ? 'edit' : null)}
-					onUpdated={onChanged}
-				/>
-			)}
-
-			{canDelete && (
-				<DeleteUser
-					user={user}
-					open={panel === 'delete'}
-					onOpenChange={(next) => setPanel(next ? 'delete' : null)}
-					onDeleted={onChanged}
-				/>
-			)}
-		</>
-	);
+	return { itemsOf, dialogs };
 };

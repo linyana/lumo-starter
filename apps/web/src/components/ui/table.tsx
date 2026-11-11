@@ -667,7 +667,7 @@ const ellipsisCell = 'max-w-[var(--cell-max-w,15rem)] overflow-hidden text-ellip
  * hold two of these a gap apart without their targets merging.
  */
 const headControl = cn(
-	'relative inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-sm',
+	'relative inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md',
 	'text-muted-foreground transition-colors duration-(--duration-state)',
 	'hover:bg-row-hover hover:text-foreground',
 	'data-active:bg-row-hover',
@@ -675,7 +675,7 @@ const headControl = cn(
 );
 
 const filterOptionClass = cn(
-	'flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm select-none',
+	'flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm select-none',
 	'has-data-disabled:cursor-not-allowed has-data-disabled:opacity-50',
 	'hover:bg-row-hover',
 );

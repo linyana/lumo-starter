@@ -77,14 +77,14 @@ export function InputGroup({ className, ...props }: InputGroupProps) {
 	return (
 		<BaseCombobox.InputGroup
 			data-slot="combobox-input-group"
-			className={cn('relative', 'has-[[data-slot=combobox-clear]]:[&_input]:pe-16', className)}
+			className={cn('relative', 'has-data-[slot=combobox-clear]:[&_input]:pe-16', className)}
 			{...props}
 		/>
 	);
 }
 
 const adornmentClass = cn(
-	'absolute inset-y-0 my-auto flex size-7 items-center justify-center rounded-sm',
+	'absolute inset-y-0 my-auto flex size-7 items-center justify-center rounded-md',
 	'text-muted-foreground transition-colors duration-(--duration-state)',
 	'hover:text-foreground',
 	'data-disabled:pointer-events-none data-disabled:opacity-50',
