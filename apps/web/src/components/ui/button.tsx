@@ -35,11 +35,13 @@ export const buttonVariants = tv({
 			// A height is a floor, not a ceiling: one line of text still lands on the 32/36/40 step,
 			// but a label that carries two lines — the account menu at the foot of the rail — grows
 			// the button instead of spilling out of a box that was told how tall to be. The icon
-			// button is a square drawn around a glyph and nothing more, so it stays fixed.
+			// button is a square drawn around a glyph and nothing more, so it stays fixed — and it
+			// sits on the `sm` step's 32, which is the square a compact row and a narrow rail draw,
+			// so an icon button never outgrows the box it was put in.
 			sm: 'min-h-8 gap-1.5 px-3 text-sm',
 			md: 'min-h-9 px-4 text-sm',
 			lg: 'min-h-10 px-6 text-base',
-			icon: 'size-9 text-sm',
+			icon: 'size-8 text-sm',
 		},
 		/** What the button does, drawn in the colour of a consequence. Orthogonal to `variant`. */
 		tone: {

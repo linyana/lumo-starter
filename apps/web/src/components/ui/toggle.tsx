@@ -38,7 +38,7 @@ export const toggleVariants = tv({
 			sm: 'h-8 gap-1.5 px-3 text-sm',
 			md: 'h-9 px-4 text-sm',
 			lg: 'h-10 px-6 text-base',
-			icon: 'size-9 text-sm',
+			icon: 'size-8 text-sm',
 		},
 	},
 	defaultVariants: {

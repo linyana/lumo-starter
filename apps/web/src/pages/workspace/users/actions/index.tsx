@@ -60,7 +60,7 @@ export const UserActions = ({
 				trigger={
 					<Button
 						variant="ghost"
-						size="sm"
+						size="icon"
 						icon={<Ellipsis />}
 						aria-label={`Actions for ${user.name}`}
 					/>

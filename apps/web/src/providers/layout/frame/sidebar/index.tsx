@@ -102,7 +102,7 @@ export function SidebarContent({
 				<div
 					data-slot="layout-brand"
 					className={cn(
-						'flex shrink-0 items-center gap-2 px-2 text-sm font-semibold [&_svg]:size-4 [&_svg]:shrink-0',
+						'flex shrink-0 items-center gap-2 px-2 text-sm font-semibold [&_svg]:shrink-0',
 						// The narrow rail is a single 32px column wide, so its brand controls stand on
 						// top of each other instead of beside each other.
 						collapsed ? 'flex-col py-2' : 'h-14',
@@ -124,7 +124,6 @@ export function SidebarContent({
 								<Button
 									variant="ghost"
 									size="icon"
-									className="size-8 shrink-0"
 									aria-label={collapsed ? 'expand sidebar' : 'collapse sidebar'}
 									aria-expanded={!collapsed}
 									onClick={onToggle}
