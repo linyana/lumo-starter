@@ -57,10 +57,7 @@ export function Indicator({ className, children, ...props }: IndicatorProps) {
 			{children ?? (
 				<>
 					<Check aria-hidden className="group-data-indeterminate/indicator:hidden" />
-					<Minus
-						aria-hidden
-						className="hidden group-data-indeterminate/indicator:block"
-					/>
+					<Minus aria-hidden className="hidden group-data-indeterminate/indicator:block" />
 				</>
 			)}
 		</BaseCheckbox.Indicator>

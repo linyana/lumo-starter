@@ -68,11 +68,7 @@ export function InputGroup({ className, ...props }: InputGroupProps) {
 	return (
 		<BaseCombobox.InputGroup
 			data-slot="combobox-input-group"
-			className={cn(
-				'relative',
-				'has-[[data-slot=combobox-clear]]:[&_input]:pe-16',
-				className,
-			)}
+			className={cn('relative', 'has-[[data-slot=combobox-clear]]:[&_input]:pe-16', className)}
 			{...props}
 		/>
 	);

@@ -12,11 +12,7 @@ export type RootProps<Value = unknown> = Omit<RadioGroupProps<Value>, 'className
 /** The group: one value for all of the items inside it, and the arrow keys between them. */
 export function Root<Value>({ className, ...props }: RootProps<Value>) {
 	return (
-		<BaseRadioGroup
-			data-slot="radio-group"
-			className={cn('grid gap-2', className)}
-			{...props}
-		/>
+		<BaseRadioGroup data-slot="radio-group" className={cn('grid gap-2', className)} {...props} />
 	);
 }
 

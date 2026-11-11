@@ -86,11 +86,7 @@ export function Value({ className, ...props }: ValueProps) {
 	return (
 		<BaseSelect.Value
 			data-slot="select-value"
-			className={cn(
-				'min-w-0 flex-1 truncate',
-				'data-placeholder:text-muted-foreground',
-				className,
-			)}
+			className={cn('min-w-0 flex-1 truncate', 'data-placeholder:text-muted-foreground', className)}
 			{...props}
 		/>
 	);

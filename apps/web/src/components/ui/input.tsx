@@ -89,11 +89,7 @@ export function LumoInput({
 			readOnly={gated ? true : readOnly}
 			onPointerDown={handlePointerDown}
 			onFocus={handleFocus}
-			className={cn(
-				inputVariants({ size }),
-				readOnly === true && 'read-only:bg-muted',
-				className,
-			)}
+			className={cn(inputVariants({ size }), readOnly === true && 'read-only:bg-muted', className)}
 			{...props}
 		/>
 	);

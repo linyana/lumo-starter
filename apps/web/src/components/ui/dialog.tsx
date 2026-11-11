@@ -32,9 +32,7 @@ export function Description({ className, ...props }: DescriptionProps) {
 export type PopupProps = ComponentProps<typeof BaseDialog.Popup>;
 
 export function Popup({ className, ...props }: PopupProps) {
-	return (
-		<BaseDialog.Popup data-slot="dialog-popup" className={cn(panel, className)} {...props} />
-	);
+	return <BaseDialog.Popup data-slot="dialog-popup" className={cn(panel, className)} {...props} />;
 }
 
 export const Portal = BaseDialog.Portal;
@@ -44,9 +42,7 @@ export const Root = BaseDialog.Root;
 export type TitleProps = ComponentProps<typeof BaseDialog.Title>;
 
 export function Title({ className, ...props }: TitleProps) {
-	return (
-		<BaseDialog.Title data-slot="dialog-title" className={cn(title, className)} {...props} />
-	);
+	return <BaseDialog.Title data-slot="dialog-title" className={cn(title, className)} {...props} />;
 }
 
 export const Trigger = BaseDialog.Trigger;

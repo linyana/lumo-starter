@@ -4,7 +4,11 @@ import { cn } from '@/lib/utils';
 
 export type LumoSeparatorProps = ComponentProps<typeof BaseSeparator>;
 
-export function LumoSeparator({ className, orientation = 'horizontal', ...props }: LumoSeparatorProps) {
+export function LumoSeparator({
+	className,
+	orientation = 'horizontal',
+	...props
+}: LumoSeparatorProps) {
 	return (
 		<BaseSeparator
 			data-slot="separator"

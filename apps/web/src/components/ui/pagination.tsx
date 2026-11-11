@@ -73,13 +73,7 @@ const paginationItemStates = cn(
 	'data-disabled:pointer-events-none data-disabled:opacity-40',
 );
 
-function itemOf({
-	size,
-	className,
-}: {
-	size: PaginationState['size'];
-	className?: string;
-}) {
+function itemOf({ size, className }: { size: PaginationState['size']; className?: string }) {
 	return cn(paginationItemVariants({ size }), paginationItemStates, className);
 }
 
@@ -266,15 +260,7 @@ export function Ellipsis({ className, children, ...props }: EllipsisProps) {
  * side. Everything between is one gap, however many pages it hides — a pagination that listed them
  * all would be a list of pages rather than a way through them.
  */
-function pageList({
-	page,
-	count,
-	siblings,
-}: {
-	page: number;
-	count: number;
-	siblings: number;
-}) {
+function pageList({ page, count, siblings }: { page: number; count: number; siblings: number }) {
 	const pages: { key: string; value?: number }[] = [];
 	const near = siblings + 1;
 

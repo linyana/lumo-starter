@@ -47,7 +47,10 @@ export const toggleVariants = tv({
 	},
 });
 
-export type LumoToggleProps<Value extends string = string> = Omit<BaseToggleProps<Value>, 'className'> &
+export type LumoToggleProps<Value extends string = string> = Omit<
+	BaseToggleProps<Value>,
+	'className'
+> &
 	VariantProps<typeof toggleVariants> & {
 		/** Merged with `cn()`, so a Base UI state callback is not accepted here. */
 		className?: string;

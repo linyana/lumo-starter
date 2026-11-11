@@ -16,7 +16,13 @@ const dotCount = 8;
 const dotScale = 0.2;
 const radiusScale = 0.34;
 
-export function LumoSpinner({ className, style, size, label = 'Loading', ...props }: LumoSpinnerProps) {
+export function LumoSpinner({
+	className,
+	style,
+	size,
+	label = 'Loading',
+	...props
+}: LumoSpinnerProps) {
 	const box = typeof size === 'number' ? `${size}em` : size;
 
 	return (
@@ -76,8 +82,7 @@ export function LumoSpinner({ className, style, size, label = 'Loading', ...prop
 									data-slot="spinner-dot"
 									className="block size-full rounded-full bg-current"
 									style={{
-										animation:
-											'lumo-spinner-pulse var(--duration, 1s) linear infinite',
+										animation: 'lumo-spinner-pulse var(--duration, 1s) linear infinite',
 										animationDelay: `calc(var(--duration, 1s) / ${dotCount} * ${index - dotCount})`,
 									}}
 								/>

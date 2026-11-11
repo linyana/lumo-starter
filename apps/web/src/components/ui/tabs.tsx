@@ -363,12 +363,7 @@ export function Panels({ className, children, ...props }: PanelsProps) {
 	}, [index, follow]);
 
 	return (
-		<div
-			ref={boxRef}
-			data-slot="tabs-panels"
-			className={cn('overflow-clip', className)}
-			{...props}
-		>
+		<div ref={boxRef} data-slot="tabs-panels" className={cn('overflow-clip', className)} {...props}>
 			<div ref={trackRef} data-slot="tabs-track" className="flex items-start">
 				<TrackContext.Provider value>
 					{panes.map((pane, lane) => (

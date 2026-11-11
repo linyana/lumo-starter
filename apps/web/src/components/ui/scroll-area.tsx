@@ -87,9 +87,7 @@ export function Thumb({ className, ...props }: ThumbProps) {
 }
 
 export function Corner({ className, ...props }: CornerProps) {
-	return (
-		<BaseScrollArea.Corner data-slot="scroll-area-corner" className={className} {...props} />
-	);
+	return <BaseScrollArea.Corner data-slot="scroll-area-corner" className={className} {...props} />;
 }
 
 export const LumoScrollArea = { Root, Viewport, Content, Scrollbar, Thumb, Corner };

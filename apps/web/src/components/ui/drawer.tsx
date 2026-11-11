@@ -149,9 +149,7 @@ export function SwipeArea({ className, ...props }: SwipeAreaProps) {
 export type TitleProps = ComponentProps<typeof BaseDrawer.Title>;
 
 export function Title({ className, ...props }: TitleProps) {
-	return (
-		<BaseDrawer.Title data-slot="drawer-title" className={cn(title, className)} {...props} />
-	);
+	return <BaseDrawer.Title data-slot="drawer-title" className={cn(title, className)} {...props} />;
 }
 
 export const Trigger = BaseDrawer.Trigger;

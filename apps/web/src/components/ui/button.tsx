@@ -104,13 +104,9 @@ export function LumoButton({
 				// Against an indefinite button it stays `auto`, so a button that hugs its label is
 				// unchanged.
 				<span data-slot="button-content" className="w-full grid">
-					<span className={cn('col-start-1 row-start-1', loading && 'opacity-0')}>
-						{children}
-					</span>
+					<span className={cn('col-start-1 row-start-1', loading && 'opacity-0')}>{children}</span>
 					{loading && (
-						<span className="col-start-1 row-start-1 flex place-self-center">
-							{spinner}
-						</span>
+						<span className="col-start-1 row-start-1 flex place-self-center">{spinner}</span>
 					)}
 				</span>
 			)}

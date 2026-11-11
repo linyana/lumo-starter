@@ -128,7 +128,12 @@ function bezier(ease: unknown): string {
  * `visualDuration` is deliberately not used here: motion ignores `velocity` when a spring is given
  * one, and a glide that cannot be interrupted smoothly is the thing this exists to avoid.
  */
-export function toTiming({ preset, from, to, velocity = 0 }: { preset: Transition } & Slide): Timing {
+export function toTiming({
+	preset,
+	from,
+	to,
+	velocity = 0,
+}: { preset: Transition } & Slide): Timing {
 	const type = (preset as { type?: string }).type;
 
 	if (type !== 'spring') {

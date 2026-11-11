@@ -80,8 +80,7 @@ export function scaleOf({
 	const edges = frame(style);
 	const width = length(style.width);
 	const height = length(style.height);
-	const borderBox =
-		width === undefined || height === undefined || style.boxSizing === 'border-box';
+	const borderBox = width === undefined || height === undefined || style.boxSizing === 'border-box';
 
 	return {
 		x: ratio({

@@ -33,11 +33,7 @@ export type LabelProps = Omit<ComponentProps<typeof BaseSlider.Label>, 'classNam
 /** What the number is about. Base UI wires it to the control's own inputs. */
 export function Label({ className, ...props }: LabelProps) {
 	return (
-		<BaseSlider.Label
-			data-slot="slider-label"
-			className={cn('text-sm', className)}
-			{...props}
-		/>
+		<BaseSlider.Label data-slot="slider-label" className={cn('text-sm', className)} {...props} />
 	);
 }
 

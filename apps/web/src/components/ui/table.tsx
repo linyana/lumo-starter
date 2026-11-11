@@ -591,11 +591,7 @@ export function Row({ depth, className, style, ...props }: RowProps) {
 		<tr
 			data-slot="table-row"
 			data-depth={depth}
-			style={
-				depth === undefined
-					? style
-					: ({ '--table-depth': depth, ...style } as CSSProperties)
-			}
+			style={depth === undefined ? style : ({ '--table-depth': depth, ...style } as CSSProperties)}
 			className={cn(tableRowVariants(), className)}
 			{...props}
 		/>
@@ -673,16 +669,12 @@ function FilterPanel({
 		needle.length === 0
 			? options
 			: options.filter((option) =>
-					(option.text ?? textOf(option.label) ?? option.value)
-						.toLowerCase()
-						.includes(needle),
+					(option.text ?? textOf(option.label) ?? option.value).toLowerCase().includes(needle),
 				);
 
 	const toggle = ({ value, on }: { value: string; on: boolean }) =>
 		setDraft((was) =>
-			on
-				? [...was.filter((one) => one !== value), value]
-				: was.filter((one) => one !== value),
+			on ? [...was.filter((one) => one !== value), value] : was.filter((one) => one !== value),
 		);
 	const apply = () => {
 		filter.onChange?.(draft.length === 0 ? null : draft);
@@ -694,8 +686,7 @@ function FilterPanel({
 		return <>{render({ value: draft, setValue: setDraft, apply, reset, close: onClose })}</>;
 	}
 
-	const nameOf = (option: TableFilterOption) =>
-		option.text ?? textOf(option.label) ?? option.value;
+	const nameOf = (option: TableFilterOption) => option.text ?? textOf(option.label) ?? option.value;
 
 	const optionRow = (option: TableFilterOption) => {
 		const name = nameOf(option);
@@ -715,11 +706,7 @@ function FilterPanel({
 						<LumoCheckbox.Indicator />
 					</LumoCheckbox.Root>
 				) : (
-					<LumoRadioGroup.Item
-						aria-label={name}
-						value={option.value}
-						disabled={option.disabled}
-					>
+					<LumoRadioGroup.Item aria-label={name} value={option.value} disabled={option.disabled}>
 						<LumoRadioGroup.Indicator />
 					</LumoRadioGroup.Item>
 				)}
@@ -736,9 +723,7 @@ function FilterPanel({
 						size="sm"
 						value={query}
 						aria-label={
-							label === undefined
-								? locale.filterSearch
-								: `${locale.filterSearch} ${label}`
+							label === undefined ? locale.filterSearch : `${locale.filterSearch} ${label}`
 						}
 						placeholder={locale.filterSearch}
 						onChange={(event) => setQuery(event.target.value)}
@@ -1041,8 +1026,7 @@ export function Cell({
 				// over the opaque base rather than the fill itself, because that fill has to stay solid.
 				fixed === undefined
 					? 'data-[sort=ascending]:bg-column-sorted data-[sort=descending]:bg-column-sorted'
-					: sorted &&
-							'bg-[linear-gradient(var(--color-column-sorted),var(--color-column-sorted))]',
+					: sorted && 'bg-[linear-gradient(var(--color-column-sorted),var(--color-column-sorted))]',
 				fixed !== undefined && 'z-1',
 				fixedClass(fixed),
 				responsiveClass(responsive),
@@ -1095,9 +1079,7 @@ export function SelectionHead({ selection, fixed, className, ...props }: Selecti
 						aria-label={table.locale.selectAll}
 						checked={all}
 						indeterminate={some}
-						onCheckedChange={(next) =>
-							keep(next === true ? [...value, ...keys] : clear)
-						}
+						onCheckedChange={(next) => keep(next === true ? [...value, ...keys] : clear)}
 					>
 						<LumoCheckbox.Indicator />
 					</LumoCheckbox.Root>
@@ -1123,13 +1105,7 @@ export function SelectionHead({ selection, fixed, className, ...props }: Selecti
 										{table.locale.selectAll}
 									</LumoMenu.Item>
 									<LumoMenu.Item
-										onClick={() =>
-											keep(
-												clear.concat(
-													keys.filter((key) => !value.includes(key)),
-												),
-											)
-										}
+										onClick={() => keep(clear.concat(keys.filter((key) => !value.includes(key))))}
 									>
 										{table.locale.selectInvert}
 									</LumoMenu.Item>
@@ -1200,11 +1176,7 @@ export function SelectionCell({
 					checked={checked}
 					disabled={disabled}
 					onCheckedChange={(next) =>
-						onChange(
-							next === true
-								? [...chosen, value]
-								: chosen.filter((one) => one !== value),
-						)
+						onChange(next === true ? [...chosen, value] : chosen.filter((one) => one !== value))
 					}
 				>
 					<LumoCheckbox.Indicator />
@@ -1308,11 +1280,7 @@ export function ExpandedRow({
 	...props
 }: ExpandedRowProps) {
 	return (
-		<tr
-			data-slot="table-expanded"
-			style={{ '--table-depth': depth } as CSSProperties}
-			{...props}
-		>
+		<tr data-slot="table-expanded" style={{ '--table-depth': depth } as CSSProperties} {...props}>
 			<td
 				colSpan={columns}
 				className={cn(
@@ -1345,10 +1313,7 @@ export function Empty({ columns, icon, className, children, ...props }: EmptyPro
 			<td
 				data-slot="table-empty-cell"
 				colSpan={columns}
-				className={cn(
-					'border-b px-(--cell-px) py-12 text-center text-muted-foreground',
-					className,
-				)}
+				className={cn('border-b px-(--cell-px) py-12 text-center text-muted-foreground', className)}
 				{...props}
 			>
 				<div
@@ -1356,11 +1321,7 @@ export function Empty({ columns, icon, className, children, ...props }: EmptyPro
 					className="mx-auto flex max-w-sm flex-col items-center gap-2"
 				>
 					{icon !== undefined && (
-						<span
-							data-slot="table-empty-icon"
-							className={cn('text-2xl', iconSlot)}
-							aria-hidden
-						>
+						<span data-slot="table-empty-icon" className={cn('text-2xl', iconSlot)} aria-hidden>
 							{icon}
 						</span>
 					)}
