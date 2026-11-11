@@ -1016,9 +1016,6 @@ export function Head({
 				rowHeader ? 'font-medium' : 'text-sm font-semibold text-muted-foreground',
 				sortable && '[thead>tr>&]:hover:bg-table-head-hover',
 				'data-[sort=ascending]:text-foreground data-[sort=descending]:text-foreground',
-				// The band runs down the column, so it starts here, opaque: a sticky header may not show
-				// the records that pass under it.
-				'data-[sort=ascending]:bg-table-head-hover data-[sort=descending]:bg-table-head-hover',
 				// A title holds still at the top of the frame and a pinned one at its edge as well. The
 				// pinned column stands in front of the rest, so it is drawn above the other titles — and
 				// only a title may be given the top, since a pinned record still has to scroll away.
@@ -1068,8 +1065,8 @@ export type CellProps = Omit<ComponentProps<'td'>, 'align'> &
 		/** Cut the cell off at the column's width, and keep the whole of it in `title`. */
 		ellipsis?: boolean | { showTitle?: boolean };
 		/**
-		 * The direction its column is displayed in, as `LumoTable.Head` was told. A sorted column shades its
-		 * cells, so it reads as one band from the header down; `none` shades nothing.
+		 * The direction its column is displayed in, as `LumoTable.Head` was told. The title uses it to
+		 * say where the column sits; the cells themselves are not shaded.
 		 */
 		sort?: TableSort;
 		/**
@@ -1094,7 +1091,6 @@ export function Cell({
 	...props
 }: CellProps) {
 	const showTitle = typeof ellipsis === 'object' ? ellipsis.showTitle !== false : true;
-	const sorted = sort === 'ascending' || sort === 'descending';
 
 	return (
 		<td
@@ -1107,11 +1103,6 @@ export function Cell({
 			className={cn(
 				tableCellVariants({ align }),
 				ellipsis && ellipsisCell,
-				// The band the header starts, carried down the column. On a pinned cell it becomes a layer
-				// over the opaque base rather than the fill itself, because that fill has to stay solid.
-				fixed === undefined
-					? 'data-[sort=ascending]:bg-column-sorted data-[sort=descending]:bg-column-sorted'
-					: sorted && 'bg-[linear-gradient(var(--color-column-sorted),var(--color-column-sorted))]',
 				fixed !== undefined && 'z-1',
 				fixedClass(fixed),
 				responsiveClass(responsive),

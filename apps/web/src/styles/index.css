@@ -53,7 +53,6 @@
 	--color-row-hover: color-mix(in oklch, var(--foreground) 5%, transparent);
 	--color-row-selected: color-mix(in oklch, var(--primary) 8%, transparent);
 	--color-row-selected-hover: color-mix(in oklch, var(--primary) 12%, transparent);
-	--color-column-sorted: color-mix(in oklch, var(--foreground) 3%, transparent);
 	--radius-sm: calc(var(--radius) * 0.6);
 	--radius-md: calc(var(--radius) * 0.8);
 	--radius-lg: var(--radius);
