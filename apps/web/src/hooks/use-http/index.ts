@@ -11,7 +11,7 @@ const INITIAL_STATE = { data: null, error: null, loading: false } as const;
  * `fetchData` — on mount from an effect for a read, on a click for a write.
  *
  * ```tsx
- * const users = useHttp(listUsers);
+ * const users = useHttp(usersApi.create);
  * useEffect(() => {
  * 	users.fetchData({ page });
  * }, [users.fetchData, page]);

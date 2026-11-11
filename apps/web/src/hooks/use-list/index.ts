@@ -12,7 +12,7 @@ const DEFAULT_PAGE_SIZE = 10;
  * and the sort beside it. A screen renders what this hands back and never assembles a query itself.
  *
  * ```tsx
- * const users = useList(listUsers, { sort: 'createdAt', order: 'desc' });
+ * const users = useList(usersApi.list, { sort: 'createdAt', order: 'desc' });
  * users.items / users.page / users.sort / users.setPage / users.setSearch / users.onSort
  * ```
  *

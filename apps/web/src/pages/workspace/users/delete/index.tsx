@@ -2,7 +2,7 @@ import type { User } from '@lumo/shared';
 import { Trash2 } from 'lucide-react';
 import { AlertDialog, Button } from '@/components';
 import { useHttp } from '@/hooks';
-import { deleteUser } from '../api';
+import { usersApi } from '@/api';
 
 /** One account's delete: the question, and the request behind the answer. */
 type IPropsType = {
@@ -18,12 +18,12 @@ type IPropsType = {
  * takes. The row is re-read through `onDeleted` once the request has answered.
  */
 export const DeleteUser = ({ user, onDeleted }: IPropsType) => {
-	const remove = useHttp(deleteUser, { onSuccess: onDeleted });
+	const removal = useHttp(usersApi.remove, { onSuccess: onDeleted });
 
 	return (
 		<AlertDialog
 			trigger={
-				<Button variant="ghost" size="sm" icon={<Trash2 />} loading={remove.loading}>
+				<Button variant="ghost" size="sm" icon={<Trash2 />} loading={removal.loading}>
 					Delete
 				</Button>
 			}
@@ -32,7 +32,7 @@ export const DeleteUser = ({ user, onDeleted }: IPropsType) => {
 			confirmLabel="Delete"
 			destructive
 			onConfirm={() => {
-				remove.fetchData(user.id);
+				removal.fetchData(user.id);
 			}}
 		/>
 	);

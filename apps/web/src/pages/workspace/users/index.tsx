@@ -1,7 +1,7 @@
 import { Input } from '@/components';
 import { useList } from '@/hooks';
 import { useAuth } from '@/providers/auth';
-import { listUsers } from './api';
+import { usersApi } from '@/api';
 import { CreateUser } from './create';
 import { UserList } from './list';
 
@@ -15,7 +15,7 @@ export const UsersPage = () => {
 	const canEdit = can('user:write');
 
 	// Opens newest first; the columns re-read it once a title is pressed.
-	const users = useList(listUsers, { sort: 'createdAt', order: 'desc' });
+	const users = useList(usersApi.list, { sort: 'createdAt', order: 'desc' });
 
 	return (
 		<div className="space-y-6">

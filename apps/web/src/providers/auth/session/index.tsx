@@ -15,7 +15,7 @@ import {
 	type User,
 } from '@lumo/shared';
 import { onUnauthorized, refreshSession, setAccessToken } from '@/lib';
-import { loginRequest, logoutRequest, registerRequest } from '../api';
+import { authApi } from '@/api';
 
 type AuthStatus = 'loading' | 'anonymous' | 'authenticated' | 'unreachable';
 
@@ -79,21 +79,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 	const login = useCallback(
 		async (input: LoginInput) => {
-			adopt(await loginRequest(input));
+			adopt(await authApi.login(input));
 		},
 		[adopt],
 	);
 
 	const register = useCallback(
 		async (input: RegisterInput) => {
-			adopt(await registerRequest(input));
+			adopt(await authApi.register(input));
 		},
 		[adopt],
 	);
 
 	const logout = useCallback(async () => {
 		try {
-			await logoutRequest();
+			await authApi.logout();
 		} finally {
 			// Local state is cleared even if the request failed: the user asked to
 			// be signed out, and the cookie path is the server's problem.

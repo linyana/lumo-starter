@@ -11,7 +11,7 @@ import { useState } from 'react';
 import { Button, Dialog, Field, Form, type FormErrors, Input, ToggleGroup } from '@/components';
 import { errorFields, toFormErrors, toastError } from '@/lib';
 import { useHttp } from '@/hooks';
-import { updateUser } from '../api';
+import { usersApi } from '@/api';
 
 /** The row being written: the panel starts from it, and the list re-reads once it answers. */
 type IPropsType = {
@@ -25,7 +25,7 @@ type IPropsType = {
 
 /** `useHttp` hands one value to its endpoint, and a PATCH names the row in the path. */
 const save = ({ id, input }: { id: string; input: UpdateUserInput }): Promise<User> =>
-	updateUser(id, input);
+	usersApi.update(id, input);
 
 /**
  * One row's account: opening the panel starts it from the row, so a stale copy cannot be saved over

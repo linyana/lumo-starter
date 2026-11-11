@@ -15,8 +15,9 @@ other name is a folder with its own `index.ts` — `constants/index.ts`, `schema
 ### `apps/web/src`
 
 ```
+api/<resource>/index.ts             the wire: one folder per resource, `index` is the barrel
 pages/<domain>/<screen>/index.tsx    screens, grouped by the rail's own groups
-providers/<concern>/{index, api/, session/, guards/}
+providers/<concern>/{index, session/, guards/}
 providers/layout/{frame,shell,auth}/  the block a screen sits in, the frames built on it,
                                      `index` is the barrel
 hooks/<name>/{index, types}          request state, the app-wide store
@@ -24,15 +25,17 @@ lib/<module>/{index, client/, error/}
 routes.tsx                           the route table, importing screens from `@/pages`
 ```
 
-- Import the barrel (`@/pages`, `@/providers`, `@/hooks`, `@/lib`); siblings inside a domain reach
-  for each other relatively.
+- Import the barrel (`@/api`, `@/pages`, `@/providers`, `@/hooks`, `@/lib`); siblings inside a domain
+  reach for each other relatively. A resource module names the sibling it needs (`../roles`), never
+  `@/api`: the barrel re-exports it, so that import would close a cycle.
 - A layout receives what it draws: `providers/routes` derives the rail rows from `routes.tsx` and
   hands them to the shell, so no layout imports the table or the pages behind it. A frame a screen
   imports may never close a cycle through `@/pages`, which is exactly what that would be.
 - The vendored `components/` keep importing the single module they need (`@/lib/utils`): the barrels
   would close a cycle there.
 - A new screen is three edits: the folder, one line in its domain's `index.ts`, one row in
-  `routes.tsx`.
+  `routes.tsx`. A new resource adds `api/<resource>/index.ts` and one line in `api/index.ts` — and
+  no screen has to know where its calls live.
 - **A props type nobody else names is not a declaration to share.** It lives in that component's own
   `index.tsx`, unexported, as `IPropsType` — no `types.ts` beside it. `types.ts` keeps what a second
   file has to name: a props type a sibling derives from (`Pick<SidebarProps, …>`), or the row and

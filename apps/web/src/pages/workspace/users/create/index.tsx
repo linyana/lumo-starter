@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button, Dialog, Field, Form, type FormErrors, Input, ToggleGroup } from '@/components';
 import { errorFields, toFormErrors, toastError } from '@/lib';
 import { useHttp } from '@/hooks';
-import { createUser } from '../api';
+import { usersApi } from '@/api';
 
 /** An account written from the list side: the panel asks, the request answers, the list re-reads. */
 type IPropsType = {
@@ -21,7 +21,7 @@ export const CreateUser = ({ onCreated }: IPropsType) => {
 	const [errors, setErrors] = useState<FormErrors>({});
 	const [roles, setRoles] = useState<Role[]>(['MEMBER']);
 
-	const submit = useHttp(createUser, {
+	const submit = useHttp(usersApi.create, {
 		onSuccess: () => {
 			setOpen(false);
 			setRoles(['MEMBER']);
