@@ -45,7 +45,13 @@ function useSteps() {
 }
 
 /** What `current` says about one item, index by index. */
-function resolveStatus(index: number | undefined, current: number | undefined): StepStatus {
+function resolveStatus({
+	index,
+	current,
+}: {
+	index: number | undefined;
+	current: number | undefined;
+}): StepStatus {
 	if (index === undefined || current === undefined) return 'wait';
 	if (index < current) return 'finish';
 	if (index === current) return 'process';
@@ -315,7 +321,7 @@ export type ItemProps = Omit<ComponentProps<'li'>, 'children'> & {
 export function Item({ className, status, icon, children, ...props }: ItemProps) {
 	const { current, orientation } = useSteps();
 	const index = useContext(StepIndexContext);
-	const resolved = status ?? resolveStatus(index, current);
+	const resolved = status ?? resolveStatus({ index, current });
 	const glyph =
 		icon ?? (resolved === 'finish' ? <Check /> : index === undefined ? null : index + 1);
 

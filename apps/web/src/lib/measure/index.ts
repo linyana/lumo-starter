@@ -45,7 +45,7 @@ export type Frame = {
 	 * The inline size that makes the border box the size given, whatever `box-sizing` says — a
 	 * height reaches the animated box's border box, its content is inside a frame.
 	 */
-	fit: (size: number, edge: number) => number;
+	fit: ({ size, edge }: { size: number; edge: number }) => number;
 };
 
 /** Border and padding of `style`: what a box is bigger than the content it holds. */
@@ -53,13 +53,13 @@ export function frameOf(style: CSSStyleDeclaration): Frame {
 	const edges = frame(style);
 	return {
 		...edges,
-		fit: (size, edge) => (style.boxSizing === 'border-box' ? size : size - edge),
+		fit: ({ size, edge }) => (style.boxSizing === 'border-box' ? size : size - edge),
 	};
 }
 
 export type Scale = { x: number; y: number };
 
-function ratio(screen: number, layout: number) {
+function ratio({ screen, layout }: { screen: number; layout: number }) {
 	return layout > 0 && screen > 0 ? screen / layout : 1;
 }
 
@@ -68,7 +68,15 @@ function ratio(screen: number, layout: number) {
  * style's own width is the precise number — `offsetWidth` is rounded — and both fall back to the
  * offsets when the size is a keyword.
  */
-export function scaleOf(element: HTMLElement, style: CSSStyleDeclaration, rect: DOMRect): Scale {
+export function scaleOf({
+	element,
+	style,
+	rect,
+}: {
+	element: HTMLElement;
+	style: CSSStyleDeclaration;
+	rect: DOMRect;
+}): Scale {
 	const edges = frame(style);
 	const width = length(style.width);
 	const height = length(style.height);
@@ -76,13 +84,13 @@ export function scaleOf(element: HTMLElement, style: CSSStyleDeclaration, rect: 
 		width === undefined || height === undefined || style.boxSizing === 'border-box';
 
 	return {
-		x: ratio(
-			rect.width,
-			width === undefined ? element.offsetWidth : borderBox ? width : width + edges.x,
-		),
-		y: ratio(
-			rect.height,
-			height === undefined ? element.offsetHeight : borderBox ? height : height + edges.y,
-		),
+		x: ratio({
+			screen: rect.width,
+			layout: width === undefined ? element.offsetWidth : borderBox ? width : width + edges.x,
+		}),
+		y: ratio({
+			screen: rect.height,
+			layout: height === undefined ? element.offsetHeight : borderBox ? height : height + edges.y,
+		}),
 	};
 }

@@ -22,10 +22,11 @@ export const Nav = ({
 	className,
 	classNames,
 }: NavProps) => {
-	const isActive = (key: string, explicit?: boolean) => explicit ?? key === selectedKey;
+	const isActive = ({ key, explicit }: { key: string; explicit?: boolean }) =>
+		explicit ?? key === selectedKey;
 
 	function renderItem(item: NavItem) {
-		const active = isActive(item.key, item.isActive);
+		const active = isActive({ key: item.key, explicit: item.isActive });
 
 		if (item.children !== undefined) {
 			return (
@@ -34,7 +35,10 @@ export const Nav = ({
 						icon={item.icon}
 						label={item.label}
 						className={cn(classNames?.button, item.className)}
-						isActive={active || item.children.some((child) => isActive(child.key, child.isActive))}
+						isActive={
+							active ||
+							item.children.some((child) => isActive({ key: child.key, explicit: child.isActive }))
+						}
 						defaultOpen={item.defaultOpen}
 						disabled={item.disabled}
 					>
@@ -43,7 +47,7 @@ export const Nav = ({
 								<LumoNav.SubButton
 									icon={child.icon}
 									className={cn(classNames?.subButton, child.className)}
-									isActive={isActive(child.key, child.isActive)}
+									isActive={isActive({ key: child.key, explicit: child.isActive })}
 									disabled={item.disabled || child.disabled}
 									href={child.href}
 									render={child.render}
@@ -83,7 +87,7 @@ export const Nav = ({
 		);
 	}
 
-	function renderEntry(entry: NavEntry, index: number) {
+	function renderEntry({ entry, index }: { entry: NavEntry; index?: number }) {
 		if (entry.type === 'separator') return <LumoNav.Separator key={`separator-${index}`} />;
 
 		if (entry.type === 'skeleton') {
@@ -102,7 +106,9 @@ export const Nav = ({
 					)}
 					{entry.action}
 					<LumoNav.List className={classNames?.list}>
-						{entry.children.map((child, childIndex) => renderEntry(child, childIndex))}
+						{entry.children.map((child, childIndex) =>
+							renderEntry({ entry: child, index: childIndex }),
+						)}
 					</LumoNav.List>
 				</LumoNav.Group>
 			);
@@ -131,10 +137,12 @@ export const Nav = ({
 					className={classNames?.group}
 					key={`loose-${block.map((entry) => ('key' in entry ? entry.key : entry.type)).join('-')}`}
 				>
-					<LumoNav.List className={classNames?.list}>{block.map(renderEntry)}</LumoNav.List>
+					<LumoNav.List className={classNames?.list}>
+						{block.map((entry) => renderEntry({ entry }))}
+					</LumoNav.List>
 				</LumoNav.Group>
 			) : (
-				renderEntry(block, index)
+				renderEntry({ entry: block, index })
 			),
 		);
 	}

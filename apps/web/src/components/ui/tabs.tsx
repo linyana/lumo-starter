@@ -57,7 +57,7 @@ const ActiveContext = createContext<TabsValue | undefined>(undefined);
 const TrackContext = createContext(false);
 
 /** A lane is named by the value of the panel in it, so a reorder is a move rather than a remount. */
-function paneKey(pane: ReactNode, lane: number) {
+function paneKey({ pane, lane }: { pane: ReactNode; lane: number }) {
 	return isValidElement<{ value?: TabsValue }>(pane) ? (pane.props.value ?? lane) : lane;
 }
 
@@ -300,15 +300,15 @@ export function Panels({ className, children, ...props }: PanelsProps) {
 
 		const rect = box.getBoundingClientRect();
 		const style = getComputedStyle(box);
-		const scale = scaleOf(box, style, rect);
+		const scale = scaleOf({ element: box, style, rect });
 		const edge = frameOf(style);
 		const borderBox = lane.getBoundingClientRect().height / scale.y + edge.y;
 
 		if (wanted.current !== null && Math.abs(wanted.current - borderBox) < 0.5) return;
 		wanted.current = borderBox;
 
-		const from = edge.fit(rect.height / scale.y, edge.y);
-		const to = edge.fit(borderBox, edge.y);
+		const from = edge.fit({ size: rect.height / scale.y, edge: edge.y });
+		const to = edge.fit({ size: borderBox, edge: edge.y });
 		// Read before the glide is interrupted: after that there is no curve to ask.
 		const velocity = interrupt(growing);
 
@@ -316,13 +316,13 @@ export function Panels({ className, children, ...props }: PanelsProps) {
 		// A few pixels is a settle, not a move.
 		if (Math.abs(from - to) < HAIRLINE || !painted.current) return;
 
-		startGlide(
-			growing,
-			box,
-			[{ height: `${from}px` }, { height: `${to}px` }],
-			sizePreset(to - from, size, quick),
-			{ from, to, velocity },
-		);
+		startGlide({
+			run: growing,
+			element: box,
+			frames: [{ height: `${from}px` }, { height: `${to}px` }],
+			preset: sizePreset({ distance: to - from, long: size, short: quick }),
+			slide: { from, to, velocity },
+		});
 	}, [index, quick, size]);
 
 	// The track, as one percentage translate with a pixel correction on top of it. The correction is
@@ -334,7 +334,7 @@ export function Panels({ className, children, ...props }: PanelsProps) {
 
 		const to = `${-index * 100}%`;
 		const before = track.getBoundingClientRect();
-		const scale = scaleOf(track, getComputedStyle(track), before);
+		const scale = scaleOf({ element: track, style: getComputedStyle(track), rect: before });
 		// Read before the glide is interrupted: after that there is no curve to ask.
 		const velocity = interrupt(sliding);
 
@@ -342,13 +342,13 @@ export function Panels({ className, children, ...props }: PanelsProps) {
 		const jump = (before.left - track.getBoundingClientRect().left) / scale.x;
 		if (Math.abs(jump) < 0.5) return;
 
-		startGlide(
-			sliding,
-			track,
-			[{ translate: `${jump}px 0px` }, { translate: '0px 0px' }],
-			slide,
-			{ from: jump, to: 0, velocity },
-		);
+		startGlide({
+			run: sliding,
+			element: track,
+			frames: [{ translate: `${jump}px 0px` }, { translate: '0px 0px' }],
+			preset: slide,
+			slide: { from: jump, to: 0, velocity },
+		});
 	}, [index, slide]);
 
 	useLayoutEffect(() => {
@@ -373,7 +373,7 @@ export function Panels({ className, children, ...props }: PanelsProps) {
 				<TrackContext.Provider value>
 					{panes.map((pane, lane) => (
 						<div
-							key={paneKey(pane, lane)}
+							key={paneKey({ pane, lane })}
 							data-slot="tabs-lane"
 							ref={(element) => {
 								laneRefs.current[lane] = element;

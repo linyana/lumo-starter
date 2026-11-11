@@ -87,7 +87,7 @@ packages/shared/src/
 | API request validation         | `@ZodBody(registerSchema)` on the controller                     |
 | Form validation in the browser | the same schema, in `safeParse`, feeding Base UI's `Form errors` |
 | Swagger request bodies         | `z.toJSONSchema()` via the `ApiZodBody` decorator                |
-| Permission check (server)      | `hasPermission(user.roles, required)` in `PermissionsGuard`      |
+| Permission check (server)      | `hasPermission({ roles, required })` in `PermissionsGuard`       |
 | Permission check (client)      | the same function, in `useAuth().can()`                          |
 | Nav/route visibility           | derived from the same `permissionsOf()` expansion                |
 

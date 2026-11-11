@@ -18,7 +18,7 @@ type IPropsType = {
  * takes. The row is re-read through `onDeleted` once the request has answered.
  */
 export const DeleteUser = ({ user, onDeleted }: IPropsType) => {
-	const removal = useHttp(usersApi.remove, { onSuccess: onDeleted });
+	const removal = useHttp({ fn: usersApi.remove, onSuccess: onDeleted });
 
 	return (
 		<AlertDialog

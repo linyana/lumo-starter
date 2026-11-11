@@ -11,7 +11,7 @@ const INITIAL_STATE = { data: null, error: null, loading: false } as const;
  * `fetchData` — on mount from an effect for a read, on a click for a write.
  *
  * ```tsx
- * const users = useHttp(usersApi.create);
+ * const users = useHttp({ fn: usersApi.create });
  * useEffect(() => {
  * 	users.fetchData({ page });
  * }, [users.fetchData, page]);
@@ -21,10 +21,12 @@ const INITIAL_STATE = { data: null, error: null, loading: false } as const;
  * Only the latest call may write state, so a slow response cannot overwrite a
  * newer one. `fetchData` is stable and safe to use in an effect's dependencies.
  */
-export const useHttp = <TData, TVariables = void>(
-	fn: (variables: TVariables) => Promise<TData>,
-	options: UseHttpOptions<TData, TVariables> = {},
-): UseHttpResult<TData, TVariables> => {
+export const useHttp = <TData, TVariables = void>({
+	fn,
+	...options
+}: {
+	fn: (variables: TVariables) => Promise<TData>;
+} & UseHttpOptions<TData, TVariables>): UseHttpResult<TData, TVariables> => {
 	const [state, setState] = useState<UseHttpState<TData>>(INITIAL_STATE);
 
 	// Endpoints and options are usually written inline, so the latest values live

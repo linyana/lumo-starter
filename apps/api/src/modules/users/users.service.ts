@@ -79,7 +79,15 @@ export class UsersService {
 			throw new AppException({ code: 'CONFLICT', message: 'That email is already registered' });
 	}
 
-	async update(id: string, input: UpdateUserInput, actor: UserActor): Promise<WireUser> {
+	async update({
+		id,
+		input,
+		actor,
+	}: {
+		id: string;
+		input: UpdateUserInput;
+		actor: UserActor;
+	}): Promise<WireUser> {
 		if (input.roles && id === actor.id) {
 			throw new AppException({ code: 'FORBIDDEN', message: 'You cannot change your own roles' });
 		}
@@ -111,7 +119,7 @@ export class UsersService {
 		return toWireUser(updated);
 	}
 
-	async remove(id: string, actor: UserActor): Promise<void> {
+	async remove({ id, actor }: { id: string; actor: UserActor }): Promise<void> {
 		if (id === actor.id) {
 			throw new AppException({ code: 'FORBIDDEN', message: 'You cannot delete your own account' });
 		}

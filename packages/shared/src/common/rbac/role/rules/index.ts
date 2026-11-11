@@ -11,10 +11,13 @@ export const permissionsOf = (roles: readonly Role[]): Permission[] => {
 	return [...granted];
 };
 
-export const hasPermission = (
-	roles: readonly Role[],
-	required: Permission | readonly Permission[],
-): boolean => {
+export const hasPermission = ({
+	roles,
+	required,
+}: {
+	roles: readonly Role[];
+	required: Permission | readonly Permission[];
+}): boolean => {
 	const granted = permissionsOf(roles);
 	const wanted = Array.isArray(required) ? required : [required];
 	return wanted.every((permission) => granted.includes(permission));

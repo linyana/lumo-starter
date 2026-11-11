@@ -157,11 +157,11 @@ const unwrap = <T>(response: AxiosResponse<ApiSuccess<T>>): T => response.data.d
 
 /** Thin typed wrapper so call sites never see the `{ data }` envelope. */
 export const api = {
-	get: async <T>(url: string, params?: Record<string, unknown>): Promise<T> =>
+	get: async <T>({ url, params }: { url: string; params?: Record<string, unknown> }): Promise<T> =>
 		unwrap(await http.get<ApiSuccess<T>>(url, { params })),
-	post: async <T>(url: string, body?: unknown): Promise<T> =>
+	post: async <T>({ url, body }: { url: string; body?: unknown }): Promise<T> =>
 		unwrap(await http.post<ApiSuccess<T>>(url, body)),
-	patch: async <T>(url: string, body?: unknown): Promise<T> =>
+	patch: async <T>({ url, body }: { url: string; body?: unknown }): Promise<T> =>
 		unwrap(await http.patch<ApiSuccess<T>>(url, body)),
 	delete: async (url: string): Promise<void> => {
 		await http.delete(url);

@@ -20,7 +20,15 @@ const baseOptions = (): NodeCookieOptions => ({
 });
 
 /** `maxAge` is in milliseconds, the way the adapter's `res.cookie` reads it. */
-export const setRefreshCookie = (res: NodeResponse, token: string, expiresAt: Date): void => {
+export const setRefreshCookie = ({
+	res,
+	token,
+	expiresAt,
+}: {
+	res: NodeResponse;
+	token: string;
+	expiresAt: Date;
+}): void => {
 	res.cookie(REFRESH_COOKIE, token, {
 		...baseOptions(),
 		maxAge: Math.max(0, expiresAt.getTime() - Date.now()),

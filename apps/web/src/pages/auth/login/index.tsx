@@ -15,7 +15,8 @@ export const LoginPage = () => {
 
 	const from = (location.state as { from?: string } | null)?.from ?? '/';
 
-	const submit = useHttp(login, {
+	const submit = useHttp({
+		fn: login,
 		onSuccess: () => navigate(from, { replace: true }),
 		// A verdict about a field belongs under it; anything else — wrong password,
 		// an unreachable server — has no field to sit under, so it takes the toast.

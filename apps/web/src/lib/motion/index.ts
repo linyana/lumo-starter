@@ -48,7 +48,15 @@ export const quickSize: Transition = { duration: 0.18, ease: [0.22, 1, 0.36, 1] 
 export const SHORT_MOVE = 120;
 
 /** The preset a size of `distance` should use — the caller's own units, which only it knows. */
-export function sizePreset(distance: number, long: Transition, short: Transition) {
+export function sizePreset({
+	distance,
+	long,
+	short,
+}: {
+	distance: number;
+	long: Transition;
+	short: Transition;
+}) {
 	return Math.abs(distance) < SHORT_MOVE ? short : long;
 }
 
@@ -85,7 +93,15 @@ const STEP = 16;
  * How far into a spring's settle the box is within half a pixel of where it is going. A spring has no
  * end — the curve is cut here, so the tail nobody can see does not keep the box clipped.
  */
-function endsAt(ease: (progress: number) => number, seconds: number, distance: number) {
+function endsAt({
+	ease,
+	seconds,
+	distance,
+}: {
+	ease: (progress: number) => number;
+	seconds: number;
+	distance: number;
+}) {
 	const total = Math.round(seconds * 1000);
 	const rest = 0.5 / Math.abs(distance);
 
@@ -112,7 +128,7 @@ function bezier(ease: unknown): string {
  * `visualDuration` is deliberately not used here: motion ignores `velocity` when a spring is given
  * one, and a glide that cannot be interrupted smoothly is the thing this exists to avoid.
  */
-export function toTiming(preset: Transition, { from, to, velocity = 0 }: Slide): Timing {
+export function toTiming({ preset, from, to, velocity = 0 }: { preset: Transition } & Slide): Timing {
 	const type = (preset as { type?: string }).type;
 
 	if (type !== 'spring') {
@@ -133,7 +149,8 @@ export function toTiming(preset: Transition, { from, to, velocity = 0 }: Slide):
 		spring,
 	);
 	const settled = Math.round(duration * 1000);
-	const ms = Math.abs(to - from) < 1 ? settled : endsAt(ease, duration, to - from);
+	const ms =
+		Math.abs(to - from) < 1 ? settled : endsAt({ ease, seconds: duration, distance: to - from });
 
 	if (ms === 0) return { duration: 0, easing: 'linear', at: () => 1 };
 
@@ -201,16 +218,23 @@ export function interrupt(run: Running) {
  * `undefined` when the reader asked for no motion: there is no frame to land on, so the caller
  * arrives by writing the end state, which it has already done.
  */
-export function startGlide(
-	run: Running,
-	element: Element,
-	frames: Keyframe[],
-	preset: Transition,
-	slide: Slide,
-	settle?: () => void,
-) {
-	const timing = toTiming(preset, slide);
-	const animation = glide(element, frames, timing);
+export function startGlide({
+	run,
+	element,
+	frames,
+	preset,
+	slide,
+	settle,
+}: {
+	run: Running;
+	element: Element;
+	frames: Keyframe[];
+	preset: Transition;
+	slide: Slide;
+	settle?: () => void;
+}) {
+	const timing = toTiming({ preset, ...slide });
+	const animation = glide({ element, keyframes: frames, timing });
 	if (animation === undefined) return undefined;
 
 	const started: Run = { animation, timing, from: slide.from, to: slide.to };
@@ -231,7 +255,15 @@ export function startGlide(
  * for no motion — the caller writes the end state itself in that case, because there is no frame to
  * land on and no reason to schedule one.
  */
-export function glide(element: Element, keyframes: Keyframe[], timing: Timing) {
+export function glide({
+	element,
+	keyframes,
+	timing,
+}: {
+	element: Element;
+	keyframes: Keyframe[];
+	timing: Timing;
+}) {
 	if (timing.duration === 0 || typeof element.animate !== 'function') return undefined;
 	return element.animate(keyframes, { duration: timing.duration, easing: timing.easing });
 }

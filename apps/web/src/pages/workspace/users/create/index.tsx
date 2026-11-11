@@ -21,7 +21,8 @@ export const CreateUser = ({ onCreated }: IPropsType) => {
 	const [errors, setErrors] = useState<FormErrors>({});
 	const [roles, setRoles] = useState<Role[]>(['MEMBER']);
 
-	const submit = useHttp(usersApi.create, {
+	const submit = useHttp({
+		fn: usersApi.create,
 		onSuccess: () => {
 			setOpen(false);
 			setRoles(['MEMBER']);

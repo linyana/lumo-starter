@@ -73,7 +73,13 @@ const paginationItemStates = cn(
 	'data-disabled:pointer-events-none data-disabled:opacity-40',
 );
 
-function itemOf(size: PaginationState['size'], className?: string) {
+function itemOf({
+	size,
+	className,
+}: {
+	size: PaginationState['size'];
+	className?: string;
+}) {
 	return cn(paginationItemVariants({ size }), paginationItemStates, className);
 }
 
@@ -168,7 +174,7 @@ export function Page({ value, className, children, ...props }: PageProps) {
 			aria-current={active ? 'page' : undefined}
 			aria-label={`${state.locale.page} ${value}`}
 			onClick={() => state.go(value)}
-			className={itemOf(state.size, className)}
+			className={itemOf({ size: state.size, className })}
 			{...props}
 		>
 			{children ?? value}
@@ -192,7 +198,7 @@ export function Prev({ className, children, ...props }: PrevProps) {
 			aria-label={state.locale.previous}
 			disabled={first}
 			onClick={() => state.go(state.page - 1)}
-			className={itemOf(state.size, className)}
+			className={itemOf({ size: state.size, className })}
 			{...props}
 		>
 			{children ?? <ChevronLeft />}
@@ -216,7 +222,7 @@ export function Next({ className, children, ...props }: NextProps) {
 			aria-label={state.locale.next}
 			disabled={last}
 			onClick={() => state.go(state.page + 1)}
-			className={itemOf(state.size, className)}
+			className={itemOf({ size: state.size, className })}
 			{...props}
 		>
 			{children ?? <ChevronRight />}
@@ -260,7 +266,15 @@ export function Ellipsis({ className, children, ...props }: EllipsisProps) {
  * side. Everything between is one gap, however many pages it hides — a pagination that listed them
  * all would be a list of pages rather than a way through them.
  */
-function pageList(page: number, count: number, siblings: number) {
+function pageList({
+	page,
+	count,
+	siblings,
+}: {
+	page: number;
+	count: number;
+	siblings: number;
+}) {
 	const pages: { key: string; value?: number }[] = [];
 	const near = siblings + 1;
 
@@ -292,7 +306,7 @@ export function Pages({ siblings = 1, className }: PagesProps) {
 
 	return (
 		<span data-slot="pagination-pages" className={cn('flex items-center gap-1', className)}>
-			{pageList(state.page, state.pageCount, siblings).map(({ key, value }) =>
+			{pageList({ page: state.page, count: state.pageCount, siblings }).map(({ key, value }) =>
 				value === undefined ? <Ellipsis key={key} /> : <Page key={key} value={value} />,
 			)}
 		</span>

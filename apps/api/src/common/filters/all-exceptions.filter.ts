@@ -21,7 +21,7 @@ const STATUS_TO_CODE: Record<number, ErrorCode> = {
 };
 
 /** The body a code falls back to. */
-const defaultBody = (code: ErrorCode, details?: unknown): ApiFailure => ({
+const defaultBody = ({ code, details }: { code: ErrorCode; details?: unknown }): ApiFailure => ({
 	error: { code, message: ERRORS[code].message, details },
 });
 
@@ -76,10 +76,13 @@ export class AllExceptionsFilter implements ExceptionFilter {
 		const prismaError = asPrismaError(exception);
 		if (prismaError) {
 			const code = PRISMA_TO_CODE[prismaError.code] ?? 'INTERNAL';
-			return { status: ERRORS[code].status, body: defaultBody(code, prismaError.meta) };
+			return {
+				status: ERRORS[code].status,
+				body: defaultBody({ code, details: prismaError.meta }),
+			};
 		}
 
-		return { status: HttpStatus.INTERNAL_SERVER_ERROR, body: defaultBody('INTERNAL') };
+		return { status: HttpStatus.INTERNAL_SERVER_ERROR, body: defaultBody({ code: 'INTERNAL' }) };
 	}
 
 	private fromHttpException(exception: HttpException): { status: number; body: ApiFailure } {
@@ -95,7 +98,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 			body: {
 				error: {
 					code,
-					message: this.readMessage(record.message ?? record.error, code),
+					message: this.readMessage({ raw: record.message ?? record.error, code }),
 					details: record.details as FieldError[] | undefined,
 				},
 			},
@@ -103,7 +106,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 	}
 
 	/** `AppException` sends a sentence; Nest's own exceptions may send an array. */
-	private readMessage(raw: unknown, code: ErrorCode): string {
+	private readMessage({ raw, code }: { raw: unknown; code: ErrorCode }): string {
 		if (typeof raw === 'string' && raw.length > 0) return raw;
 		if (Array.isArray(raw) && raw.every((item) => typeof item === 'string')) {
 			return raw.join('; ');

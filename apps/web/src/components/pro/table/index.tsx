@@ -9,7 +9,13 @@ export type { TableColumn, TableOrder, TableProps, TableSlots, TableSort } from 
  * Which way a title's arrow points, in `aria-sort`'s own words. A sortable column that is not the
  * one the records arrived in says `none`, which is the quiet, two-headed arrow.
  */
-function ariaSortOf<Key extends string>(sortKey: Key, sort: TableSort<Key> | undefined): AriaSort {
+function ariaSortOf<Key extends string>({
+	sortKey,
+	sort,
+}: {
+	sortKey: Key;
+	sort: TableSort<Key> | undefined;
+}): AriaSort {
 	if (sort === undefined || sort.key !== sortKey) return 'none';
 	return sort.order === 'asc' ? 'ascending' : 'descending';
 }
@@ -19,10 +25,13 @@ function ariaSortOf<Key extends string>(sortKey: Key, sort: TableSort<Key> | und
  * was pressed and the direction to read it in, or `undefined` when the cycle has run out. The
  * columns are the ones that know their sort key, so a title reports its own.
  */
-function sortPressOf<Key extends string>(
-	sortKey: Key | undefined,
-	onSortChange: ((next: TableSort<Key> | undefined) => void) | undefined,
-) {
+function sortPressOf<Key extends string>({
+	sortKey,
+	onSortChange,
+}: {
+	sortKey: Key | undefined;
+	onSortChange: ((next: TableSort<Key> | undefined) => void) | undefined;
+}) {
 	if (sortKey === undefined || onSortChange === undefined) return undefined;
 
 	return (next: AriaSort | undefined) =>
@@ -57,8 +66,8 @@ export const Table = <Row, Key extends string = string>({
 	// the same column and the cells have to shade with the same answer.
 	const headed = columns.map((column) => ({
 		column,
-		sort: column.sortKey === undefined ? undefined : ariaSortOf(column.sortKey, sort),
-		onSort: sortPressOf(column.sortKey, onSortChange),
+		sort: column.sortKey === undefined ? undefined : ariaSortOf({ sortKey: column.sortKey, sort }),
+		onSort: sortPressOf({ sortKey: column.sortKey, onSortChange }),
 	}));
 
 	return (

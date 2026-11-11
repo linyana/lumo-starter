@@ -12,7 +12,8 @@ export const RegisterPage = () => {
 	const navigate = useNavigate();
 	const [errors, setErrors] = useState<FormErrors>({});
 
-	const submit = useHttp(register, {
+	const submit = useHttp({
+		fn: register,
 		onSuccess: () => navigate('/', { replace: true }),
 		onError: (error) => {
 			const fields = errorFields(error);

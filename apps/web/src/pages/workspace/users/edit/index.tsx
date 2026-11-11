@@ -25,7 +25,7 @@ type IPropsType = {
 
 /** `useHttp` hands one value to its endpoint, and a PATCH names the row in the path. */
 const save = ({ id, input }: { id: string; input: UpdateUserInput }): Promise<User> =>
-	usersApi.update(id, input);
+	usersApi.update({ id, input });
 
 /**
  * One row's account: opening the panel starts it from the row, so a stale copy cannot be saved over
@@ -39,7 +39,8 @@ export const EditUser = ({ user, currentUserId, onUpdated }: IPropsType) => {
 
 	const ownRow = user.id === currentUserId;
 
-	const submit = useHttp(save, {
+	const submit = useHttp({
+		fn: save,
 		onSuccess: () => {
 			setOpen(false);
 			onUpdated();

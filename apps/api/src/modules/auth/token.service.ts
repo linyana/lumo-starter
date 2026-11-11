@@ -62,7 +62,7 @@ export class TokenService {
 
 	async issue(claims: AccessClaims): Promise<IssuedTokens> {
 		const accessToken = await this.signAccess(claims);
-		const refresh = await this.createRefresh(claims.sub, this.prisma);
+		const refresh = await this.createRefresh({ userId: claims.sub, writer: this.prisma });
 		return { accessToken, refreshToken: refresh.refreshToken, refreshExpiresAt: refresh.expiresAt };
 	}
 
@@ -124,7 +124,7 @@ export class TokenService {
 		};
 
 		const tokens = await this.prisma.$transaction(async (tx) => {
-			const created = await this.createRefresh(existing.userId, tx);
+			const created = await this.createRefresh({ userId: existing.userId, writer: tx });
 			await tx.refreshToken.update({
 				where: { id: existing.id },
 				// A second presentation inside the grace window does not extend the first
@@ -160,10 +160,13 @@ export class TokenService {
 		);
 	}
 
-	private async createRefresh(
-		userId: string,
-		writer: RefreshWriter,
-	): Promise<{ id: string; refreshToken: string; expiresAt: Date }> {
+	private async createRefresh({
+		userId,
+		writer,
+	}: {
+		userId: string;
+		writer: RefreshWriter;
+	}): Promise<{ id: string; refreshToken: string; expiresAt: Date }> {
 		const refreshToken = randomBytes(48).toString('base64url');
 		const expiresAt = new Date(Date.now() + this.refreshTtlMs());
 		const created = await writer.refreshToken.create({

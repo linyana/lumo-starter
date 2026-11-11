@@ -1,13 +1,15 @@
 import type { AuthResult, LoginInput, RegisterInput, User } from '@lumo/shared';
 import { api, http } from '@/lib';
 
-const login = (input: LoginInput): Promise<AuthResult> => api.post<AuthResult>('/auth/login', input);
+const login = (input: LoginInput): Promise<AuthResult> =>
+	api.post<AuthResult>({ url: '/auth/login', body: input });
 
 const register = (input: RegisterInput): Promise<AuthResult> =>
-	api.post<AuthResult>('/auth/register', input);
+	api.post<AuthResult>({ url: '/auth/register', body: input });
 
 /** The account behind a token, for a tab that holds one but has not cached the user yet. */
-const me = (): Promise<User> => api.get<{ user: User }>('/auth/me').then((payload) => payload.user);
+const me = (): Promise<User> =>
+	api.get<{ user: User }>({ url: '/auth/me' }).then((payload) => payload.user);
 
 /** 204 No Content — the envelope is skipped on the server for this route. */
 const logout = (): Promise<void> => http.post('/auth/logout').then(() => undefined);

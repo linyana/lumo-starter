@@ -197,26 +197,26 @@ function responsiveClass(responsive: TableBreakpoint[] | undefined) {
  */
 function syncScroll(box: HTMLElement) {
 	const rest = box.scrollWidth - box.clientWidth - box.scrollLeft;
-	const mark = (name: string, on: boolean) => {
+	const mark = ({ name, on }: { name: string; on: boolean }) => {
 		if (on === box.hasAttribute(name)) return;
 		if (on) box.setAttribute(name, '');
 		else box.removeAttribute(name);
 	};
-	mark('data-scrolled-start', box.scrollLeft > 1);
-	mark('data-scrolled-end', rest > 1);
+	mark({ name: 'data-scrolled-start', on: box.scrollLeft > 1 });
+	mark({ name: 'data-scrolled-end', on: rest > 1 });
 }
 
 /** Where a pinned column's offset is written, in pixels, for its own rule to read. */
 const fixedOffset = '--table-fixed-offset';
 
-function place(cell: HTMLTableCellElement, offset: number) {
+function place({ cell, offset }: { cell: HTMLTableCellElement; offset: number }) {
 	const value = `${offset}px`;
 	if (cell.style.getPropertyValue(fixedOffset) !== value)
 		cell.style.setProperty(fixedOffset, value);
 }
 
 /** The column at the inner end of a run of pinned columns is the one that casts the shadow. */
-function markEdge(cell: HTMLTableCellElement, edge: TableFixed | undefined) {
+function markEdge({ cell, edge }: { cell: HTMLTableCellElement; edge: TableFixed | undefined }) {
 	if (edge === undefined) {
 		if (cell.hasAttribute('data-fixed-edge')) cell.removeAttribute('data-fixed-edge');
 		return;
@@ -233,7 +233,7 @@ function markEdge(cell: HTMLTableCellElement, edge: TableFixed | undefined) {
  * layout's own — `offsetWidth`, not the rectangle a transform ancestor or a zoom would report — and
  * every write is compared first, so a render that changes nothing costs one pass and no invalidation.
  */
-function measureTable(element: HTMLTableElement, box: HTMLElement) {
+function measureTable({ element, box }: { element: HTMLTableElement; box: HTMLElement }) {
 	if (element.querySelector('[data-fixed]') !== null) {
 		for (const row of element.rows) {
 			const cells = Array.from(row.cells);
@@ -242,15 +242,15 @@ function measureTable(element: HTMLTableElement, box: HTMLElement) {
 
 			let start = 0;
 			for (const [index, cell] of starts.entries()) {
-				place(cell, start);
-				markEdge(cell, index === starts.length - 1 ? 'start' : undefined);
+				place({ cell, offset: start });
+				markEdge({ cell, edge: index === starts.length - 1 ? 'start' : undefined });
 				start += cell.offsetWidth;
 			}
 
 			let end = 0;
 			for (const [index, cell] of ends.entries()) {
-				place(cell, end);
-				markEdge(cell, index === ends.length - 1 ? 'end' : undefined);
+				place({ cell, offset: end });
+				markEdge({ cell, edge: index === ends.length - 1 ? 'end' : undefined });
 				end += cell.offsetWidth;
 			}
 		}
@@ -280,14 +280,14 @@ function useTableLayout(root: RefObject<HTMLDivElement | null>) {
 		const element = root.current?.querySelector('table');
 		const box = root.current?.querySelector<HTMLElement>('[data-slot="table-container"]');
 		if (!element || !box) return;
-		measureTable(element, box);
+		measureTable({ element, box });
 	});
 
 	useEffect(() => {
 		const element = root.current?.querySelector('table');
 		const box = root.current?.querySelector<HTMLElement>('[data-slot="table-container"]');
 		if (!element || !box) return;
-		const observer = new ResizeObserver(() => measureTable(element, box));
+		const observer = new ResizeObserver(() => measureTable({ element, box }));
 		observer.observe(element);
 		observer.observe(box);
 		return () => observer.disconnect();
@@ -323,7 +323,15 @@ const fixedShadow = cn(
 );
 
 /** Which layer a cell is drawn on: a pinned one in front of its row, a title in front of the records. */
-function layerOf(fixed: TableFixed | undefined, inHead: boolean, holds: boolean) {
+function layerOf({
+	fixed,
+	inHead,
+	holds,
+}: {
+	fixed: TableFixed | undefined;
+	inHead: boolean;
+	holds: boolean;
+}) {
 	if (fixed !== undefined) return inHead ? 'z-20' : 'z-1';
 	return holds ? 'z-10' : undefined;
 }
@@ -670,7 +678,7 @@ function FilterPanel({
 						.includes(needle),
 				);
 
-	const toggle = (value: string, on: boolean) =>
+	const toggle = ({ value, on }: { value: string; on: boolean }) =>
 		setDraft((was) =>
 			on
 				? [...was.filter((one) => one !== value), value]
@@ -702,7 +710,7 @@ function FilterPanel({
 						aria-label={name}
 						checked={draft.includes(option.value)}
 						disabled={option.disabled}
-						onCheckedChange={(next) => toggle(option.value, next === true)}
+						onCheckedChange={(next) => toggle({ value: option.value, on: next === true })}
 					>
 						<LumoCheckbox.Indicator />
 					</LumoCheckbox.Root>
@@ -846,7 +854,13 @@ function SortArrow({ sort }: { sort: TableSort }) {
 }
 
 /** The state a press leads to, including the `undefined` that means "and now not at all". */
-function nextSort(directions: TableSort[], current: TableSort): TableSort | undefined {
+function nextSort({
+	directions,
+	current,
+}: {
+	directions: TableSort[];
+	current: TableSort;
+}): TableSort | undefined {
 	const index = directions.indexOf(current);
 	return directions[index + 1];
 }
@@ -876,7 +890,7 @@ export function Head({
 	const holds = header?.sticky === true;
 	const rowHeader = scope === 'row' || scope === 'rowgroup';
 	const current = sort ?? 'none';
-	const next = nextSort(sortDirections ?? table.sortDirections, current);
+	const next = nextSort({ directions: sortDirections ?? table.sortDirections, current });
 	const hint =
 		next === 'ascending'
 			? table.locale.sortAscending
@@ -940,7 +954,7 @@ export function Head({
 				// only a title may be given the top, since a pinned record still has to scroll away.
 				(fixed !== undefined || holds) && 'sticky',
 				holds && 'top-[var(--table-head-top,0px)]',
-				layerOf(fixed, header !== null, holds),
+				layerOf({ fixed, inHead: header !== null, holds }),
 				fixedClass(fixed),
 				responsiveClass(responsive),
 				sortable && 'cursor-pointer select-none',

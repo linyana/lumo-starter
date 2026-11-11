@@ -48,7 +48,7 @@ export class UsersController {
 		@ZodBody(updateUserSchema) input: UpdateUserInput,
 		@CurrentUser() actor: AuthUser,
 	) {
-		return { user: await this.users.update(id, input, actor) };
+		return { user: await this.users.update({ id, input, actor }) };
 	}
 
 	@Delete(':id')
@@ -56,6 +56,6 @@ export class UsersController {
 	@HttpCode(HttpStatus.NO_CONTENT)
 	@SkipEnvelope()
 	async remove(@Param('id') id: string, @CurrentUser() actor: AuthUser): Promise<void> {
-		await this.users.remove(id, actor);
+		await this.users.remove({ id, actor });
 	}
 }

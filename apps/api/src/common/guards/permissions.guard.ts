@@ -24,7 +24,9 @@ export class PermissionsGuard implements CanActivate {
 
 		const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
 		if (!request.user) throw new AppException('UNAUTHORIZED');
-		if (!hasPermission(request.user.roles, required)) throw new AppException('FORBIDDEN');
+		if (!hasPermission({ roles: request.user.roles, required })) {
+			throw new AppException('FORBIDDEN');
+		}
 
 		return true;
 	}

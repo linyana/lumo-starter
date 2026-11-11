@@ -5,6 +5,22 @@
 Prefer simple, extensible designs. Optimize for fewer concepts, no special cases, and changes that
 stay local.
 
+## Functions
+
+**Two or more parameters become one object parameter.** A function takes a single positional value
+at most; anything beyond that is a named object, so a call site reads as labels and a new field
+never re-orders existing arguments.
+
+```ts
+// no
+getUsers(page, pageSize, filter);
+// yes
+getUsers({ page, pageSize, filter });
+```
+
+The only exception is a signature the framework dictates (Nest guards, interceptors and pipes,
+React event handlers, third-party callbacks): we cannot reshape those, so leave them alone.
+
 ## Layout
 
 Domain first, then one folder per unit, at every level. **A folder holds two files, at most:

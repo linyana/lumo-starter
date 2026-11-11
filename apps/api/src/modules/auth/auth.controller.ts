@@ -26,7 +26,7 @@ export class AuthController {
 		@Res({ passthrough: true }) res: NodeResponse,
 	) {
 		const result = await this.auth.register(input);
-		this.attachRefreshCookie(res, result.tokens);
+		this.attachRefreshCookie({ res, tokens: result.tokens });
 		return { accessToken: result.tokens.accessToken, user: result.user };
 	}
 
@@ -39,7 +39,7 @@ export class AuthController {
 		@Res({ passthrough: true }) res: NodeResponse,
 	) {
 		const result = await this.auth.login(input);
-		this.attachRefreshCookie(res, result.tokens);
+		this.attachRefreshCookie({ res, tokens: result.tokens });
 		return { accessToken: result.tokens.accessToken, user: result.user };
 	}
 
@@ -61,7 +61,7 @@ export class AuthController {
 		if (!raw) throw new AppException('UNAUTHORIZED');
 
 		const result = await this.auth.refresh(raw);
-		this.attachRefreshCookie(res, result.tokens);
+		this.attachRefreshCookie({ res, tokens: result.tokens });
 		return { accessToken: result.tokens.accessToken, user: result.user };
 	}
 
@@ -83,7 +83,7 @@ export class AuthController {
 		return { user: await this.auth.me(user.id) };
 	}
 
-	private attachRefreshCookie(res: NodeResponse, tokens: IssuedTokens): void {
-		setRefreshCookie(res, tokens.refreshToken, tokens.refreshExpiresAt);
+	private attachRefreshCookie({ res, tokens }: { res: NodeResponse; tokens: IssuedTokens }): void {
+		setRefreshCookie({ res, token: tokens.refreshToken, expiresAt: tokens.refreshExpiresAt });
 	}
 }

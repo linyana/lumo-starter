@@ -89,7 +89,15 @@ function normalizeDetails(details: unknown): FieldError[] {
 }
 
 /** HTTP failure → `ApiError`, using the API's own sentence when there is one. */
-export function fromHttpStatus(status: number, body: unknown, originalError?: unknown): ApiError {
+export function fromHttpStatus({
+	status,
+	body,
+	originalError,
+}: {
+	status: number;
+	body: unknown;
+	originalError?: unknown;
+}): ApiError {
 	const failure = (body ?? {}) as Partial<ApiFailure>;
 	const error = failure.error;
 
@@ -122,7 +130,11 @@ export function toApiError(error: unknown): ApiError {
 
 	if (axiosError?.isAxiosError) {
 		if (axiosError.response) {
-			return fromHttpStatus(axiosError.response.status, axiosError.response.data, error);
+			return fromHttpStatus({
+				status: axiosError.response.status,
+				body: axiosError.response.data,
+				originalError: error,
+			});
 		}
 
 		const timedOut = axiosError.code === 'ECONNABORTED' || axiosError.code === 'ETIMEDOUT';

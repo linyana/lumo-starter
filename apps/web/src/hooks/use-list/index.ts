@@ -12,22 +12,22 @@ const DEFAULT_PAGE_SIZE = 10;
  * and the sort beside it. A screen renders what this hands back and never assembles a query itself.
  *
  * ```tsx
- * const users = useList(usersApi.list, { sort: 'createdAt', order: 'desc' });
+ * const users = useList({ fetcher: usersApi.list, sort: 'createdAt', order: 'desc' });
  * users.items / users.page / users.sort / users.setPage / users.setSearch / users.onSort
  * ```
  *
  * The effect owns the first read and every change of page, search or sort, so a screen holds no
  * `useEffect` of its own. The failure is not toasted: a list says it where the records go.
  */
-export const useList = <TItem, TQuery extends ListQuery>(
-	fetcher: (query: TQuery) => Promise<Paginated<TItem>>,
-	{
-		sort: initialSort,
-		order: initialOrder = 'desc',
-		query,
-		pageSize = DEFAULT_PAGE_SIZE,
-	}: UseListOptions<TQuery>,
-): UseListResult<TItem, TQuery> => {
+export const useList = <TItem, TQuery extends ListQuery>({
+	fetcher,
+	sort: initialSort,
+	order: initialOrder = 'desc',
+	query,
+	pageSize = DEFAULT_PAGE_SIZE,
+}: {
+	fetcher: (query: TQuery) => Promise<Paginated<TItem>>;
+} & UseListOptions<TQuery>): UseListResult<TItem, TQuery> => {
 	const [page, setPage] = useState(1);
 	const [search, setSearchValue] = useState('');
 	const [sort, setSort] = useState<ListSort<SortKeyOf<TQuery>>>({
@@ -43,7 +43,7 @@ export const useList = <TItem, TQuery extends ListQuery>(
 	});
 	const key = JSON.stringify(query ?? null);
 
-	const { data, loading, error, fetchData } = useHttp(fetcher, { toastError: false });
+	const { data, loading, error, fetchData } = useHttp({ fn: fetcher, toastError: false });
 
 	const reload = useCallback(() => {
 		const narrowed = search.trim();

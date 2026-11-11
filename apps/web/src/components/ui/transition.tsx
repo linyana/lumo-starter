@@ -35,7 +35,7 @@ const px = (value: string) => Number.parseFloat(value) || 0;
  * The width the box has to work with: the parent's content box, margins taken out, or `null` when
  * there is no block parent to hand one over.
  */
-function room(box: HTMLElement, style: CSSStyleDeclaration): number | null {
+function room({ box, style }: { box: HTMLElement; style: CSSStyleDeclaration }): number | null {
 	const parent = box.parentElement;
 	if (parent === null || parent.clientWidth === 0) return null;
 	const out = getComputedStyle(parent);
@@ -49,8 +49,18 @@ function room(box: HTMLElement, style: CSSStyleDeclaration): number | null {
 }
 
 /** The content's height, measured at the width the box is heading for rather than the one it is at. */
-function heightOf(content: HTMLElement, width: number | undefined, edge: Frame, scale: Scale) {
-	if (width !== undefined) content.style.width = `${edge.fit(width, edge.x)}px`;
+function heightOf({
+	content,
+	width,
+	edge,
+	scale,
+}: {
+	content: HTMLElement;
+	width: number | undefined;
+	edge: Frame;
+	scale: Scale;
+}) {
+	if (width !== undefined) content.style.width = `${edge.fit({ size: width, edge: edge.x })}px`;
 	const height = content.getBoundingClientRect().height / scale.y + edge.y;
 	if (width !== undefined) content.style.removeProperty('width');
 	return height;
@@ -64,20 +74,20 @@ function heightOf(content: HTMLElement, width: number | undefined, edge: Frame, 
 const SETTLING = 120;
 
 /** Whether two targets ask for the same size — a repeat measurement rather than a change. */
-function same(a: Size, b: Size) {
+function same({ a, b }: { a: Size; b: Size }) {
 	if (Math.abs(a.height - b.height) >= 0.5) return false;
 	if (a.width === undefined || b.width === undefined) return a.width === b.width;
 	return Math.abs(a.width - b.width) < 0.5;
 }
 
 /** Whether the box is already the size measured — a child sizing itself off the box, not a change. */
-function at(live: Size, size: Size) {
+function at({ live, size }: { live: Size; size: Size }) {
 	if (Math.abs(live.height - size.height) >= 0.5) return false;
 	return size.width === undefined || Math.abs((live.width ?? 0) - size.width) < 0.5;
 }
 
 /** Whether the size measured is somewhere other than where the box is. */
-function travels(live: Size, size: Size) {
+function travels({ live, size }: { live: Size; size: Size }) {
 	if (Math.abs(live.height - size.height) >= HAIRLINE) return true;
 	return size.width !== undefined && Math.abs((live.width ?? 0) - size.width) >= HAIRLINE;
 }
@@ -141,7 +151,7 @@ export function LumoTransition({ className, height, children }: LumoTransitionPr
 		// from what is on screen. Screen pixels, converted once by the scale they were measured at.
 		const rect = box.getBoundingClientRect();
 		const style = getComputedStyle(box);
-		const scale = scaleOf(box, style, rect);
+		const scale = scaleOf({ element: box, style, rect });
 		const edge = frameOf(style);
 		const live: Size = { width: rect.width / scale.x, height: rect.height / scale.y };
 		const hold = held.current;
@@ -163,7 +173,7 @@ export function LumoTransition({ className, height, children }: LumoTransitionPr
 			}
 
 			target.current = { width: undefined, height: hold };
-			box.style.height = `${edge.fit(hold, edge.y)}px`;
+			box.style.height = `${edge.fit({ size: hold, edge: edge.y })}px`;
 			box.style.overflow = 'clip';
 			return;
 		}
@@ -188,7 +198,7 @@ export function LumoTransition({ className, height, children }: LumoTransitionPr
 			const natural = content.getBoundingClientRect().width / scale.x + edge.x;
 			content.style.removeProperty('width');
 
-			const limit = room(box, style);
+			const limit = room({ box, style });
 			const fits = limit === null || natural <= limit + 0.5;
 			const own = mode.current === 'content' || Math.abs(natural - (live.width ?? 0)) < 0.5;
 
@@ -204,20 +214,21 @@ export function LumoTransition({ className, height, children }: LumoTransitionPr
 
 		const next: Size =
 			hold === undefined
-				? { width, height: heightOf(content, width, edge, scale) }
+				? { width, height: heightOf({ content, width, edge, scale }) }
 				: { width, height: hold };
 
 		const previous = target.current;
-		if (previous !== undefined && same(previous, next)) return;
+		if (previous !== undefined && same({ a: previous, b: next })) return;
 		// A child that sizes itself off the box (`h-full`) would re-aim the glide at wherever the box
 		// currently is, and park it there.
-		if (running.current !== null && at(live, next)) return;
+		if (running.current !== null && at({ live, size: next })) return;
 
 		target.current = next;
 
-		const from = edge.fit(live.height, edge.y);
-		const to = edge.fit(next.height, edge.y);
-		const toWidth = next.width === undefined ? undefined : edge.fit(next.width, edge.x);
+		const from = edge.fit({ size: live.height, edge: edge.y });
+		const to = edge.fit({ size: next.height, edge: edge.y });
+		const toWidth =
+			next.width === undefined ? undefined : edge.fit({ size: next.width, edge: edge.x });
 		// Read before the glide is interrupted: after that there is no curve to ask.
 		const velocity = interrupt(running);
 
@@ -234,7 +245,7 @@ export function LumoTransition({ className, height, children }: LumoTransitionPr
 
 		if (
 			previous === undefined ||
-			!travels(live, next) ||
+			!travels({ live, size: next }) ||
 			!painted.current ||
 			performance.now() < settleBy.current
 		) {
@@ -248,21 +259,21 @@ export function LumoTransition({ className, height, children }: LumoTransitionPr
 
 		const frames: Keyframe[] = [{ height: `${from}px` }, { height: `${to}px` }];
 		if (toWidth !== undefined) {
-			frames[0]!.width = `${edge.fit(live.width ?? 0, edge.x)}px`;
+			frames[0]!.width = `${edge.fit({ size: live.width ?? 0, edge: edge.x })}px`;
 			frames[1]!.width = `${toWidth}px`;
 		}
 
-		const landed = startGlide(
-			running,
-			box,
+		const landed = startGlide({
+			run: running,
+			element: box,
 			frames,
-			sizePreset(to - from, spring, quick),
-			{ from, to, velocity },
-			() => {
+			preset: sizePreset({ distance: to - from, long: spring, short: quick }),
+			slide: { from, to, velocity },
+			settle: () => {
 				box.removeAttribute('data-swapping');
 				if (held.current === undefined) box.style.removeProperty('overflow');
 			},
-		);
+		});
 
 		// No motion: the box has already been written at its end size, so there is only the clip to
 		// hand back.

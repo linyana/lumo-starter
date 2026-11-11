@@ -15,7 +15,7 @@ export const UsersPage = () => {
 	const canEdit = can('user:write');
 
 	// Opens newest first; the columns re-read it once a title is pressed.
-	const users = useList(usersApi.list, { sort: 'createdAt', order: 'desc' });
+	const users = useList({ fetcher: usersApi.list, sort: 'createdAt', order: 'desc' });
 
 	return (
 		<div className="space-y-6">
