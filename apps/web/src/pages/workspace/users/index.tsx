@@ -29,7 +29,11 @@ export const UsersPage = () => {
 
 				<div className="flex items-end gap-2">
 					<div className="w-64">
-						<Input placeholder="Search email or name" {...users.text('search')} />
+						<Input
+							aria-label="Search name or email"
+							placeholder="Search name or email"
+							{...users.text('search')}
+						/>
 					</div>
 
 					{canEdit && <CreateUser onCreated={users.reload} />}

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { emailSchema, nameSchema, passwordSchema } from '../../../common/field';
+import { EMAIL_MAX, emailSchema, nameSchema, passwordSchema } from '../../../common/field';
 import { paginationSchema, sortOrderSchema } from '../../../common/pagination';
 import { permissionSchema } from '../../../common/rbac/permission';
 import { roleSchema } from '../../../common/rbac/role';
@@ -39,6 +39,13 @@ export const updateUserSchema = z
 
 export const listUsersQuerySchema = paginationSchema.extend({
 	search: z.string().trim().max(120).optional(),
+	/**
+	 * The address, in part — what a reader types of the one account they are looking for. It is
+	 * narrower than `search`, which reads the name as well, and the two add up: `search` is what the
+	 * reader looked for, `email` is what they are sure of. Not `emailSchema`: a substring of an
+	 * address is not an address, so only its length is a rule here.
+	 */
+	email: z.string().trim().max(EMAIL_MAX).optional(),
 	sort: z.enum(['email', 'name', 'createdAt']).default('createdAt'),
 	order: sortOrderSchema,
 });

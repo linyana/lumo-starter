@@ -43,6 +43,9 @@ export const UserList = ({ users }: IPropsType) => {
 			key: 'email',
 			header: 'Email',
 			sortKey: 'email',
+			// The column narrows itself, and the field behind its icon is the same binding a header field
+			// would take: what is typed is written, the hook waits for the pause, and the icon says it is on.
+			filter: { kind: 'text', placeholder: 'Filter by email', ...users.text('email') },
 			cell: (row) => <span className="text-muted-foreground">{row.email}</span>,
 		},
 		{
@@ -85,9 +88,17 @@ export const UserList = ({ users }: IPropsType) => {
 	// under a message that says the last read did not answer: what is on the page would be a guess.
 	const failed = users.error !== undefined;
 
+	// The two fields the screen narrows with, and the one press that clears both: a narrowed list that
+	// found nothing says so, and offers the way back to the whole list.
+	const narrowed = users.filters.search !== undefined || users.filters.email !== undefined;
+	const clearFilters = () => {
+		users.setFilter('search', null);
+		users.setFilter('email', null);
+	};
+
 	/**
 	 * The row a table shows when it has no records — which is three different situations and not one,
-	 * so each says its own thing: the read failed, the search found nothing, the list is empty.
+	 * so each says its own thing: the read failed, nothing matched, the list is empty.
 	 */
 	const empty = failed ? (
 		<>
@@ -104,11 +115,11 @@ export const UserList = ({ users }: IPropsType) => {
 				Try again
 			</Button>
 		</>
-	) : users.filters.search ? (
+	) : narrowed ? (
 		<>
-			<p>No account matches “{users.filters.search}”.</p>
-			<Button variant="ghost" size="sm" onClick={() => users.setFilter('search', null)}>
-				Clear search
+			<p>No accounts match.</p>
+			<Button variant="ghost" size="sm" onClick={clearFilters}>
+				Clear filters
 			</Button>
 		</>
 	) : (
