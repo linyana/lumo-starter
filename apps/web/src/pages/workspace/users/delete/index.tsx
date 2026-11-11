@@ -1,6 +1,5 @@
 import type { User } from '@lumo/shared';
-import { Trash2 } from 'lucide-react';
-import { AlertDialog, Button } from '@/components';
+import { AlertDialog } from '@/components';
 import { useHttp } from '@/hooks';
 import { usersApi } from '@/api';
 
@@ -8,35 +7,32 @@ import { usersApi } from '@/api';
 type IPropsType = {
 	/** The account the question is about. */
 	user: User;
+	/** Whether the question is the one on screen. The row that asked it owns that. */
+	open: boolean;
+	/** Runs when the question asks to open or close — on the answer, too. */
+	onOpenChange: (open: boolean) => void;
 	/** Runs once the request has answered, so the caller can re-read the list. */
 	onDeleted: () => void;
 };
 
 /**
- * The delete of one account: a button that asks before it acts, and the request behind the answer.
- * The panel closes on confirm, so a failure has nowhere to land but the toast — the default `useHttp`
- * takes. The row is re-read through `onDeleted` once the request has answered.
+ * The delete of one account: the question, and the request behind the answer. The question closes
+ * on confirm, so a failure has nowhere to land but the toast — the default `useHttp` takes. The row
+ * is re-read through `onDeleted` once the request has answered.
  */
-export const DeleteUser = ({ user, onDeleted }: IPropsType) => {
-	const removal = useHttp({ fn: usersApi.remove, onSuccess: onDeleted });
+export const DeleteUser = ({ user, open, onOpenChange, onDeleted }: IPropsType) => {
+	const remove = useHttp({ fn: usersApi.remove, onSuccess: onDeleted });
 
 	return (
 		<AlertDialog
-			trigger={
-				<Button
-					variant="ghost"
-					size="sm"
-					icon={<Trash2 />}
-					loading={removal.loading}
-					tone="destructive"
-				/>
-			}
+			open={open}
+			onOpenChange={onOpenChange}
 			title={`Delete ${user.name}?`}
 			description={`${user.email} loses access immediately. What the account wrote stays. This cannot be undone.`}
 			confirmLabel="Delete"
 			destructive
 			onConfirm={() => {
-				removal.fetchData(user.id);
+				remove.fetchData(user.id);
 			}}
 		/>
 	);

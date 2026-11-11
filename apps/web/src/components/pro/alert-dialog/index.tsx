@@ -30,7 +30,7 @@ export const AlertDialog = ({
 
 	return (
 		<LumoAlertDialog.Root actionsRef={actions} {...props}>
-			<LumoAlertDialog.Trigger render={trigger} />
+			{trigger !== undefined && <LumoAlertDialog.Trigger render={trigger} />}
 			<LumoAlertDialog.Portal>
 				<LumoAlertDialog.Backdrop className={classNames?.backdrop} />
 				<LumoAlertDialog.Viewport

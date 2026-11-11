@@ -54,7 +54,7 @@ export const CreateUser = ({ onCreated }: IPropsType) => {
 				setOpen(next);
 				if (!next) setErrors({});
 			}}
-			trigger={<Button icon={<Plus />}>New user</Button>}
+			trigger={<Button variant="ghost" icon={<Plus />}>New user</Button>}
 			title="New account"
 			description="They sign in with this email and the password you set."
 		>

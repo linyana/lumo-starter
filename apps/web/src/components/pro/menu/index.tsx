@@ -4,6 +4,8 @@ import { iconSlot } from '@/lib/control';
 import { cn } from '@/lib/utils';
 import type { MenuProps } from './types';
 
+export type { MenuItem, MenuProps, MenuSlots } from './types';
+
 /** A menu of actions on a trigger: one list, and the rows it holds. */
 export const Menu = ({
 	trigger,

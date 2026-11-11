@@ -7,8 +7,11 @@ type DialogRootProps = ComponentProps<typeof LumoDialog.Root>;
 export type DialogSlots = 'backdrop' | 'viewport' | 'popup' | 'title' | 'description' | 'footer';
 
 export type DialogProps = Pick<DialogRootProps, 'open' | 'defaultOpen' | 'onOpenChange'> & {
-	/** The element that opens it. It becomes the dialog's trigger. */
-	trigger: ReactElement;
+	/**
+	 * The element that opens it. It becomes the dialog's trigger. Leave it out for a panel opened
+	 * from somewhere else — a menu row, say — which then drives it through `open` and `onOpenChange`.
+	 */
+	trigger?: ReactElement;
 	title: ReactNode;
 	description?: ReactNode;
 	children?: ReactNode;

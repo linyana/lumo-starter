@@ -6,7 +6,6 @@ import {
 	type UpdateUserInput,
 	type User,
 } from '@lumo/shared';
-import { Pencil } from 'lucide-react';
 import { useState } from 'react';
 import { Button, Dialog, Field, Form, type FormErrors, Input, ToggleGroup } from '@/components';
 import { errorFields, toFormErrors, toastError } from '@/lib';
@@ -19,6 +18,10 @@ type IPropsType = {
 	user: User;
 	/** The signed-in account — its own roles are read-only, which is the API's rule too. */
 	currentUserId?: string;
+	/** Whether the panel is the one on screen. The row that opened it owns that. */
+	open: boolean;
+	/** Runs when the panel asks to open or close — on save, too. */
+	onOpenChange: (open: boolean) => void;
 	/** Runs once the request has answered, so the caller can re-read the list. */
 	onUpdated: () => void;
 };
@@ -32,8 +35,7 @@ const save = ({ id, input }: { id: string; input: UpdateUserInput }): Promise<Us
  * a newer one. The API holds the rest of the rules — the last owner cannot be demoted, and a reader
  * cannot change its own roles — so those come back as sentences rather than being guessed here.
  */
-export const EditUser = ({ user, currentUserId, onUpdated }: IPropsType) => {
-	const [open, setOpen] = useState(false);
+export const EditUser = ({ user, currentUserId, open, onOpenChange, onUpdated }: IPropsType) => {
 	const [errors, setErrors] = useState<FormErrors>({});
 	const [roles, setRoles] = useState<Role[]>(user.roles);
 
@@ -42,7 +44,7 @@ export const EditUser = ({ user, currentUserId, onUpdated }: IPropsType) => {
 	const submit = useHttp({
 		fn: save,
 		onSuccess: () => {
-			setOpen(false);
+			onOpenChange(false);
 			onUpdated();
 		},
 		onError: (error) => {
@@ -71,11 +73,10 @@ export const EditUser = ({ user, currentUserId, onUpdated }: IPropsType) => {
 		<Dialog
 			open={open}
 			onOpenChange={(next) => {
-				setOpen(next);
 				setErrors({});
 				if (next) setRoles(user.roles);
+				onOpenChange(next);
 			}}
-			trigger={<Button variant="ghost" size="sm" icon={<Pencil />} />}
 			title={`Edit ${user.name}`}
 			description={user.email}
 		>

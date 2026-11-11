@@ -1,4 +1,4 @@
-@import '@fontsource-variable/geist';
+@import '@fontsource-variable/inter';
 @import 'tailwindcss';
 
 /* @lumo/theme and @lumo/palette are merged into this file by the shadcn CLI. */
@@ -7,11 +7,11 @@
 
 @theme inline {
 	--font-sans:
-		'Geist Variable', 'Geist', 'Noto Sans SC Variable', 'Noto Sans SC', system-ui, -apple-system,
+		'Inter Variable', 'Inter', 'Noto Sans SC Variable', 'Noto Sans SC', system-ui, -apple-system,
 		BlinkMacSystemFont, 'Segoe UI', sans-serif;
 	--font-mono:
-		'Geist Mono Variable', 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas,
-		'Liberation Mono', 'Noto Sans SC Variable', 'Noto Sans SC', monospace;
+		ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', 'Noto Sans SC Variable',
+		'Noto Sans SC', monospace;
 	--color-background: var(--background);
 	--color-layout-background: var(--layout-background);
 	--color-layout-content: var(--layout-content);
@@ -128,7 +128,7 @@
 	--card-foreground: oklch(0.145 0 0);
 	--popover: oklch(1 0 0);
 	--popover-foreground: oklch(0.145 0 0);
-	--primary: oklch(0.32 0 0);
+	--primary: oklch(0.31 0.0026 282);
 	--primary-foreground: oklch(0.985 0 0);
 	--secondary: oklch(0.94 0 0);
 	--secondary-foreground: oklch(0.205 0 0);
@@ -165,7 +165,7 @@
 	--card-foreground: oklch(0.985 0 0);
 	--popover: rgb(34 35 38);
 	--popover-foreground: oklch(0.985 0 0);
-	--primary: oklch(0.922 0 0);
+	--primary: oklch(0.922 0.0026 282);
 	--primary-foreground: oklch(0.205 0 0);
 	--secondary: rgb(40 41 44);
 	--secondary-foreground: oklch(0.985 0 0);

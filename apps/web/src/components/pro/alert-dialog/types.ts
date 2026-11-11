@@ -16,7 +16,12 @@ export type AlertDialogProps = Pick<
 	AlertDialogRootProps,
 	'open' | 'defaultOpen' | 'onOpenChange'
 > & {
-	trigger: ReactElement;
+	/**
+	 * The element that opens it. It becomes the alert dialog's trigger. Leave it out for a question
+	 * asked from somewhere else — a menu row, say — which then drives it through `open` and
+	 * `onOpenChange`.
+	 */
+	trigger?: ReactElement;
 	title: ReactNode;
 	description?: ReactNode;
 	/** More to read between the description and the two buttons. */

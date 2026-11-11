@@ -14,7 +14,7 @@ export const Dialog = ({
 	...props
 }: DialogProps) => (
 	<LumoDialog.Root {...props}>
-		<LumoDialog.Trigger render={trigger} />
+		{trigger !== undefined && <LumoDialog.Trigger render={trigger} />}
 		<LumoDialog.Portal>
 			<LumoDialog.Backdrop className={classNames?.backdrop} />
 			<LumoDialog.Viewport className={classNames?.viewport}>

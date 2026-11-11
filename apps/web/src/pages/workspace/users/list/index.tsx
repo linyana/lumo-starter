@@ -3,8 +3,7 @@ import { RotateCcw } from 'lucide-react';
 import { Badge, Button, Input, Pagination, Table, type TableColumn } from '@/components';
 import type { SortKeyOf, UseListResult } from '@/hooks';
 import { useAuth } from '@/providers/auth';
-import { DeleteUser } from '../delete';
-import { EditUser } from '../edit';
+import { UserActions } from '../actions';
 
 /** The keys `GET /users` sorts on, which are the columns a title may report. */
 type UserSortKey = SortKeyOf<ListUsersQuery>;
@@ -73,12 +72,13 @@ export const UserList = ({ users }: IPropsType) => {
 				}
 
 				return (
-					<div className="flex items-center justify-end gap-1">
-						{canEdit && (
-							<EditUser user={row} currentUserId={currentUser?.id} onUpdated={users.reload} />
-						)}
-						{deletable && <DeleteUser user={row} onDeleted={users.reload} />}
-					</div>
+					<UserActions
+						user={row}
+						currentUserId={currentUser?.id}
+						canEdit={canEdit}
+						canDelete={deletable}
+						onChanged={users.reload}
+					/>
 				);
 			},
 		},
