@@ -13,7 +13,7 @@ export const LoginPage = () => {
 	const from = (location.state as { from?: string } | null)?.from ?? '/';
 
 	const submit = useHttp({
-		fn: login,
+		endpoint: login,
 		onSuccess: () => navigate(from, { replace: true }),
 	});
 

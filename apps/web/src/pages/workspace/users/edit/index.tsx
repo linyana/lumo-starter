@@ -38,7 +38,7 @@ export const EditUser = ({ user, currentUserId, open, onOpenChange, onUpdated }:
 	const ownRow = user.id === currentUserId;
 
 	const submit = useHttp({
-		fn: (input: UpdateUserInput) => usersApi.update({ id: user.id, input }),
+		endpoint: (input: UpdateUserInput) => usersApi.update({ id: user.id, input }),
 		onSuccess: () => {
 			onOpenChange(false);
 			onUpdated();

@@ -7,11 +7,11 @@ export type { FetchData, FetchResult, UseHttpOptions, UseHttpResult, UseHttpStat
 const INITIAL_STATE = { data: null, error: null, loading: false, initial: true } as const;
 
 /**
- * One hook for both reads and writes: hand it an endpoint function, then call
+ * One hook for both reads and writes: hand it an endpoint, then call
  * `fetchData` — on mount from an effect for a read, on a click for a write.
  *
  * ```tsx
- * const users = useHttp({ fn: usersApi.create });
+ * const users = useHttp({ endpoint: usersApi.create });
  * useEffect(() => {
  * 	users.fetchData({ page });
  * }, [users.fetchData, page]);
@@ -30,18 +30,19 @@ const INITIAL_STATE = { data: null, error: null, loading: false, initial: true }
  * ```
  */
 export const useHttp = <TData, TVariables = void>({
-	fn,
+	endpoint,
 	...options
 }: {
-	fn: (variables: TVariables) => Promise<TData>;
+	/** The resource's verb to call: a plain function, so it can be taken off the `api` object. */
+	endpoint: (variables: TVariables) => Promise<TData>;
 } & UseHttpOptions<TData, TVariables>): UseHttpResult<TData, TVariables> => {
 	const [state, setState] = useState<UseHttpState<TData>>(INITIAL_STATE);
 
 	// Endpoints and options are usually written inline, so the latest values live
 	// in a ref instead of rebuilding `fetchData` on every render.
-	const latest = useRef({ fn, options });
+	const latest = useRef({ endpoint, options });
 	useEffect(() => {
-		latest.current = { fn, options };
+		latest.current = { endpoint, options };
 	});
 
 	const requestId = useRef(0);
@@ -49,7 +50,7 @@ export const useHttp = <TData, TVariables = void>({
 	const fetchData = useCallback<FetchData<TData, TVariables>>(
 		async (variables?: TVariables): Promise<FetchResult<TData> | null> => {
 			const id = ++requestId.current;
-			const { fn: endpoint, options: current } = latest.current;
+			const { endpoint, options: current } = latest.current;
 
 			setState((previous) => ({ ...previous, loading: true, error: null }));
 

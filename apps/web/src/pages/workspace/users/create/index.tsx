@@ -22,7 +22,7 @@ export const CreateUser = ({ onCreated }: IPropsType) => {
 	const form = useForm();
 
 	const submit = useHttp({
-		fn: usersApi.create,
+		endpoint: usersApi.create,
 		onSuccess: () => {
 			setOpen(false);
 			onCreated();

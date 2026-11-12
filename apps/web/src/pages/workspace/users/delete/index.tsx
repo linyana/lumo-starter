@@ -21,7 +21,7 @@ type IPropsType = {
  * is re-read through `onDeleted` once the request has answered.
  */
 export const DeleteUser = ({ user, open, onOpenChange, onDeleted }: IPropsType) => {
-	const remove = useHttp({ fn: usersApi.remove, onSuccess: onDeleted });
+	const remove = useHttp({ endpoint: usersApi.remove, onSuccess: onDeleted });
 
 	return (
 		<AlertDialog

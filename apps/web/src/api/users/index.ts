@@ -27,6 +27,6 @@ const remove = (id: string): Promise<void> => api.delete(`/users/${id}`);
  * data, the suffixed one is the wire.
  *
  * Each verb is declared on its own and only gathered here, so it is still a plain function when a
- * caller takes it off the object (`useHttp({ fn: usersApi.create })`) — nothing is bound to `this`.
+ * caller takes it off the object (`useHttp({ endpoint: usersApi.create })`) — nothing is bound to `this`.
  */
 export const usersApi = { list, create, update, remove };

@@ -71,7 +71,10 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 		Array.isArray(value) ? value.length > 0 : value !== undefined && value !== null && value !== '',
 	);
 
-	const { data, loading, error, initial, fetchData } = useHttp({ fn: fetcher, toastError: false });
+	const { data, loading, error, initial, fetchData } = useHttp({
+		endpoint: fetcher,
+		toastError: false,
+	});
 
 	const total = data?.total ?? 0;
 	const pageCount = Math.max(1, Math.ceil(total / pageSize));

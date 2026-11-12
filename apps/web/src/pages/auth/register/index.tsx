@@ -10,7 +10,7 @@ export const RegisterPage = () => {
 	const navigate = useNavigate();
 
 	const submit = useHttp({
-		fn: register,
+		endpoint: register,
 		onSuccess: () => navigate('/', { replace: true }),
 	});
 
