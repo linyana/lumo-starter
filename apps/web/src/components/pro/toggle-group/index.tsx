@@ -7,6 +7,7 @@ export const ToggleGroup = <Value extends string>({
 	items,
 	variant = 'ghost',
 	size = 'md',
+	onChange,
 	className,
 	classNames,
 	...props
@@ -14,6 +15,7 @@ export const ToggleGroup = <Value extends string>({
 	<LumoToggleGroup.Root<Value>
 		variant={variant}
 		size={size}
+		onValueChange={onChange}
 		className={cn(className, classNames?.root)}
 		{...props}
 	>

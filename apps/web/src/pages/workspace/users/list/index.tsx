@@ -1,15 +1,15 @@
 import { ROLE_META, type ListUsersQuery, type Role, type User } from '@lumo/shared';
 import { Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { Badge, Input, Table, type MenuItem, type TableColumn } from '@/components';
-import type { SortKeyOf, UseListResult } from '@/hooks';
+import { Badge, Field, Form, Input, Table, type MenuItem, type TableColumn } from '@/components';
+import type { SortKeyOf, UseQueryResult } from '@/hooks';
 import { useAuth } from '@/providers/auth';
 import { DeleteUser } from '../delete';
 import { EditUser } from '../edit';
 
 type UserSortKey = SortKeyOf<ListUsersQuery>;
 
-type IPropsType = { users: UseListResult<User, ListUsersQuery> };
+type IPropsType = { users: UseQueryResult<User, ListUsersQuery> };
 
 const ROLE_VARIANT: Record<Role, 'default' | 'info' | 'secondary'> = {
 	OWNER: 'default',
@@ -17,6 +17,12 @@ const ROLE_VARIANT: Record<Role, 'default' | 'info' | 'secondary'> = {
 	MEMBER: 'secondary',
 };
 
+/**
+ * The records, and the two ways of narrowing them: one field over the table and one behind each
+ * column's title. Both are fields of the one form, so narrowing by either is the same write, and a
+ * column's "Clear filter" is the same reset — the table is only told whether its column is narrowed
+ * and how to undo it.
+ */
 export const UserList = ({ users }: IPropsType) => {
 	const { user: currentUser, can } = useAuth();
 	const canEdit = can('user:write');
@@ -77,7 +83,15 @@ export const UserList = ({ users }: IPropsType) => {
 			key: 'email',
 			header: 'Email',
 			sortKey: 'email',
-			filter: { ...users.text('email'), placeholder: 'Filter by email' },
+			filter: {
+				field: (
+					<Field name="email">
+						<Input placeholder="Filter by email" aria-label="Filter by email" />
+					</Field>
+				),
+				active: users.filters.email !== undefined,
+				clear: () => users.clearFilter('email'),
+			},
 			cell: (row) => <span className="text-muted-foreground">{row.email}</span>,
 		},
 		{
@@ -97,18 +111,18 @@ export const UserList = ({ users }: IPropsType) => {
 
 	return (
 		<>
-			<div>
-				<Input
-					aria-label="Search name or email"
-					placeholder="Search name or email"
-					{...users.text('search')}
-				/>
-			</div>
-			<Table
-				columns={columns}
-				list={users}
-				rowActions={rowActions}
-			/>
+			<Form
+				form={users.form}
+				initial={users.opened}
+				onChange={users.write}
+				settle={300}
+				className="gap-3"
+			>
+				<Field name="search">
+					<Input aria-label="Search name or email" placeholder="Search name or email" />
+				</Field>
+				<Table columns={columns} list={users} rowActions={rowActions} />
+			</Form>
 
 			{dialogs}
 		</>

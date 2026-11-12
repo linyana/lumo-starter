@@ -16,7 +16,7 @@ export const Select = <Value extends string>({
 	options,
 	value,
 	defaultValue,
-	onValueChange,
+	onChange,
 	placeholder,
 	size = 'md',
 	disabled = false,
@@ -34,7 +34,7 @@ export const Select = <Value extends string>({
 
 	const choose = (next: Value | null): void => {
 		if (value === undefined) setHeld(next);
-		onValueChange?.(next);
+		onChange?.(next);
 	};
 
 	return (

@@ -1,7 +1,7 @@
 import { ArrowDown, ArrowUp, ArrowUpDown, Ellipsis, ListFilter, RotateCcw } from 'lucide-react';
 import { useId, useState, type MouseEvent } from 'react';
 import { LumoSkeleton } from '@/components/ui/skeleton';
-import { isTableFiltered, LumoTable, type TableSort as AriaSort } from '@/components/ui/table';
+import { LumoTable, type TableSort as AriaSort } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { Button } from '../button';
 import { ContextMenu, type ContextMenuAnchor } from '../context-menu';
@@ -13,13 +13,11 @@ import type { TableColumn, TableFilterProps, TableList, TableProps, TableSort } 
 export type {
 	TableColumn,
 	TableFilterProps,
-	TableOptionsFilter,
 	TableOrder,
 	TableList,
 	TableProps,
 	TableSlots,
 	TableSort,
-	TableTextFilter,
 } from './types';
 
 const actions = 'Actions';
@@ -147,26 +145,16 @@ function columnItems<Row, Key extends string>({
 	}
 
 	const filter: TableFilterProps | undefined = column.filter;
-	if (filter !== undefined && filter.onChange !== undefined && isTableFiltered(filter)) {
+	if (filter?.clear !== undefined && filter.active === true) {
 		items.push({
 			label: 'Clear filter',
 			icon: <ListFilter />,
 			separatorBefore: true,
-			onClick: () => clearFilter(filter),
+			onClick: filter.clear,
 		});
 	}
 
 	return [...items, ...(column.menu?.() ?? noItems)];
-}
-
-/**
- * The empty answer, in the shape each kind of narrowing reports one: a field is emptied, a set is not.
- * It is the same write the panel behind the icon makes when it is cleared letter by letter, so the two
- * cannot disagree about what "not narrowed" is.
- */
-function clearFilter(filter: TableFilterProps): void {
-	if ('options' in filter) filter.onChange?.(null);
-	else filter.onChange?.('');
 }
 
 export const Table = <Row, Key extends string = string>({

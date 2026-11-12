@@ -16,7 +16,8 @@ export type SelectProps<Value extends string = string> = {
 	options: SelectOption<Value>[];
 	value?: Value | null;
 	defaultValue?: Value | null;
-	onValueChange?: (value: Value | null) => void;
+	/** The value picked — `null` when the way back was taken. */
+	onChange?: (value: Value | null) => void;
 	/** Shown in the trigger while no option is chosen. */
 	placeholder?: ReactNode;
 	size?: TriggerProps['size'];

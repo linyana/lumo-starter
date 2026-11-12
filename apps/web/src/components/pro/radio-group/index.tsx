@@ -6,6 +6,7 @@ import type { RadioGroupProps } from './types';
 /** Exactly one of these: the options, their labels, and the arrow keys between them. */
 export const RadioGroup = <Value extends string>({
 	options,
+	onChange,
 	className,
 	classNames,
 	...props
@@ -13,7 +14,11 @@ export const RadioGroup = <Value extends string>({
 	const base = useId();
 
 	return (
-		<LumoRadioGroup.Root<Value> className={cn(className, classNames?.root)} {...props}>
+		<LumoRadioGroup.Root<Value>
+			onValueChange={onChange}
+			className={cn(className, classNames?.root)}
+			{...props}
+		>
 			{options.map((option) => {
 				const id = `${base}-${option.value}`;
 

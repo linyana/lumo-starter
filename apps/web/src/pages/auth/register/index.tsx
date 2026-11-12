@@ -1,8 +1,6 @@
-import { registerSchema, type RegisterInput } from '@lumo/shared';
-import { useState } from 'react';
+import { registerSchema } from '@lumo/shared';
 import { Link, useNavigate } from 'react-router';
-import { Button, Field, Form, type FormErrors, Input } from '@/components';
-import { errorFields, toFormErrors, toastError } from '@/lib';
+import { Button, Field, Form, Input } from '@/components';
 import { useHttp } from '@/hooks';
 import { useAuth } from '@/providers/auth';
 import { AuthLayout } from '@/providers/layout';
@@ -10,28 +8,11 @@ import { AuthLayout } from '@/providers/layout';
 export const RegisterPage = () => {
 	const { register } = useAuth();
 	const navigate = useNavigate();
-	const [errors, setErrors] = useState<FormErrors>({});
 
 	const submit = useHttp({
 		fn: register,
 		onSuccess: () => navigate('/', { replace: true }),
-		onError: (error) => {
-			const fields = errorFields(error);
-			if (Object.keys(fields).length > 0) setErrors(fields);
-			else toastError(error.message);
-		},
 	});
-
-	const handleSubmit = (values: Record<string, unknown>): void => {
-		const parsed = registerSchema.safeParse(values);
-		if (!parsed.success) {
-			setErrors(toFormErrors(parsed.error));
-			return;
-		}
-
-		setErrors({});
-		submit.fetchData(parsed.data as RegisterInput);
-	};
 
 	return (
 		<AuthLayout
@@ -51,7 +32,7 @@ export const RegisterPage = () => {
 				</>
 			}
 		>
-			<Form errors={errors} onFormSubmit={handleSubmit}>
+			<Form schema={registerSchema} onSubmit={submit.fetchData}>
 				<Field name="email" label="Email">
 					<Input type="email" autoComplete="email" />
 				</Field>

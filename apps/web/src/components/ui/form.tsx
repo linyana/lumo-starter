@@ -1,5 +1,6 @@
 import { Form as BaseForm, type FormProps as BaseFormProps } from '@base-ui/react/form';
 import { createContext, useMemo, useState } from 'react';
+import type { Ref } from 'react';
 import { cn } from '@/lib/utils';
 
 /**
@@ -16,6 +17,8 @@ export type LumoFormProps<Values extends Record<string, unknown> = Record<string
 	className?: string;
 	/** Keyed by each `LumoField.Root`'s `name`; handed to Base UI as it stands. */
 	errors?: FormErrors;
+	/** The element itself, so a failed submit can find the first field to focus. */
+	ref?: Ref<HTMLFormElement>;
 };
 
 /**

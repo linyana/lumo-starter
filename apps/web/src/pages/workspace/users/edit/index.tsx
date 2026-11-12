@@ -6,9 +6,7 @@ import {
 	type UpdateUserInput,
 	type User,
 } from '@lumo/shared';
-import { useState } from 'react';
-import { Button, Dialog, Field, Form, type FormErrors, Input, ToggleGroup } from '@/components';
-import { errorFields, toFormErrors, toastError } from '@/lib';
+import { Button, Dialog, Field, Form, Input, ToggleGroup, useForm } from '@/components';
 import { useHttp } from '@/hooks';
 import { usersApi } from '@/api';
 
@@ -26,67 +24,49 @@ type IPropsType = {
 	onUpdated: () => void;
 };
 
-/** `useHttp` hands one value to its endpoint, and a PATCH names the row in the path. */
-const save = ({ id, input }: { id: string; input: UpdateUserInput }): Promise<User> =>
-	usersApi.update({ id, input });
-
 /**
  * One row's account: opening the panel starts it from the row, so a stale copy cannot be saved over
  * a newer one. The API holds the rest of the rules — the last owner cannot be demoted, and a reader
  * cannot change its own roles — so those come back as sentences rather than being guessed here.
+ *
+ * The reader's own roles are shown but not sent: the group is disabled, and the body for that case
+ * is the two fields that may change. Assembling it is the screen's business, which is why it is
+ * here and not behind a prop.
  */
 export const EditUser = ({ user, currentUserId, open, onOpenChange, onUpdated }: IPropsType) => {
-	const [errors, setErrors] = useState<FormErrors>({});
-	const [roles, setRoles] = useState<Role[]>(user.roles);
-
+	const form = useForm();
 	const ownRow = user.id === currentUserId;
 
 	const submit = useHttp({
-		fn: save,
+		fn: (input: UpdateUserInput) => usersApi.update({ id: user.id, input }),
 		onSuccess: () => {
 			onOpenChange(false);
 			onUpdated();
 		},
-		onError: (error) => {
-			const fields = errorFields(error);
-			if (Object.keys(fields).length > 0) setErrors(fields);
-			else toastError(error.message);
-		},
+		onError: form.setApiError,
 	});
-
-	const handleSubmit = (values: Record<string, unknown>): void => {
-		// The roles are held here rather than in the form: a group of toggles submits no value.
-		const parsed = updateUserSchema.safeParse({
-			...values,
-			...(ownRow ? {} : { roles }),
-		});
-		if (!parsed.success) {
-			setErrors(toFormErrors(parsed.error));
-			return;
-		}
-
-		setErrors({});
-		submit.fetchData({ id: user.id, input: parsed.data as UpdateUserInput });
-	};
 
 	return (
 		<Dialog
 			open={open}
-			onOpenChange={(next) => {
-				setErrors({});
-				if (next) setRoles(user.roles);
-				onOpenChange(next);
-			}}
+			onOpenChange={onOpenChange}
 			title={`Edit ${user.name}`}
 			description={user.email}
 		>
-			<Form errors={errors} onFormSubmit={handleSubmit}>
+			<Form
+				form={form}
+				schema={updateUserSchema}
+				initial={{ email: user.email, name: user.name, roles: user.roles }}
+				onSubmit={(values) =>
+					submit.fetchData(ownRow ? { email: values.email, name: values.name } : values)
+				}
+			>
 				<Field name="email" label="Email">
-					<Input type="email" autoComplete="off" defaultValue={user.email} />
+					<Input type="email" autoComplete="off" />
 				</Field>
 
 				<Field name="name" label="Display name">
-					<Input autoComplete="off" defaultValue={user.name} />
+					<Input autoComplete="off" />
 				</Field>
 
 				<Field
@@ -98,16 +78,12 @@ export const EditUser = ({ user, currentUserId, open, onOpenChange, onUpdated }:
 						multiple
 						variant="outline"
 						size="sm"
-						value={roles}
 						disabled={ownRow}
-						onValueChange={(value) => {
-							setRoles(Array.isArray(value) ? value : value === null ? [] : [value]);
-						}}
 						items={ROLES.map((role) => ({ value: role, label: ROLE_META[role] }))}
 					/>
 				</Field>
 
-				<Button type="submit" loading={submit.loading} className="mt-2">
+				<Button loading={submit.loading} onClick={form.submit} className="mt-2">
 					Save changes
 				</Button>
 			</Form>

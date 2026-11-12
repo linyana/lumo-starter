@@ -4,7 +4,7 @@ import type { MenuItem } from '../menu';
 import type { PaginationProps } from '../pagination';
 import type { SlotClassNames } from '../types';
 
-export type { TableFilterProps, TableOptionsFilter, TableTextFilter } from '@/components/ui/table';
+export type { TableFilterProps } from '@/components/ui/table';
 
 type ColumnAlign = HeadProps['align'];
 
@@ -31,9 +31,19 @@ export type TableColumn<Row, Key extends string = string> = {
 	 */
 	sortKey?: Key;
 	/**
-	 * A panel behind an icon beside the title, narrowing this column: a set of its own values, or a
-	 * field the reader types into. The value and the way back are the caller's, exactly as the title's
-	 * sort is — the panel draws what it is handed and reports what was pressed.
+	 * A control narrowing this column, behind an icon beside the title. The table draws all of that —
+	 * the icon, the popup, its placement, the room inside it, the focus it opens with, the way out —
+	 * and the caller hands over one `Field`: bound like any other field, narrowing the column by being
+	 * in it. `active` tints the icon and `clear` is the way back, both of them the caller's answers
+	 * because the value is the caller's.
+	 *
+	 * ```tsx
+	 * filter: {
+	 *   field: <Field name="email"><Input placeholder="Filter by email" /></Field>,
+	 *   active: users.filters.email !== undefined,
+	 *   clear: () => users.clearFilter('email'),
+	 * }
+	 * ```
 	 */
 	filter?: TableFilterProps;
 	/**
@@ -60,7 +70,7 @@ export type TableSlots =
 /**
  * What a table reads from a list: the records, the wait they arrive in, how they are ordered, the way
  * through them, and the two things a blank table needs to say the right sentence about itself. It is
- * the shape `useList` already returns, so a list screen hands the whole result over — `list={users}` —
+ * the shape `useQuery` already returns, so a list screen hands the whole result over — `list={users}` —
  * and names a field of it again only where the table would read it differently.
  */
 export type TableList<Row, Key extends string = string> = {

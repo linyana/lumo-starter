@@ -2,10 +2,12 @@ import type { ReactNode } from 'react';
 import type { RootProps } from '@/components/ui/switch';
 import type { SlotClassNames } from '../types';
 
-type SwitchRootProps = Pick<
-	RootProps,
-	'checked' | 'defaultChecked' | 'onCheckedChange' | 'disabled' | 'name' | 'required'
->;
+/** `value`/`onChange` are the pair every control here is bound by — see `pro/checkbox`'s type. */
+type SwitchRootProps = Pick<RootProps, 'disabled' | 'name' | 'required'> & {
+	value?: boolean;
+	defaultValue?: boolean;
+	onChange?: (value: boolean) => void;
+};
 
 export type SwitchSlots = 'root' | 'track' | 'thumb' | 'label';
 

@@ -7,7 +7,7 @@ export const Tabs = ({
 	items,
 	value,
 	defaultValue,
-	onValueChange,
+	onChange,
 	variant = 'rounded',
 	size = 'md',
 	className,
@@ -17,7 +17,7 @@ export const Tabs = ({
 		value={value}
 		defaultValue={defaultValue ?? items[0]?.value}
 		onValueChange={(next) => {
-			if (typeof next === 'string') onValueChange?.(next);
+			if (typeof next === 'string') onChange?.(next);
 		}}
 		variant={variant}
 		size={size}

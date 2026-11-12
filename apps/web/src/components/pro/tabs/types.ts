@@ -16,7 +16,8 @@ export type TabsProps = {
 	items: TabItem[];
 	value?: string;
 	defaultValue?: string;
-	onValueChange?: (value: string) => void;
+	/** The tab picked. `value`/`onChange` bind every control here — see `pro/checkbox`'s type. */
+	onChange?: (value: string) => void;
 	/** `rounded` is the filled track, `square` and `point` the flat rows with a moving edge. */
 	variant?: TabsVariant;
 	size?: TabsSize;

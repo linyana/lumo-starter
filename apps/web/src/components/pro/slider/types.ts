@@ -4,8 +4,11 @@ import type { SlotClassNames } from '../types';
 
 type SliderRootProps = Pick<
 	RootProps,
-	'value' | 'defaultValue' | 'onValueChange' | 'min' | 'max' | 'step' | 'disabled' | 'orientation'
->;
+	'value' | 'defaultValue' | 'min' | 'max' | 'step' | 'disabled' | 'orientation'
+> & {
+	/** The number the knob stopped on. `value`/`onChange` bind every control here — see `pro/checkbox`'s type. */
+	onChange?: RootProps['onValueChange'];
+};
 
 export type SliderSlots = 'root' | 'label' | 'value' | 'control' | 'track' | 'indicator' | 'thumb';
 

@@ -14,7 +14,6 @@ import {
 	useMemo,
 	useRef,
 	useState,
-	type ChangeEvent,
 	type ComponentProps,
 	type CSSProperties,
 	type MouseEvent,
@@ -22,9 +21,7 @@ import {
 	type RefObject,
 } from 'react';
 import { tv, type VariantProps } from 'tailwind-variants';
-import { LumoButton } from '@/components/ui/button';
 import { LumoCheckbox } from '@/components/ui/checkbox';
-import { LumoInput } from '@/components/ui/input';
 import { LumoMenu } from '@/components/ui/menu';
 import { LumoPopover } from '@/components/ui/popover';
 import { LumoRadioGroup } from '@/components/ui/radio-group';
@@ -46,82 +43,33 @@ export type TableSort = 'ascending' | 'descending' | 'none';
  */
 const defaultSortDirections: TableSort[] = ['ascending', 'descending'];
 
-/** One line of a filter panel. `text` is what the search box reads when the label is not a string. */
-export type TableFilterOption = {
-	value: string;
-	label: ReactNode;
-	text?: string;
-	disabled?: boolean;
-};
-
-/** What a custom panel is handed: the draft it is editing, and the four things it can do with it. */
-export type TableFilterRenderProps = {
-	value: string[];
-	setValue: (next: string[]) => void;
-	/** Write the draft back through `onChange` and close the panel. */
-	apply: () => void;
-	/** Drop the draft. Nothing is written until `apply`. */
-	reset: () => void;
-	close: () => void;
-};
-
 /**
- * What narrowing a column by its own values is, in the two kinds it comes in. A column either holds a
- * list of answers — a role, a status — or free text that cannot be listed — an address, a name — and
- * the panel behind the header's icon is drawn from that: a set of boxes, or one field. The two are
- * told apart by the only thing that is not shared: a set names the answers it offers.
- */
-export type TableFilterProps = TableOptionsFilter | TableTextFilter;
-
-/** A column narrowed to a set of its own values, drawn as boxes — or as radios, with `multiple: false`. */
-export type TableOptionsFilter = {
-	options: TableFilterOption[];
-	/** The applied answer. An empty list and `null` both mean the column is not filtered. */
-	value?: string[] | null;
-	/** Called on apply with the draft, or `null` when the draft is empty. */
-	onChange?: (next: string[] | null) => void;
-	/** `false` offers one value at a time, drawn as radios. */
-	multiple?: boolean;
-	/** Puts a search box over the options. */
-	searchable?: boolean;
-	/** Merged onto the popup, for a wider panel or a taller one. */
-	className?: string;
-	/** Replaces the panel itself. The draft and the actions are handed over. */
-	render?: (props: TableFilterRenderProps) => ReactNode;
-};
-
-/**
- * A column narrowed to what the reader types. There is nothing to draft and nothing to confirm — the
- * value is the field's own, written as it is typed and cleared by emptying it — so the panel is one
- * input and no footer, and the filter is the field itself: a binding handed over whole is a filter.
+ * A column narrowed by one control. The table owns everything about how that is asked — the icon in
+ * the title, the popup, where it lands, the room the control is drawn in, the focus it opens with,
+ * and the reader's way out — and the caller owns the control itself: one `Field`, bound the way
+ * every other field is, narrowing the column by being in it.
  *
  * ```tsx
- * filter: list.text('email')
+ * filter: {
+ *   field: <Field name="email"><Input placeholder="Filter by email" /></Field>,
+ *   active: users.filters.email !== undefined,
+ *   clear: () => users.clearFilter('email'),
+ * }
  * ```
- *
- * Its own menu clears the column through the same write, handing over the empty value instead of a
- * press.
  */
-export type TableTextFilter = {
-	value?: string;
-	/** What is typed, or the value written straight — which is how the column's title clears it. */
-	onChange?: (change: ChangeEvent<HTMLInputElement> | string) => void;
-	/** What the field says before anything is typed. Left out, it says nothing — the words are the screen's. */
-	placeholder?: string;
-	/** Merged onto the popup. */
+export type TableFilterProps = {
+	/** The control itself. A field, not a panel: no popup, no chrome, no padding of its own. */
+	field: ReactNode;
+	/**
+	 * Whether this column is narrowed now. The caller's answer, because the value is the caller's: it
+	 * tints the icon and offers the way out in the column's menu.
+	 */
+	active?: boolean;
+	/** The way back to an unnarrowed column — the menu line that offers it. Left out, there is none. */
+	clear?: () => void;
+	/** Merged onto the popup, for a wider panel or a taller one — never for the panel's own room. */
 	className?: string;
 };
-
-/**
- * Whether a column is narrowed: a set has members, a text filter has letters. It is what the icon
- * beside a title is tinted from, and what a column's menu offers the way out of.
- */
-export function isTableFiltered(filter: TableFilterProps | undefined): boolean {
-	if (filter === undefined) return false;
-	if ('options' in filter) return (filter.value?.length ?? 0) > 0;
-
-	return filter.value !== undefined && filter.value !== '';
-}
 
 /** The words the table says on its own. Anything left out falls back to English. */
 export type TableLocale = {
@@ -129,10 +77,6 @@ export type TableLocale = {
 	sortDescending?: string;
 	cancelSort?: string;
 	filter?: string;
-	filterSearch?: string;
-	filterReset?: string;
-	filterApply?: string;
-	filterEmpty?: string;
 	selectAll?: string;
 	selectNone?: string;
 	selectInvert?: string;
@@ -146,10 +90,6 @@ const defaultLocale: Required<TableLocale> = {
 	sortDescending: 'Sort descending',
 	cancelSort: 'Clear sorting',
 	filter: 'Filter',
-	filterSearch: 'Search options',
-	filterReset: 'Reset',
-	filterApply: 'Apply',
-	filterEmpty: 'No options',
 	selectAll: 'Select every row',
 	selectNone: 'Select nothing',
 	selectInvert: 'Invert the selection',
@@ -658,166 +598,34 @@ const headControl = cn(
 	'before:absolute before:-inset-1.5',
 );
 
-const filterOptionClass = cn(
-	'flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm select-none',
-	'has-data-disabled:cursor-not-allowed has-data-disabled:opacity-50',
-	'hover:bg-row-hover',
-);
-
 /**
- * The panel behind a header's filter icon. It edits a draft, because a list of checkboxes that took
- * effect on every press would refetch the table for each one — the reader picks, then says so.
+ * The panel behind a header's filter icon: the caller's control, in the table's panel. The room
+ * around it, the focus it opens with and the way the reader says they are done are the panel's — a
+ * control is handed in, not a popup — so a screen never has to know how a filter is asked for.
+ *
+ * Enter is the reader saying so: what was typed has already been handed over, and the press would
+ * otherwise reach the form as a submit — which is not what a filter bar has to offer.
  */
-function FilterPanel({
-	filter,
-	locale,
-	label,
-	onClose,
-}: {
-	filter: TableOptionsFilter;
-	locale: Required<TableLocale>;
-	label?: string;
-	onClose: () => void;
-}) {
-	const { options, multiple = true, searchable = false, render } = filter;
-	const [draft, setDraft] = useState<string[]>(filter.value ?? []);
-	const [query, setQuery] = useState('');
-
-	const needle = query.trim().toLowerCase();
-	const visible =
-		needle.length === 0
-			? options
-			: options.filter((option) =>
-					(option.text ?? textOf(option.label) ?? option.value).toLowerCase().includes(needle),
-				);
-
-	const toggle = ({ value, on }: { value: string; on: boolean }) =>
-		setDraft((was) =>
-			on ? [...was.filter((one) => one !== value), value] : was.filter((one) => one !== value),
-		);
-	const apply = () => {
-		filter.onChange?.(draft.length === 0 ? null : draft);
-		onClose();
-	};
-	const reset = () => setDraft([]);
-
-	if (render !== undefined) {
-		return <>{render({ value: draft, setValue: setDraft, apply, reset, close: onClose })}</>;
-	}
-
-	const nameOf = (option: TableFilterOption) => option.text ?? textOf(option.label) ?? option.value;
-
-	const optionRow = (option: TableFilterOption) => {
-		const name = nameOf(option);
-		return (
-			<label
-				key={option.value}
-				className={filterOptionClass}
-				data-disabled={option.disabled ? '' : undefined}
-			>
-				{multiple ? (
-					<LumoCheckbox.Root
-						aria-label={name}
-						checked={draft.includes(option.value)}
-						disabled={option.disabled}
-						onCheckedChange={(next) => toggle({ value: option.value, on: next === true })}
-					>
-						<LumoCheckbox.Indicator />
-					</LumoCheckbox.Root>
-				) : (
-					<LumoRadioGroup.Item aria-label={name} value={option.value} disabled={option.disabled}>
-						<LumoRadioGroup.Indicator />
-					</LumoRadioGroup.Item>
-				)}
-				<span className="min-w-0 truncate">{option.label}</span>
-			</label>
-		);
-	};
-
+function FilterPanel({ filter, onClose }: { filter: TableFilterProps; onClose: () => void }) {
 	return (
-		<div data-slot="table-filter-panel" className="flex max-h-80 flex-col">
-			{searchable && (
-				<div className="border-b p-2">
-					<LumoInput
-						size="sm"
-						value={query}
-						aria-label={
-							label === undefined ? locale.filterSearch : `${locale.filterSearch} ${label}`
-						}
-						placeholder={locale.filterSearch}
-						onChange={(event) => setQuery(event.target.value)}
-					/>
-				</div>
-			)}
-			<div className="min-h-0 flex-1 overflow-auto p-1">
-				{visible.length === 0 ? (
-					<p className="px-2 py-6 text-center text-sm text-muted-foreground">
-						{locale.filterEmpty}
-					</p>
-				) : multiple ? (
-					visible.map(optionRow)
-				) : (
-					<LumoRadioGroup.Root
-						className="gap-0"
-						value={draft[0] ?? null}
-						onValueChange={(next) => setDraft(next == null ? [] : [String(next)])}
-					>
-						{visible.map(optionRow)}
-					</LumoRadioGroup.Root>
-				)}
-			</div>
-			<div className="flex items-center justify-end gap-2 border-t p-2">
-				<LumoButton variant="ghost" size="sm" disabled={draft.length === 0} onClick={reset}>
-					{locale.filterReset}
-				</LumoButton>
-				<LumoButton size="sm" onClick={apply}>
-					{locale.filterApply}
-				</LumoButton>
-			</div>
-		</div>
-	);
-}
+		<div
+			data-slot="table-filter-panel"
+			className="p-2"
+			onKeyDown={(event) => {
+				if (event.key !== 'Enter' || !(event.target instanceof HTMLInputElement)) return;
 
-/**
- * The panel of a text filter: one field, and the field is the filter. Nothing is drafted and nothing
- * is confirmed — what is typed narrows the column as it is typed, and emptying the field unnarrows it
- * — so the footer the set panel needs would be two buttons with nothing left to do.
- */
-function TextPanel({
-	filter,
-	locale,
-	label,
-	onClose,
-}: {
-	filter: TableTextFilter;
-	locale: Required<TableLocale>;
-	label?: string;
-	onClose: () => void;
-}) {
-	const name = label === undefined ? locale.filter : `${locale.filter} ${label}`;
-
-	return (
-		<div data-slot="table-filter-panel" className="p-2">
-			<LumoInput
-				size="sm"
-				autoFocus
-				aria-label={name}
-				placeholder={filter.placeholder}
-				value={filter.value ?? ''}
-				onChange={filter.onChange}
-				onKeyDown={(event) => {
-					// The reader is done typing. What was typed has already been handed over, so the panel
-					// only has to get out of the way of the records it narrowed.
-					if (event.key === 'Enter') onClose();
-				}}
-			/>
+				event.preventDefault();
+				onClose();
+			}}
+		>
+			{filter.field}
 		</div>
 	);
 }
 
 /**
  * The filter icon in a column's title, and the popup it opens. It is tinted while the column is
- * filtered, which is the only sign of an applied filter once the panel is closed.
+ * narrowed, which is the only sign of an applied filter once the panel is closed.
  */
 function FilterControl({
 	filter,
@@ -829,13 +637,12 @@ function FilterControl({
 	label?: string;
 }) {
 	const [open, setOpen] = useState(false);
-	const active = isTableFiltered(filter);
 
 	return (
 		<LumoPopover.Root open={open} onOpenChange={setOpen}>
 			<LumoPopover.Trigger
 				data-slot="table-filter"
-				data-active={active ? '' : undefined}
+				data-active={filter.active === true ? '' : undefined}
 				aria-label={label === undefined ? locale.filter : `${locale.filter} ${label}`}
 				className={cn(headControl, 'data-active:text-primary', iconSlot)}
 			>
@@ -844,21 +651,7 @@ function FilterControl({
 			<LumoPopover.Portal>
 				<LumoPopover.Positioner sideOffset={6} align="end">
 					<LumoPopover.Popup className={cn('w-60 p-0', filter.className)}>
-						{'options' in filter ? (
-							<FilterPanel
-								filter={filter}
-								locale={locale}
-								label={label}
-								onClose={() => setOpen(false)}
-							/>
-						) : (
-							<TextPanel
-								filter={filter}
-								locale={locale}
-								label={label}
-								onClose={() => setOpen(false)}
-							/>
-						)}
+						<FilterPanel filter={filter} onClose={() => setOpen(false)} />
 					</LumoPopover.Popup>
 				</LumoPopover.Positioner>
 			</LumoPopover.Portal>
@@ -889,9 +682,8 @@ export type HeadProps = Omit<ComponentProps<'th'>, 'align'> &
 		/** This column's own cycle. The step after the last direction clears the column. */
 		sortDirections?: TableSort[];
 		/**
-		 * A filter panel behind an icon beside the title: a set of the column's own values, or a field
-		 * the reader types into. Either way the pressed state is the caller's — the panel reports the
-		 * next value and draws the icon tinted from the one it is handed.
+		 * A filter panel behind an icon beside the title, drawn by the caller: a `Field` around the
+		 * control that narrows this column. The pressed state is the caller's too, because the value is.
 		 */
 		filter?: TableFilterProps;
 		/**
@@ -959,7 +751,7 @@ export function Head({
 				: table.locale.cancelSort;
 	const label = textOf(children);
 	const showTitle = typeof ellipsis === 'object' ? ellipsis.showTitle !== false : true;
-	const filtered = isTableFiltered(filter);
+	const filtered = filter?.active === true;
 	const sorted = sort === 'ascending' || sort === 'descending';
 
 	const sortable = onSort !== undefined;

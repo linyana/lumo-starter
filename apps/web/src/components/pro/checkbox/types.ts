@@ -2,10 +2,16 @@ import type { ReactNode } from 'react';
 import type { RootProps } from '@/components/ui/checkbox';
 import type { SlotClassNames } from '../types';
 
-type CheckboxRootProps = Pick<
-	RootProps,
-	'checked' | 'defaultChecked' | 'onCheckedChange' | 'disabled' | 'name' | 'required'
->;
+/**
+ * The value is a boolean here rather than Base UI's `checked`: every control this library hands to a
+ * screen reports and takes its value the same way, as `value` and `onChange`, so a field around it
+ * never has to know which kind of control it is holding.
+ */
+type CheckboxRootProps = Pick<RootProps, 'disabled' | 'name' | 'required'> & {
+	value?: boolean;
+	defaultValue?: boolean;
+	onChange?: (value: boolean) => void;
+};
 
 export type CheckboxSlots = 'root' | 'box' | 'indicator' | 'label';
 

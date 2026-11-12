@@ -6,8 +6,8 @@ export interface UseHttpOptions<TData, TVariables> {
 	 * message. Set to `false` when the caller renders the error itself.
 	 */
 	toastError?: boolean;
-	/** Custom failure handling. Supplying this replaces the toast entirely. */
-	onError?: (error: ApiError) => void;
+	/** Custom failure handling. Supplying this replaces the toast; answering `false` keeps it. */
+	onError?: (error: ApiError) => void | boolean;
 	/** Runs after a successful call. */
 	onSuccess?: (data: TData, variables: TVariables) => void;
 }

@@ -92,6 +92,12 @@ export type LumoButtonProps = Omit<ComponentProps<typeof BaseButton>, 'className
 		loading?: boolean;
 	};
 
+/**
+ * The words a button of this size holds, and nothing else. `type` defaults to `button`, not the HTML
+ * default of `submit`: a button is almost never the form's submit — inside a `<form>` the browser's
+ * default would reload the page on a press that only opens a menu — so submitting is said out loud
+ * with `type="submit"`, and every other button is harmless wherever it is drawn.
+ */
 export function LumoButton({
 	className,
 	variant = 'default',
@@ -100,6 +106,7 @@ export function LumoButton({
 	icon = null,
 	loadingIcon,
 	loading = false,
+	type = 'button',
 	disabled = false,
 	children,
 	...props
@@ -109,6 +116,7 @@ export function LumoButton({
 	return (
 		<BaseButton
 			data-slot="button"
+			type={type}
 			data-variant={variant}
 			data-tone={tone}
 			data-size={size}

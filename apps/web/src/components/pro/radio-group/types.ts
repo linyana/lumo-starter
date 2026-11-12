@@ -4,8 +4,11 @@ import type { SlotClassNames } from '../types';
 
 type RadioGroupRootProps<Value> = Pick<
 	RootProps<Value>,
-	'value' | 'defaultValue' | 'onValueChange' | 'disabled' | 'name' | 'required'
->;
+	'value' | 'defaultValue' | 'disabled' | 'name' | 'required'
+> & {
+	/** The option picked. `value`/`onChange` bind every control here — see `pro/checkbox`'s type. */
+	onChange?: RootProps<Value>['onValueChange'];
+};
 
 export type RadioOption<Value extends string = string> = {
 	value: Value;

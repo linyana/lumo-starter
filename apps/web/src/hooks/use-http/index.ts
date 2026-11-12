@@ -64,9 +64,12 @@ export const useHttp = <TData, TVariables = void>({
 				if (id !== requestId.current) return null;
 
 				const error = toApiError(cause);
-				if (current.onError) current.onError(error);
-				else if (current.toastError !== false && !error.sessionExpired) {
-					// A dead session is announced by the auth provider, exactly once.
+				const handled = current.onError?.(error);
+				const quiet = current.toastError === false || error.sessionExpired;
+
+				// A handler that answered `false` did not take the failure — the toast is still the
+				// default, and the screen has only said where the verdict belongs, not that none is due.
+				if (!quiet && (current.onError === undefined || handled === false)) {
 					raiseToast(error.message);
 				}
 				setState((previous) => ({ ...previous, error, loading: false, initial: false }));

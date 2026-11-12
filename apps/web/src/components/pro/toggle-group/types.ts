@@ -4,8 +4,14 @@ import type { SlotClassNames } from '../types';
 
 type ToggleGroupRootProps<Value extends string> = Pick<
 	RootProps<Value>,
-	'value' | 'defaultValue' | 'onValueChange' | 'multiple' | 'orientation' | 'disabled' | 'loopFocus'
->;
+	'value' | 'defaultValue' | 'multiple' | 'orientation' | 'disabled' | 'loopFocus'
+> & {
+	/**
+	 * The value picked: one, several with `multiple`, or `null` when the last one was turned off.
+	 * `value`/`onChange` bind every control here — see `pro/checkbox`'s type.
+	 */
+	onChange?: RootProps<Value>['onValueChange'];
+};
 
 export type ToggleGroupItem<Value extends string = string> = {
 	value: Value;

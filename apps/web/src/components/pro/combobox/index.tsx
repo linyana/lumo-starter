@@ -7,7 +7,7 @@ export const Combobox = ({
 	items,
 	value,
 	defaultValue,
-	onValueChange,
+	onChange,
 	placeholder,
 	size = 'md',
 	disabled = false,
@@ -20,7 +20,7 @@ export const Combobox = ({
 		items={items}
 		value={value}
 		defaultValue={defaultValue}
-		onValueChange={onValueChange}
+		onValueChange={onChange}
 		disabled={disabled}
 		name={name}
 	>

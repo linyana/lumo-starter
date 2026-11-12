@@ -9,7 +9,8 @@ export type ComboboxProps = {
 	items: string[];
 	value?: string | null;
 	defaultValue?: string | null;
-	onValueChange?: (value: string | null) => void;
+	/** The item picked, or `null` once the field is emptied. */
+	onChange?: (value: string | null) => void;
 	placeholder?: string;
 	size?: InputProps['size'];
 	disabled?: boolean;

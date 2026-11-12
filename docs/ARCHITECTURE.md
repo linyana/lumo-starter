@@ -119,11 +119,13 @@ in front of this would need its own rendering story.
 
 **Chosen.** `src/lib/http/` unwraps `{ data }`, attaches the bearer token, refreshes single-flight on
 401, and normalises every failure into `ApiError`. Components call endpoints through
-`pages/*/*/api.ts` with `useHttp`, which holds `data / error / loading`. A list puts
-`useList` on top of it: that one owns the page, the filters and the sort as well, so a screen
-showing records holds no effect of its own and hands the whole result to the table as a single prop.
-Each filter control is handed its own props by shape — `text`, `choice`, `flag` — so a screen names
-neither the value nor the setter, and changing which control draws a filter never touches the query.
+`pages/*/*/api.ts` with `useHttp`, which holds `data / error / loading`. A list puts `useQuery` on
+top of it: that one owns the page, the order, the address bar and the read, so a screen showing
+records holds no effect of its own and hands the whole result to the table as a single prop.
+What the reader narrows on is a `<Form>` — its fields are the filters — so `useQuery` holds the
+values of the last read and the form holds the ones being typed. Nothing is bound by string: a
+column's filter is a `<Field>`, and the group of toggles that narrows by role is the same control a
+data-entry form would use.
 
 **Why.** Mixing fetch state into component state is what makes large React apps rot — but a cache
 layer answers a question this app does not ask: every screen wants the server's answer _now_
@@ -135,28 +137,36 @@ would have keyed it. No dedupe across components, no background revalidation.
 
 ---
 
-## 8. Forms use Base UI's `<Form>` + zod directly, not react-hook-form
+## 8. One `Form` for both kinds of form: submit-once and live-query
 
-**Chosen.** `Field.Root name="email"` + `Field.Control render={<Input />}`, values collected by the
-form, `safeParse` on submit, errors passed back through the `errors` prop.
+**Chosen.** `<Form schema={loginSchema} onSubmit={...}>` for a submission, and
+`<Form form={users.form} initial={users.opened} onChange={users.write} settle={300}>` for a filter
+bar. Same component, same `Field`s, same schema. The instance from `useForm()` holds the values, the
+verdicts, and one validation path (`form.submit()` → `prune` → `safeParse` → `onSubmit(parsed)`).
+Controls speak one pair — `value` and `onChange` — and `Field` injects them, so a field names
+nothing but its own name.
 
-**Why.** lumo-ui's form stack already collects values, focuses the first invalid field, and clears a
-field's error as it is edited. Layering react-hook-form on top would mean two form state machines
-competing for the same inputs. The zod schema is still the only validation rule, so the
-"one source of truth" property survives.
+**Why.** A form and a filter bar are the same question asked at different times: _what do these
+fields hold, and when is it read?_ Splitting them produced two value conventions (uncontrolled +
+`FormData` on one side, a set of binding functions on the other), and a reviewer had to know both.
+One convention — the instance holds the values, a control reports through `onChange` — covers both,
+and the difference is the one prop that says when to read: `onSubmit`, or `onChange` + `settle`.
+
+**Why the store, when §8 first rejected antd's.** The controls keep their own DOM value and the
+instance is a mirror written by their `onChange`; it is not a controlled store. That is what lets a
+browser autofill land (the read-only gate opens the field first, and Chrome dispatches `input` on a
+fill), and it is why `reset` is a remount rather than a write back into each control. What was worth
+taking from `Form.Item` is exactly this much: the injection of `value`/`onChange`, and a `values()`
+that a body, a query or a rule can read without the screen keeping a copy.
 
 **Rejected.** react-hook-form + `zodResolver`: better for very large forms with field arrays, but it
-would bypass the component library's own form semantics.
+would mean a second state machine beside the instance, and the schema is already the only rule.
+`rules` on each field (antd): the schema is the rule, and it is the same object the API parses the
+body with, so a per-field rule language would be a second source of truth.
 
-**Cost.** Manual work for arrays/nested forms later; that is when react-hook-form is worth
-reconsidering (and it can coexist on individual screens).
-
-**Also rejected: antd's Form instance, for filters.** `Form.useForm()` + `onValuesChange` is how an
-antd screen narrows a list, but the store would be a second owner of the query beside `useList`
-(and a third beside the URL), and Base UI's `Form` has no `onValuesChange` at all — its non-native
-controls report through `onValueChange`, so the model does not carry over. What is worth taking is
-the half of `Form.Item` that removes `value`/`onChange` from the call site: a control bound by the
-shape it reports a value in. That is `useList`'s `text` / `choice` / `flag`, and it needs no store.
+**Cost.** A small store of our own (~140 lines in `components/pro/form/instance`), and one
+implementation detail: a `<button>` inside a form is a `submit` by default, so `Button` defaults to
+`type="button"` and submitting is said out loud.
 
 ---
 

@@ -1,7 +1,6 @@
-import { createUserSchema, ROLES, ROLE_META, type CreateUserInput, type Role } from '@lumo/shared';
+import { createUserSchema, ROLES, ROLE_META, type Role } from '@lumo/shared';
 import { useState } from 'react';
-import { Button, Dialog, Field, Form, type FormErrors, Input, ToggleGroup } from '@/components';
-import { errorFields, toFormErrors, toastError } from '@/lib';
+import { Button, Dialog, Field, Form, Input, ToggleGroup, useForm } from '@/components';
 import { useHttp } from '@/hooks';
 import { usersApi } from '@/api';
 
@@ -14,45 +13,27 @@ type IPropsType = {
 /**
  * An account made by someone who already may: the panel is the form, and it stays open while the
  * request runs — a rejection about a field lands under that field, anything else takes the toast.
+ *
+ * The roles are a field like any other: the toggle group reports through the same `onChange` an
+ * input does, so the form holds them and the panel keeps nothing of its own.
  */
 export const CreateUser = ({ onCreated }: IPropsType) => {
 	const [open, setOpen] = useState(false);
-	const [errors, setErrors] = useState<FormErrors>({});
-	const [roles, setRoles] = useState<Role[]>(['MEMBER']);
+	const form = useForm();
 
 	const submit = useHttp({
 		fn: usersApi.create,
 		onSuccess: () => {
 			setOpen(false);
-			setRoles(['MEMBER']);
 			onCreated();
 		},
-		onError: (error) => {
-			const fields = errorFields(error);
-			if (Object.keys(fields).length > 0) setErrors(fields);
-			else toastError(error.message);
-		},
+		onError: form.setApiError,
 	});
-
-	const handleSubmit = (values: Record<string, unknown>): void => {
-		// The roles are held here rather than in the form: a group of toggles submits no value.
-		const parsed = createUserSchema.safeParse({ ...values, roles });
-		if (!parsed.success) {
-			setErrors(toFormErrors(parsed.error));
-			return;
-		}
-
-		setErrors({});
-		submit.fetchData(parsed.data as CreateUserInput);
-	};
 
 	return (
 		<Dialog
 			open={open}
-			onOpenChange={(next) => {
-				setOpen(next);
-				if (!next) setErrors({});
-			}}
+			onOpenChange={setOpen}
 			trigger={
 				<Button variant="default" size="sm">
 					Invite
@@ -61,7 +42,12 @@ export const CreateUser = ({ onCreated }: IPropsType) => {
 			title="New account"
 			description="They sign in with this email and the password you set."
 		>
-			<Form errors={errors} onFormSubmit={handleSubmit}>
+			<Form
+				form={form}
+				schema={createUserSchema}
+				initial={{ roles: ['MEMBER'] }}
+				onSubmit={submit.fetchData}
+			>
 				<Field name="email" label="Email">
 					<Input type="email" autoComplete="off" />
 				</Field>
@@ -83,15 +69,11 @@ export const CreateUser = ({ onCreated }: IPropsType) => {
 						multiple
 						variant="outline"
 						size="sm"
-						value={roles}
-						onValueChange={(value) => {
-							setRoles(Array.isArray(value) ? value : value === null ? [] : [value]);
-						}}
 						items={ROLES.map((role) => ({ value: role, label: ROLE_META[role] }))}
 					/>
 				</Field>
 
-				<Button type="submit" loading={submit.loading} className="mt-2">
+				<Button loading={submit.loading} onClick={form.submit} className="mt-2">
 					Create account
 				</Button>
 			</Form>

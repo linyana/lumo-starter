@@ -3,8 +3,8 @@ import { cn } from '@/lib/utils';
 import type { SliderProps } from './types';
 
 /** A setting that is a number on a line: a groove, what is already taken of it, and the knob. */
-export const Slider = ({ label, className, classNames, ...props }: SliderProps) => (
-	<LumoSlider.Root className={cn(className, classNames?.root)} {...props}>
+export const Slider = ({ label, onChange, className, classNames, ...props }: SliderProps) => (
+	<LumoSlider.Root onValueChange={onChange} className={cn(className, classNames?.root)} {...props}>
 		{label !== undefined && (
 			<>
 				<LumoSlider.Label className={classNames?.label}>{label}</LumoSlider.Label>
