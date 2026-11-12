@@ -112,11 +112,12 @@ export type TableProps<Row, Key extends string = string> = {
 	hoverable?: boolean;
 	/**
 	 * A read is in flight — the list's own when one is handed over. What that looks like is `initial`'s
-	 * answer: the wait a table opens with has
-	 * nothing behind it, so it replaces the body with skeleton rows under the column names — the shape
-	 * of what is coming — and every wait after it keeps what the table last answered with, an empty
-	 * result included, and covers it with a spinner. So a page, a sort or a narrowed column does not
-	 * move the row the reader was on, and a search that found nothing says so without going blank first.
+	 * answer: the wait a table opens with has nothing behind it, so it replaces the body with skeleton
+	 * rows under the column names — the shape of what is coming — and every wait after it keeps what the
+	 * table last answered with, an empty result included, and covers it with a spinner: the records and
+	 * the footer alike, because the way through them is part of the same answer. So a page, a sort or a
+	 * narrowed column does not move the row the reader was on, and a search that found nothing says so
+	 * without going blank first.
 	 */
 	loading?: boolean;
 	/**

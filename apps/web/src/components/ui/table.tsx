@@ -28,7 +28,6 @@ import { LumoInput } from '@/components/ui/input';
 import { LumoMenu } from '@/components/ui/menu';
 import { LumoPopover } from '@/components/ui/popover';
 import { LumoRadioGroup } from '@/components/ui/radio-group';
-import { LumoSpinner } from '@/components/ui/spinner';
 import { LumoTooltip } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { iconSlot } from '@/lib/control';
@@ -126,7 +125,6 @@ export type TableLocale = {
 	filterReset?: string;
 	filterApply?: string;
 	filterEmpty?: string;
-	loading?: string;
 	selectAll?: string;
 	selectNone?: string;
 	selectInvert?: string;
@@ -144,7 +142,6 @@ const defaultLocale: Required<TableLocale> = {
 	filterReset: 'Reset',
 	filterApply: 'Apply',
 	filterEmpty: 'No options',
-	loading: 'Loading',
 	selectAll: 'Select every row',
 	selectNone: 'Select nothing',
 	selectInvert: 'Invert the selection',
@@ -452,12 +449,6 @@ export type RootProps = Omit<ComponentProps<'table'>, 'className'> &
 		/** The words behind the controls the table draws itself: sort hints, the filter panel. */
 		locale?: TableLocale;
 		/**
-		 * Cover the records with a spinner while keeping them, and their column names, in place. The
-		 * word under it is said only once the wait has run long enough to be worth naming — a read that
-		 * answers in a moment never needs it.
-		 */
-		loading?: boolean;
-		/**
 		 * `fixed` gives every column the width it was declared, which is what `ellipsis` needs: an
 		 * automatic layout decides widths from the content it is asked to cut off.
 		 */
@@ -473,7 +464,6 @@ export function Root({
 	size = 'md',
 	variant = 'borderless',
 	hoverable = true,
-	loading = false,
 	layout = 'auto',
 	sortDirections = defaultSortDirections,
 	locale,
@@ -498,8 +488,6 @@ export function Root({
 				data-slot="table-root"
 				data-size={size}
 				data-variant={variant}
-				data-loading={loading ? '' : undefined}
-				aria-busy={loading || undefined}
 				className="relative min-w-0 w-full"
 			>
 				<div
@@ -524,14 +512,6 @@ export function Root({
 						{children}
 					</table>
 				</div>
-				{loading && (
-					<LumoSpinner
-						mask
-						label={value.locale.loading}
-						caption={value.locale.loading}
-						className={variant === 'borderless' ? undefined : 'rounded-lg'}
-					/>
-				)}
 			</div>
 		</TableContext>
 	);

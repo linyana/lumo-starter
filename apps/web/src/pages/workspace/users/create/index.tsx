@@ -1,5 +1,4 @@
 import { createUserSchema, ROLES, ROLE_META, type CreateUserInput, type Role } from '@lumo/shared';
-import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { Button, Dialog, Field, Form, type FormErrors, Input, ToggleGroup } from '@/components';
 import { errorFields, toFormErrors, toastError } from '@/lib';
