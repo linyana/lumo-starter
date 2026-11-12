@@ -94,7 +94,7 @@ export const UserList = ({ users }: IPropsType) => {
 			key: 'email',
 			header: 'Email',
 			sortKey: 'email',
-			filter: { kind: 'text', placeholder: 'Filter by email', ...users.text('email') },
+			filter: { ...users.text('email'), placeholder: 'Filter by email' },
 			cell: (row) => <span className="text-muted-foreground">{row.email}</span>,
 		},
 		{

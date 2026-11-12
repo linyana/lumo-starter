@@ -36,6 +36,13 @@ export type TableColumn<Row, Key extends string = string> = {
 	 * sort is — the panel draws what it is handed and reports what was pressed.
 	 */
 	filter?: TableFilterProps;
+	/**
+	 * More of what a right press on this title opens, after the lines the table draws from what the column
+	 * already declared: the press its `sortKey`'s arrow would make next, and "Clear filter" while its
+	 * `filter` is applied and can be written. This is what the table cannot know — a column's own actions,
+	 * such as narrowing to this row's value — and every line in the menu is a press that changes something.
+	 */
+	menu?: () => MenuItem[];
 };
 
 export type TableSlots =

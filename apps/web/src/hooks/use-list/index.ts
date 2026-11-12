@@ -239,8 +239,16 @@ export const useList = <TItem, TQuery extends ListQuery>({
 	// schema's, which the wire alone can check, so a text field keeps the caller's word for it.
 	const text = <Key extends StringFilterKey<TQuery>>(key: Key) => ({
 		value: (filters[key] as string | undefined) ?? '',
-		onChange: (event: ChangeEvent<HTMLInputElement>) =>
-			write({ key, value: event.target.value as ListFilters<TQuery>[Key], typing: true }),
+		// A keystroke is one of many and waits for the pause; a value written straight — a column's own
+		// "clear" — is one answer, and is read at once.
+		onChange: (change: ChangeEvent<HTMLInputElement> | string) =>
+			write({
+				key,
+				value: (typeof change === 'string'
+					? change
+					: change.target.value) as ListFilters<TQuery>[Key],
+				typing: typeof change !== 'string',
+			}),
 	});
 
 	const choice = <Key extends StringFilterKey<TQuery>>(key: Key) => ({

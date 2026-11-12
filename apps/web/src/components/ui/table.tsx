@@ -68,14 +68,13 @@ export type TableFilterRenderProps = {
 /**
  * What narrowing a column by its own values is, in the two kinds it comes in. A column either holds a
  * list of answers — a role, a status — or free text that cannot be listed — an address, a name — and
- * the panel behind the header's icon is drawn from that: a set of boxes, or one field.
+ * the panel behind the header's icon is drawn from that: a set of boxes, or one field. The two are
+ * told apart by the only thing that is not shared: a set names the answers it offers.
  */
 export type TableFilterProps = TableOptionsFilter | TableTextFilter;
 
 /** A column narrowed to a set of its own values, drawn as boxes — or as radios, with `multiple: false`. */
 export type TableOptionsFilter = {
-	/** Left out, it is the only kind there used to be, and so the one a caller need not name. */
-	kind?: 'options';
 	options: TableFilterOption[];
 	/** The applied answer. An empty list and `null` both mean the column is not filtered. */
 	value?: string[] | null;
@@ -94,25 +93,34 @@ export type TableOptionsFilter = {
 /**
  * A column narrowed to what the reader types. There is nothing to draft and nothing to confirm — the
  * value is the field's own, written as it is typed and cleared by emptying it — so the panel is one
- * input and no footer. The props are an `<input>`'s, which is what lets a field bound elsewhere be
- * handed over whole: `filter={{ kind: 'text', ...list.text('email') }}`.
+ * input and no footer, and the filter is the field itself: a binding handed over whole is a filter.
+ *
+ * ```tsx
+ * filter: list.text('email')
+ * ```
+ *
+ * Its own menu clears the column through the same write, handing over the empty value instead of a
+ * press.
  */
 export type TableTextFilter = {
-	kind: 'text';
 	value?: string;
-	onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
-	/** What the field says before anything is typed. */
+	/** What is typed, or the value written straight — which is how the column's title clears it. */
+	onChange?: (change: ChangeEvent<HTMLInputElement> | string) => void;
+	/** What the field says before anything is typed. Left out, it says nothing — the words are the screen's. */
 	placeholder?: string;
 	/** Merged onto the popup. */
 	className?: string;
 };
 
-/** Whether a column is narrowed: a set has members, a text filter has letters. */
-function isFiltered(filter: TableFilterProps | undefined): boolean {
+/**
+ * Whether a column is narrowed: a set has members, a text filter has letters. It is what the icon
+ * beside a title is tinted from, and what a column's menu offers the way out of.
+ */
+export function isTableFiltered(filter: TableFilterProps | undefined): boolean {
 	if (filter === undefined) return false;
-	if (filter.kind === 'text') return filter.value !== undefined && filter.value !== '';
+	if ('options' in filter) return (filter.value?.length ?? 0) > 0;
 
-	return (filter.value?.length ?? 0) > 0;
+	return filter.value !== undefined && filter.value !== '';
 }
 
 /** The words the table says on its own. Anything left out falls back to English. */
@@ -794,7 +802,7 @@ function TextPanel({
 				size="sm"
 				autoFocus
 				aria-label={name}
-				placeholder={filter.placeholder ?? locale.filter}
+				placeholder={filter.placeholder}
 				value={filter.value ?? ''}
 				onChange={filter.onChange}
 				onKeyDown={(event) => {
@@ -821,7 +829,7 @@ function FilterControl({
 	label?: string;
 }) {
 	const [open, setOpen] = useState(false);
-	const active = isFiltered(filter);
+	const active = isTableFiltered(filter);
 
 	return (
 		<LumoPopover.Root open={open} onOpenChange={setOpen}>
@@ -836,15 +844,15 @@ function FilterControl({
 			<LumoPopover.Portal>
 				<LumoPopover.Positioner sideOffset={6} align="end">
 					<LumoPopover.Popup className={cn('w-60 p-0', filter.className)}>
-						{filter.kind === 'text' ? (
-							<TextPanel
+						{'options' in filter ? (
+							<FilterPanel
 								filter={filter}
 								locale={locale}
 								label={label}
 								onClose={() => setOpen(false)}
 							/>
 						) : (
-							<FilterPanel
+							<TextPanel
 								filter={filter}
 								locale={locale}
 								label={label}
@@ -858,6 +866,12 @@ function FilterControl({
 	);
 }
 
+/**
+ * A column's title. Its own props are the three things a title knows about its column — how it is
+ * sorted, how it is narrowed, where it is pinned — and everything else is a `<th>`'s. A right press is
+ * one of those: `onContextMenu` lands on the cell itself, which is where a menu about the column is
+ * opened from, and the press is the caller's to prevent, anchor and fill.
+ */
 export type HeadProps = Omit<ComponentProps<'th'>, 'align'> &
 	VariantProps<typeof tableCellVariants> & {
 		/** Which way this column is sorted by. Left out, it is a column that cannot be sorted. */
@@ -945,7 +959,7 @@ export function Head({
 				: table.locale.cancelSort;
 	const label = textOf(children);
 	const showTitle = typeof ellipsis === 'object' ? ellipsis.showTitle !== false : true;
-	const filtered = isFiltered(filter);
+	const filtered = isTableFiltered(filter);
 	const sorted = sort === 'ascending' || sort === 'descending';
 
 	const sortable = onSort !== undefined;

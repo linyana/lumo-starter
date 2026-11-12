@@ -76,7 +76,12 @@ export type BooleanFilterKey<TQuery extends ListQuery> = {
  */
 export type TextBinding = {
 	value: string;
-	onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+	/**
+	 * What was typed, or the value written straight through. A control hands over the event it already
+	 * has; a component that composes its own field — a table's column filter, clearing itself from the
+	 * title's menu — hands over the value, and the pause is the same one either way.
+	 */
+	onChange: (change: ChangeEvent<HTMLInputElement> | string) => void;
 };
 
 export type ChoiceBinding<Value> = {

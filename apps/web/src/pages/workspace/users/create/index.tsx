@@ -53,7 +53,11 @@ export const CreateUser = ({ onCreated }: IPropsType) => {
 				setOpen(next);
 				if (!next) setErrors({});
 			}}
-			trigger={<Button variant="default" size="sm">Invite</Button>}
+			trigger={
+				<Button variant="default" size="sm">
+					Invite
+				</Button>
+			}
 			title="New account"
 			description="They sign in with this email and the password you set."
 		>

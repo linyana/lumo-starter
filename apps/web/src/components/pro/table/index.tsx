@@ -1,13 +1,14 @@
-import { Ellipsis, RotateCcw } from 'lucide-react';
-import { useId, useState } from 'react';
+import { ArrowDown, ArrowUp, ArrowUpDown, Ellipsis, ListFilter, RotateCcw } from 'lucide-react';
+import { useId, useState, type MouseEvent } from 'react';
 import { LumoSkeleton } from '@/components/ui/skeleton';
-import { LumoTable, type TableSort as AriaSort } from '@/components/ui/table';
+import { isTableFiltered, LumoTable, type TableSort as AriaSort } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { Button } from '../button';
 import { ContextMenu, type ContextMenuAnchor } from '../context-menu';
+import type { MenuItem } from '../menu';
 import { Pagination, type PaginationProps } from '../pagination';
 import { Spinner } from '../spinner';
-import type { TableList, TableProps, TableSort } from './types';
+import type { TableColumn, TableFilterProps, TableList, TableProps, TableSort } from './types';
 
 export type {
 	TableColumn,
@@ -25,7 +26,29 @@ const actions = 'Actions';
 
 const noRecords: never[] = [];
 
+const noItems: MenuItem[] = [];
+
 const idOf = (row: unknown) => String((row as { id: unknown }).id);
+
+/**
+ * The menu the table has open, whichever half of it asked: the actions of a record from a right press
+ * on its row, or a column's own from one on its title. One list, one place on the page.
+ */
+type OpenMenu = {
+	anchor: ContextMenuAnchor;
+	items: MenuItem[];
+	/** The record it is about. Left out, it belongs to a title and names no row. */
+	rowKey?: string;
+};
+
+/**
+ * Where a press asked for the menu: at the pointer, or at the element itself when the press came from
+ * the keyboard, which reports a press at no coordinates at all.
+ */
+const anchorOf = (event: MouseEvent<HTMLElement>): ContextMenuAnchor =>
+	event.clientX === 0 && event.clientY === 0
+		? event.currentTarget
+		: { x: event.clientX, y: event.clientY };
 
 function pagerOf<Row, Key extends string>(
 	list: TableList<Row, Key> | undefined,
@@ -58,7 +81,6 @@ function ariaSortOf<Key extends string>({
 	return sort.order === 'asc' ? 'ascending' : 'descending';
 }
 
-
 function sortPressOf<Key extends string>({
 	sortKey,
 	onSortChange,
@@ -74,6 +96,77 @@ function sortPressOf<Key extends string>({
 				? undefined
 				: { key: sortKey, order: next === 'ascending' ? 'asc' : 'desc' },
 		);
+}
+
+/**
+ * The press a column's arrow would make next: the two directions round, then the way back out. The
+ * menu says this one thing rather than both directions and a reset, because a list of everything a
+ * column could be is one the reader has to read their way out of before they can choose.
+ */
+function nextSort(sort: AriaSort | undefined): 'ascending' | 'descending' | undefined {
+	if (sort === 'ascending') return 'descending';
+	if (sort === 'descending') return undefined;
+
+	return 'ascending';
+}
+
+/** What the press a column is about to make is called, and the arrow that says the same thing. */
+const sortPress = {
+	ascending: { label: 'Sort ascending', icon: <ArrowUp /> },
+	descending: { label: 'Sort descending', icon: <ArrowDown /> },
+	cleared: { label: 'Clear sorting', icon: <ArrowUpDown /> },
+} as const;
+
+/**
+ * What a title offers about its own column, one line per thing it can do next: the press its arrow would
+ * make, and the way out of the column's own narrowing while it is narrowed. Both are read from what the
+ * column already declared — `sortKey` and `filter` — so a screen that declares its columns gets its
+ * titles' menu without saying anything about it, and `menu` only adds what the table cannot know.
+ *
+ * A column whose next press is nothing at all — unsortable and unnarrowed, with nothing of its own to
+ * add — offers no menu, and a right press on it stays the browser's.
+ */
+function columnItems<Row, Key extends string>({
+	column,
+	sort,
+	onSort,
+}: {
+	column: TableColumn<Row, Key>;
+	sort: AriaSort | undefined;
+	onSort: ((next: AriaSort | undefined) => void) | undefined;
+}): MenuItem[] {
+	const items: MenuItem[] = [];
+
+	if (onSort !== undefined) {
+		const next = nextSort(sort);
+		const { label, icon } = next === undefined ? sortPress.cleared : sortPress[next];
+
+		// The current order is the one the title already says with its arrow, so the menu never repeats it:
+		// every line here is a press that changes something.
+		items.push({ label, icon, onClick: () => onSort(next) });
+	}
+
+	const filter: TableFilterProps | undefined = column.filter;
+	if (filter !== undefined && filter.onChange !== undefined && isTableFiltered(filter)) {
+		items.push({
+			label: 'Clear filter',
+			icon: <ListFilter />,
+			separatorBefore: true,
+			onClick: () => clearFilter(filter),
+		});
+	}
+
+	return [...items, ...(column.menu?.() ?? noItems)];
+}
+
+/**
+ * The empty answer, in the shape each kind of narrowing reports one: a field is emptied, a set is not.
+ * It is the same write the panel behind the icon makes when it is cleared letter by letter, so the two
+ * cannot disagree about what "not narrowed" is.
+ */
+function clearFilter(filter: TableFilterProps): void {
+	if ('options' in filter) filter.onChange?.(null);
+	else filter.onChange?.('');
 }
 
 export const Table = <Row, Key extends string = string>({
@@ -98,9 +191,8 @@ export const Table = <Row, Key extends string = string>({
 	className,
 	classNames,
 }: TableProps<Row, Key>) => {
-	const [menu, setMenu] = useState<{ row: Row; key: string; anchor: ContextMenuAnchor } | null>(
-		null,
-	);
+	const [menu, setMenu] = useState<OpenMenu | null>(null);
+	const menuRow = menu?.rowKey;
 
 	const data = rows ?? list?.items ?? noRecords;
 	const busy = loading ?? list?.loading ?? false;
@@ -124,9 +216,28 @@ export const Table = <Row, Key extends string = string>({
 
 	const actionsOf = (row: Row) => rowActions?.(row) ?? [];
 
-	const openMenu = ({ row, anchor }: { row: Row; anchor: ContextMenuAnchor }) => {
-		if (actionsOf(row).length === 0) return;
-		setMenu({ row, key: rowKey(row), anchor });
+	const openRowMenu = ({ row, anchor }: { row: Row; anchor: ContextMenuAnchor }) => {
+		const items = actionsOf(row);
+		if (items.length === 0) return;
+		setMenu({ items, anchor, rowKey: rowKey(row) });
+	};
+
+	// A title's list is built at the press, so a column nobody right-presses costs nothing on every
+	// render that draws it.
+	const openColumnMenu = ({
+		column,
+		sort,
+		onSort,
+		anchor,
+	}: {
+		column: TableColumn<Row, Key>;
+		sort: AriaSort | undefined;
+		onSort: ((next: AriaSort | undefined) => void) | undefined;
+		anchor: ContextMenuAnchor;
+	}) => {
+		const items = columnItems({ column, sort, onSort });
+		if (items.length === 0) return;
+		setMenu({ items, anchor });
 	};
 
 	const headed = columns.map((column) => ({
@@ -187,6 +298,19 @@ export const Table = <Row, Key extends string = string>({
 								sort={columnSort}
 								onSort={onSort}
 								filter={column.filter}
+								onContextMenu={
+									column.menu === undefined && onSort === undefined && column.filter === undefined
+										? undefined
+										: (event) => {
+												event.preventDefault();
+												openColumnMenu({
+													column,
+													sort: columnSort,
+													onSort,
+													anchor: anchorOf(event),
+												});
+											}
+								}
 							>
 								{column.header}
 							</LumoTable.Head>
@@ -242,7 +366,7 @@ export const Table = <Row, Key extends string = string>({
 						records.map(({ row, key, items }, index) => (
 							<LumoTable.Row
 								key={key}
-								data-menu-open={menu?.key === key ? '' : undefined}
+								data-menu-open={menuRow === key ? '' : undefined}
 								className={cn(
 									classNames?.row,
 									withActions && 'group/row',
@@ -253,13 +377,7 @@ export const Table = <Row, Key extends string = string>({
 										? undefined
 										: (event) => {
 												event.preventDefault();
-												openMenu({
-													row,
-													anchor:
-														event.clientX === 0 && event.clientY === 0
-															? event.currentTarget
-															: { x: event.clientX, y: event.clientY },
-												});
+												openRowMenu({ row, anchor: anchorOf(event) });
 											}
 								}
 							>
@@ -283,7 +401,7 @@ export const Table = <Row, Key extends string = string>({
 											<span
 												className={cn(
 													rowActionReveal,
-													menu?.key === key && 'opacity-100 pointer-events-auto',
+													menuRow === key && 'opacity-100 pointer-events-auto',
 												)}
 											>
 												<Button
@@ -297,8 +415,8 @@ export const Table = <Row, Key extends string = string>({
 													}
 													aria-label={rowActionsLabel?.(row)}
 													aria-haspopup="menu"
-													aria-expanded={menu?.key === key}
-													onClick={(event) => openMenu({ row, anchor: event.currentTarget })}
+													aria-expanded={menuRow === key}
+													onClick={(event) => openRowMenu({ row, anchor: event.currentTarget })}
 												/>
 											</span>
 										)}
@@ -329,7 +447,7 @@ export const Table = <Row, Key extends string = string>({
 
 			<ContextMenu
 				anchor={menu?.anchor ?? null}
-				items={menu === null ? [] : actionsOf(menu.row)}
+				items={menu?.items ?? noItems}
 				onClose={() => setMenu(null)}
 			/>
 		</div>
