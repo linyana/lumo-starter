@@ -29,6 +29,14 @@ export const createUserSchema = z.object({
 	roles: z.array(roleSchema).min(1).default(['MEMBER']),
 });
 
+/**
+ * What a path addresses: the description of one account. The column is a uuid, so the segment is
+ * asked for one at the boundary rather than handed to Postgres as text and failing there.
+ */
+export const userParamsSchema = z.object({
+	id: z.uuid({ error: 'Not a valid user id' }),
+});
+
 export const updateUserSchema = z
 	.object({
 		email: emailSchema.optional(),

@@ -1,17 +1,19 @@
-import { Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
+import { Controller, Delete, Get, HttpCode, HttpStatus, Patch, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import {
 	createUserSchema,
 	listUsersQuerySchema,
 	updateUserSchema,
+	userParamsSchema,
 	type CreateUserInput,
 	type ListUsersQuery,
 	type UpdateUserInput,
+	type UserParams,
 } from '@lumo/shared';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { RequirePermissions } from '../../common/decorators/permissions.decorator.js';
 import { SkipEnvelope } from '../../common/decorators/skip-envelope.decorator.js';
-import { ZodBody, ZodQuery } from '../../common/pipes/zod-validation.pipe.js';
+import { ZodBody, ZodParams, ZodQuery } from '../../common/pipes/zod-validation.pipe.js';
 import { ApiZodBody } from '../../common/swagger/zod-openapi/index.js';
 import type { AuthUser } from '../../common/types/index.js';
 import { UsersService } from './users.service.js';
@@ -29,7 +31,7 @@ export class UsersController {
 
 	@Get(':id')
 	@RequirePermissions('user:read')
-	async get(@Param('id') id: string) {
+	async get(@ZodParams(userParamsSchema) { id }: UserParams) {
 		return { user: await this.users.getById(id) };
 	}
 
@@ -44,7 +46,7 @@ export class UsersController {
 	@RequirePermissions('user:write')
 	@ApiZodBody(updateUserSchema)
 	async update(
-		@Param('id') id: string,
+		@ZodParams(userParamsSchema) { id }: UserParams,
 		@ZodBody(updateUserSchema) input: UpdateUserInput,
 		@CurrentUser() actor: AuthUser,
 	) {
@@ -55,7 +57,10 @@ export class UsersController {
 	@RequirePermissions('user:delete')
 	@HttpCode(HttpStatus.NO_CONTENT)
 	@SkipEnvelope()
-	async remove(@Param('id') id: string, @CurrentUser() actor: AuthUser): Promise<void> {
+	async remove(
+		@ZodParams(userParamsSchema) { id }: UserParams,
+		@CurrentUser() actor: AuthUser,
+	): Promise<void> {
 		await this.users.remove({ id, actor });
 	}
 }

@@ -1,4 +1,4 @@
-import { Body, type PipeTransform, Query } from '@nestjs/common';
+import { Body, Param, type PipeTransform, Query } from '@nestjs/common';
 import type { FieldError } from '@lumo/shared';
 import type { ZodType } from 'zod';
 import { AppException } from '../errors/app.exception.js';
@@ -30,6 +30,10 @@ export class ZodValidationPipe<T> implements PipeTransform<unknown, T> {
 /** `@ZodBody(schema) input: MyInput` */
 export const ZodBody = <T>(schema: ZodType<T>): ParameterDecorator =>
 	Body(new ZodValidationPipe(schema));
+
+/** `@ZodParams(schema) { id }: MyParams` — a path segment arrives as text, like a query does. */
+export const ZodParams = <T>(schema: ZodType<T>): ParameterDecorator =>
+	Param(new ZodValidationPipe(schema));
 
 /** `@ZodQuery(schema) query: MyQuery` — query strings arrive as text. */
 export const ZodQuery = <T>(schema: ZodType<T>): ParameterDecorator =>
