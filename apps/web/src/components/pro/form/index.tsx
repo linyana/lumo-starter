@@ -35,17 +35,11 @@ export const Form = <Input, Values extends Record<string, unknown> = Record<stri
 	const opened = useRef(false);
 	const latest = useRef(instance);
 	latest.current = instance;
-
-	// A panel that opens again after a rejection would draw the last sentence for a frame: the
-	// instance outlives the element, so what it answered before is cleared before this one paints.
+	
 	useLayoutEffect(() => {
 		if (Object.keys(latest.current.errors).length > 0) latest.current.setErrors({});
 	}, []);
 
-	// Writes to refs, so nothing is scheduled here: what `submit` reads has to be this render's
-	// `onSubmit`, and the values have to be the ones the form mounts with — the element is drawn
-	// afresh every time a panel opens, and a form that opened before must not answer with what it
-	// held then.
 	if (!opened.current) {
 		instance.seed(initial);
 		opened.current = true;
@@ -58,11 +52,8 @@ export const Form = <Input, Values extends Record<string, unknown> = Record<stri
 				{...props}
 				ref={element}
 				errors={instance.errors}
-				// The native submit — Enter, or a `type="submit"` button — takes the same path as
-				// `form.submit()`. Base UI has already run each field's own rule by here.
 				onFormSubmit={() => instance.submit()}
 			>
-				{/* Keyed by the reset: a control's value is its own, so a reset redraws the fields. */}
 				<Fragment key={instance.epoch}>{children}</Fragment>
 			</LumoForm>
 		</FormProvider>

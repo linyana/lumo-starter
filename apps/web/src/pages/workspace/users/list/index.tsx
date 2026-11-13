@@ -18,54 +18,11 @@ const ROLE_VARIANT: Record<Role, 'default' | 'info' | 'secondary'> = {
 	MEMBER: 'secondary',
 };
 
-/**
- * The records, and the two ways of narrowing them: one field over the table and one behind each
- * column's title. Both are fields of the one form, so narrowing by either is the same write, and a
- * column's "Clear filter" is the same reset — the table is only told whether its column is narrowed
- * and how to undo it.
- */
 export const UserList = ({ list }: IPropsType) => {
 	const { user: currentUser } = useAuth();
 
 	const [panel, setPanel] = useState<{ user: User; kind: 'edit' | 'delete' } | null>(null);
 	const [batch, setBatch] = useState<readonly User[] | null>(null);
-
-	const closePanel = (next: boolean) => {
-		if (!next) setPanel(null);
-	};
-
-	/**
-	 * The one rule the row's delete and the chosen set's delete both answer to: the record is the reader's
-	 * own. It is written once so a batch cannot come to a different verdict than the row it contains —
-	 * the row hides the action, the batch disables it and says why.
-	 */
-	const isMine = (user: User) => user.id === currentUser?.id;
-
-	const dialogs = (
-		<>
-			{panel === null ? null : panel.kind === 'edit' ? (
-				<EditUser
-					user={panel.user}
-					currentUserId={currentUser?.id}
-					open
-					onOpenChange={closePanel}
-					onUpdated={list.reload}
-				/>
-			) : (
-				<DeleteUser user={panel.user} open onOpenChange={closePanel} onDeleted={list.reload} />
-			)}
-			{batch !== null && (
-				<DeleteUsers
-					users={batch}
-					open
-					onOpenChange={(next) => {
-						if (!next) setBatch(null);
-					}}
-					onDeleted={list.reload}
-				/>
-			)}
-		</>
-	);
 
 	const columns: TableColumn<User, UserSortKey>[] = [
 		{
@@ -120,10 +77,10 @@ export const UserList = ({ list }: IPropsType) => {
 							icon: <Trash2 />,
 							destructive: true,
 							access: { permission: 'user:delete' },
-							// What the chosen records withhold, said rather than hidden: the rows are on the screen and
-							// the reader picked them, so the answer is why not — and the press stays where it was.
 							blocked: (rows) =>
-								rows.some(isMine) ? 'You cannot delete your own account' : undefined,
+								rows.some((user: User) => user.id === currentUser?.id)
+									? 'You cannot delete your own account'
+									: undefined,
 							onClick: ({ rows }) => setBatch(rows),
 						},
 					]}
@@ -139,14 +96,45 @@ export const UserList = ({ list }: IPropsType) => {
 							icon: <Trash2 />,
 							destructive: true,
 							separatorBefore: true,
-							access: { permission: 'user:delete', when: () => !isMine(item) },
+							access: { permission: 'user:delete', when: () => item.id !== currentUser?.id },
 							onClick: () => setPanel({ user: item, kind: 'delete' }),
 						},
 					]}
 				/>
 			</Form>
 
-			{dialogs}
+			<>
+				{panel === null ? null : panel.kind === 'edit' ? (
+					<EditUser
+						user={panel.user}
+						currentUserId={currentUser?.id}
+						open
+						onOpenChange={(next: boolean) => {
+							if (!next) setPanel(null);
+						}}
+						onUpdated={list.reload}
+					/>
+				) : (
+					<DeleteUser
+						user={panel.user}
+						open
+						onOpenChange={(next: boolean) => {
+							if (!next) setPanel(null);
+						}}
+						onDeleted={list.reload}
+					/>
+				)}
+				{batch !== null && (
+					<DeleteUsers
+						users={batch}
+						open
+						onOpenChange={(next) => {
+							if (!next) setBatch(null);
+						}}
+						onDeleted={list.reload}
+					/>
+				)}
+			</>
 		</>
 	);
 };

@@ -4,16 +4,7 @@ import { usersApi } from '@/api';
 import { CreateUser } from './create';
 import { UserList } from './list';
 
-/**
- * The list is deliberately plain: its job is proving the wiring — shared query schema,
- * permission-gated controls, pagination. Every write lives in the folder beside it, and every one of
- * them ends with this screen reading the list again.
- *
- * The one control this screen draws is gated where it stands, by the same `access` block the API
- * guard enforces — no `canEdit` local to keep in step with the row actions below.
- */
 export const UsersPage = () => {
-	// Opens newest first; the columns re-read it once a title is pressed.
 	const list = useQuery({ fetcher: usersApi.list, sort: 'createdAt', order: 'desc' });
 
 	return (
