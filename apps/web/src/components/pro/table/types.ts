@@ -211,6 +211,9 @@ export type TableProps<Row, Key extends string = string> = {
 	 * the pointer. One list is drawn twice — a record with no actions gets neither, so a row a reader
 	 * may not act on says nothing about it.
 	 *
+	 * The "..." is a switch and a right press is not: the button is where the list came from, so the press
+	 * that opened it puts it away again, while a right press asks for the list at the pointer every time.
+	 *
 	 * Each item may carry an `access` block of its own: this is the one place a condition is written per
 	 * row, "cannot delete yourself", and the grant strips it before the table decides whether that row
 	 * has any actions at all. The column is decided from the same list, with `when` left out — what the

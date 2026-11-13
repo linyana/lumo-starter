@@ -318,6 +318,32 @@ export const Table = <Row, Key extends string = string>({
 		setMenu({ items, anchor, rowKey: rowKey(row) });
 	};
 
+	/**
+	 * The press on a record's "...": a switch, not an opener. The button is where the menu came from, so
+	 * a second press puts it away — the same press that opened it is the one that closes it, which is
+	 * what a reader tries first. A right press is not this: it asks for the menu at the pointer and is
+	 * answered there every time, because a right press on a row is a request to see what it offers, not a
+	 * toggle on something the reader has to already know is open.
+	 */
+	const toggleRowMenu = ({
+		row,
+		key,
+		anchor,
+	}: {
+		row: Row;
+		key: string;
+		anchor: ContextMenuAnchor;
+	}) => {
+		if (menuRow === key) {
+			setMenu(null);
+			return;
+		}
+
+		const items = actionsOf(row);
+		if (items.length === 0) return;
+		setMenu({ items, anchor, rowKey: key });
+	};
+
 	// A title's list is built at the press, so a column nobody right-presses costs nothing on every
 	// render that draws it.
 	const openColumnMenu = ({
@@ -580,7 +606,9 @@ export const Table = <Row, Key extends string = string>({
 													// The menu is the table's, not Base UI's, so the flag a trigger carries is written
 													// here: the button a menu came from stays tinted like one that owns it.
 													data-popup-open={menuRow === key ? '' : undefined}
-													onClick={(event) => openRowMenu({ row, anchor: event.currentTarget })}
+													onClick={(event) =>
+														toggleRowMenu({ row, key, anchor: event.currentTarget })
+													}
 												/>
 											</span>
 										)}

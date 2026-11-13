@@ -33,6 +33,25 @@ const at = (point: ContextMenuPoint) => ({
 const isPoint = (anchor: ContextMenuAnchor): anchor is ContextMenuPoint =>
 	anchor !== null && 'x' in anchor;
 
+/**
+ * Whether a press landed on the control the menu was opened from.
+ *
+ * That control is a switch, and its own press handler is what turns it — so a menu that shut itself
+ * here first would be shut by the half of the press that lands, and opened again by the click that
+ * same press ends with. One press, read twice, and the menu never closes.
+ */
+const pressesAnchor = ({
+	anchor,
+	event,
+}: {
+	anchor: ContextMenuAnchor;
+	event: Event | undefined;
+}): boolean => {
+	if (anchor === null || event === undefined || isPoint(anchor)) return false;
+
+	return event.target instanceof Node && anchor.contains(event.target);
+};
+
 const anchorOf = (anchor: ContextMenuAnchor) => (isPoint(anchor) ? at(anchor) : anchor);
 
 /**
@@ -68,8 +87,16 @@ export const ContextMenu = ({
 			// A menu at the pointer is the page's while it is open, not its prisoner: a right press on
 			// another record closes this one and opens that one, in one motion.
 			modal={false}
-			onOpenChange={(open) => {
-				if (!open) onClose();
+			onOpenChange={(open, details) => {
+				if (open) return;
+				// A press on the control the menu came from is that control's own to answer; everything
+				// else is dismissed here, the way the page expects: a press anywhere else shuts the menu,
+				// and a right press on another record shuts this one and opens that one in one motion.
+				if (details.reason === 'outside-press' && pressesAnchor({ anchor, event: details.event })) {
+					return;
+				}
+
+				onClose();
 			}}
 		>
 			<LumoMenu.Portal>
