@@ -84,7 +84,7 @@ export const UserList = ({ users }: IPropsType) => {
 			filter: {
 				field: (
 					<Field name="email">
-						<Input placeholder="Filter by email" aria-label="Filter by email" />
+						<Input placeholder="Filter by email" />
 					</Field>
 				),
 				active: users.filters.email !== undefined,
@@ -117,7 +117,7 @@ export const UserList = ({ users }: IPropsType) => {
 				className="gap-3"
 			>
 				<Field name="search">
-					<Input aria-label="Search name or email" placeholder="Search name or email" />
+					<Input placeholder="Search name or email" />
 				</Field>
 				<Table columns={columns} list={users} rowActions={rowActions} />
 			</Form>

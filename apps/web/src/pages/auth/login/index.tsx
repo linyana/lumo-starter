@@ -37,7 +37,13 @@ export const LoginPage = () => {
 			{/* The same schema the API validates with — one rule, two runtimes. */}
 			<Form className="gap-6" schema={loginSchema} onSubmit={submit.fetchData}>
 				<Field name="email">
-					<Input type="email" autoComplete="username" placeholder="Email" aria-label="Email" />
+					<Input
+						type="email"
+						autoComplete="username"
+						placeholder="Email"
+						aria-label="Email"
+						clearable={false}
+					/>
 				</Field>
 
 				<Field name="password">
@@ -46,6 +52,7 @@ export const LoginPage = () => {
 						autoComplete="current-password"
 						placeholder="Password"
 						aria-label="Password"
+						clearable={false}
 					/>
 				</Field>
 

@@ -34,11 +34,11 @@ export const RegisterPage = () => {
 		>
 			<Form schema={registerSchema} onSubmit={submit.fetchData}>
 				<Field name="email" label="Email">
-					<Input type="email" autoComplete="email" />
+					<Input type="email" autoComplete="email" clearable={false} />
 				</Field>
 
 				<Field name="name" label="Display name">
-					<Input autoComplete="name" />
+					<Input autoComplete="name" clearable={false} />
 				</Field>
 
 				<Field
@@ -46,11 +46,11 @@ export const RegisterPage = () => {
 					label="Password"
 					description="At least 8 characters, mixing letters and numbers."
 				>
-					<Input type="password" autoComplete="new-password" />
+					<Input type="password" autoComplete="new-password" clearable={false} />
 				</Field>
 
 				<Field name="confirmPassword" label="Confirm password">
-					<Input type="password" autoComplete="new-password" />
+					<Input type="password" autoComplete="new-password" clearable={false} />
 				</Field>
 
 				<Button type="submit" loading={submit.loading} className="mt-2 w-full">
