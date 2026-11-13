@@ -257,8 +257,12 @@ export type TableProps<Row, Key extends string = string> = {
 	 * table only decides where the line goes. Left out, it comes from the list if one was handed over;
 	 * without either, the table has no footer. A footer with nothing
 	 * to say — no records, one page of nobody's records — is not drawn either.
+	 *
+	 * What is given here overrides the list field by field, so a screen says only what it has an
+	 * opinion about: `{ items: 'user' }` renames the records the footer counts and leaves the page,
+	 * the count and the way through them to the list.
 	 */
-	pagination?: PaginationProps;
+	pagination?: Partial<PaginationProps>;
 	className?: string;
 	classNames?: SlotClassNames<TableSlots>;
 };

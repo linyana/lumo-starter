@@ -13,6 +13,7 @@ export const Pagination = ({
 	pageCount,
 	total,
 	pageSize,
+	items,
 	onPageChange,
 	size = 'md',
 	siblings = 1,
@@ -25,6 +26,7 @@ export const Pagination = ({
 		pageCount={pageCount}
 		total={total}
 		pageSize={pageSize}
+		items={items}
 		onPageChange={onPageChange}
 		size={size}
 		className={cn(className, classNames?.root)}

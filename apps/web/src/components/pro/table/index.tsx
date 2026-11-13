@@ -303,12 +303,11 @@ export const Table = <Row, Key extends string = string>({
 	const wait = declared ?? list?.wait ?? null;
 	const failure = error ?? list?.error;
 	const retry = onRetry ?? list?.reload;
-	const pager = pagination ?? pagerOf(list);
+	const pager = { ...pagerOf(list), ...pagination };
 	const skeletonCount = skeletonRows ?? list?.pageSize ?? 5;
 
 	const paging =
 		failure === undefined &&
-		pager !== undefined &&
 		(pager.total === undefined ? (pager.pageCount ?? 1) > 1 : pager.total > 0);
 
 	const prefix = useId();
@@ -645,6 +644,7 @@ export const Table = <Row, Key extends string = string>({
 			{paging && (
 				<Pagination
 					{...pager}
+					page={pager.page ?? 1}
 					size={pager.size ?? size}
 					range={pager.range ?? true}
 					className={cn('pt-3', pager.className, classNames?.footer)}

@@ -70,6 +70,7 @@ export const UserList = ({ list }: IPropsType) => {
 				<Table
 					columns={columns}
 					list={list}
+					pagination={{ items: 'user' }}
 					rowLabel={(item) => item.name}
 					selectionActions={() => [
 						{

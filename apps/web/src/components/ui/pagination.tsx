@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import pluralize from 'pluralize';
 import { createContext, use, useMemo, type ComponentProps, type ReactNode } from 'react';
 import { tv, type VariantProps } from 'tailwind-variants';
 import { cn } from '@/lib/utils';
@@ -12,22 +13,24 @@ export type PaginationLocale = {
 	next?: string;
 	/** Before the number, in the accessible name of a page button. */
 	page?: string;
-	/** Between the range and the total, in `Range`. */
-	of?: string;
 };
 
 const defaultLocale: Required<PaginationLocale> = {
 	previous: 'previous page',
 	next: 'next page',
 	page: 'page',
-	of: 'of',
 };
+
+/** The one word the range is written with, whatever the noun is: `Showing`, `from`. */
+const rangeWording = { leading: 'Showing', trailing: 'from' };
 
 type PaginationState = {
 	page: number;
 	pageCount: number;
 	total?: number;
 	pageSize?: number;
+	/** The records are counted in this noun, singular: the range pluralises it. */
+	items: string;
 	locale: Required<PaginationLocale>;
 	size: 'sm' | 'md' | 'lg';
 	go: (next: number) => void;
@@ -89,6 +92,11 @@ export type RootProps = Omit<ComponentProps<'nav'>, 'onChange'> &
 		pageSize?: number;
 		/** The page a reader asked for. Nothing is written until this is called. */
 		onPageChange?: (page: number) => void;
+		/**
+		 * What the records are called, in the singular — `user` is said as `users` by the range, and
+		 * `category` as `categories`. The plural is the library's business, not the caller's.
+		 */
+		items?: string;
 		/** Wording of the buttons, the labels and the range. */
 		locale?: PaginationLocale;
 		/** Merged last through `cn()`. */
@@ -107,6 +115,7 @@ export function Root({
 	pageSize,
 	size = 'md',
 	onPageChange,
+	items = 'item',
 	locale,
 	className,
 	children,
@@ -122,8 +131,8 @@ export function Root({
 			const to = Math.min(Math.max(next, 1), count);
 			if (to !== current) onPageChange?.(to);
 		};
-		return { page: current, pageCount: count, total, pageSize, locale: words, size, go };
-	}, [current, count, total, pageSize, words, size, onPageChange]);
+		return { page: current, pageCount: count, total, pageSize, items, locale: words, size, go };
+	}, [current, count, total, pageSize, items, words, size, onPageChange]);
 
 	return (
 		<PaginationContext value={value}>
@@ -302,26 +311,28 @@ export function Pages({ siblings = 1, className }: PagesProps) {
 export type RangeProps = Omit<ComponentProps<'span'>, 'children'>;
 
 /**
- * What the page holds out of everything: `21–40 of 240` when the total is known, `3 / 12` when only
- * the page count is. It is the whole story in one line, which is what a narrow screen shows in place
- * of the numbers.
+ * What the page holds out of everything: `Showing 21 - 40 from 240 items` when the total is known,
+ * `3 / 12` when only the page count is. It is the whole story in one line, which is what a narrow
+ * screen shows in place of the numbers. The noun is the caller's — `items` — and its plural is the
+ * only thing this part decides on its own.
  */
 export function Range({ className, ...props }: RangeProps) {
 	const state = usePagination('Range');
-	const { page, pageCount, total, pageSize, locale } = state;
+	const { page, pageCount, total, pageSize, items } = state;
+	const { leading, trailing } = rangeWording;
 
 	let text: string;
 	if (total === undefined) {
 		text = `${page.toLocaleString()} / ${pageCount.toLocaleString()}`;
 	} else if (total === 0) {
-		text = `0 ${locale.of} 0`;
+		text = `${leading} 0 ${trailing} 0 ${pluralize(items, 0)}`;
 	} else {
 		// A caller that knows the total and the page count but not the size still gets a range: the
 		// two together are the size.
 		const size = Math.max(1, pageSize ?? Math.ceil(total / pageCount));
 		const from = (page - 1) * size + 1;
 		const to = Math.min(page * size, total);
-		text = `${from.toLocaleString()}–${to.toLocaleString()} ${locale.of} ${total.toLocaleString()}`;
+		text = `${leading} ${from.toLocaleString()} - ${to.toLocaleString()} ${trailing} ${total.toLocaleString()} ${pluralize(items, total)}`;
 	}
 
 	return (
