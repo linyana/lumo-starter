@@ -16,6 +16,11 @@ export const buttonVariants = tv({
 		'active:not-aria-[haspopup]:duration-(--duration-press)',
 		stateLayer,
 		'data-pressed:after:opacity-(--state-layer-hover-opacity)',
+		// A button whose popup is open keeps the tint the pointer left: the popup has the reader's
+		// attention now, and the button is the one thing that says which control it came from — so the
+		// tint lasts instead of ending with the hover that opened it. Base UI writes the flag on every
+		// trigger, and a button that opens a menu its caller owns writes it too.
+		'data-popup-open:after:opacity-(--state-layer-hover-opacity)',
 		'data-disabled:pointer-events-none',
 		'data-disabled:not-data-loading:opacity-50',
 		iconSlot,

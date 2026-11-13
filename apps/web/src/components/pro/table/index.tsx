@@ -428,6 +428,9 @@ export const Table = <Row, Key extends string = string>({
 													aria-label={rowActionsLabel?.(row)}
 													aria-haspopup="menu"
 													aria-expanded={menuRow === key}
+													// The menu is the table's, not Base UI's, so the flag a trigger carries is written
+													// here: the button a menu came from stays tinted like one that owns it.
+													data-popup-open={menuRow === key ? '' : undefined}
 													onClick={(event) => openRowMenu({ row, anchor: event.currentTarget })}
 												/>
 											</span>
