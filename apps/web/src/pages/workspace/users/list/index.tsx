@@ -9,7 +9,7 @@ import { EditUser } from '../edit';
 
 type UserSortKey = SortKeyOf<ListUsersQuery>;
 
-type IPropsType = { users: UseQueryResult<User, ListUsersQuery> };
+type IPropsType = { list: UseQueryResult<User, ListUsersQuery> };
 
 const ROLE_VARIANT: Record<Role, 'default' | 'info' | 'secondary'> = {
 	OWNER: 'default',
@@ -23,7 +23,7 @@ const ROLE_VARIANT: Record<Role, 'default' | 'info' | 'secondary'> = {
  * column's "Clear filter" is the same reset — the table is only told whether its column is narrowed
  * and how to undo it.
  */
-export const UserList = ({ users }: IPropsType) => {
+export const UserList = ({ list }: IPropsType) => {
 	const { user: currentUser } = useAuth();
 
 	const [panel, setPanel] = useState<{ user: User; kind: 'edit' | 'delete' } | null>(null);
@@ -33,7 +33,7 @@ export const UserList = ({ users }: IPropsType) => {
 	 * the list of what a record offers, and the only line here that is not a permission is "an account
 	 * cannot delete itself", a `when` on this row's own data.
 	 */
-	const rowActions = (user: User): MenuItem[] => [
+	const rowActionItems = (user: User): MenuItem[] => [
 		{
 			label: 'Edit',
 			icon: <Pencil />,
@@ -64,10 +64,10 @@ export const UserList = ({ users }: IPropsType) => {
 				currentUserId={currentUser?.id}
 				open
 				onOpenChange={closePanel}
-				onUpdated={users.reload}
+				onUpdated={list.reload}
 			/>
 		) : (
-			<DeleteUser user={panel.user} open onOpenChange={closePanel} onDeleted={users.reload} />
+			<DeleteUser user={panel.user} open onOpenChange={closePanel} onDeleted={list.reload} />
 		);
 
 	const columns: TableColumn<User, UserSortKey>[] = [
@@ -87,8 +87,8 @@ export const UserList = ({ users }: IPropsType) => {
 						<Input placeholder="Filter by email" />
 					</Field>
 				),
-				active: users.filters.email !== undefined,
-				clear: () => users.clearFilter('email'),
+				active: list.filters.email !== undefined,
+				clear: () => list.clearFilter('email'),
 			},
 			cell: (row) => <span className="text-muted-foreground">{row.email}</span>,
 		},
@@ -109,17 +109,19 @@ export const UserList = ({ users }: IPropsType) => {
 
 	return (
 		<>
-			<Form
-				form={users.form}
-				initial={users.opened}
-				onChange={users.write}
-				settle={300}
-				className="gap-3"
-			>
+			<Form form={list.form} initial={list.opened} onChange={list.write} settle={300}>
 				<Field name="search">
 					<Input placeholder="Search name or email" />
 				</Field>
-				<Table columns={columns} list={users} rowActions={rowActions} />
+				{/*
+				 * The actions come with the condition the column is drawn under, so a read-only session is
+				 * never given a column of nothing — and the column cannot appear or vanish as the page does.
+				 */}
+				<Table
+					columns={columns}
+					list={list}
+					rowActions={{ items: rowActionItems, access: { permission: 'user:write' } }}
+				/>
 			</Form>
 
 			{dialogs}

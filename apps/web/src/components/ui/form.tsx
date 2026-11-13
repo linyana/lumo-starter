@@ -50,7 +50,7 @@ export function LumoForm<Values extends Record<string, unknown> = Record<string,
 
 	return (
 		<FieldGateContext.Provider value={gate}>
-			<BaseForm data-slot="form" className={cn('flex flex-col gap-4', className)} {...props} />
+			<BaseForm data-slot="form" className={cn('flex flex-col gap-2', className)} {...props} />
 		</FieldGateContext.Provider>
 	);
 }

@@ -8,6 +8,7 @@ import type {
 	ListQuery,
 	ListState,
 	ListSort,
+	ListWait,
 	SortKeyOf,
 	UseQueryOptions,
 	UseQueryResult,
@@ -18,6 +19,7 @@ export type {
 	ListQuery,
 	ListState,
 	ListSort,
+	ListWait,
 	SortKeyOf,
 	UseQueryOptions,
 	UseQueryResult,
@@ -78,6 +80,11 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 
 	const total = data?.total ?? 0;
 	const pageCount = Math.max(1, Math.ceil(total / pageSize));
+
+	// The wait, as one word. Until the first answer lands the read is still the opening one — including
+	// the frame between mounting and the call the effect below schedules, which is why `initial` and not
+	// `loading` is what asks the question.
+	const wait: ListWait = initial ? 'opening' : loading ? 'refreshing' : null;
 
 	/**
 	 * What a change in the fields means: the filters are exactly what the fields hold, and the records
@@ -165,8 +172,7 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 		opened: opened.filters,
 		narrowed,
 		sort,
-		loading,
-		initial,
+		wait,
 		error: error?.message,
 		setPage,
 		onSort,

@@ -65,6 +65,15 @@ export type UseQueryOptions<TItem, TQuery extends ListQuery> = {
 	sync?: boolean;
 };
 
+/**
+ * Which wait a read is, if any. It is one word and not two booleans because the two questions behind
+ * it — is a read in flight, has anything answered yet — are only interesting together: the wait a
+ * list opens with has nothing to keep, and every wait after one keeps what the list last said. Left
+ * as booleans, every consumer would combine them again, and the frame between mounting and the call
+ * this hook schedules — nothing in flight, still nothing answered — is the one that gets forgotten.
+ */
+export type ListWait = 'opening' | 'refreshing' | null;
+
 export type UseQueryResult<TItem, TQuery extends ListQuery> = {
 	/** The records on the page in view; empty until the first answer lands. */
 	items: TItem[];
@@ -86,9 +95,8 @@ export type UseQueryResult<TItem, TQuery extends ListQuery> = {
 	narrowed: boolean;
 	/** The column the records were read by, and which way. The table draws its arrow from this. */
 	sort: ListSort<SortKeyOf<TQuery>>;
-	loading: boolean;
-	/** No read has answered yet, so there is nothing on the page to keep. */
-	initial: boolean;
+	/** Which wait this is, if any: `opening` before the first answer, `refreshing` after one. */
+	wait: ListWait;
 	/** The API's sentence when the last read failed. The caller renders it where the records go. */
 	error?: string;
 	setPage: (page: number) => void;

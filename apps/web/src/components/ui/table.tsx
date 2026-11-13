@@ -25,6 +25,7 @@ import { LumoCheckbox } from '@/components/ui/checkbox';
 import { LumoMenu } from '@/components/ui/menu';
 import { LumoPopover } from '@/components/ui/popover';
 import { LumoRadioGroup } from '@/components/ui/radio-group';
+import { LumoSpinner } from '@/components/ui/spinner';
 import { LumoTooltip } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { iconSlot } from '@/lib/control';
@@ -83,6 +84,8 @@ export type TableLocale = {
 	selectOptions?: string;
 	expand?: string;
 	collapse?: string;
+	/** What a wait over the records is called, said under the ring and read out at once. */
+	loading?: string;
 };
 
 const defaultLocale: Required<TableLocale> = {
@@ -96,6 +99,7 @@ const defaultLocale: Required<TableLocale> = {
 	selectOptions: 'Selection options',
 	expand: 'Expand',
 	collapse: 'Collapse',
+	loading: 'Loading',
 };
 
 /**
@@ -205,15 +209,26 @@ function markEdge({ cell, edge }: { cell: HTMLTableCellElement; edge: TableFixed
 }
 
 /**
- * The two things a table cannot be told from its own markup: how far each pinned column is from the
- * edge it is pinned to, and how far down each sticky header row starts.
+ * The three things a table cannot be told from its own markup: how far each pinned column is from
+ * the edge it is pinned to, how far down each sticky header row starts, and how tall the band of
+ * titles is — which is where the records begin, and so where a wait over them begins as well.
  *
- * Both are measured from the cells, which is why a column only has to name an edge instead of an
- * offset, and why a grouped header stacks without anyone adding up row heights. The widths are the
- * layout's own — `offsetWidth`, not the rectangle a transform ancestor or a zoom would report — and
- * every write is compared first, so a render that changes nothing costs one pass and no invalidation.
+ * All three are measured from the cells, which is why a column only has to name an edge instead of
+ * an offset, and why a grouped header stacks without anyone adding up row heights. The widths are
+ * the layout's own — `offsetWidth`, not the rectangle a transform ancestor or a zoom would report —
+ * and every write is compared first, so a render that changes nothing costs one pass and no
+ * invalidation.
  */
-function measureTable({ element, box }: { element: HTMLTableElement; box: HTMLElement }) {
+function measureTable({
+	element,
+	box,
+	root,
+}: {
+	element: HTMLTableElement;
+	box: HTMLElement;
+	/** The frame around both, which is where a wait's layer reads the title band's height from. */
+	root: HTMLElement;
+}) {
 	if (element.querySelector('[data-fixed]') !== null) {
 		for (const row of element.rows) {
 			const cells = Array.from(row.cells);
@@ -248,6 +263,11 @@ function measureTable({ element, box }: { element: HTMLTableElement; box: HTMLEl
 		}
 	}
 
+	const band = `${head?.offsetHeight ?? 0}px`;
+	if (root.style.getPropertyValue('--table-head-height') !== band) {
+		root.style.setProperty('--table-head-height', band);
+	}
+
 	syncScroll(box);
 }
 
@@ -259,15 +279,16 @@ function useTableLayout(root: RefObject<HTMLDivElement | null>) {
 	useLayoutEffect(() => {
 		const element = root.current?.querySelector('table');
 		const box = root.current?.querySelector<HTMLElement>('[data-slot="table-container"]');
-		if (!element || !box) return;
-		measureTable({ element, box });
+		if (!root.current || !element || !box) return;
+		measureTable({ element, box, root: root.current });
 	});
 
 	useEffect(() => {
-		const element = root.current?.querySelector('table');
-		const box = root.current?.querySelector<HTMLElement>('[data-slot="table-container"]');
-		if (!element || !box) return;
-		const observer = new ResizeObserver(() => measureTable({ element, box }));
+		const frame = root.current;
+		const element = frame?.querySelector('table');
+		const box = frame?.querySelector<HTMLElement>('[data-slot="table-container"]');
+		if (!frame || !element || !box) return;
+		const observer = new ResizeObserver(() => measureTable({ element, box, root: frame }));
 		observer.observe(element);
 		observer.observe(box);
 		return () => observer.disconnect();
@@ -401,6 +422,17 @@ export type RootProps = Omit<ComponentProps<'table'>, 'className'> &
 		 * automatic layout decides widths from the content it is asked to cut off.
 		 */
 		layout?: 'auto' | 'fixed';
+		/**
+		 * The records are being fetched again. They stay where they are — what the last answer said is
+		 * still worth reading — under a scrim that reaches from under the titles to the frame's own
+		 * bottom edge, with the ring in the middle of exactly that box.
+		 *
+		 * The band of titles is deliberately outside it: it names what the wait is about and does not
+		 * change with its answer, so a wait that covered it would be moving a reader's own bearings
+		 * around. A table being read for the first time has nothing to keep, and shows placeholders
+		 * instead — the caller's choice, since only the caller knows which of the two it is.
+		 */
+		waiting?: boolean;
 	};
 
 /**
@@ -416,6 +448,7 @@ export function Root({
 	sortDirections = defaultSortDirections,
 	locale,
 	scroll,
+	waiting = false,
 	className,
 	style,
 	children,
@@ -460,6 +493,20 @@ export function Root({
 						{children}
 					</table>
 				</div>
+				{waiting && (
+					<div
+						data-slot="table-wait"
+						className={cn(
+							// From under the titles to the frame's bottom edge: the box that is actually answering.
+							'absolute inset-x-0 bottom-0 top-(--table-head-height,0px) z-20',
+							'grid place-items-center bg-background/30 text-muted-foreground',
+							// Its top edge falls mid-frame, so only the corners the frame rounds are rounded.
+							variant !== 'borderless' && 'rounded-b-lg',
+						)}
+					>
+						<LumoSpinner label={value.locale.loading} caption={value.locale.loading} />
+					</div>
+				)}
 			</div>
 		</TableContext>
 	);

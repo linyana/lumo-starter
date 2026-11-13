@@ -14,7 +14,7 @@ import { UserList } from './list';
  */
 export const UsersPage = () => {
 	// Opens newest first; the columns re-read it once a title is pressed.
-	const users = useQuery({ fetcher: usersApi.list, sort: 'createdAt', order: 'desc' });
+	const list = useQuery({ fetcher: usersApi.list, sort: 'createdAt', order: 'desc' });
 
 	return (
 		<div className="space-y-3">
@@ -22,10 +22,10 @@ export const UsersPage = () => {
 				<h1 className="text-xl font-semibold">Users</h1>
 
 				<Can access={{ permission: 'user:write' }}>
-					<CreateUser onCreated={users.reload} />
+					<CreateUser onCreated={list.reload} />
 				</Can>
 			</div>
-			<UserList users={users} />
+			<UserList list={list} />
 		</div>
 	);
 };

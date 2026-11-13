@@ -1,5 +1,6 @@
 import type { AccessCondition } from '@lumo/shared';
 import type { ReactNode } from 'react';
+import type { ListWait } from '@/hooks';
 import type { HeadProps, RootProps, TableFilterProps } from '@/components/ui/table';
 import type { MenuItem } from '../menu';
 import type { PaginationProps } from '../pagination';
@@ -83,9 +84,8 @@ export type TableSlots =
 export type TableList<Row, Key extends string = string> = {
 	/** The records on the page in view. */
 	items: Row[];
-	loading: boolean;
-	/** No read has answered yet, so this wait has nothing behind it. */
-	initial: boolean;
+	/** Which wait this is, if any — `opening` before the first answer, `refreshing` after one. */
+	wait: ListWait;
 	/** The column the records were read by, and which way. */
 	sort: TableSort<Key>;
 	/** A title was pressed: the order to read them by next. */
@@ -109,7 +109,7 @@ export type TableProps<Row, Key extends string = string> = {
 	columns: TableColumn<Row, Key>[];
 	/**
 	 * The list the records came from, handed over whole. It fills in what a table would otherwise be
-	 * told one prop at a time — `rows`, `loading`, `initial`, `sort`, `onSortChange`, `pagination`,
+	 * told one prop at a time — `rows`, `wait`, `sort`, `onSortChange`, `pagination`,
 	 * `skeletonRows`, `error`, `onRetry` and the two empty-state facts — so a list screen passes four
 	 * props instead of ten. Each of those stays setable on its own and wins over the list, which is
 	 * what a screen reading from somewhere else needs.
@@ -135,21 +135,16 @@ export type TableProps<Row, Key extends string = string> = {
 	variant?: RootProps['variant'];
 	hoverable?: boolean;
 	/**
-	 * A read is in flight — the list's own when one is handed over. What that looks like is `initial`'s
-	 * answer: the wait a table opens with has nothing behind it, so it replaces the body with skeleton
-	 * rows under the column names — the shape of what is coming — and every wait after it keeps what the
-	 * table last answered with, an empty result included, and covers it with a spinner: the records and
-	 * the footer alike, because the way through them is part of the same answer. So a page, a sort or a
-	 * narrowed column does not move the row the reader was on, and a search that found nothing says so
-	 * without going blank first.
+	 * Which wait this is, if any — the hook's own word, handed over whole with `list`
+	 * (`useQuery` returns it). `opening` has nothing behind it, so placeholders take the body's place
+	 * under the column names — the shape of what is coming. `refreshing` keeps what the table last
+	 * answered with, an empty result and a failure included, and is laid over the records alone: never
+	 * the column names, because they are what the answer is read against, and never the pages, because
+	 * they are not records that have to arrive again. So a page, a sort or a narrowed column does not
+	 * move the row the reader was on, a search that found nothing says so without going blank first, and
+	 * the way onwards stays pressable while the records are not.
 	 */
-	loading?: boolean;
-	/**
-	 * No read has answered yet, so this wait is the first one — hand it the hook's own
-	 * (`initial={users.initial}`). Left out, every wait is treated as a later one and covers what is
-	 * on the screen rather than replacing it.
-	 */
-	initial?: boolean;
+	wait?: ListWait;
 	/** Number of placeholder rows shown while the first wait is in flight. Defaults to a page of them. */
 	skeletonRows?: number;
 	/**
@@ -173,11 +168,19 @@ export type TableProps<Row, Key extends string = string> = {
 	 * the pointer. One list is drawn twice — a record with no actions gets neither, so a row a reader
 	 * may not act on says nothing about it.
 	 *
-	 * Each item may carry an `access` block — this is the one place a condition is written per row,
-	 * "cannot delete yourself" — and the table strips what the grant does not allow before it decides
-	 * whether a row has any actions at all.
+	 * It is two answers because they come from two places. `items` is the list itself, and each item may
+	 * carry an `access` block of its own — this is the one place a condition is written per row,
+	 * "cannot delete yourself" — which the grant strips before the table decides whether a row has any
+	 * actions at all. `access` is who may act, and it is the column's condition: stated here, whether the
+	 * column exists is a fact about the session, so a read-only session is never handed a column of
+	 * nothing and a page whose records happen to offer no action cannot make it come and go.
 	 */
-	rowActions?: (row: Row) => MenuItem[];
+	rowActions?: {
+		/** What one record offers, before the grant strips it. */
+		items: (row: Row) => MenuItem[];
+		/** Who may act at all. Left out, every row is the same as `items` says. */
+		access?: AccessCondition;
+	};
 	/**
 	 * What a record's "..." is called. Left out, it is named from the two things around it — the row's
 	 * first cell and the strip it stands in, so "Ada Lovelace Actions" — which is what tells one row's

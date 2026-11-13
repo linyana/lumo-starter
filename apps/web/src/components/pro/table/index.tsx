@@ -9,7 +9,6 @@ import { Button } from '../button';
 import { ContextMenu, type ContextMenuAnchor } from '../context-menu';
 import type { MenuItem } from '../menu';
 import { Pagination, type PaginationProps } from '../pagination';
-import { Spinner } from '../spinner';
 import type { TableColumn, TableFilterProps, TableList, TableProps, TableSort } from './types';
 
 export type {
@@ -172,8 +171,7 @@ export const Table = <Row, Key extends string = string>({
 	size = 'md',
 	variant = 'borderless',
 	hoverable = true,
-	loading,
-	initial,
+	wait: declared,
 	skeletonRows,
 	error,
 	onRetry,
@@ -193,15 +191,11 @@ export const Table = <Row, Key extends string = string>({
 	const visible = filterAccess({ items: columns, grant });
 
 	const data = rows ?? list?.items ?? noRecords;
-	const busy = loading ?? list?.loading ?? false;
-	const first = initial ?? list?.initial ?? false;
+	const wait = declared ?? list?.wait ?? null;
 	const failure = error ?? list?.error;
 	const retry = onRetry ?? list?.reload;
 	const pager = pagination ?? pagerOf(list);
 	const skeletonCount = skeletonRows ?? list?.pageSize ?? 5;
-
-	const skeleton = busy && first;
-	const masked = busy && !first;
 
 	const paging =
 		failure === undefined &&
@@ -212,7 +206,15 @@ export const Table = <Row, Key extends string = string>({
 	const actionsId = `${prefix}-actions`;
 	const cellId = (index: number) => `${prefix}-row-${index}`;
 
-	const actionsOf = (row: Row) => filterAccess({ items: rowActions?.(row) ?? [], grant });
+	const actionsOf = (row: Row) => filterAccess({ items: rowActions?.items(row) ?? [], grant });
+
+	/**
+	 * Whether the column of actions exists at all. It is the caller's condition answered against the
+	 * session, and it goes through the same stripper one row's items go through — so the column and the
+	 * rows cannot disagree about who is reading, and the answer never depends on which page is in view.
+	 */
+	const hasActions =
+		rowActions !== undefined && filterAccess({ items: [rowActions], grant }).length > 0;
 
 	const openRowMenu = ({ row, anchor }: { row: Row; anchor: ContextMenuAnchor }) => {
 		const items = actionsOf(row);
@@ -250,41 +252,51 @@ export const Table = <Row, Key extends string = string>({
 	}));
 
 	const records = data.map((row) => ({ row, key: rowKey(row), items: actionsOf(row) }));
-	const withActions =
-		rowActions !== undefined && (skeleton || records.some((record) => record.items.length > 0));
 
-	const blank =
+	/** What the row says when it has no records to draw: the failure, the caller's word, or neither. */
+	const notice =
 		failure !== undefined ? (
 			<>
 				<p role="alert" className="text-destructive">
 					{failure}
 				</p>
 				{retry !== undefined && (
-					<Button variant="outline" size="sm" icon={<RotateCcw />} loading={busy} onClick={retry}>
+					<Button
+						variant="outline"
+						size="sm"
+						icon={<RotateCcw />}
+						loading={wait !== null}
+						onClick={retry}
+					>
 						Try again
 					</Button>
 				)}
 			</>
 		) : empty !== undefined ? (
 			empty
-		) : list?.narrowed === true ? (
-			<>
-				<p>No records match.</p>
-				<Button variant="ghost" size="sm" onClick={list.clearFilters}>
-					Clear filters
-				</Button>
-			</>
 		) : (
-			<p>No records yet.</p>
+			<div>
+				<p>No records</p>
+				{list?.narrowed && (
+					<Button variant="ghost" size="sm" onClick={list.clearFilters}>
+						Clear filters
+					</Button>
+				)}
+			</div>
 		);
 
 	return (
 		<div data-slot="table-block" className="relative min-w-0">
+			{/*
+			 * Only the table waits, and only the records inside it: the pages under it are not records
+			 * that have to arrive again, so they are left out of both the box and the ring.
+			 */}
 			<LumoTable.Root
 				size={size}
 				variant={variant}
-				hoverable={hoverable && !busy}
-				aria-busy={busy || undefined}
+				hoverable={hoverable && wait === null}
+				waiting={wait === 'refreshing'}
+				aria-busy={wait !== null || undefined}
 				className={cn(className, classNames?.root)}
 			>
 				<LumoTable.Header className={classNames?.header}>
@@ -315,7 +327,7 @@ export const Table = <Row, Key extends string = string>({
 								{column.header}
 							</LumoTable.Head>
 						))}
-						{withActions && (
+						{hasActions && (
 							<LumoTable.Head
 								id={actionsId}
 								align="end"
@@ -325,8 +337,8 @@ export const Table = <Row, Key extends string = string>({
 						)}
 					</LumoTable.Row>
 				</LumoTable.Header>
-				<LumoTable.Body aria-hidden={skeleton || undefined} className={classNames?.body}>
-					{skeleton ? (
+				<LumoTable.Body aria-hidden={wait === 'opening' || undefined} className={classNames?.body}>
+					{wait === 'opening' ? (
 						Array.from({ length: skeletonCount }, (_, index) => (
 							<LumoTable.Row key={index} className={classNames?.row}>
 								{visible.map((column) => (
@@ -345,7 +357,7 @@ export const Table = <Row, Key extends string = string>({
 										/>
 									</LumoTable.Cell>
 								))}
-								{withActions && (
+								{hasActions && (
 									<LumoTable.Cell
 										align="end"
 										className={cn(classNames?.cell, 'w-px', classNames?.actions)}
@@ -357,10 +369,10 @@ export const Table = <Row, Key extends string = string>({
 						))
 					) : failure !== undefined || data.length === 0 ? (
 						<LumoTable.Empty
-							columns={visible.length + (withActions ? 1 : 0)}
+							columns={hasActions ? visible.length + 1 : visible.length}
 							className={classNames?.empty}
 						>
-							{blank}
+							{notice}
 						</LumoTable.Empty>
 					) : (
 						records.map(({ row, key, items }, index) => (
@@ -369,7 +381,7 @@ export const Table = <Row, Key extends string = string>({
 								data-menu-open={menuRow === key ? '' : undefined}
 								className={cn(
 									classNames?.row,
-									withActions && 'group/row',
+									hasActions && 'group/row',
 									'data-menu-open:bg-row-hover',
 								)}
 								onContextMenu={
@@ -392,7 +404,7 @@ export const Table = <Row, Key extends string = string>({
 										{column.cell(row)}
 									</LumoTable.Cell>
 								))}
-								{withActions && (
+								{hasActions && (
 									<LumoTable.Cell
 										align="end"
 										className={cn(classNames?.cell, 'w-px', classNames?.actions)}
@@ -434,14 +446,6 @@ export const Table = <Row, Key extends string = string>({
 					size={pager.size ?? size}
 					range={pager.range ?? true}
 					className={cn('pt-3', pager.className, classNames?.footer)}
-				/>
-			)}
-
-			{masked && (
-				<Spinner
-					mask
-					caption="Loading"
-					className={variant === 'borderless' ? undefined : 'rounded-lg'}
 				/>
 			)}
 
