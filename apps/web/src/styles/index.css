@@ -43,12 +43,12 @@
 	--color-table-head: color-mix(
 		in oklch,
 		var(--foreground) 2%,
-		var(--table-surface, var(--background))
+		var(--table-surface, var(--layout-content))
 	);
 	--color-table-head-hover: color-mix(
 		in oklch,
 		var(--foreground) 8%,
-		var(--table-surface, var(--background))
+		var(--table-surface, var(--layout-content))
 	);
 	--color-row-hover: color-mix(in oklch, var(--foreground) 5%, transparent);
 	--color-row-selected: color-mix(in oklch, var(--primary) 8%, transparent);

@@ -13,6 +13,7 @@
  * same z-index are ordered by whichever portal mounted last, so every step is written down:
  *
  *   10 — chrome that stays above the page it moves over: a sticky header, a scrollbar, a swipe strip
+ *   30 — a bar that floats over the page it acts on: a chosen set, an unsaved form
  *   40 — a scrim
  *   50 — the popup the scrim belongs to: dialog, drawer, menu, popover
  *   60 — a tooltip, which explains something inside one of those

@@ -1,10 +1,12 @@
 import { Controller, Delete, Get, HttpCode, HttpStatus, Patch, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import {
+	batchDeleteUsersSchema,
 	createUserSchema,
 	listUsersQuerySchema,
 	updateUserSchema,
 	userParamsSchema,
+	type BatchDeleteUsersInput,
 	type CreateUserInput,
 	type ListUsersQuery,
 	type UpdateUserInput,
@@ -62,5 +64,19 @@ export class UsersController {
 		@CurrentUser() actor: AuthUser,
 	): Promise<void> {
 		await this.users.remove({ id, actor });
+	}
+
+	/**
+	 * The same delete asked for a screenful: every row is asked about first and they are removed in one
+	 * statement, so a failure leaves nothing gone and the answer counts what did.
+	 */
+	@Post('batch-delete')
+	@RequirePermissions('user:delete')
+	@ApiZodBody(batchDeleteUsersSchema)
+	async removeMany(
+		@ZodBody(batchDeleteUsersSchema) input: BatchDeleteUsersInput,
+		@CurrentUser() actor: AuthUser,
+	) {
+		return this.users.removeMany({ ids: input.ids, actor });
 	}
 }

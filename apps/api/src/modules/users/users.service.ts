@@ -123,7 +123,12 @@ export class UsersService {
 		return toWireUser(updated);
 	}
 
-	async remove({ id, actor }: { id: string; actor: UserActor }): Promise<void> {
+	/**
+	 * The rules one account has to pass to be deleted: not the reader's own, and not the last owner. They
+	 * live here, once, because a batch is the same question asked about more rows — and a batch that
+	 * answered differently from a row would be a second set of rules to keep in step.
+	 */
+	private async assertDeletable({ id, actor }: { id: string; actor: UserActor }): Promise<void> {
 		if (id === actor.id) {
 			throw new AppException({ code: 'FORBIDDEN', message: 'You cannot delete your own account' });
 		}
@@ -137,8 +142,23 @@ export class UsersService {
 				throw new AppException({ code: 'FORBIDDEN', message: 'The last owner cannot be deleted' });
 			}
 		}
+	}
+
+	async remove({ id, actor }: { id: string; actor: UserActor }): Promise<void> {
+		await this.assertDeletable({ id, actor });
 
 		// Refresh tokens cascade (onDelete: Cascade), so the session dies with the user.
 		await this.prisma.user.delete({ where: { id } });
+	}
+
+	/**
+	 * The same question about a screenful: every id is asked first and the delete happens once, so a
+	 * batch never half-succeeds under a failure — either nothing went, or the answer counts what did.
+	 */
+	async removeMany({ ids, actor }: { ids: readonly string[]; actor: UserActor }) {
+		for (const id of ids) await this.assertDeletable({ id, actor });
+
+		const { count } = await this.prisma.user.deleteMany({ where: { id: { in: [...ids] } } });
+		return { deleted: count };
 	}
 }

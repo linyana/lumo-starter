@@ -1,9 +1,10 @@
 import { ROLE_META, type ListUsersQuery, type Role, type User } from '@lumo/shared';
 import { Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { Badge, Field, Form, Input, Table, type MenuItem, type TableColumn } from '@/components';
+import { Badge, Field, Form, Input, Table, type TableColumn } from '@/components';
 import type { SortKeyOf, UseQueryResult } from '@/hooks';
 import { useAuth } from '@/providers/auth';
+import { DeleteUsers } from '../batch-delete';
 import { DeleteUser } from '../delete';
 import { EditUser } from '../edit';
 
@@ -27,48 +28,44 @@ export const UserList = ({ list }: IPropsType) => {
 	const { user: currentUser } = useAuth();
 
 	const [panel, setPanel] = useState<{ user: User; kind: 'edit' | 'delete' } | null>(null);
-
-	/**
-	 * The actions are stated, and the table strips what the session does not grant — so this reads as
-	 * the list of what a record offers, and the only line here that is not a permission is "an account
-	 * cannot delete itself", a `when` on this row's own data.
-	 */
-	const rowActionItems = (user: User): MenuItem[] => [
-		{
-			label: 'Edit',
-			icon: <Pencil />,
-			access: { permission: 'user:write' },
-			onClick: () => setPanel({ user, kind: 'edit' }),
-		},
-		{
-			label: 'Delete',
-			icon: <Trash2 />,
-			destructive: true,
-			separatorBefore: true,
-			access: {
-				permission: 'user:delete',
-				when: () => user.id !== currentUser?.id,
-			},
-			onClick: () => setPanel({ user, kind: 'delete' }),
-		},
-	];
+	const [batch, setBatch] = useState<readonly User[] | null>(null);
 
 	const closePanel = (next: boolean) => {
 		if (!next) setPanel(null);
 	};
 
-	const dialogs =
-		panel === null ? null : panel.kind === 'edit' ? (
-			<EditUser
-				user={panel.user}
-				currentUserId={currentUser?.id}
-				open
-				onOpenChange={closePanel}
-				onUpdated={list.reload}
-			/>
-		) : (
-			<DeleteUser user={panel.user} open onOpenChange={closePanel} onDeleted={list.reload} />
-		);
+	/**
+	 * The one rule the row's delete and the chosen set's delete both answer to: the record is the reader's
+	 * own. It is written once so a batch cannot come to a different verdict than the row it contains —
+	 * the row hides the action, the batch disables it and says why.
+	 */
+	const isMine = (user: User) => user.id === currentUser?.id;
+
+	const dialogs = (
+		<>
+			{panel === null ? null : panel.kind === 'edit' ? (
+				<EditUser
+					user={panel.user}
+					currentUserId={currentUser?.id}
+					open
+					onOpenChange={closePanel}
+					onUpdated={list.reload}
+				/>
+			) : (
+				<DeleteUser user={panel.user} open onOpenChange={closePanel} onDeleted={list.reload} />
+			)}
+			{batch !== null && (
+				<DeleteUsers
+					users={batch}
+					open
+					onOpenChange={(next) => {
+						if (!next) setBatch(null);
+					}}
+					onDeleted={list.reload}
+				/>
+			)}
+		</>
+	);
 
 	const columns: TableColumn<User, UserSortKey>[] = [
 		{
@@ -113,14 +110,39 @@ export const UserList = ({ list }: IPropsType) => {
 				<Field name="search">
 					<Input placeholder="Search name or email" />
 				</Field>
-				{/*
-				 * The actions come with the condition the column is drawn under, so a read-only session is
-				 * never given a column of nothing — and the column cannot appear or vanish as the page does.
-				 */}
 				<Table
 					columns={columns}
 					list={list}
-					rowActions={{ items: rowActionItems, access: { permission: 'user:write' } }}
+					rowLabel={(item) => item.name}
+					selectionActions={() => [
+						{
+							label: 'Delete',
+							icon: <Trash2 />,
+							destructive: true,
+							access: { permission: 'user:delete' },
+							// What the chosen records withhold, said rather than hidden: the rows are on the screen and
+							// the reader picked them, so the answer is why not — and the press stays where it was.
+							blocked: (rows) =>
+								rows.some(isMine) ? 'You cannot delete your own account' : undefined,
+							onClick: ({ rows }) => setBatch(rows),
+						},
+					]}
+					rowActions={(item) => [
+						{
+							label: 'Edit',
+							icon: <Pencil />,
+							access: { permission: 'user:write' },
+							onClick: () => setPanel({ user: item, kind: 'edit' }),
+						},
+						{
+							label: 'Delete',
+							icon: <Trash2 />,
+							destructive: true,
+							separatorBefore: true,
+							access: { permission: 'user:delete', when: () => !isMine(item) },
+							onClick: () => setPanel({ user: item, kind: 'delete' }),
+						},
+					]}
 				/>
 			</Form>
 

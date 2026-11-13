@@ -18,6 +18,9 @@ const update = ({ id, input }: { id: string; input: UpdateUserInput }): Promise<
 
 const remove = (id: string): Promise<void> => api.delete(`/users/${id}`);
 
+const removeMany = (ids: string[]): Promise<{ deleted: number }> =>
+	api.post<{ deleted: number }>({ url: '/users/batch-delete', body: { ids } });
+
 /**
  * The resource as one client: `POST /users` and the rest of it, named by what the caller asks for
  * rather than by the function's own name — the folder says `users`, so `usersApi.create` says it
@@ -29,4 +32,4 @@ const remove = (id: string): Promise<void> => api.delete(`/users/${id}`);
  * Each verb is declared on its own and only gathered here, so it is still a plain function when a
  * caller takes it off the object (`useHttp({ endpoint: usersApi.create })`) — nothing is bound to `this`.
  */
-export const usersApi = { list, create, update, remove };
+export const usersApi = { list, create, update, remove, removeMany };

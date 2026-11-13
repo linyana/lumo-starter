@@ -1,5 +1,6 @@
 import type { z } from 'zod';
 import type {
+	batchDeleteUsersSchema,
 	createUserSchema,
 	listUsersQuerySchema,
 	updateUserSchema,
@@ -16,3 +17,5 @@ export type UpdateUserInput = z.infer<typeof updateUserSchema>;
 export type ListUsersQuery = z.infer<typeof listUsersQuerySchema>;
 
 export type UserParams = z.infer<typeof userParamsSchema>;
+
+export type BatchDeleteUsersInput = z.infer<typeof batchDeleteUsersSchema>;

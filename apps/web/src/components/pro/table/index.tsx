@@ -1,6 +1,7 @@
 import { ArrowDown, ArrowUp, ArrowUpDown, Ellipsis, ListFilter, RotateCcw } from 'lucide-react';
 import { useId, useState, type MouseEvent } from 'react';
-import { filterAccess } from '@lumo/shared';
+import { filterAccess, permits } from '@lumo/shared';
+import { ActionBar } from '@/components/action-bar';
 import { LumoSkeleton } from '@/components/ui/skeleton';
 import { LumoTable, type TableSort as AriaSort } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
@@ -9,11 +10,21 @@ import { Button } from '../button';
 import { ContextMenu, type ContextMenuAnchor } from '../context-menu';
 import type { MenuItem } from '../menu';
 import { Pagination, type PaginationProps } from '../pagination';
-import type { TableColumn, TableFilterProps, TableList, TableProps, TableSort } from './types';
-
-export type {
+import { Tooltip } from '../tooltip';
+import type {
+	SelectionAction,
 	TableColumn,
 	TableFilterProps,
+	TableList,
+	TableProps,
+	TableSort,
+} from './types';
+
+export type {
+	SelectionAction,
+	TableColumn,
+	TableFilterProps,
+	TableFixed,
 	TableOrder,
 	TableList,
 	TableProps,
@@ -26,6 +37,8 @@ const actions = 'Actions';
 const noRecords: never[] = [];
 
 const noItems: MenuItem[] = [];
+
+const noChosen: string[] = [];
 
 const idOf = (row: unknown) => String((row as { id: unknown }).id);
 
@@ -68,6 +81,13 @@ const rowActionReveal = cn(
 	'group-hover/row:opacity-100 group-hover/row:pointer-events-auto',
 	'group-has-[:focus-visible]/row:opacity-100 group-has-[:focus-visible]/row:pointer-events-auto',
 );
+
+/**
+ * The room the column of actions is held at: one icon button, and the cell's own inset on either side,
+ * read from the variable the size variant writes. Held rather than left to the content, so the column
+ * does not breathe as the "..." comes and goes on hover — and so a sized header and its cells agree.
+ */
+const actionsWidth = 'calc(var(--spacing) * 8 + var(--cell-px) * 2)';
 
 function ariaSortOf<Key extends string>({
 	sortKey,
@@ -158,6 +178,69 @@ function columnItems<Row, Key extends string>({
 	return [...items, ...(column.menu?.() ?? noItems)];
 }
 
+type SelectionBarProps<Row> = {
+	rows: readonly Row[];
+	actions: (rows: readonly Row[]) => SelectionAction<Row>[];
+	onClear: () => void;
+	className?: string;
+};
+
+/**
+ * What the table puts in the floating bar while records are chosen: how many, what can be done with
+ * them, and the way back. The list is the caller's minus what the session is not granted, and an action
+ * the chosen records withhold is drawn unavailable with the reason on it rather than dropped — the
+ * records are on the screen and the reader chose them, so "not these, because…" is the answer, not
+ * silence.
+ */
+const SelectionBar = <Row,>({ rows, actions, onClear, className }: SelectionBarProps<Row>) => {
+	const grant = useAccess();
+	const prefix = useId();
+	const offered = rows.length === 0 ? [] : filterAccess({ items: actions(rows), grant });
+
+	return (
+		<ActionBar visible={rows.length > 0} className={className}>
+			<p aria-live="polite" className="text-sm font-medium">
+				{rows.length === 1 ? '1 selected' : `${rows.length} selected`}
+			</p>
+			<div className="flex flex-wrap items-center gap-2">
+				{offered.map((action, index) => {
+					const reason = action.blocked?.(rows);
+					const look = {
+						variant: 'outline' as const,
+						size: 'sm' as const,
+						icon: action.icon,
+						tone: action.destructive ? ('destructive' as const) : ('default' as const),
+					};
+					const why = `${prefix}-blocked-${index}`;
+
+					return reason === undefined ? (
+						<Button key={index} {...look} onClick={() => action.onClick({ rows, clear: onClear })}>
+							{action.label}
+						</Button>
+					) : (
+						// The press keeps its name and its place and stops being a press. It stays focusable so
+						// the sentence is not hover-only, and the hint hangs on the wrap: a disabled button takes
+						// no pointer events, so a tooltip anchored to the button itself would never arrive.
+						<Tooltip key={index} content={reason}>
+							<span className="inline-flex">
+								<Button {...look} disabled focusableWhenDisabled aria-describedby={why}>
+									{action.label}
+								</Button>
+								<span id={why} className="sr-only">
+									{reason}
+								</span>
+							</span>
+						</Tooltip>
+					);
+				})}
+				<Button variant="ghost" size="sm" onClick={onClear}>
+					Clear
+				</Button>
+			</div>
+		</ActionBar>
+	);
+};
+
 export const Table = <Row, Key extends string = string>({
 	columns,
 	list,
@@ -167,10 +250,13 @@ export const Table = <Row, Key extends string = string>({
 	onSortChange,
 	rowActions,
 	rowActionsLabel,
+	rowLabel,
+	selectionActions,
 	pagination,
 	size = 'md',
 	variant = 'borderless',
 	hoverable = true,
+	layout = 'auto',
 	wait: declared,
 	skeletonRows,
 	error,
@@ -181,6 +267,7 @@ export const Table = <Row, Key extends string = string>({
 }: TableProps<Row, Key>) => {
 	const [menu, setMenu] = useState<OpenMenu | null>(null);
 	const menuRow = menu?.rowKey;
+	const [chosenKeys, setChosenKeys] = useState<string[]>(noChosen);
 
 	/**
 	 * The columns this app's grant allows: a screen states `access` on the ones that are not for
@@ -206,15 +293,24 @@ export const Table = <Row, Key extends string = string>({
 	const actionsId = `${prefix}-actions`;
 	const cellId = (index: number) => `${prefix}-row-${index}`;
 
-	const actionsOf = (row: Row) => filterAccess({ items: rowActions?.items(row) ?? [], grant });
+	/** What one record offers, before the grant strips it. */
+	const declaredOf = (row: Row) => rowActions?.(row) ?? noItems;
+	const actionsOf = (row: Row) => filterAccess({ items: declaredOf(row), grant });
 
 	/**
-	 * Whether the column of actions exists at all. It is the caller's condition answered against the
-	 * session, and it goes through the same stripper one row's items go through — so the column and the
-	 * rows cannot disagree about who is reading, and the answer never depends on which page is in view.
+	 * Whether the column of actions exists at all, read from the same list the rows below it are drawn
+	 * from — so the column and the rows cannot disagree about who is reading. It asks only the session's
+	 * half of each condition (`permits`): `when` is one record's answer about its own data, and a column
+	 * whose existence followed it would come and go as the records do. With nothing in view to ask — the
+	 * first read, an empty page — the column is drawn as declared, the skeleton with it, because a
+	 * skeleton is a promise and there is no record yet to keep it.
 	 */
 	const hasActions =
-		rowActions !== undefined && filterAccess({ items: [rowActions], grant }).length > 0;
+		rowActions !== undefined &&
+		(data.length === 0 ||
+			data.some((row) =>
+				declaredOf(row).some((item) => permits({ condition: item.access, grant })),
+			));
 
 	const openRowMenu = ({ row, anchor }: { row: Row; anchor: ContextMenuAnchor }) => {
 		const items = actionsOf(row);
@@ -253,6 +349,24 @@ export const Table = <Row, Key extends string = string>({
 
 	const records = data.map((row) => ({ row, key: rowKey(row), items: actionsOf(row) }));
 
+	/**
+	 * The records a reader has chosen, kept as keys because a page is what the table draws: the answer is
+	 * the chosen keys still in view, so a fresh read, another page or a narrowed column never leaves a
+	 * press acting on something that is no longer on the screen.
+	 */
+	const keys = records.map((one) => one.key);
+	const chosen = chosenKeys.filter((key) => keys.includes(key));
+	const chosenRows = records.filter((one) => chosen.includes(one.key)).map((one) => one.row);
+	const choosable =
+		selectionActions === undefined
+			? undefined
+			: {
+					keys,
+					value: chosen,
+					onChange: (next: string[]) => setChosenKeys(next.filter((key) => keys.includes(key))),
+				};
+	const clearChosen = () => setChosenKeys(noChosen);
+
 	/** What the row says when it has no records to draw: the failure, the caller's word, or neither. */
 	const notice =
 		failure !== undefined ? (
@@ -287,6 +401,14 @@ export const Table = <Row, Key extends string = string>({
 
 	return (
 		<div data-slot="table-block" className="relative min-w-0">
+			{selectionActions !== undefined && (
+				<SelectionBar
+					rows={chosenRows}
+					actions={selectionActions}
+					onClear={clearChosen}
+					className={classNames?.selection}
+				/>
+			)}
 			{/*
 			 * Only the table waits, and only the records inside it: the pages under it are not records
 			 * that have to arrive again, so they are left out of both the box and the ring.
@@ -295,16 +417,21 @@ export const Table = <Row, Key extends string = string>({
 				size={size}
 				variant={variant}
 				hoverable={hoverable && wait === null}
+				layout={layout}
 				waiting={wait === 'refreshing'}
 				aria-busy={wait !== null || undefined}
 				className={cn(className, classNames?.root)}
 			>
 				<LumoTable.Header className={classNames?.header}>
 					<LumoTable.Row className={classNames?.row}>
+						{choosable !== undefined && (
+							<LumoTable.SelectionHead selection={choosable} fixed="start" />
+						)}
 						{headed.map(({ column, sort: columnSort, onSort }) => (
 							<LumoTable.Head
 								key={column.key}
 								align={column.align}
+								fixed={column.fixed}
 								style={column.width === undefined ? undefined : { width: column.width }}
 								className={cn(classNames?.head, column.className)}
 								sort={columnSort}
@@ -332,7 +459,9 @@ export const Table = <Row, Key extends string = string>({
 								id={actionsId}
 								align="end"
 								aria-label={actions}
-								className={cn(classNames?.head, 'w-px', classNames?.actions)}
+								fixed="end"
+								style={{ width: actionsWidth }}
+								className={cn(classNames?.head, classNames?.actions)}
 							/>
 						)}
 					</LumoTable.Row>
@@ -341,10 +470,20 @@ export const Table = <Row, Key extends string = string>({
 					{wait === 'opening' ? (
 						Array.from({ length: skeletonCount }, (_, index) => (
 							<LumoTable.Row key={index} className={classNames?.row}>
+								{choosable !== undefined && (
+									<LumoTable.Cell
+										align="start"
+										fixed="start"
+										className={cn(classNames?.cell, 'w-10')}
+									>
+										<LumoSkeleton className="size-4 rounded-sm" />
+									</LumoTable.Cell>
+								)}
 								{visible.map((column) => (
 									<LumoTable.Cell
 										key={column.key}
 										align={column.align}
+										fixed={column.fixed}
 										className={cn(classNames?.cell, column.className)}
 									>
 										<LumoSkeleton
@@ -360,7 +499,9 @@ export const Table = <Row, Key extends string = string>({
 								{hasActions && (
 									<LumoTable.Cell
 										align="end"
-										className={cn(classNames?.cell, 'w-px', classNames?.actions)}
+										fixed="end"
+										style={{ width: actionsWidth }}
+										className={cn(classNames?.cell, classNames?.actions)}
 									>
 										<LumoSkeleton className={cn('ms-auto size-6', classNames?.skeleton)} />
 									</LumoTable.Cell>
@@ -369,7 +510,7 @@ export const Table = <Row, Key extends string = string>({
 						))
 					) : failure !== undefined || data.length === 0 ? (
 						<LumoTable.Empty
-							columns={hasActions ? visible.length + 1 : visible.length}
+							columns={visible.length + (hasActions ? 1 : 0) + (choosable === undefined ? 0 : 1)}
 							className={classNames?.empty}
 						>
 							{notice}
@@ -378,12 +519,9 @@ export const Table = <Row, Key extends string = string>({
 						records.map(({ row, key, items }, index) => (
 							<LumoTable.Row
 								key={key}
+								data-selected={chosen.includes(key) ? '' : undefined}
 								data-menu-open={menuRow === key ? '' : undefined}
-								className={cn(
-									classNames?.row,
-									hasActions && 'group/row',
-									'data-menu-open:bg-row-hover',
-								)}
+								className={cn(classNames?.row, hasActions && 'group/row')}
 								onContextMenu={
 									items.length === 0
 										? undefined
@@ -393,11 +531,20 @@ export const Table = <Row, Key extends string = string>({
 											}
 								}
 							>
+								{choosable !== undefined && (
+									<LumoTable.SelectionCell
+										selection={choosable}
+										value={key}
+										label={rowLabel?.(row)}
+										fixed="start"
+									/>
+								)}
 								{headed.map(({ column, sort: columnSort }, columnIndex) => (
 									<LumoTable.Cell
 										key={column.key}
 										id={columnIndex === 0 ? cellId(index) : undefined}
 										align={column.align}
+										fixed={column.fixed}
 										sort={columnSort}
 										className={cn(classNames?.cell, column.className)}
 									>
@@ -407,7 +554,9 @@ export const Table = <Row, Key extends string = string>({
 								{hasActions && (
 									<LumoTable.Cell
 										align="end"
-										className={cn(classNames?.cell, 'w-px', classNames?.actions)}
+										fixed="end"
+										style={{ width: actionsWidth }}
+										className={cn(classNames?.cell, classNames?.actions)}
 									>
 										{items.length > 0 && (
 											<span

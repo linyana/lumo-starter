@@ -45,6 +45,21 @@ export const updateUserSchema = z
 	})
 	.refine((value) => Object.keys(value).length > 0, { error: 'Send at least one field to update' });
 
+/**
+ * A delete asked for more than one account at a time. The ids are asked for as ids at the boundary for
+ * the same reason a path segment is, and the list is bounded at both ends: nothing to delete is not a
+ * batch, and a press is a screenful of rows, never a whole table.
+ */
+export const batchDeleteUsersSchema = z.object({
+	ids: z
+		.array(z.uuid({ error: 'Not a valid user id' }))
+		.min(1)
+		.max(100),
+});
+
+/** How many of them went — the one thing a batch answer can say that a row's cannot. */
+export const batchDeleteUsersResponseSchema = z.object({ deleted: z.number() });
+
 export const listUsersQuerySchema = paginationSchema.extend({
 	search: z.string().trim().max(120).optional(),
 	/**

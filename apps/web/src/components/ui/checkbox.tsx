@@ -17,7 +17,7 @@ export function Root({ className, ...props }: RootProps) {
 			className={cn(
 				toggleBox,
 				// A checkbox fills when it is checked, and the tick is the surface's own colour.
-				'rounded-md text-primary-foreground',
+				'rounded-sm text-primary-foreground',
 				'data-checked:bg-primary',
 				'data-indeterminate:border-primary data-indeterminate:bg-primary',
 				className,

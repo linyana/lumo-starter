@@ -1,12 +1,12 @@
 import type { AccessCondition } from '@lumo/shared';
 import type { ReactNode } from 'react';
 import type { ListWait } from '@/hooks';
-import type { HeadProps, RootProps, TableFilterProps } from '@/components/ui/table';
+import type { HeadProps, RootProps, TableFilterProps, TableFixed } from '@/components/ui/table';
 import type { MenuItem } from '../menu';
 import type { PaginationProps } from '../pagination';
 import type { SlotClassNames } from '../types';
 
-export type { TableFilterProps } from '@/components/ui/table';
+export type { TableFilterProps, TableFixed } from '@/components/ui/table';
 
 type ColumnAlign = HeadProps['align'];
 
@@ -22,8 +22,17 @@ export type TableColumn<Row, Key extends string = string> = {
 	header: ReactNode;
 	cell: (row: Row) => ReactNode;
 	align?: ColumnAlign;
-	/** The width the column is declared at. `layout="fixed"` is what makes it hold. */
+	/** The width the column is declared at. A hint under the default layout; where the column ends under `layout="fixed"`. */
 	width?: string;
+	/**
+	 * Pin the column to an edge of the frame: it stays where it is while the columns beside it scroll
+	 * under it. The offset is measured from them, so two pinned columns only have to agree on the edge.
+	 *
+	 * With `width` it is what makes a wide table readable — the records that name a row held on the near
+	 * edge and its controls on the far one, and only what is in between moves. The column of actions is
+	 * pinned to the end by the table itself, which is why this is the answer for everything before it.
+	 */
+	fixed?: TableFixed;
 	/** Merged onto this column's header and cells, after `classNames.head` and `classNames.cell`. */
 	className?: string;
 	/**
@@ -71,9 +80,36 @@ export type TableSlots =
 	| 'body'
 	| 'cell'
 	| 'actions'
+	| 'selection'
 	| 'empty'
 	| 'skeleton'
 	| 'footer';
+
+/**
+ * One press a chosen set of records offers, in the bar that floats over them. It is the row's own action
+ * shape minus the two things only a single record knows: a menu row's type, and the record it is about —
+ * the press is handed the records instead.
+ */
+export type SelectionAction<Row> = {
+	label: ReactNode;
+	icon?: ReactNode;
+	/** Drawn in the destructive colour. */
+	destructive?: boolean;
+	/** The session's condition, stripped by the same grant as every other gate on this table. */
+	access?: AccessCondition;
+	/**
+	 * What the chosen records withhold from this press, or nothing when every one of them allows it —
+	 * "an account cannot delete itself", "these records are not the same kind". Returned, the press is
+	 * drawn unavailable and says this sentence: on hover, and to a reader who tabs to it.
+	 *
+	 * A rule about *these records* belongs here and not in `access`. That one is about the reader, and it
+	 * answers the same for every row; this one is the answer the records themselves give, which is also
+	 * why it disables instead of hiding — the records are on the screen and the reader chose them.
+	 */
+	blocked?: (rows: readonly Row[]) => ReactNode | undefined;
+	/** The press, given the records it is about and the way back from choosing them. */
+	onClick: (chosen: { rows: readonly Row[]; clear: () => void }) => void;
+};
 
 /**
  * What a table reads from a list: the records, the wait they arrive in, how they are ordered, the way
@@ -135,6 +171,13 @@ export type TableProps<Row, Key extends string = string> = {
 	variant?: RootProps['variant'];
 	hoverable?: boolean;
 	/**
+	 * Whether a column's declared `width` is where it ends. Left out, the automatic layout weighs the
+	 * widths against the content — a column holding a sentence takes the room from one holding a date,
+	 * which is that layout doing its job. Stated, every column holds the width it declared, and a table
+	 * of cells that are all the same size stops re-deciding its columns on every answer.
+	 */
+	layout?: RootProps['layout'];
+	/**
 	 * Which wait this is, if any — the hook's own word, handed over whole with `list`
 	 * (`useQuery` returns it). `opening` has nothing behind it, so placeholders take the body's place
 	 * under the column names — the shape of what is coming. `refreshing` keeps what the table last
@@ -168,19 +211,29 @@ export type TableProps<Row, Key extends string = string> = {
 	 * the pointer. One list is drawn twice — a record with no actions gets neither, so a row a reader
 	 * may not act on says nothing about it.
 	 *
-	 * It is two answers because they come from two places. `items` is the list itself, and each item may
-	 * carry an `access` block of its own — this is the one place a condition is written per row,
-	 * "cannot delete yourself" — which the grant strips before the table decides whether a row has any
-	 * actions at all. `access` is who may act, and it is the column's condition: stated here, whether the
-	 * column exists is a fact about the session, so a read-only session is never handed a column of
-	 * nothing and a page whose records happen to offer no action cannot make it come and go.
+	 * Each item may carry an `access` block of its own: this is the one place a condition is written per
+	 * row, "cannot delete yourself", and the grant strips it before the table decides whether that row
+	 * has any actions at all. The column is decided from the same list, with `when` left out — what the
+	 * session may act on at all, which does not change from one page to the next. So nothing is stated
+	 * twice: a field on the record's own actions is the only place the condition is written.
 	 */
-	rowActions?: {
-		/** What one record offers, before the grant strips it. */
-		items: (row: Row) => MenuItem[];
-		/** Who may act at all. Left out, every row is the same as `items` says. */
-		access?: AccessCondition;
-	};
+	rowActions?: (row: Row) => MenuItem[];
+	/**
+	 * What a chosen set of records offers, in the bar that floats over them while any are chosen. Its
+	 * presence is what makes a row choosable — one declaration, because a selection nothing can be done
+	 * with is a reader's time spent for nothing.
+	 *
+	 * The table keeps the chosen keys and hands the press the records still in view, so a page, a
+	 * narrowing, a fresh read or a reload never leaves an action acting on something the reader can no
+	 * longer see. The arrows are the caller's in the same place its `rowActions` are.
+	 */
+	selectionActions?: (chosen: readonly Row[]) => SelectionAction<Row>[];
+	/**
+	 * What a record is called, for the controls that have to say its name in words — the box in the
+	 * selection column. Left out, the record's key is used, which names a row only if the key is a name:
+	 * an id is not, and a box announced as "7f3a91" is a box nobody can tell from the one below it.
+	 */
+	rowLabel?: (row: Row) => string;
 	/**
 	 * What a record's "..." is called. Left out, it is named from the two things around it — the row's
 	 * first cell and the strip it stands in, so "Ada Lovelace Actions" — which is what tells one row's

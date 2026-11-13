@@ -299,28 +299,40 @@ function useTableLayout(root: RefObject<HTMLDivElement | null>) {
  * The washes a row can show, on a pinned cell. The cell's fill is opaque — nothing may be read
  * through a column standing in front of the others — so a translucent row state is laid on top of
  * it as a layer instead of replacing it.
+ *
+ * A row's own wash is the row's to paint, and a pinned cell is the one cell that does not sit on it:
+ * whichever state the host sets on the row has to be repeated here. Hover is the table's own, and
+ * `data-menu-open` is what a host marks a row with while its menu is open.
  */
 const fixedRowStates = cn(
 	// Below the cell's own content, above its fill, so the wash tints the row and not the words in it.
 	'before:pointer-events-none before:absolute before:inset-0 before:-z-10',
+	// The wash is a box of its own and takes the corner the cell was given, so a wash on the last cell of
+	// a row ends where the row does.
+	'before:rounded-[inherit]',
 	'before:bg-row-hover before:opacity-0',
 	'before:transition-[opacity,background-color] before:duration-(--duration-state)',
 	'[[data-slot=table-container][data-hoverable=true]_tbody>tr:not([data-selected]):hover>&]:before:opacity-100',
+	// The row is washed by the host while the menu it opened is up; this is that wash, and it stands
+	// before the selected rules so a chosen row keeps its own tint under the popup.
+	'[tr[data-menu-open]>&]:before:opacity-100',
 	'[tr[data-selected]>&]:before:bg-row-selected [tr[data-selected]>&]:before:opacity-100',
 	'[tr[data-selected]:hover>&]:before:bg-row-selected-hover',
 );
 
 /**
  * The shadow of a pinned column, cast past its inner edge and only while something is passing under
- * it: the frame says which edges still have content behind them, and the last pinned column of a run
- * is the only one that draws it.
+ * it: the frame says which edges still have content behind them, and the last pinned column of a run is
+ * the only one that draws it.
+ *
+ * It is the cell's shadow rather than a layer beside it, because the layers of a cell are spoken for —
+ * one is the row's colour and one is the rule under the row — and an inset shadow is the same picture
+ * without one.
  */
 const fixedShadow = cn(
-	'after:pointer-events-none after:absolute after:inset-y-0 after:w-4',
-	'after:from-foreground/10 after:to-transparent after:opacity-0',
-	'after:transition-opacity after:duration-(--duration-state)',
-	'[[data-scrolled-start]_&[data-fixed-edge=start]]:after:opacity-100',
-	'[[data-scrolled-end]_&[data-fixed-edge=end]]:after:opacity-100',
+	'transition-shadow duration-(--duration-state)',
+	'[[data-scrolled-start]_&[data-fixed-edge=start]]:shadow-[inset_-8px_0_8px_-8px_var(--color-border)]',
+	'[[data-scrolled-end]_&[data-fixed-edge=end]]:shadow-[inset_8px_0_8px_-8px_var(--color-border)]',
 );
 
 /** Which layer a cell is drawn on: a pinned one in front of its row, a title in front of the records. */
@@ -340,15 +352,18 @@ function layerOf({
 /** What a column pinned to an edge is drawn with, whether it is a title or a cell. */
 function fixedClass(fixed: TableFixed | undefined) {
 	if (fixed === undefined) return undefined;
+	// The fill is what hides the columns scrolling under the pinned one, and it has to be the surface the
+	// table is actually on. A variant that owns a surface names it; a borderless table sits on the page's
+	// content area, which is a tone of its own and not the page's chrome — filling with `--background`
+	// there leaves a band of the wrong colour down the edge. A table drawn on a card of its own is
+	// `variant="outlined"`, or a wrapper that sets `--table-surface`: the component cannot read a
+	// surface it was not told about.
 	return cn(
-		'sticky bg-[var(--table-surface,var(--background))]',
+		'sticky bg-[var(--table-surface,var(--layout-content))]',
 		fixed === 'start'
 			? 'left-[var(--table-fixed-offset,0px)]'
 			: 'right-[var(--table-fixed-offset,0px)]',
 		fixedRowStates,
-		fixed === 'start'
-			? 'after:left-full after:bg-linear-to-r'
-			: 'after:right-full after:bg-linear-to-l',
 		fixedShadow,
 	);
 }
@@ -361,14 +376,16 @@ function fixedClass(fixed: TableFixed | undefined) {
  * the table: a head, a cell and the empty state are all inset by them, so the size variant is the
  * only knob and a part added later is drawn at it without being told to be.
  *
- * The border model is `separate` with no spacing rather than `collapse`, because a collapsed border
- * belongs to the table and scrolls with it — a sticky header drawn that way loses its bottom rule
- * the moment it sticks. So the line under a row is drawn by each of its cells instead.
+ * The border model is `separate` rather than `collapse`, because a collapsed border belongs to the table
+ * and scrolls with it — a sticky header drawn that way loses its bottom rule the moment it sticks. So the
+ * line under a row is drawn by each of its cells instead, as a layer, in the hairline of spacing the
+ * table keeps between two rows: a border is part of the box it belongs to and bends with that box's
+ * corners, and a row whose colour is round still ends on a straight line.
  */
 export const tableVariants = tv({
 	base: [
 		'min-w-0 w-full overflow-auto text-sm',
-		'[&>table:has(>tfoot)>tbody>tr:last-child>*]:border-b-0',
+		'[&>table:has(>tfoot)>tbody>tr:last-child>*]:after:hidden',
 	],
 	variants: {
 		size: {
@@ -380,11 +397,11 @@ export const tableVariants = tv({
 			borderless: '',
 			outlined: [
 				'rounded-lg border bg-card text-card-foreground [--table-surface:var(--card)]',
-				'[&>table>tbody>tr:last-child>*]:border-b-0',
+				'[&>table>tbody>tr:last-child>*]:after:hidden',
 			],
 			filled: [
 				'rounded-lg bg-muted [--table-surface:var(--muted)]',
-				'[&>table>tbody>tr:last-child>*]:border-b-0',
+				'[&>table>tbody>tr:last-child>*]:after:hidden',
 			],
 		},
 	},
@@ -487,7 +504,10 @@ export function Root({
 					<table
 						data-slot="table"
 						style={{ minWidth: scroll?.x, ...style }}
-						className="w-full border-separate border-spacing-0 caption-bottom"
+						// A hairline of the table's own between two rows, which is where the rule under a record
+						// stands: the line fills that space, so taking it away leaves the space rather than closing
+						// it — a row that is arrived at lifts off its neighbours instead of losing a line.
+						className="w-full border-separate border-spacing-x-0 border-spacing-y-px caption-bottom"
 						{...props}
 					>
 						{children}
@@ -533,7 +553,9 @@ export function Header({ sticky = false, className, ...props }: HeaderProps) {
 			<thead
 				data-slot="table-header"
 				data-sticky={sticky ? '' : undefined}
-				className={cn('[&>tr>th]:bg-table-head', className)}
+				// The band names the columns and needs no line under it to say where it ends: the tone is the
+				// boundary, and a rule there would be the one line in the table that no record owns.
+				className={cn('[&>tr>th]:bg-table-head [&>tr>th]:after:hidden', className)}
 				{...props}
 			/>
 		</HeaderContext>
@@ -570,13 +592,13 @@ export function Footer({ className, ...props }: FooterProps) {
  * Two fills, and they are not the same fill. The pointer leaves a wash of the text colour, gone a
  * frame after it passes; a chosen row leaves a tint of `primary`, which in this theme is also a
  * near-black and so has to be mixed a step stronger to still be there once the pointer has left.
+ *
+ * Neither is drawn here, because a table row is not a box the browser rounds and a fill with no corners
+ * is a fill a row cannot show as its own: both are drawn by the cells instead, in `rowCellWash`. What
+ * is left here belongs to the row alone — what an unavailable row gives up.
  */
 export const tableRowVariants = tv({
 	base: [
-		'transition-colors duration-(--duration-state)',
-		'[[data-slot=table-container][data-hoverable=true]>table>tbody>&]:hover:bg-row-hover',
-		'[tbody>&]:data-selected:bg-row-selected',
-		'[[data-slot=table-container][data-hoverable=true]>table>tbody>&]:data-selected:hover:bg-row-selected-hover',
 		// A row that cannot be acted on is out of the way rather than hidden: the records around it
 		// are still true, so it keeps its place and its text, and loses its answers.
 		'data-disabled:pointer-events-none data-disabled:opacity-50',
@@ -605,6 +627,25 @@ export function Row({ depth, className, style, ...props }: RowProps) {
 }
 
 /**
+ * The line under a row, drawn by each of its cells as a layer of its own. A border is part of the box it
+ * belongs to, so a cell with a rounded corner bends its rule with it — the line would lift at the two
+ * ends of a row and nowhere else. A layer is not clipped, so the rule stays straight under a row whose
+ * colour is round.
+ *
+ * A row that is arrived at — the pointer's or the reader's — takes its own line with it and the line it
+ * sits under as well: a colour that is round and a rule that stops at it are two pictures of one block,
+ * and a line drawn across either edge would be the third. The hairline the line stood in stays, so the
+ * block sits a hair off what it left behind rather than touching it.
+ */
+const rowRule = cn(
+	'after:pointer-events-none after:absolute after:inset-x-0 after:-bottom-px after:h-px after:bg-border',
+	'[[data-slot=table-container][data-hoverable=true]>table>tbody>tr:hover>&]:after:hidden',
+	'[[data-slot=table-container][data-hoverable=true]>table>tbody>tr:has(+_tr:hover)>&]:after:hidden',
+	'[tr[data-selected]>&]:after:hidden',
+	'[tr:has(+_tr[data-selected])>&]:after:hidden',
+);
+
+/**
  * What every column is drawn with: the inset, the rule under it, and which edge its text is set
  * from. A header and a cell are the same box — one names the column and one fills it — so both are
  * built from this, and a column set from the end reads as one line from its name to its last figure.
@@ -613,7 +654,10 @@ export function Row({ depth, className, style, ...props }: RowProps) {
  * cell are usually being compared with the digits in the cell above it.
  */
 export const tableCellVariants = tv({
-	base: ['border-b px-(--cell-px) py-(--cell-py) align-middle whitespace-nowrap tabular-nums'],
+	base: [
+		'relative px-(--cell-px) py-(--cell-py) align-middle whitespace-nowrap tabular-nums',
+		rowRule,
+	],
 	variants: {
 		align: {
 			start: 'text-start',
@@ -628,6 +672,28 @@ export const tableCellVariants = tv({
 
 /** One line, cut off at the column's width. `--cell-max-w` is how far a column may run. */
 const ellipsisCell = 'max-w-[var(--cell-max-w,15rem)] overflow-hidden text-ellipsis';
+
+/**
+ * The two ends of a row, and the only two cells that can be a corner: a row is rounded where it starts
+ * and where it ends, never between two of its own cells — a radius on every cell would notch the rule
+ * at every column boundary instead of rounding the row's edges.
+ */
+const rowCellEnds = '[&:first-child]:rounded-s-lg [&:last-child]:rounded-e-lg';
+
+/**
+ * The colour of a row, on the boxes that make it — see `tableRowVariants` for why it is not on the row.
+ * The transition is here for the same reason: the wash changes when the pointer arrives, and a pinned
+ * cell paints the same wash a layer down, so the two can only arrive together if they take the same
+ * time to.
+ */
+const rowCellWash = cn(
+	'transition-colors duration-(--duration-state)',
+	'[[data-slot=table-container][data-hoverable=true]>table>tbody>tr:not([data-selected]):hover>&]:bg-row-hover',
+	// A row keeps the pointer's wash while its menu is up, and the menu is the host's to open.
+	'[tr[data-menu-open]>&]:bg-row-hover',
+	'[tr[data-selected]>&]:bg-row-selected',
+	'[[data-slot=table-container][data-hoverable=true]>table>tbody>tr[data-selected]:hover>&]:bg-row-selected-hover',
+);
 
 /**
  * A control in a column title: one 24px square holding one glyph, tinted while the pointer is on it
@@ -851,6 +917,7 @@ export function Head({
 				(fixed !== undefined || holds) && 'sticky',
 				holds && 'top-(--table-head-top,0px)',
 				layerOf({ fixed, inHead: header !== null, holds }),
+				rowCellEnds,
 				fixedClass(fixed),
 				responsiveClass(responsive),
 				sortable && 'cursor-pointer select-none',
@@ -932,6 +999,10 @@ export function Cell({
 			className={cn(
 				tableCellVariants({ align }),
 				ellipsis && ellipsisCell,
+				// A pinned cell paints its own fill and lays the wash over it, so the row's colour reaches it a
+				// way down — `fixedRowStates` is that way, and this is the other.
+				fixed === undefined && rowCellWash,
+				rowCellEnds,
 				fixed !== undefined && 'z-1',
 				fixedClass(fixed),
 				responsiveClass(responsive),

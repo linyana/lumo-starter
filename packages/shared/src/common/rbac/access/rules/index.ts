@@ -30,11 +30,15 @@ const holdsRole = ({
 }): boolean => wanted === undefined || listOf(wanted).some((role) => grant.roles.includes(role));
 
 /**
- * The single answer every gate reads — the API guard, a route, a column, a menu
- * row, a button. No condition grants, so an ungated item needs no branch at the
- * call site; every stated field must hold.
+ * The session's half of a condition: `permission` and `role`, and never `when`.
+ * What `when` says is the thing's own answer about the data — "an account cannot
+ * delete itself" — so it is asked only where the data is, by `allows` below.
+ *
+ * A gate that decides layout rather than drawing the thing — whether a column
+ * exists at all — asks this one instead, because an answer that depends on the
+ * records would come and go as the records do.
  */
-export const allows = ({
+export const permits = ({
 	condition,
 	grant,
 }: {
@@ -43,10 +47,22 @@ export const allows = ({
 }): boolean => {
 	if (!condition) return true;
 	if (!holdsPermission({ grant, required: condition.permission })) return false;
-	if (!holdsRole({ grant, wanted: condition.role })) return false;
-	if (condition.when && !condition.when(grant)) return false;
-	return true;
+	return holdsRole({ grant, wanted: condition.role });
 };
+
+/**
+ * The single answer every gate reads — the API guard, a route, a column, a menu
+ * row, a button: the session's half, and then the condition's own `when` composed
+ * after it, so a predicate narrows and never widens. No condition grants, so an
+ * ungated item needs no branch at the call site; every stated field must hold.
+ */
+export const allows = ({
+	condition,
+	grant,
+}: {
+	condition?: AccessCondition;
+	grant: AccessGrant;
+}): boolean => permits({ condition, grant }) && (condition?.when?.(grant) ?? true);
 
 /**
  * Drops what the grant does not allow, keeping the order and the item type — so a
