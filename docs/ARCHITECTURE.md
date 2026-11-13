@@ -334,6 +334,49 @@ default): reordering a file is not a formatting decision this repo makes.
 
 ---
 
+## 15. One `access` condition per gated thing, one `allows` to answer it
+
+**Chosen.** Every gate is a condition beside the thing it gates — a route, a table column, a menu
+row, a dialog — and both layers read the same evaluation:
+
+```ts
+// packages/shared/src/common/rbac/access
+type AccessCondition = {
+	permission?: Permission | readonly Permission[]; // all of
+	role?: Role | readonly Role[]; // any of
+	when?: (grant: AccessGrant) => boolean; // the rule only the screen knows
+};
+
+allows({ condition, grant }); // the answer
+filterAccess({ items, grant }); // the answer, for a list
+```
+
+**Why.** The permission table was already one source (`PERMISSIONS`, `ROLE_PERMISSIONS`); what was
+missing was a way to state _who may see this one row_ without writing an `if` per call site. Left as
+`if (canEdit) items.push(…)`, four places drift: the page's button, the row's actions, the route's
+rail entry and the API guard. A condition is data, so the same block is filtered by
+`filterAccess`, drawn by `<Can>`, and enforced by `PermissionsGuard` — the shared package owns the
+rule, the components only draw what survives.
+
+**Where the filter runs.** At the call site, never inside `Table` or `Menu`. `providers/auth`
+re-exports its guards, and `guards` draws `Button` and `Spinner` from `@/components`, so a
+`useAuth()` in a table reads `components/pro/table → @/providers/auth → guards → @/components →
+pro/index → table`: a cycle, and one the barrel convention makes the normal path rather than a
+mistake. Those components are also drawn from what they are handed (a story, a public page), so
+ambient session inside them cannot be varied and cannot be tested. They only _declare_
+`access?: AccessCondition`; `useAuth().filter` strips the rows before they arrive.
+
+**Cost.** Two shapes for one gate — a list is filtered, a single element is wrapped in `<Can>`, and
+the reader has to know which they are looking at. `when` makes the condition partly a function, so a
+condition can no longer be serialized or compared, which is why it stays in code beside the data it
+gates.
+
+**Upgrade path.** A new dimension — a feature flag, a tenant type — is a field on `AccessCondition`
+and one line in `allows`. It is deliberately not there yet: this starter has roles and permissions,
+and a condition type with five axes nobody evaluates is a list of special cases in waiting.
+
+---
+
 ## Version notes
 
 | Thing          | Version     | Why this one                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |

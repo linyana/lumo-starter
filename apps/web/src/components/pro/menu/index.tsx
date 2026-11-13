@@ -22,7 +22,9 @@ export const MenuItems = ({ items, classNames }: MenuItemsProps) => (
 	<>
 		{items.map((item, index) => (
 			<Fragment key={index}>
-				{item.separatorBefore && <LumoMenu.Separator className={classNames?.separator} />}
+				{item.separatorBefore && index > 0 && (
+					<LumoMenu.Separator className={classNames?.separator} />
+				)}
 				{item.type === 'content' ? (
 					item.content
 				) : (

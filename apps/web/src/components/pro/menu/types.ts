@@ -1,3 +1,4 @@
+import type { AccessCondition } from '@lumo/shared';
 import type { ReactElement, ReactNode } from 'react';
 import type { PositionerProps } from '@/components/ui/menu';
 import type { SlotClassNames } from '../types';
@@ -9,6 +10,13 @@ export type MenuSlots = 'popup' | 'viewport' | 'item' | 'separator';
 export type MenuItem = {
 	/** Puts the row under a separator, so a group of actions reads as one. */
 	separatorBefore?: boolean;
+	/**
+	 * The condition this row is drawn under. The menu does not read it — a menu that
+	 * asked who is signed in could not be drawn from a story or a test — so a caller
+	 * strips the rows first: `filter(items)`, the `useAuth()` form of `filterAccess`.
+	 * A separator that was only there for a stripped row is dropped too.
+	 */
+	access?: AccessCondition;
 } & (
 	| {
 			type: 'content';

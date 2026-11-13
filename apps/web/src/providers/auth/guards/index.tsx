@@ -1,4 +1,4 @@
-import type { Permission } from '@lumo/shared';
+import type { AccessCondition } from '@lumo/shared';
 import type { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router';
 import { Button, Spinner } from '@/components';
@@ -57,32 +57,73 @@ export const RequireAuth = ({ children }: { children: ReactNode }) => {
 };
 
 /**
- * Hides a route the user cannot reach. This is an affordance, not a security
- * boundary — the same permission is enforced by the API guard.
+ * The gate in element position: the children are drawn only when the condition
+ * holds, and nothing is drawn when it does not — an action, a card, a control.
+ * `access` left out means ungated, so a list can gate some of its rows and not
+ * others. It reads the same `access` block a column, a menu row or a route
+ * carries; `filterAccess` is the list form of the same answer.
+ *
+ * Hiding an element is an affordance, not a boundary: the API guard answers for
+ * the request itself.
  */
-export const RequirePermission = ({
-	permission,
+export const Can = ({
+	access,
+	fallback = null,
 	children,
 }: {
-	permission: Permission;
+	access?: AccessCondition;
+	/** Drawn instead when the condition does not hold. Nothing by default. */
+	fallback?: ReactNode;
 	children: ReactNode;
 }) => {
-	const { can } = useAuth();
+	const { allows } = useAuth();
 
-	if (!can(permission)) {
-		return (
-			<div className="grid place-items-center p-12 text-center">
-				<div className="max-w-sm space-y-2">
-					<h2 className="text-lg font-semibold">Not available</h2>
-					<p className="text-sm text-muted-foreground">
-						Your role does not include <code className="font-mono">{permission}</code>.
-					</p>
-				</div>
+	return <>{allows(access) ? children : fallback}</>;
+};
+
+/** The permissions a screen-opening condition names, when it names any. */
+const namedPermissions = (access?: AccessCondition): string | null => {
+	const permission = access?.permission;
+	if (permission === undefined) return null;
+	return (typeof permission === 'string' ? [permission] : permission).join(', ');
+};
+
+/**
+ * Hides a route the session cannot open. This is an affordance, not a security
+ * boundary — the same permission is enforced by the API guard.
+ *
+ * Its answer is the page's, so it says so on the page rather than drawing nothing:
+ * a typed URL that quietly rendered an empty screen would look broken.
+ */
+export const RequireAccess = ({
+	access,
+	children,
+}: {
+	access?: AccessCondition;
+	children: ReactNode;
+}) => {
+	const { allows } = useAuth();
+
+	if (allows(access)) return <>{children}</>;
+
+	const named = namedPermissions(access);
+
+	return (
+		<div className="grid place-items-center p-12 text-center">
+			<div className="max-w-sm space-y-2">
+				<h2 className="text-lg font-semibold">Not available</h2>
+				<p className="text-sm text-muted-foreground">
+					{named === null ? (
+						'Your role does not include what this page needs.'
+					) : (
+						<>
+							Your role does not include <code className="font-mono">{named}</code>.
+						</>
+					)}
+				</p>
 			</div>
-		);
-	}
-
-	return <>{children}</>;
+		</div>
+	);
 };
 
 /** Inverse guard: a signed-in user visiting /login goes home. */

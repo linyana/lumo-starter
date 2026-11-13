@@ -1,3 +1,4 @@
+import type { AccessCondition } from '@lumo/shared';
 import type { ReactNode } from 'react';
 import type { HeadProps, RootProps, TableFilterProps } from '@/components/ui/table';
 import type { MenuItem } from '../menu';
@@ -24,6 +25,13 @@ export type TableColumn<Row, Key extends string = string> = {
 	width?: string;
 	/** Merged onto this column's header and cells, after `classNames.head` and `classNames.cell`. */
 	className?: string;
+	/**
+	 * The condition this column is drawn under. The table does not read it — a table that asked who is
+	 * signed in could not serve a public page or a story — so the caller strips the columns before
+	 * handing them over: `columns={filter(columns)}`, the `useAuth()` form of `filterAccess`. The last
+	 * column is the actions one, so a screen that gates its own columns still gets "..." drawn.
+	 */
+	access?: AccessCondition;
 	/**
 	 * The key the records are re-read by when this title is pressed. Left out, the column cannot be
 	 * sorted: a column of buttons, or one the endpoint does not sort on. Its own `key` is the one the
@@ -165,6 +173,9 @@ export type TableProps<Row, Key extends string = string> = {
 	 * "..." on the row the pointer is on, and a right press anywhere on the row opens the same list at
 	 * the pointer. One list is drawn twice — a record with no actions gets neither, so a row a reader
 	 * may not act on says nothing about it.
+	 *
+	 * Each item may carry an `access` block, and this is the one place a condition is written per row —
+	 * "cannot delete yourself" — so the caller filters the list it returns: `return filter([...])`.
 	 */
 	rowActions?: (row: Row) => MenuItem[];
 	/**

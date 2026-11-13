@@ -24,36 +24,36 @@ const ROLE_VARIANT: Record<Role, 'default' | 'info' | 'secondary'> = {
  * and how to undo it.
  */
 export const UserList = ({ users }: IPropsType) => {
-	const { user: currentUser, can } = useAuth();
-	const canEdit = can('user:write');
-	const canDelete = can('user:delete');
+	const { user: currentUser, filter } = useAuth();
 
 	const [panel, setPanel] = useState<{ user: User; kind: 'edit' | 'delete' } | null>(null);
 
-	const rowActions = (user: User): MenuItem[] => {
-		const items: MenuItem[] = [];
-
-		if (canEdit) {
-			items.push({
+	/**
+	 * The actions are stated, then stripped: each row says who may see it, and `filter` is the same
+	 * `filterAccess` the route table runs — so the row actions, the page's button and the API guard are
+	 * one expression. The only rule here that is not a permission is "an account cannot delete
+	 * itself", which is a `when` on that row's own data.
+	 */
+	const rowActions = (user: User): MenuItem[] =>
+		filter([
+			{
 				label: 'Edit',
 				icon: <Pencil />,
+				access: { permission: 'user:write' },
 				onClick: () => setPanel({ user, kind: 'edit' }),
-			});
-		}
-
-		// An account cannot delete itself — a rule of this screen's, not of the endpoint's.
-		if (canDelete && user.id !== currentUser?.id) {
-			items.push({
+			},
+			{
 				label: 'Delete',
 				icon: <Trash2 />,
 				destructive: true,
 				separatorBefore: true,
+				access: {
+					permission: 'user:delete',
+					when: () => user.id !== currentUser?.id,
+				},
 				onClick: () => setPanel({ user, kind: 'delete' }),
-			});
-		}
-
-		return items;
-	};
+			},
+		]);
 
 	const closePanel = (next: boolean) => {
 		if (!next) setPanel(null);

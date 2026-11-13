@@ -18,9 +18,9 @@ export const routes: AppRoute[] = [
 		path: 'users',
 		layout: 'shell',
 		page: UsersPage,
-		permission: 'user:read',
+		access: { permission: 'user:read' },
 		nav: { group: 'Workspace', label: 'Users', icon: Users },
 	},
-	{ path: 'login', layout: 'bare', page: LoginPage, access: 'anonymous' },
-	{ path: 'register', layout: 'bare', page: RegisterPage, access: 'anonymous' },
+	{ path: 'login', layout: 'bare', page: LoginPage, audience: 'anonymous' },
+	{ path: 'register', layout: 'bare', page: RegisterPage, audience: 'anonymous' },
 ];

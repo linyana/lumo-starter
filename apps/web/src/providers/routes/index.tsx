@@ -1,13 +1,14 @@
 import { useMemo } from 'react';
 import { NavLink, createBrowserRouter, Link, type RouteObject } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
+import { filterAccess } from '@lumo/shared';
 import type { LayoutNavEntry, LayoutNavItem } from '@/providers/layout';
-import { RedirectIfAuthenticated, RequireAuth, RequirePermission, useAuth } from '@/providers/auth';
+import { RedirectIfAuthenticated, RequireAccess, RequireAuth, useAuth } from '@/providers/auth';
 import { AppShell } from '@/providers/layout';
 import { routes } from '@/routes';
 import type { AppRoute, NavEntry } from './types';
 
-export type { AppRoute, NavEntry, RouteAccess } from './types';
+export type { AppRoute, NavEntry, RouteAudience } from './types';
 
 /**
  * The one place where route data meets React: guards wrap a page in the order they must run, and
@@ -71,18 +72,18 @@ const NotFoundPage = () => (
  */
 const elementFor = (route: AppRoute) => {
 	const Page = route.page;
-	const page = route.permission ? (
-		<RequirePermission permission={route.permission}>
+	const page = route.access ? (
+		<RequireAccess access={route.access}>
 			<Page />
-		</RequirePermission>
+		</RequireAccess>
 	) : (
 		<Page />
 	);
 
 	if (route.layout === 'shell') return page;
-	if (route.access === 'anonymous')
+	if (route.audience === 'anonymous')
 		return <RedirectIfAuthenticated>{page}</RedirectIfAuthenticated>;
-	if (route.access === 'authenticated') return <RequireAuth>{page}</RequireAuth>;
+	if (route.audience === 'authenticated') return <RequireAuth>{page}</RequireAuth>;
 	return page;
 };
 
@@ -100,17 +101,15 @@ const navRoutes = shellRoutes.filter((route): route is NavRoute => route.nav !==
  * on the role, and the role only exists inside `AuthProvider` — so the filter lives here rather
  * than at module scope, and the shell keeps receiving its rows instead of deriving them.
  *
- * Hiding a row is an affordance, not a boundary: `RequirePermission` still answers for a URL typed
- * by hand, and the API still enforces the same permission.
+ * The rows are filtered by the same `access` block a column or a menu row states, so a page, the row
+ * that opens it and the actions inside it cannot drift apart. Hiding a row is an affordance, not a
+ * boundary: `RequireAccess` still answers for a URL typed by hand, and the API still enforces the
+ * same permission.
  */
 const AuthorizedShell = () => {
-	const { can } = useAuth();
-	// `can` is stable per session, so the rows keep their identity until the roles change.
-	const nav = useMemo(
-		() =>
-			navFor(navRoutes.filter((route) => route.permission === undefined || can(route.permission))),
-		[can],
-	);
+	const { grant } = useAuth();
+	// The grant is stable per session, so the rows keep their identity until the roles change.
+	const nav = useMemo(() => navFor(filterAccess({ items: navRoutes, grant })), [grant]);
 
 	return <AppShell nav={nav} />;
 };

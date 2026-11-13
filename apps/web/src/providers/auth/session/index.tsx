@@ -8,11 +8,16 @@ import {
 	type ReactNode,
 } from 'react';
 import {
-	hasPermission as sharedHasPermission,
+	allows as sharedAllows,
+	filterAccess,
+	grantFor,
+	type AccessCondition,
+	type AccessGrant,
 	type LoginInput,
 	type Permission,
 	type RegisterInput,
 	type User,
+	type WithAccess,
 } from '@lumo/shared';
 import { onUnauthorized, refreshSession, setAccessToken } from '@/lib';
 import { authApi } from '@/api';
@@ -27,8 +32,14 @@ type AuthContextValue = {
 	logout: () => Promise<void>;
 	/** Asks the server who this tab is again — what the unreachable screen offers. */
 	refresh: () => Promise<void>;
-	/** Same expression the API guard evaluates — see ROLE_PERMISSIONS in @lumo/shared. */
+	/** What every access condition is evaluated against — see `AccessGrant` in @lumo/shared. */
+	grant: AccessGrant;
+	/** The common case, spelled once: does this session hold that permission? */
 	can: (permission: Permission) => boolean;
+	/** The general case: does this session satisfy that condition? No condition allows. */
+	allows: (condition?: AccessCondition) => boolean;
+	/** The same answer for a list — drops what the session may not see, in place. */
+	filter: <T extends WithAccess>(items: readonly T[]) => T[];
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -103,15 +114,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		}
 	}, []);
 
+	/**
+	 * Roles are the only fact the token carries, so the grant expands them here, once
+	 * per session: `can`, `allows` and `filter` all read this value, and the route
+	 * table's rows keep their identity until it changes.
+	 */
+	const grant = useMemo(() => grantFor(user?.roles ?? []), [user]);
+
 	const can = useCallback(
-		(permission: Permission) =>
-			user ? sharedHasPermission({ roles: user.roles, required: permission }) : false,
-		[user],
+		(permission: Permission) => grant.permissions.includes(permission),
+		[grant],
+	);
+
+	const allows = useCallback(
+		(condition?: AccessCondition) => sharedAllows({ condition, grant }),
+		[grant],
+	);
+
+	const filter = useCallback(
+		<T extends WithAccess>(items: readonly T[]) => filterAccess({ items, grant }),
+		[grant],
 	);
 
 	const value = useMemo<AuthContextValue>(
-		() => ({ user, status, login, register, logout, refresh, can }),
-		[user, status, login, register, logout, refresh, can],
+		() => ({ user, status, login, register, logout, refresh, grant, can, allows, filter }),
+		[user, status, login, register, logout, refresh, grant, can, allows, filter],
 	);
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

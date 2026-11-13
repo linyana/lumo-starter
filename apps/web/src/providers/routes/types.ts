@@ -1,4 +1,4 @@
-import type { Permission } from '@lumo/shared';
+import type { AccessCondition } from '@lumo/shared';
 import type { ComponentType } from 'react';
 
 /**
@@ -6,8 +6,11 @@ import type { ComponentType } from 'react';
  * itself, `providers/routes/index.tsx` turns it into route objects.
  */
 
-/** Who may see a bare page. `anonymous` is the inverse guard (signed-in goes home). */
-export type RouteAccess = 'public' | 'authenticated' | 'anonymous';
+/**
+ * Who a bare page is for — the session question, which is asked before any permission is. The name
+ * is not `access`: `access` is the authorization condition every gated thing carries.
+ */
+export type RouteAudience = 'public' | 'authenticated' | 'anonymous';
 
 export type NavEntry = {
 	/** Nav rows sharing a group sit under one heading, in table order. */
@@ -17,22 +20,25 @@ export type NavEntry = {
 };
 
 /**
- * Where a page sits, and who may enter it. Only a `bare` page names its access: a `shell` page sits
+ * Where a page sits, and who may enter it. Only a `bare` page names its audience: a `shell` page sits
  * inside the frame that asked for the session, so restating it on every row would be the same
  * answer twice.
  */
 type Layout =
 	/** Inside the rail, whose frame requires a signed-in session. */
 	| { layout: 'shell' }
-	/** Owns the whole page, so it is the one that says who may see it. */
-	| { layout: 'bare'; access: RouteAccess };
+	/** Owns the whole page, so it is the one that says who it is for. */
+	| { layout: 'bare'; audience: RouteAudience };
 
 export type AppRoute = Layout & {
 	/** Path below the shell's root. Omitted means the index route. */
 	path?: string;
 	page: ComponentType;
-	/** Hides the page when the role lacks it; the API enforces the same permission. */
-	permission?: Permission;
+	/**
+	 * Who may open the page, and the only gate a row can carry: it hides the rail's row and the page
+	 * behind it alike, with the condition every other gated thing states — see `AccessCondition`.
+	 */
+	access?: AccessCondition;
 	/** Present means the shell draws a row for this page; absent means no row. */
 	nav?: NavEntry;
 };
