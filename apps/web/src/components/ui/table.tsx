@@ -702,12 +702,22 @@ const rowCellWash = cn(
  *
  * The tint is painted on the square; the pointer is taken from a wider invisible box, so a header can
  * hold two of these a gap apart without their targets merging.
+ *
+ * Three things leave the tint behind, and all three are the same tint: the pointer resting on the
+ * square, the reader having opened the panel behind it, and the column being sorted or narrowed. The
+ * second is not the first lasting longer — once the pointer is in the panel, the trigger is no longer
+ * pointed at, and a square that dropped back would leave the open panel with nothing saying which
+ * control it came from. Base UI writes that flag on every trigger; the sort arrow never carries it.
+ *
+ * The ink is the same at every state, so the two glyphs read as one control: a title that can be
+ * sorted and one that can be narrowed sit beside each other, and neither is the quieter of the two.
  */
 const headControl = cn(
 	'relative inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md',
 	'text-muted-foreground transition-colors duration-(--duration-state)',
 	'hover:bg-row-hover hover:text-foreground',
-	'data-active:bg-row-hover',
+	'data-active:bg-row-hover data-active:text-foreground',
+	'data-popup-open:bg-row-hover data-popup-open:text-foreground',
 	'before:absolute before:-inset-1.5',
 );
 
@@ -757,7 +767,7 @@ function FilterControl({
 				data-slot="table-filter"
 				data-active={filter.active === true ? '' : undefined}
 				aria-label={label === undefined ? locale.filter : `${locale.filter} ${label}`}
-				className={cn(headControl, 'data-active:text-primary', iconSlot)}
+				className={cn(headControl, iconSlot)}
 			>
 				<ListFilter />
 			</LumoPopover.Trigger>
@@ -810,12 +820,12 @@ export type HeadProps = Omit<ComponentProps<'th'>, 'align'> &
 		ellipsis?: boolean | { showTitle?: boolean };
 	};
 
-/** The direction the arrow points. Unsorted is the two-headed one, quiet, so the column still says it can move. */
+/** The direction the arrow points. Unsorted is the two-headed one, so the column still says it can move. */
 function SortArrow({ sort }: { sort: TableSort }) {
 	if (sort === 'ascending') return <ArrowUp />;
 	if (sort === 'descending') return <ArrowDown />;
 
-	return <ArrowUpDown className="opacity-40 transition-opacity group-hover/sort:opacity-100" />;
+	return <ArrowUpDown />;
 }
 
 /** The state a press leads to, including the `undefined` that means "and now not at all". */
@@ -887,7 +897,7 @@ export function Head({
 				data-active={sorted ? '' : undefined}
 				aria-label={label === undefined ? hint : `${hint} ${label}`}
 				onClick={() => onSort(next)}
-				className={cn(headControl, 'group/sort data-active:text-foreground', iconSlot)}
+				className={cn(headControl, iconSlot)}
 			>
 				<SortArrow sort={current} />
 			</button>
