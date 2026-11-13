@@ -26,10 +26,9 @@ export type TableColumn<Row, Key extends string = string> = {
 	/** Merged onto this column's header and cells, after `classNames.head` and `classNames.cell`. */
 	className?: string;
 	/**
-	 * The condition this column is drawn under. The table does not read it — a table that asked who is
-	 * signed in could not serve a public page or a story — so the caller strips the columns before
-	 * handing them over: `columns={filter(columns)}`, the `useAuth()` form of `filterAccess`. The last
-	 * column is the actions one, so a screen that gates its own columns still gets "..." drawn.
+	 * The condition this column is drawn under. State it and stop: the table strips what the
+	 * surrounding `<AccessProvider>` does not grant, so the header, the skeleton and the empty row's
+	 * span all count the columns that survived.
 	 */
 	access?: AccessCondition;
 	/**
@@ -174,8 +173,9 @@ export type TableProps<Row, Key extends string = string> = {
 	 * the pointer. One list is drawn twice — a record with no actions gets neither, so a row a reader
 	 * may not act on says nothing about it.
 	 *
-	 * Each item may carry an `access` block, and this is the one place a condition is written per row —
-	 * "cannot delete yourself" — so the caller filters the list it returns: `return filter([...])`.
+	 * Each item may carry an `access` block — this is the one place a condition is written per row,
+	 * "cannot delete yourself" — and the table strips what the grant does not allow before it decides
+	 * whether a row has any actions at all.
 	 */
 	rowActions?: (row: Row) => MenuItem[];
 	/**

@@ -1,8 +1,10 @@
 import { ArrowDown, ArrowUp, ArrowUpDown, Ellipsis, ListFilter, RotateCcw } from 'lucide-react';
 import { useId, useState, type MouseEvent } from 'react';
+import { filterAccess } from '@lumo/shared';
 import { LumoSkeleton } from '@/components/ui/skeleton';
 import { LumoTable, type TableSort as AriaSort } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
+import { useAccess } from '../access';
 import { Button } from '../button';
 import { ContextMenu, type ContextMenuAnchor } from '../context-menu';
 import type { MenuItem } from '../menu';
@@ -182,6 +184,14 @@ export const Table = <Row, Key extends string = string>({
 	const [menu, setMenu] = useState<OpenMenu | null>(null);
 	const menuRow = menu?.rowKey;
 
+	/**
+	 * The columns this app's grant allows: a screen states `access` on the ones that are not for
+	 * everyone and hands the whole list over, so the column and the row actions that follow it cannot
+	 * disagree about who is reading.
+	 */
+	const grant = useAccess();
+	const visible = filterAccess({ items: columns, grant });
+
 	const data = rows ?? list?.items ?? noRecords;
 	const busy = loading ?? list?.loading ?? false;
 	const first = initial ?? list?.initial ?? false;
@@ -202,7 +212,7 @@ export const Table = <Row, Key extends string = string>({
 	const actionsId = `${prefix}-actions`;
 	const cellId = (index: number) => `${prefix}-row-${index}`;
 
-	const actionsOf = (row: Row) => rowActions?.(row) ?? [];
+	const actionsOf = (row: Row) => filterAccess({ items: rowActions?.(row) ?? [], grant });
 
 	const openRowMenu = ({ row, anchor }: { row: Row; anchor: ContextMenuAnchor }) => {
 		const items = actionsOf(row);
@@ -223,12 +233,14 @@ export const Table = <Row, Key extends string = string>({
 		onSort: ((next: AriaSort | undefined) => void) | undefined;
 		anchor: ContextMenuAnchor;
 	}) => {
-		const items = columnItems({ column, sort, onSort });
+		// A column's own menu lines may carry a condition too — the table's own (a sort step, a clear)
+		// never do — so it is stripped here as well: an emptied menu is not opened at all.
+		const items = filterAccess({ items: columnItems({ column, sort, onSort }), grant });
 		if (items.length === 0) return;
 		setMenu({ items, anchor });
 	};
 
-	const headed = columns.map((column) => ({
+	const headed = visible.map((column) => ({
 		column,
 		sort:
 			column.sortKey === undefined
@@ -317,7 +329,7 @@ export const Table = <Row, Key extends string = string>({
 					{skeleton ? (
 						Array.from({ length: skeletonCount }, (_, index) => (
 							<LumoTable.Row key={index} className={classNames?.row}>
-								{columns.map((column) => (
+								{visible.map((column) => (
 									<LumoTable.Cell
 										key={column.key}
 										align={column.align}
@@ -345,7 +357,7 @@ export const Table = <Row, Key extends string = string>({
 						))
 					) : failure !== undefined || data.length === 0 ? (
 						<LumoTable.Empty
-							columns={columns.length + (withActions ? 1 : 0)}
+							columns={visible.length + (withActions ? 1 : 0)}
 							className={classNames?.empty}
 						>
 							{blank}

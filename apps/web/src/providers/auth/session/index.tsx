@@ -8,17 +8,15 @@ import {
 	type ReactNode,
 } from 'react';
 import {
-	allows as sharedAllows,
 	filterAccess,
 	grantFor,
-	type AccessCondition,
-	type AccessGrant,
 	type LoginInput,
 	type Permission,
 	type RegisterInput,
 	type User,
 	type WithAccess,
 } from '@lumo/shared';
+import { AccessProvider } from '@/components';
 import { onUnauthorized, refreshSession, setAccessToken } from '@/lib';
 import { authApi } from '@/api';
 
@@ -32,13 +30,12 @@ type AuthContextValue = {
 	logout: () => Promise<void>;
 	/** Asks the server who this tab is again — what the unreachable screen offers. */
 	refresh: () => Promise<void>;
-	/** What every access condition is evaluated against — see `AccessGrant` in @lumo/shared. */
-	grant: AccessGrant;
 	/** The common case, spelled once: does this session hold that permission? */
 	can: (permission: Permission) => boolean;
-	/** The general case: does this session satisfy that condition? No condition allows. */
-	allows: (condition?: AccessCondition) => boolean;
-	/** The same answer for a list — drops what the session may not see, in place. */
+	/**
+	 * The same answer for a list no component draws itself. A table's columns and a menu's rows are
+	 * stripped where they are drawn; this is for the arrays that are not.
+	 */
 	filter: <T extends WithAccess>(items: readonly T[]) => T[];
 };
 
@@ -115,19 +112,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	}, []);
 
 	/**
-	 * Roles are the only fact the token carries, so the grant expands them here, once
-	 * per session: `can`, `allows` and `filter` all read this value, and the route
-	 * table's rows keep their identity until it changes.
+	 * Roles are the only fact the token carries, so the grant expands them here, once per session.
+	 * `can` and `filter` read it, and `AccessProvider` publishes it to the components that draw a
+	 * gated column, row or control — so the one expansion is the one answer.
 	 */
 	const grant = useMemo(() => grantFor(user?.roles ?? []), [user]);
 
 	const can = useCallback(
 		(permission: Permission) => grant.permissions.includes(permission),
-		[grant],
-	);
-
-	const allows = useCallback(
-		(condition?: AccessCondition) => sharedAllows({ condition, grant }),
 		[grant],
 	);
 
@@ -137,11 +129,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	);
 
 	const value = useMemo<AuthContextValue>(
-		() => ({ user, status, login, register, logout, refresh, grant, can, allows, filter }),
-		[user, status, login, register, logout, refresh, grant, can, allows, filter],
+		() => ({ user, status, login, register, logout, refresh, can, filter }),
+		[user, status, login, register, logout, refresh, can, filter],
 	);
 
-	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+	return (
+		<AuthContext.Provider value={value}>
+			<AccessProvider grant={grant}>{children}</AccessProvider>
+		</AuthContext.Provider>
+	);
 };
 
 export const useAuth = (): AuthContextValue => {

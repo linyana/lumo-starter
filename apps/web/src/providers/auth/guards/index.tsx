@@ -1,7 +1,7 @@
-import type { AccessCondition } from '@lumo/shared';
+import { allows, type AccessCondition } from '@lumo/shared';
 import type { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router';
-import { Button, Spinner } from '@/components';
+import { Button, Spinner, useAccess } from '@/components';
 import { useAuth } from '../session';
 
 export const FullPageLoader = () => (
@@ -61,7 +61,7 @@ export const RequireAuth = ({ children }: { children: ReactNode }) => {
  * holds, and nothing is drawn when it does not — an action, a card, a control.
  * `access` left out means ungated, so a list can gate some of its rows and not
  * others. It reads the same `access` block a column, a menu row or a route
- * carries; `filterAccess` is the list form of the same answer.
+ * carries, and the same grant those are drawn against.
  *
  * Hiding an element is an affordance, not a boundary: the API guard answers for
  * the request itself.
@@ -76,9 +76,9 @@ export const Can = ({
 	fallback?: ReactNode;
 	children: ReactNode;
 }) => {
-	const { allows } = useAuth();
+	const grant = useAccess();
 
-	return <>{allows(access) ? children : fallback}</>;
+	return <>{allows({ condition: access, grant }) ? children : fallback}</>;
 };
 
 /** The permissions a screen-opening condition names, when it names any. */
@@ -102,9 +102,9 @@ export const RequireAccess = ({
 	access?: AccessCondition;
 	children: ReactNode;
 }) => {
-	const { allows } = useAuth();
+	const grant = useAccess();
 
-	if (allows(access)) return <>{children}</>;
+	if (allows({ condition: access, grant })) return <>{children}</>;
 
 	const named = namedPermissions(access);
 

@@ -1,4 +1,5 @@
 export * from './types';
+export * from './access';
 export * from './accordion';
 export * from './alert-dialog';
 export * from './avatar';

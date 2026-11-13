@@ -24,36 +24,34 @@ const ROLE_VARIANT: Record<Role, 'default' | 'info' | 'secondary'> = {
  * and how to undo it.
  */
 export const UserList = ({ users }: IPropsType) => {
-	const { user: currentUser, filter } = useAuth();
+	const { user: currentUser } = useAuth();
 
 	const [panel, setPanel] = useState<{ user: User; kind: 'edit' | 'delete' } | null>(null);
 
 	/**
-	 * The actions are stated, then stripped: each row says who may see it, and `filter` is the same
-	 * `filterAccess` the route table runs — so the row actions, the page's button and the API guard are
-	 * one expression. The only rule here that is not a permission is "an account cannot delete
-	 * itself", which is a `when` on that row's own data.
+	 * The actions are stated, and the table strips what the session does not grant — so this reads as
+	 * the list of what a record offers, and the only line here that is not a permission is "an account
+	 * cannot delete itself", a `when` on this row's own data.
 	 */
-	const rowActions = (user: User): MenuItem[] =>
-		filter([
-			{
-				label: 'Edit',
-				icon: <Pencil />,
-				access: { permission: 'user:write' },
-				onClick: () => setPanel({ user, kind: 'edit' }),
+	const rowActions = (user: User): MenuItem[] => [
+		{
+			label: 'Edit',
+			icon: <Pencil />,
+			access: { permission: 'user:write' },
+			onClick: () => setPanel({ user, kind: 'edit' }),
+		},
+		{
+			label: 'Delete',
+			icon: <Trash2 />,
+			destructive: true,
+			separatorBefore: true,
+			access: {
+				permission: 'user:delete',
+				when: () => user.id !== currentUser?.id,
 			},
-			{
-				label: 'Delete',
-				icon: <Trash2 />,
-				destructive: true,
-				separatorBefore: true,
-				access: {
-					permission: 'user:delete',
-					when: () => user.id !== currentUser?.id,
-				},
-				onClick: () => setPanel({ user, kind: 'delete' }),
-			},
-		]);
+			onClick: () => setPanel({ user, kind: 'delete' }),
+		},
+	];
 
 	const closePanel = (next: boolean) => {
 		if (!next) setPanel(null);

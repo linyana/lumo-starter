@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { NavLink, createBrowserRouter, Link, type RouteObject } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
-import { filterAccess } from '@lumo/shared';
 import type { LayoutNavEntry, LayoutNavItem } from '@/providers/layout';
 import { RedirectIfAuthenticated, RequireAccess, RequireAuth, useAuth } from '@/providers/auth';
 import { AppShell } from '@/providers/layout';
@@ -107,9 +106,9 @@ const navRoutes = shellRoutes.filter((route): route is NavRoute => route.nav !==
  * same permission.
  */
 const AuthorizedShell = () => {
-	const { grant } = useAuth();
+	const { filter } = useAuth();
 	// The grant is stable per session, so the rows keep their identity until the roles change.
-	const nav = useMemo(() => navFor(filterAccess({ items: navRoutes, grant })), [grant]);
+	const nav = useMemo(() => navFor(filter(navRoutes)), [filter]);
 
 	return <AppShell nav={nav} />;
 };

@@ -358,18 +358,23 @@ rail entry and the API guard. A condition is data, so the same block is filtered
 `filterAccess`, drawn by `<Can>`, and enforced by `PermissionsGuard` — the shared package owns the
 rule, the components only draw what survives.
 
-**Where the filter runs.** At the call site, never inside `Table` or `Menu`. `providers/auth`
-re-exports its guards, and `guards` draws `Button` and `Spinner` from `@/components`, so a
-`useAuth()` in a table reads `components/pro/table → @/providers/auth → guards → @/components →
-pro/index → table`: a cycle, and one the barrel convention makes the normal path rather than a
-mistake. Those components are also drawn from what they are handed (a story, a public page), so
-ambient session inside them cannot be varied and cannot be tested. They only _declare_
-`access?: AccessCondition`; `useAuth().filter` strips the rows before they arrive.
+**Where the filter runs.** Inside the two components that draw a list from data: `Table` strips its
+`columns` and every row's actions, `MenuItems` strips a menu's rows. They read the grant from
+`<AccessProvider>`, which lives in `components/pro/access` and imports React and `@lumo/shared` and
+nothing else. That placement is the whole trick: `providers/auth` already draws `Button` and `Spinner`
+from `@/components`, so a table reaching back into `providers/auth` would close the cycle
+`components/pro/table → @/providers/auth → guards → @/components → pro/index → table`.
+`providers/auth/session` fills the provider in once, from the session.
 
-**Cost.** Two shapes for one gate — a list is filtered, a single element is wrapped in `<Can>`, and
-the reader has to know which they are looking at. `when` makes the condition partly a function, so a
-condition can no longer be serialized or compared, which is why it stays in code beside the data it
-gates.
+The caller states `access` and stops: a column, a menu row, a row action, a route, or one element
+wrapped in `<Can>`. `useAuth().filter` remains for the arrays no component draws itself.
+
+**Cost.** Two shapes for one gate — a list is stripped by the component that draws it, a single
+element is wrapped in `<Can>`. The components read ambient state, so what a table draws depends on
+who is signed in: anything that gates must be rendered inside `<AccessProvider>`, and the default
+while nothing provides one is an empty grant, which draws no gated item. `when` makes a condition
+partly a function, so conditions cannot be serialized or compared, which is why they stay in code
+beside the data they gate.
 
 **Upgrade path.** A new dimension — a feature flag, a tenant type — is a field on `AccessCondition`
 and one line in `allows`. It is deliberately not there yet: this starter has roles and permissions,

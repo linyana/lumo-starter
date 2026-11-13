@@ -11,10 +11,9 @@ export type MenuItem = {
 	/** Puts the row under a separator, so a group of actions reads as one. */
 	separatorBefore?: boolean;
 	/**
-	 * The condition this row is drawn under. The menu does not read it — a menu that
-	 * asked who is signed in could not be drawn from a story or a test — so a caller
-	 * strips the rows first: `filter(items)`, the `useAuth()` form of `filterAccess`.
-	 * A separator that was only there for a stripped row is dropped too.
+	 * The condition this row is drawn under. State it and stop: the menu strips what the surrounding
+	 * `<AccessProvider>` does not grant, and a separator that was only there to set a stripped row apart
+	 * goes with it. Left out, the row is drawn for everyone.
 	 */
 	access?: AccessCondition;
 } & (
