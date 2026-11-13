@@ -93,6 +93,14 @@ export type TableSlots =
 export type SelectionAction<Row> = {
 	label: ReactNode;
 	icon?: ReactNode;
+	/**
+	 * Draw the `icon` alone, with the `label` left to a reader who cannot see it. For a press the bar's
+	 * own shape already names — a delete, a download — where the word is room the records are worth not
+	 * giving up. Only a press that declared an `icon` can be said without its words; with none it is
+	 * drawn labelled, whatever this says. The edge goes with the words: the button is drawn quiet, because
+	 * a box around one glyph is louder than the same box around a word.
+	 */
+	iconOnly?: boolean;
 	/** Drawn in the destructive colour. */
 	destructive?: boolean;
 	/** The session's condition, stripped by the same grant as every other gate on this table. */

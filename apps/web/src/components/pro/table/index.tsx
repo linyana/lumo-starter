@@ -186,11 +186,11 @@ type SelectionBarProps<Row> = {
 };
 
 /**
- * What the table puts in the floating bar while records are chosen: how many, what can be done with
- * them, and the way back. The list is the caller's minus what the session is not granted, and an action
- * the chosen records withhold is drawn unavailable with the reason on it rather than dropped — the
- * records are on the screen and the reader chose them, so "not these, because…" is the answer, not
- * silence.
+ * What the table puts in the floating bar while records are chosen: how many on the start, the way back
+ * beside them, and what can be done with them on the end. The list is the caller's minus what the session
+ * is not granted, and an action the chosen records withhold is drawn unavailable with the reason on it
+ * rather than dropped — the records are on the screen and the reader chose them, so "not these, because…"
+ * is the answer, not silence.
  */
 const SelectionBar = <Row,>({ rows, actions, onClear, className }: SelectionBarProps<Row>) => {
 	const grant = useAccess();
@@ -199,23 +199,48 @@ const SelectionBar = <Row,>({ rows, actions, onClear, className }: SelectionBarP
 
 	return (
 		<ActionBar visible={rows.length > 0} className={className}>
-			<p aria-live="polite" className="text-sm font-medium">
-				{rows.length === 1 ? '1 selected' : `${rows.length} selected`}
-			</p>
+			<div className="flex items-center gap-2">
+				<p aria-live="polite" className="text-sm font-medium">
+					{rows.length === 1 ? '1 selected' : `${rows.length} selected`}
+				</p>
+				{/*
+				 * The way out of the choice, not a thing done with it: the same button as the bar's own, in the
+				 * quiet ink and one step down in type, so it reads as the count's aside rather than as something
+				 * the records offer. The one pixel of padding on top is optical: a smaller word's ink sits a hair
+				 * high in a box centred on the one beside it — its ascender tops line up while its baseline does
+				 * not — and half that difference back is what puts the two on one line to the eye.
+				 */}
+				<Button
+					variant="ghost"
+					size="sm"
+					className="pt-px text-xs text-muted-foreground"
+					onClick={onClear}
+				>
+					Clear
+				</Button>
+			</div>
 			<div className="flex flex-wrap items-center gap-2">
 				{offered.map((action, index) => {
 					const reason = action.blocked?.(rows);
+					// An icon alone is only a press once there is an icon to press: a wordless action is the one
+					// thing the bar refuses to draw, because nothing in it would say what it does.
+					const iconOnly = action.iconOnly === true && action.icon !== undefined;
 					const look = {
-						variant: 'outline' as const,
-						size: 'sm' as const,
+						// A box drawn around one glyph is louder than the same box around a word, so the action that
+						// gave up its words gives up the edge with them and stands as the icon alone.
+						variant: iconOnly ? ('ghost' as const) : ('outline' as const),
+						size: iconOnly ? ('icon' as const) : ('sm' as const),
 						icon: action.icon,
 						tone: action.destructive ? ('destructive' as const) : ('default' as const),
 					};
+					// The words stay in the button when the icon takes their place: the press keeps its name read
+					// out, and loses only the room it took.
+					const words = iconOnly ? <span className="sr-only">{action.label}</span> : action.label;
 					const why = `${prefix}-blocked-${index}`;
 
 					return reason === undefined ? (
 						<Button key={index} {...look} onClick={() => action.onClick({ rows, clear: onClear })}>
-							{action.label}
+							{words}
 						</Button>
 					) : (
 						// The press keeps its name and its place and stops being a press. It stays focusable so
@@ -224,7 +249,7 @@ const SelectionBar = <Row,>({ rows, actions, onClear, className }: SelectionBarP
 						<Tooltip key={index} content={reason}>
 							<span className="inline-flex">
 								<Button {...look} disabled focusableWhenDisabled aria-describedby={why}>
-									{action.label}
+									{words}
 								</Button>
 								<span id={why} className="sr-only">
 									{reason}
@@ -233,9 +258,6 @@ const SelectionBar = <Row,>({ rows, actions, onClear, className }: SelectionBarP
 						</Tooltip>
 					);
 				})}
-				<Button variant="ghost" size="sm" onClick={onClear}>
-					Clear
-				</Button>
 			</div>
 		</ActionBar>
 	);

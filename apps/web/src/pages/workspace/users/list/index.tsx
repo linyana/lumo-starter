@@ -75,6 +75,7 @@ export const UserList = ({ list }: IPropsType) => {
 						{
 							label: 'Delete',
 							icon: <Trash2 />,
+							iconOnly: true,
 							destructive: true,
 							access: { permission: 'user:delete' },
 							blocked: (rows) =>
