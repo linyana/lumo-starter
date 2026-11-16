@@ -125,6 +125,10 @@ export type UseQueryResult<TItem, TQuery extends ListQuery> = {
 	clearFilter: (name: string) => void;
 	/** The fields' values. Handed to `<Form form>` so they are one set with the query. */
 	form: FormInstance;
-	/** What a change in the fields means: they *are* the filters. `<Form onChange>` calls this. */
+	/**
+	 * What a change in the fields means: they *are* the filters. `<Form onChange>` calls this, and the
+	 * page goes back to the first one with them. A write that says what the last one said is dropped —
+	 * nothing narrowed moved, so neither the page nor the records do.
+	 */
 	write: (values: FormValues) => void;
 };

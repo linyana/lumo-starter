@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { pageCountOf, PAGE_SIZE_DEFAULT } from '@lumo/shared';
-import { useForm } from '@/components/pro/form';
+import { useForm, type FormValues } from '@/components/pro/form';
 import { useHttp } from '../use-http';
 import { stateFromParams, paramsFromState, emptyState } from './params';
 import type {
@@ -25,6 +25,33 @@ export type {
 	UseQueryOptions,
 	UseQueryResult,
 } from './types';
+
+/**
+ * Whether two writes hold the same answers. A field's value is text, a number, a flag or a list of
+ * them, so this is the keys and then the values — a list by what it holds, because a multi-select
+ * picked again is a new array with the same content. Anything it cannot see into counts as a change:
+ * a read too many is a read, and a stale list is not.
+ */
+const sameValues = (was: FormValues, next: FormValues): boolean => {
+	const keys = Object.keys(was);
+	if (keys.length !== Object.keys(next).length) return false;
+
+	return keys.every((key) => {
+		const a = was[key];
+		const b = next[key];
+
+		if (Array.isArray(a) || Array.isArray(b)) {
+			return (
+				Array.isArray(a) &&
+				Array.isArray(b) &&
+				a.length === b.length &&
+				a.every((value, index) => value === b[index])
+			);
+		}
+
+		return a === b;
+	});
+};
 
 /**
  * One page of records and the way through them: `useHttp` under the hood, with the page, the size,
@@ -103,11 +130,21 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 	/**
 	 * What a change in the fields means: the filters are exactly what the fields hold, and the records
 	 * under the cursor have moved, so the next read starts over from the first page.
+	 *
+	 * A write that says what the last one said is not a write — the value is picked again by the same
+	 * control, or the reader typed their way back to where they were. Nothing narrowed has changed, so
+	 * the page they were on is still theirs, and the filters keep their identity: the effect keyed on
+	 * them does not fire, and no read goes out for a question already answered.
 	 */
-	const write = useCallback((values: Record<string, unknown>): void => {
-		setFilters(values as ListFilters<TQuery>);
-		setPage(1);
-	}, []);
+	const write = useCallback(
+		(values: FormValues): void => {
+			if (sameValues(filters as FormValues, values)) return;
+
+			setFilters(values as ListFilters<TQuery>);
+			setPage(1);
+		},
+		[filters],
+	);
 
 	/**
 	 * A size the reader picked. It starts over from the first page: the records they were looking at
