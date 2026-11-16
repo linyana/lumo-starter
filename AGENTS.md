@@ -5,6 +5,10 @@
 Prefer simple, extensible designs. Optimize for fewer concepts, no special cases, and changes that
 stay local.
 
+**A branch the wire cannot produce is a comment pretending to be code.** Read the service before
+drawing a partial outcome: a batch that asks about every row before it deletes answers all-or-nothing,
+so a `deleted < ids.length` notice is a path nobody reaches and a reader will still believe.
+
 ## Functions
 
 **Two or more parameters become one object parameter.** A function takes a single positional value
@@ -28,11 +32,16 @@ Domain first, then one folder per unit, at every level. **A folder holds two fil
 other name is a folder with its own `index.ts` — `constants/index.ts`, `schema/index.ts`,
 `api/index.ts`, `mapper/index.ts`. kebab-case for folders and files.
 
+Imports are alphabetical by specifier — `@/api` before `@/components`, `../delete` before `./types`
+— and the block ends with one blank line before the first declaration. `oxfmt` leaves both alone, so
+both are written by hand.
+
 ### `apps/web/src`
 
 ```
 api/<resource>/index.ts             the wire: one folder per resource, `index` is the barrel
 pages/<domain>/<screen>/index.tsx    screens, grouped by the rail's own groups
+pages/<domain>/<screen>/types.ts     the screen's declarations, named by its siblings
 providers/<concern>/{index, session/, guards/}
 providers/layout/{frame,shell,auth}/  the block a screen sits in, the frames built on it,
                                      `index` is the barrel
@@ -52,11 +61,42 @@ routes.tsx                           the route table, importing screens from `@/
 - A new screen is three edits: the folder, one line in its domain's `index.ts`, one row in
   `routes.tsx`. A new resource adds `api/<resource>/index.ts` and one line in `api/index.ts` — and
   no screen has to know where its calls live.
-- **A props type nobody else names is not a declaration to share.** It lives in that component's own
-  `index.tsx`, unexported, as `IPropsType` — no `types.ts` beside it. `types.ts` keeps what a second
-  file has to name: a props type a sibling derives from (`Pick<SidebarProps, …>`), or the row and
-  column shapes a caller is written against. So a screen and the panels under it say `IPropsType`,
-  and `components/` publishes `XxxProps` from its `types.ts`, because every screen may name those.
+- **Declarations live in `types.ts`, behavior in `index.tsx`.** The state a screen holds open, the
+  args a local dispatcher takes, the row and column shapes a caller is written against: all exported
+  from `types.ts` whether one sibling names them or five. It is where a reader looks, and it keeps a
+  doc comment on the declaration instead of on a function that happens to mention it. The one
+  exception is the entry's own props type — `IPropsType`, unexported, in the file that declares the
+  component — because a second name for it buys nothing. `components/` publishes `XxxProps` from its
+  `types.ts` as always, since every screen may name those.
+- **What a screen has open is one value, not a state per dialog.** The union lives in `types.ts`, the
+  screen holds `useState<Panel | null>(null)`, and one function draws whichever kind is open:
+
+  ```tsx
+  const renderPanel = ({ panel, onOpenChange, reload }: PanelArgs): ReactElement => {
+  	switch (panel.kind) {
+  		case 'edit':
+  			return <EditUser user={panel.user} open onOpenChange={onOpenChange} onUpdated={reload} />;
+  		case 'delete':
+  			return (
+  				<DeleteUsers users={panel.users} open onOpenChange={onOpenChange} onDeleted={reload} />
+  			);
+  	}
+  };
+  ```
+
+  Returning `ReactElement` rather than `ReactNode` is the whole guard: every case returns, so a kind
+  with no case is a function that can end without returning and `TS2366` says so — no `default` that
+  throws, no `satisfies never`, no mapped-type table. A table of renderers buys a line per kind and
+  costs three type declarations plus a generic that exists only to be callable, so it does not pay at
+  this size.
+
+- **No ternaries in JSX, and no truthiness on a nullable.** A nullable reads `panel !== null && …`; a
+  boolean reads `flag && …`. A chain of `a ? <A /> : b ? <B /> : <C />` is a union with a `switch`
+  behind it, and the branch that "must be" the last one is the one nobody checks.
+- **A folder is a verb, and one verb is one component.** `list`, `create`, `edit`, `delete`. A folder
+  named after a quantity (`batch-delete`) or a second noun is a component that should have taken the
+  rows as a payload: `DeleteUsers({ users })` deletes one row and a screenful with no branch, and the
+  screen's `Panel` keeps a single `delete`.
 
 ### `apps/api/src`
 
