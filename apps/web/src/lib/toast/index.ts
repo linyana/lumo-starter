@@ -1,4 +1,4 @@
-import { createToastManager } from '@/components/pro/toast';
+import { createToastManager } from '@/components/feedback/toast';
 
 /**
  * One manager for the whole app, so anything may queue a toast — a request

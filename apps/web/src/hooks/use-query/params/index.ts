@@ -1,5 +1,4 @@
-import type { SortOrder } from '@lumo/shared';
-import { PAGE_SIZE_MAX, PAGE_SIZE_MIN } from '@lumo/shared';
+import { PAGE_SIZE_MAX, PAGE_SIZE_MIN, type SortOrder } from '@lumo/shared';
 import type { ListFilters, ListOwnedKey, ListQuery, ListState, SortKeyOf } from '../types';
 
 /**

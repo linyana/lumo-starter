@@ -57,17 +57,44 @@ providers/layout/{frame,shell,auth}/  the block a screen sits in, the frames bui
                                      `index` is the barrel
 hooks/<name>/{index, types}          request state, the app-wide store
 lib/<module>/{index, client/, error/}
+components/<group>/<name>/          the kit, one folder per component
+components/<group>/{index.ts}       the six groups: form overlay display feedback navigation data
+components/<group>/<name>/{index.tsx, types.ts, parts/}
+components/<group>/<name>/parts/<part>/index.tsx
+providers/access/                    the grant a gated row is filtered by — a provider and a hook
 routes.tsx                           the route table, importing screens from `@/pages`
 ```
 
-- Import the barrel (`@/api`, `@/pages`, `@/providers`, `@/hooks`, `@/lib`); siblings inside a domain
-  reach for each other relatively. A resource module names the sibling it needs (`../roles`), never
-  `@/api`: the barrel re-exports it, so that import would close a cycle.
+- **A component is filed by what a screen needs it for, and there are six answers.** `form/` — a
+  control whose value the screen collects (button, input, select, checkbox, field, form…);
+  `overlay/` — something drawn over the page (dialog, drawer, menu, tooltip, action bar); `display/`
+  — a thing that shows one fact (badge, avatar, card, separator, expansion); `feedback/` — the state
+  of a wait or an outcome (toast, progress, spinner, skeleton); `navigation/` — moving between
+  places (nav, tabs); `data/` — a collection of records (table, pagination, steps). Provenance is
+  not the axis: a wrapper of Base UI and one written here sit side by side when they answer the same
+  need — `menu` and `context-menu` are both in `overlay/`. Where the behaviour comes from is the
+  first line of the file, and one `grep -rl "@base-ui/react" components` lists every wrapper.
+- **A component is one folder, and it opens up twice.** `index.tsx` is the shape a screen wants
+  (`Card` takes a title, a description, a footer); `parts/` is the same component taken apart
+  (`CardRoot`, `CardHeader`), for the rare screen that needs a different arrangement. Whether a
+  folder has a `parts/` is also how a leaf tells itself from an assembly. A preset that only
+  re-states a default belongs in neither: fold it into the part it defaults.
+- **A part is flat, and a shared value lives with the part that owns it.** `parts/root`, `parts/item`
+  — never a nested tree — and `buttonVariants`, a context, a locale table sit in the part that reads
+  them, not in a `variants.ts` beside the component.
+- Import the barrel (`@/api`, `@/pages`, `@/providers`, `@/hooks`, `@/lib`, `@/components`); siblings
+  inside a domain reach for each other relatively. A resource module names the sibling it needs
+  (`../roles`), never `@/api`: the barrel re-exports it, so that import would close a cycle.
+- A screen imports `@/components`; reaching into a component's `parts/` is the exception that says
+  so in the diff. Inside the kit the split is positional: a sibling part is relative (`../header`),
+  another component is `@/components/<group>/<name>` or `…/parts` — even one in the same group — and
+  never the `@/components` barrel, which re-exports all 42, so naming it from a part would make one
+  `div` depend on the whole kit.
 - A layout receives what it draws: `providers/routes` derives the rail rows from `routes.tsx` and
   hands them to the shell, so no layout imports the table or the pages behind it. A frame a screen
   imports may never close a cycle through `@/pages`, which is exactly what that would be.
-- The vendored `components/` keep importing the single module they need (`@/lib/utils`): the barrels
-  would close a cycle there.
+- The components keep importing the single module they need (`@/lib/utils`): the
+  barrels would close a cycle there.
 - A new screen is three edits: the folder, one line in its domain's `index.ts`, one row in
   `routes.tsx`. A new resource adds `api/<resource>/index.ts` and one line in `api/index.ts` — and
   no screen has to know where its calls live.

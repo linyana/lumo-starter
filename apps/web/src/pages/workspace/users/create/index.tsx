@@ -1,4 +1,4 @@
-import { createUserSchema, ROLES, ROLE_META, type Role } from '@lumo/shared';
+import { createUserSchema, ROLE_META, ROLES, type Role } from '@lumo/shared';
 import { useState } from 'react';
 import { usersApi } from '@/api';
 import { Button, Dialog, Field, Form, Input, ToggleGroup, useForm } from '@/components';

@@ -1,13 +1,4 @@
 import {
-	createContext,
-	useCallback,
-	useContext,
-	useEffect,
-	useMemo,
-	useState,
-	type ReactNode,
-} from 'react';
-import {
 	filterAccess,
 	grantFor,
 	type LoginInput,
@@ -16,9 +7,18 @@ import {
 	type User,
 	type WithAccess,
 } from '@lumo/shared';
-import { AccessProvider } from '@/components';
-import { onUnauthorized, refreshSession, setAccessToken } from '@/lib';
+import {
+	createContext,
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+	useState,
+	type ReactNode,
+} from 'react';
 import { authApi } from '@/api';
+import { onUnauthorized, refreshSession, setAccessToken } from '@/lib';
+import { AccessProvider } from '@/providers/access';
 
 type AuthStatus = 'loading' | 'anonymous' | 'authenticated' | 'unreachable';
 

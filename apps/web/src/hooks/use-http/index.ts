@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { toApiError, toastError as raiseToast } from '@/lib';
+import { toastError as raiseToast, toApiError } from '@/lib';
 import type { FetchData, FetchResult, UseHttpOptions, UseHttpResult, UseHttpState } from './types';
 
 export type { FetchData, FetchResult, UseHttpOptions, UseHttpResult, UseHttpState } from './types';

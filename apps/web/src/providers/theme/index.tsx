@@ -1,5 +1,4 @@
-import type { ReactNode } from 'react';
-import { useLayoutEffect } from 'react';
+import { useLayoutEffect, type ReactNode } from 'react';
 import { useGlobal } from '@/hooks';
 
 export { ThemeToggle } from './theme-toggle';

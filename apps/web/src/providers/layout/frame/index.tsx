@@ -11,8 +11,8 @@ import { tv, type VariantProps } from 'tailwind-variants';
 import { cn } from '@/lib/utils';
 import { Content } from './content';
 import { Header } from './header';
-import { Sidebar } from './sidebar';
 import { MobileNavigation } from './mobile';
+import { Sidebar } from './sidebar';
 import type { LayoutNavEntry } from './types';
 
 export const layoutVariants = tv({

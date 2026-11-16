@@ -200,12 +200,12 @@ the action to take.
 - **The API is ESM** — every relative import ends in `.js`. A CommonJS build only _appears_ to work
   (ARCHITECTURE §9).
 - **TypeScript is pinned to 5.9** — Nest's DI needs `emitDecoratorMetadata` (Version notes).
-- **lumo-ui is copied, not installed** — `bunx shadcn@latest add @lumo/<name>`. The files under
-  `apps/web/src/{components,lib}` belong to this repo, but oxfmt and oxlint skip them so registry
-  updates stay diff-able. The `layout` block is the exception: it is app shape rather than a
-  primitive, so it lives at `providers/layout/frame` and is linted, formatted and edited like the
-  rest of `src`.
-- **The AI skill** is installed locally, not committed: it lands in `.agents/skills/lumo-ui`
+- **The UI kit belongs to this repository** — `apps/web/src/components` is maintained here, not
+  installed from a registry: no `bunx shadcn add`, no upstream to diff against, no `components.json`.
+  It is grouped by what a component is for — `form/ overlay/ display/ feedback/ navigation/ data/` —
+  and each one is a folder that opens up twice: `index.tsx` is the shape a screen wants, `parts/` is
+  the same component taken apart. All of it is linted, formatted and edited like the rest of `src`.
+- **The AI skill** is landed locally, not committed: it goes to `.agents/skills/lumo-ui`
   (`bunx skills`), and `bunx skills update` refreshes it.
 - **`.env` holds only `DATABASE_URL` and `JWT_ACCESS_SECRET`** — everything else is a constant in
   `apps/api/src/common/config/runtime.ts` (port, log level, token lifetimes, throttling). The one
@@ -228,15 +228,15 @@ the action to take.
 │   │   ├── src/common/                  # pipes, filters, guards, swagger, db
 │   │   └── src/modules/{auth,users,health}
 │   └── web
-│       ├── components.json              # shadcn + @lumo registry
 │       ├── src/routes.tsx               # the route table: page, access, permission, nav
 │       ├── src/pages/{auth,workspace}   # screens, one folder each, grouped by domain
 │       ├── src/providers/auth          # the session and the guards a route asks for
+│       ├── src/providers/access        # the grant a gated row is filtered by
 │       ├── src/providers/routes        # the table turned into route objects, plus the rail rows
 │       ├── src/providers/layout/{frame,shell,auth} # the rail block, the shell on it, the auth column
 │       ├── src/hooks/{use-http,use-list,use-global} # request state, paging, the store
 │       ├── src/lib/{http,form,toast,…}  # transport and the small shared modules
-│       └── src/components/ui            # installed from @lumo
+│       └── src/components/{form,overlay,display,feedback,navigation,data} # the kit
 ├── packages/shared                      # the single source of truth
 └── docs/ARCHITECTURE.md                 # why each choice, and what it costs
 ```

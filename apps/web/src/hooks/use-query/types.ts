@@ -1,5 +1,5 @@
 import type { Paginated, SortOrder } from '@lumo/shared';
-import type { FormInstance, FormValues } from '@/components/pro/form/types';
+import type { FormInstance, FormValues } from '@/components/form/form/types';
 
 /**
  * The part of a list endpoint's query the hook fills in itself: which page, how large, what the

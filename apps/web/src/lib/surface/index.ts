@@ -1,24 +1,3 @@
-/**
- * The appearance every floating surface shares.
- *
- * A dialog, a drawer, a menu, a popover and a tooltip are drawn by Base UI parts of their own, but
- * the layer they sit on, the way they arrive, the arrow they point with and the viewport they slide
- * between are the same mechanics five times over. Resolved here once, they cannot drift apart: a
- * popover and a tooltip open on the same beat, and one fixed place to change the ladder.
- *
- * The classes are already merged through `cn()`, so a component that hands `className` in last
- * still wins — these are a starting point, not a lock.
- *
- * The layer ladder, which is the one thing a portal cannot work out on its own. Two overlays at the
- * same z-index are ordered by whichever portal mounted last, so every step is written down:
- *
- *   10 — chrome that stays above the page it moves over: a sticky header, a scrollbar, a swipe strip
- *   30 — a bar that floats over the page it acts on: a chosen set, an unsaved form
- *   40 — a scrim
- *   50 — the popup the scrim belongs to: dialog, drawer, menu, popover
- *   60 — a tooltip, which explains something inside one of those
- *   70 — a toast, which is true whatever else is open
- */
 import { cn } from '@/lib/utils';
 
 /** The scrim behind a modal surface. */

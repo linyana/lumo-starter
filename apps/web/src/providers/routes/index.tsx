@@ -1,9 +1,8 @@
 import { useMemo } from 'react';
-import { NavLink, createBrowserRouter, Link, type RouteObject } from 'react-router';
+import { createBrowserRouter, Link, NavLink, type RouteObject } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
-import type { LayoutNavEntry, LayoutNavItem } from '@/providers/layout';
 import { RedirectIfAuthenticated, RequireAccess, RequireAuth, useAuth } from '@/providers/auth';
-import { AppShell } from '@/providers/layout';
+import { AppShell, type LayoutNavEntry, type LayoutNavItem } from '@/providers/layout';
 import { routes } from '@/routes';
 import type { AppRoute, NavEntry } from './types';
 

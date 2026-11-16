@@ -164,7 +164,7 @@ would mean a second state machine beside the instance, and the schema is already
 `rules` on each field (antd): the schema is the rule, and it is the same object the API parses the
 body with, so a per-field rule language would be a second source of truth.
 
-**Cost.** A small store of our own (~140 lines in `components/pro/form/instance`), and one
+**Cost.** A small store of our own (~140 lines in `components/form/form/instance`), and one
 implementation detail: a `<button>` inside a form is a `submit` by default, so `Button` defaults to
 `type="button"` and submitting is said out loud.
 
@@ -360,11 +360,12 @@ rule, the components only draw what survives.
 
 **Where the filter runs.** Inside the two components that draw a list from data: `Table` strips its
 `columns` and every row's actions, `MenuItems` strips a menu's rows. They read the grant from
-`<AccessProvider>`, which lives in `components/pro/access` and imports React and `@lumo/shared` and
-nothing else. That placement is the whole trick: `providers/auth` already draws `Button` and `Spinner`
-from `@/components`, so a table reaching back into `providers/auth` would close the cycle
-`components/pro/table → @/providers/auth → guards → @/components → pro/index → table`.
-`providers/auth/session` fills the provider in once, from the session.
+`<AccessProvider>`, which lives in `providers/access` and imports React and `@lumo/shared` and
+nothing else. Being a leaf is what makes that placement safe: a component names it
+(`components/data/table → @/providers/access`) and nothing under `providers/access` names a
+component back, so the door only opens one way. `providers/auth/session` fills the provider in once,
+from the session. `providers/auth/guards` draws `Button` and `Spinner`, but names those two modules
+rather than the `@/components` barrel, so the guard cannot pull the kit in behind it.
 
 The caller states `access` and stops: a column, a menu row, a row action, a route, or one element
 wrapped in `<Can>`. `useAuth().filter` remains for the arrays no component draws itself.

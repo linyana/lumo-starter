@@ -1,6 +1,6 @@
+import { usersApi } from '@/api';
 import { useQuery } from '@/hooks';
 import { Can } from '@/providers/auth';
-import { usersApi } from '@/api';
 import { CreateUser } from './create';
 import { UserList } from './list';
 

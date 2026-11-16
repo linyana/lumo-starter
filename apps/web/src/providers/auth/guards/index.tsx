@@ -1,7 +1,9 @@
 import { allows, type AccessCondition } from '@lumo/shared';
 import type { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router';
-import { Button, Spinner, useAccess } from '@/components';
+import { Spinner } from '@/components/feedback/spinner';
+import { Button } from '@/components/form/button';
+import { useAccess } from '@/providers/access';
 import { useAuth } from '../session';
 
 export const FullPageLoader = () => (

@@ -1,6 +1,6 @@
 import {
-	ROLES,
 	ROLE_META,
+	ROLES,
 	updateUserSchema,
 	type Role,
 	type UpdateUserInput,

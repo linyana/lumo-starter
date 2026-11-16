@@ -1,3 +1,4 @@
+export * from './access';
 export * from './auth';
 export * from './layout';
 export * from './routes';

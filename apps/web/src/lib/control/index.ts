@@ -1,13 +1,3 @@
-/**
- * The appearance every control shares.
- *
- * Five idioms repeat across the library — the tint a control shows while it is hovered or pressed,
- * the way an icon is sized from the text around it, the shell of a text field, the box a tick or a
- * dot is drawn in, and the row a list of choices is made of — plus the one glyph that is state rather
- * than decoration: the caret of a row that folds. Each is written once here, so a checkbox and a radio
- * look like one family, a press feels the same wherever it happens, and a menu's action and a select's
- * option are the same line.
- */
 import { cn } from '@/lib/utils';
 
 /**

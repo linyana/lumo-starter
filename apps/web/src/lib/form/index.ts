@@ -1,5 +1,5 @@
 import type { ZodError, ZodType } from 'zod';
-import type { FormErrors } from '@/components/ui/form';
+import type { FormErrors } from '@/components/form/form';
 
 /** What the fields of one form hold, by name. Spelled here so this module depends on no layer. */
 type Values = Record<string, unknown>;
