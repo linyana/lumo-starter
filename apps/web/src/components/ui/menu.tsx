@@ -31,7 +31,7 @@ export function Item({ className, tone = 'default', ...props }: ItemProps) {
 			data-tone={tone}
 			className={cn(
 				row,
-				'cursor-pointer data-disabled:cursor-not-allowed pr-8',
+				'cursor-pointer pr-8',
 				tone === 'destructive' && rowDestructive,
 				className,
 			)}

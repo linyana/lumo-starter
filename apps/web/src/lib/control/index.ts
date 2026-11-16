@@ -130,9 +130,14 @@ export const caret = cn(
  * already saying, so it is not a louder thing, only a lasting one. It deepens a notch while the
  * pointer or the arrows are still on it, so a row that is both does not go still. The padding on the
  * right is the caller's: a row that carries an action of its own needs more room.
+ *
+ * A row out of reach fades to the same half as every other control that cannot be used, and takes
+ * the cursor that says so: the tint is what the pointer leaves, so a row it will never touch has to
+ * say as much before it is pointed at.
  */
 export const row = cn(
 	'flex py-2 pl-4 text-sm leading-4 outline-none select-none',
+	'data-disabled:cursor-not-allowed data-disabled:opacity-50',
 	'relative z-0',
 	"before:absolute before:inset-x-1 before:inset-y-0 before:z-[-1] before:rounded-md before:content-['']",
 	'before:bg-current before:opacity-0',

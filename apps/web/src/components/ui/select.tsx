@@ -340,7 +340,7 @@ export function Item({ className, tone = 'default', ...props }: ItemProps) {
 			data-tone={tone}
 			className={cn(
 				row,
-				'cursor-pointer pr-3 data-disabled:opacity-50',
+				'cursor-pointer pr-3',
 				tone === 'destructive' && rowDestructive,
 				className,
 			)}
