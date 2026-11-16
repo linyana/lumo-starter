@@ -76,9 +76,9 @@ export const UserList = ({ list }: IPropsType) => {
 						{
 							label: 'Delete',
 							icon: <Trash2 />,
-							iconOnly: true,
 							destructive: true,
 							access: { permission: 'user:delete' },
+							variant: "default",
 							blocked: (rows) =>
 								rows.some((user: User) => user.id === currentUser?.id)
 									? 'You cannot delete your own account'

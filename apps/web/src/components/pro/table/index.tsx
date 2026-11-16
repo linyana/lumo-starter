@@ -13,6 +13,7 @@ import { Pagination, type PaginationProps } from '../pagination';
 import { Tooltip } from '../tooltip';
 import type {
 	SelectionAction,
+	SelectionChosen,
 	TableColumn,
 	TableFilterProps,
 	TableList,
@@ -22,6 +23,7 @@ import type {
 
 export type {
 	SelectionAction,
+	SelectionChosen,
 	TableColumn,
 	TableFilterProps,
 	TableFixed,
@@ -191,11 +193,15 @@ type SelectionBarProps<Row> = {
  * is not granted, and an action the chosen records withhold is drawn unavailable with the reason on it
  * rather than dropped — the records are on the screen and the reader chose them, so "not these, because…"
  * is the answer, not silence.
+ *
+ * Each press is a `Button` drawn as the bar draws one — an outlined box for a word, a quiet glyph for an
+ * icon alone — unless the press stated its own shape, in which case that is what is drawn.
  */
 const SelectionBar = <Row,>({ rows, actions, onClear, className }: SelectionBarProps<Row>) => {
 	const grant = useAccess();
 	const prefix = useId();
 	const offered = rows.length === 0 ? [] : filterAccess({ items: actions(rows), grant });
+	const chosen: SelectionChosen<Row> = { rows, clear: onClear };
 
 	return (
 		<ActionBar visible={rows.length > 0} className={className}>
@@ -221,25 +227,40 @@ const SelectionBar = <Row,>({ rows, actions, onClear, className }: SelectionBarP
 			</div>
 			<div className="flex flex-wrap items-center gap-2">
 				{offered.map((action, index) => {
-					const reason = action.blocked?.(rows);
+					// The bar's own fields, taken out so that everything left — `variant`, `tone`, `size`, `className`,
+					// `loading`, whatever else the button takes — is the button's and is spread on as it was stated.
+					const {
+						label,
+						icon,
+						iconOnly,
+						destructive,
+						blocked,
+						onClick,
+						access: _access,
+						...button
+					} = action;
+					const reason = blocked?.(rows);
 					// An icon alone is only a press once there is an icon to press: a wordless action is the one
 					// thing the bar refuses to draw, because nothing in it would say what it does.
-					const iconOnly = action.iconOnly === true && action.icon !== undefined;
+					const glyphOnly = iconOnly === true && icon !== undefined;
+					// What the bar draws when the press has no opinion, and only then: this object is spread over, so
+					// a screen stating its own `variant` or `tone` — a filled primary — is drawn as it asked.
 					const look = {
 						// A box drawn around one glyph is louder than the same box around a word, so the action that
 						// gave up its words gives up the edge with them and stands as the icon alone.
-						variant: iconOnly ? ('ghost' as const) : ('outline' as const),
-						size: iconOnly ? ('icon' as const) : ('sm' as const),
-						icon: action.icon,
-						tone: action.destructive ? ('destructive' as const) : ('default' as const),
+						variant: glyphOnly ? ('ghost' as const) : ('outline' as const),
+						size: glyphOnly ? ('icon' as const) : ('sm' as const),
+						tone: destructive ? ('destructive' as const) : ('default' as const),
+						icon,
+						...button,
 					};
 					// The words stay in the button when the icon takes their place: the press keeps its name read
 					// out, and loses only the room it took.
-					const words = iconOnly ? <span className="sr-only">{action.label}</span> : action.label;
+					const words = glyphOnly ? <span className="sr-only">{label}</span> : label;
 					const why = `${prefix}-blocked-${index}`;
 
 					return reason === undefined ? (
-						<Button key={index} {...look} onClick={() => action.onClick({ rows, clear: onClear })}>
+						<Button key={index} {...look} onClick={() => onClick(chosen)}>
 							{words}
 						</Button>
 					) : (

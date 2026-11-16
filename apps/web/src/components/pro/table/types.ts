@@ -2,6 +2,7 @@ import type { AccessCondition } from '@lumo/shared';
 import type { ReactNode } from 'react';
 import type { ListWait } from '@/hooks';
 import type { HeadProps, RootProps, TableFilterProps, TableFixed } from '@/components/ui/table';
+import type { ButtonProps } from '../button';
 import type { MenuItem } from '../menu';
 import type { PaginationProps } from '../pagination';
 import type { SlotClassNames } from '../types';
@@ -86,22 +87,42 @@ export type TableSlots =
 	| 'footer';
 
 /**
- * One press a chosen set of records offers, in the bar that floats over them. It is the row's own action
- * shape minus the two things only a single record knows: a menu row's type, and the record it is about —
- * the press is handed the records instead.
+ * The records a chosen set is about, and the way back from choosing them — what a bar's press is handed
+ * in place of a mouse event.
  */
-export type SelectionAction<Row> = {
+export type SelectionChosen<Row> = {
+	rows: readonly Row[];
+	clear: () => void;
+};
+
+/**
+ * One press a chosen set of records offers. It is the row's own action shape minus the two things only
+ * a single record knows: a menu row's type, and the record it is about — the press is handed the
+ * records instead.
+ *
+ * It is a `Button` besides — `variant`, `tone`, `size`, `className`, `loading`, whatever the button
+ * takes — because a press in the bar is one: the fields below are the bar's, and everything else is
+ * spread onto the button as it was stated. So a screen that wants a filled primary press says
+ * `variant: 'default'`, and one that wants nothing but the words says nothing at all.
+ */
+export type SelectionAction<Row> = Omit<ButtonProps, 'children' | 'onClick'> & {
+	/** The words on the press. */
 	label: ReactNode;
-	icon?: ReactNode;
 	/**
 	 * Draw the `icon` alone, with the `label` left to a reader who cannot see it. For a press the bar's
 	 * own shape already names — a delete, a download — where the word is room the records are worth not
 	 * giving up. Only a press that declared an `icon` can be said without its words; with none it is
 	 * drawn labelled, whatever this says. The edge goes with the words: the button is drawn quiet, because
 	 * a box around one glyph is louder than the same box around a word.
+	 *
+	 * A default, not a command: a `variant` or a `size` stated on the press itself is drawn as stated.
 	 */
 	iconOnly?: boolean;
-	/** Drawn in the destructive colour. */
+	/**
+	 * Drawn in the destructive colour — the short way to `tone: 'destructive'`, which wins when both are
+	 * said. It is here because "delete the chosen" is the press a bar is most often asked for, and a field
+	 * named for its meaning says it once.
+	 */
 	destructive?: boolean;
 	/** The session's condition, stripped by the same grant as every other gate on this table. */
 	access?: AccessCondition;
@@ -116,7 +137,7 @@ export type SelectionAction<Row> = {
 	 */
 	blocked?: (rows: readonly Row[]) => ReactNode | undefined;
 	/** The press, given the records it is about and the way back from choosing them. */
-	onClick: (chosen: { rows: readonly Row[]; clear: () => void }) => void;
+	onClick: (chosen: SelectionChosen<Row>) => void;
 };
 
 /**
@@ -237,6 +258,10 @@ export type TableProps<Row, Key extends string = string> = {
 	 * The table keeps the chosen keys and hands the press the records still in view, so a page, a
 	 * narrowing, a fresh read or a reload never leaves an action acting on something the reader can no
 	 * longer see. The arrows are the caller's in the same place its `rowActions` are.
+	 *
+	 * A line may be drawn by the table from a `label` and an `icon` — the whole vocabulary is on the
+	 * entry, so no button prop is ever exposed — or by the caller, as a `render` slot, for the control
+	 * the vocabulary cannot say. Both are gated by the same `access`.
 	 */
 	selectionActions?: (chosen: readonly Row[]) => SelectionAction<Row>[];
 	/**
