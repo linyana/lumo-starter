@@ -35,7 +35,7 @@ export const Form = <Input, Values extends Record<string, unknown> = Record<stri
 	const opened = useRef(false);
 	const latest = useRef(instance);
 	latest.current = instance;
-	
+
 	useLayoutEffect(() => {
 		if (Object.keys(latest.current.errors).length > 0) latest.current.setErrors({});
 	}, []);
