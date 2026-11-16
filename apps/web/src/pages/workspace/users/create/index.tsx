@@ -3,20 +3,10 @@ import { useState } from 'react';
 import { Button, Dialog, Field, Form, Input, ToggleGroup, useForm } from '@/components';
 import { useHttp } from '@/hooks';
 import { usersApi } from '@/api';
-
-/** An account written from the list side: the panel asks, the request answers, the list re-reads. */
 type IPropsType = {
-	/** Runs once the account exists, so the caller can re-read the list. */
 	onCreated: () => void;
 };
 
-/**
- * An account made by someone who already may: the panel is the form, and it stays open while the
- * request runs — a rejection about a field lands under that field, anything else takes the toast.
- *
- * The roles are a field like any other: the toggle group reports through the same `onChange` an
- * input does, so the form holds them and the panel keeps nothing of its own.
- */
 export const CreateUser = ({ onCreated }: IPropsType) => {
 	const [open, setOpen] = useState(false);
 	const form = useForm();
