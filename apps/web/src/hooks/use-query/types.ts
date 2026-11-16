@@ -26,11 +26,13 @@ export type SortKeyOf<TQuery> = NonNullable<TQuery extends { sort?: infer Key } 
 export type ListSort<Key extends string = string> = { key: Key; order: SortOrder };
 
 /**
- * Everything a list screen says about itself — the page, the order and what the reader narrowed on.
- * It is one object because it is one query: the wire takes it whole and so does the address bar.
+ * Everything a list screen says about itself — the page, the size, the order and what the reader
+ * narrowed on. It is one object because it is one query: the wire takes it whole and so does the
+ * address bar.
  */
 export type ListState<TQuery extends ListQuery> = {
 	page: number;
+	pageSize: number;
 	sort: ListSort<SortKeyOf<TQuery>>;
 	filters: ListFilters<TQuery>;
 };
@@ -45,8 +47,8 @@ export type ListOwnedKey = 'page' | 'pageSize' | 'sort' | 'order';
 export type ListFilters<TQuery extends ListQuery> = Omit<TQuery, ListOwnedKey>;
 
 /**
- * What the screen fixes for the life of the query: the order it opens in. The page, the sort the
- * reader picks and what they narrow on are the hook's own state.
+ * What the screen fixes for the life of the query: the order it opens in. The page, the size the
+ * reader picks, the sort they pick and what they narrow on are the hook's own state.
  */
 export type UseQueryOptions<TItem, TQuery extends ListQuery> = {
 	/** The endpoint one read calls; it is handed the whole query, filters and page alike. */
@@ -55,7 +57,10 @@ export type UseQueryOptions<TItem, TQuery extends ListQuery> = {
 	sort: SortKeyOf<TQuery>;
 	/** Which way round that column reads. Descending by default: the newest record first. */
 	order?: SortOrder;
-	/** How many records one page holds. One table's worth by default. */
+	/**
+	 * How many records one page holds until the reader picks another. The size the API opens at by
+	 * default — one table's worth.
+	 */
 	pageSize?: number;
 	/**
 	 * Whether the page, the order and the settled filters live in the address bar. On by default: a
@@ -83,6 +88,7 @@ export type UseQueryResult<TItem, TQuery extends ListQuery> = {
 	pageCount: number;
 	/** The page in view, counted from one. */
 	page: number;
+	/** How many records one page holds. */
 	pageSize: number;
 	/** What the fields are narrow on now. */
 	filters: ListFilters<TQuery>;
@@ -99,7 +105,13 @@ export type UseQueryResult<TItem, TQuery extends ListQuery> = {
 	wait: ListWait;
 	/** The API's sentence when the last read failed. The caller renders it where the records go. */
 	error?: string;
+	/** The page a reader asked for. It is read from the first page on a change of size or order. */
 	setPage: (page: number) => void;
+	/**
+	 * The size a reader picked. The page goes back to the first one with it: the records they were
+	 * looking at are not at the same row any more, and page five of ten is not page five of fifty.
+	 */
+	setPageSize: (pageSize: number) => void;
 	/**
 	 * A title was pressed: another column, the other direction round, or nothing — which is the
 	 * press after the last direction, and puts the list back in the order the screen asked for.

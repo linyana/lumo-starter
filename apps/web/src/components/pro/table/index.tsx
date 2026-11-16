@@ -3,7 +3,7 @@ import { useId, useState, type MouseEvent } from 'react';
 import { filterAccess, permits } from '@lumo/shared';
 import { ActionBar } from '@/components/action-bar';
 import { LumoSkeleton } from '@/components/ui/skeleton';
-import { LumoTable, type TableSort as AriaSort } from '@/components/ui/table';
+import { LumoTable, tableDensity, type TableSort as AriaSort } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { useAccess } from '../access';
 import { Button } from '../button';
@@ -64,6 +64,10 @@ const anchorOf = (event: MouseEvent<HTMLElement>): ContextMenuAnchor =>
 		? event.currentTarget
 		: { x: event.clientX, y: event.clientY };
 
+/**
+ * What a list says about the way through its records, as a `Pagination` takes it. The list's own page
+ * size setter is handed over too, so a footer draws the size box without a screen naming it.
+ */
 function pagerOf<Row, Key extends string>(
 	list: TableList<Row, Key> | undefined,
 ): PaginationProps | undefined {
@@ -75,6 +79,10 @@ function pagerOf<Row, Key extends string>(
 		total: list.total,
 		pageSize: list.pageSize,
 		onPageChange: list.setPage,
+		onPageSizeChange: list.setPageSize,
+		// A read in the air holds the footer's presses: the rows are about to be replaced, so a press
+		// would be aimed at a page the reader has not seen yet.
+		busy: list.wait === 'refreshing',
 	};
 }
 
@@ -468,7 +476,7 @@ export const Table = <Row, Key extends string = string>({
 		);
 
 	return (
-		<div data-slot="table-block" className="relative min-w-0">
+		<div data-slot="table-block" className={cn('relative min-w-0', tableDensity[size])}>
 			{selectionActions !== undefined && (
 				<SelectionBar
 					rows={chosenRows}
@@ -668,7 +676,10 @@ export const Table = <Row, Key extends string = string>({
 					page={pager.page ?? 1}
 					size={pager.size ?? size}
 					range={pager.range ?? true}
-					className={cn('pt-3', pager.className, classNames?.footer)}
+					// The footer is outside the frame the table's own insets are set on, so the count is inset here by
+					// the same measurement it would be under the first column. The end is not: the last control of the
+					// row ends where the table ends, so the two share one edge down the side of the block.
+					className={cn('pt-(--cell-py) ps-(--cell-px)', pager.className, classNames?.footer)}
 				/>
 			)}
 

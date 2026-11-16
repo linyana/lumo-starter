@@ -15,9 +15,16 @@ export type ApiFailure = {
 
 export type FieldError = { path: string; message: string };
 
+/**
+ * One page of a list, and how many of them there are. `pageCount` is answered by the API rather than
+ * derived here: the size that was read at and the size that was asked for can differ (a clamped
+ * `pageSize`), and only the reading end knows which one the records were cut at.
+ */
 export type Paginated<T> = {
 	items: T[];
 	page: number;
 	pageSize: number;
+	/** How many pages `total` makes at `pageSize`, never fewer than one. */
+	pageCount: number;
 	total: number;
 };

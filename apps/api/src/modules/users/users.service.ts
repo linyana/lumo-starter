@@ -10,6 +10,7 @@ import argon2 from 'argon2';
 import type { Prisma } from '../../generated/prisma/client.js';
 import { PrismaService } from '../../common/db/prisma.service.js';
 import { AppException } from '../../common/errors/app.exception.js';
+import { paginate } from '../../common/pagination/index.js';
 import type { UpdateUserInput } from '@lumo/shared';
 import { toWireUser } from './mapper/index.js';
 
@@ -33,26 +34,21 @@ export class UsersService {
 				: undefined,
 		};
 
-		// The sort key is a closed union in the shared schema, so this cast cannot
-		// be reached with arbitrary column names from the query string.
-		const orderBy = { [query.sort]: query.order } as Prisma.UserOrderByWithRelationInput;
+		const page = await paginate({
+			prisma: this.prisma,
+			query,
+			// The sort key is a closed union in the shared schema, so the cast cannot be reached with an
+			// arbitrary column name from the query string.
+			find: (window) =>
+				this.prisma.user.findMany({
+					where,
+					orderBy: { [query.sort]: query.order } as Prisma.UserOrderByWithRelationInput,
+					...window,
+				}),
+			count: () => this.prisma.user.count({ where }),
+		});
 
-		const [rows, total] = await this.prisma.$transaction([
-			this.prisma.user.findMany({
-				where,
-				orderBy,
-				skip: (query.page - 1) * query.pageSize,
-				take: query.pageSize,
-			}),
-			this.prisma.user.count({ where }),
-		]);
-
-		return {
-			items: rows.map(toWireUser),
-			page: query.page,
-			pageSize: query.pageSize,
-			total,
-		};
+		return { ...page, items: page.items.map(toWireUser) };
 	}
 
 	async getById(id: string): Promise<WireUser> {

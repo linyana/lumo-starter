@@ -160,6 +160,8 @@ export type TableList<Row, Key extends string = string> = {
 	pageSize: number;
 	total: number;
 	setPage: (page: number) => void;
+	/** The size a reader picked in the footer's own box, which the list reads from then on. */
+	setPageSize: (pageSize: number) => void;
 	/** The API's sentence when the last read failed. It takes the place of the records. */
 	error?: string;
 	/** Read the page again — what the failure row's press does. */

@@ -382,17 +382,24 @@ function fixedClass(fixed: TableFixed | undefined) {
  * table keeps between two rows: a border is part of the box it belongs to and bends with that box's
  * corners, and a row whose colour is round still ends on a straight line.
  */
+/**
+ * The two insets the table is drawn at, as classes. Exported because the footer is drawn outside the
+ * frame the variables are set on: a pagination under a table lines up with the columns above it only
+ * if it is inset by the same measurements, so the block that holds both sets them once.
+ */
+export const tableDensity = {
+	sm: '[--cell-px:--spacing(3)] [--cell-py:--spacing(2)]',
+	md: '[--cell-px:--spacing(4)] [--cell-py:--spacing(3)]',
+	lg: '[--cell-px:--spacing(5)] [--cell-py:--spacing(4)]',
+} as const;
+
 export const tableVariants = tv({
 	base: [
 		'min-w-0 w-full overflow-auto text-sm',
 		'[&>table:has(>tfoot)>tbody>tr:last-child>*]:after:hidden',
 	],
 	variants: {
-		size: {
-			sm: '[--cell-px:--spacing(3)] [--cell-py:--spacing(2)]',
-			md: '[--cell-px:--spacing(4)] [--cell-py:--spacing(3)]',
-			lg: '[--cell-px:--spacing(5)] [--cell-py:--spacing(4)]',
-		},
+		size: tableDensity,
 		variant: {
 			borderless: '',
 			outlined: [

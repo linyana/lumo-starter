@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
+import { pageCountOf, PAGE_SIZE_DEFAULT } from '@lumo/shared';
 import { useForm } from '@/components/pro/form';
 import { useHttp } from '../use-http';
 import { stateFromParams, paramsFromState, emptyState } from './params';
@@ -25,12 +26,10 @@ export type {
 	UseQueryResult,
 } from './types';
 
-const DEFAULT_PAGE_SIZE = 10;
-
 /**
- * One page of records and the way through them: `useHttp` under the hood, with the page, the order
- * and what the reader narrowed on beside it. The screen renders what this hands back and never
- * assembles a query itself.
+ * One page of records and the way through them: `useHttp` under the hood, with the page, the size,
+ * the order and what the reader narrowed on beside it. The screen renders what this hands back and
+ * never assembles a query itself.
  *
  * What the reader narrows on is not this hook's state — it is a form's. `form` is the instance the
  * screen hands to `<Form form>`, and `write` is what that form calls on every change: the fields are
@@ -41,14 +40,15 @@ const DEFAULT_PAGE_SIZE = 10;
  * <Form form={users.form} initial={users.opened} onChange={users.write} settle={300}>
  * ```
  *
- * The effect owns the first read and every change of a filter, the page or the order, so a screen
- * holds no `useEffect` of its own. The failure is not toasted: a list says it where the records go.
+ * The effect owns the first read and every change of a filter, the page, the size or the order, so a
+ * screen holds no `useEffect` of its own. The failure is not toasted: a list says it where the
+ * records go.
  */
 export const useQuery = <TItem, TQuery extends ListQuery>({
 	fetcher,
 	sort: initialSort,
 	order: initialOrder = 'desc',
-	pageSize = DEFAULT_PAGE_SIZE,
+	pageSize: initialPageSize = PAGE_SIZE_DEFAULT,
 	sync = true,
 }: UseQueryOptions<TItem, TQuery>): UseQueryResult<TItem, TQuery> => {
 	const [searchParams, setSearchParams] = useSearchParams();
@@ -59,11 +59,21 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 	// the same screen is not.
 	const [opened] = useState<ListState<TQuery>>(() =>
 		sync
-			? stateFromParams<TQuery>({ params: searchParams, sort: initialSort, order: initialOrder })
-			: emptyState<TQuery>({ sort: initialSort, order: initialOrder }),
+			? stateFromParams<TQuery>({
+					params: searchParams,
+					sort: initialSort,
+					order: initialOrder,
+					pageSize: initialPageSize,
+				})
+			: emptyState<TQuery>({
+					sort: initialSort,
+					order: initialOrder,
+					pageSize: initialPageSize,
+				}),
 	);
 
 	const [page, setPage] = useState(opened.page);
+	const [pageSize, setPageSizeState] = useState(opened.pageSize);
 	const [sort, setSort] = useState<ListSort<SortKeyOf<TQuery>>>(opened.sort);
 	const [filters, setFilters] = useState<ListFilters<TQuery>>(opened.filters);
 
@@ -79,7 +89,11 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 	});
 
 	const total = data?.total ?? 0;
-	const pageCount = Math.max(1, Math.ceil(total / pageSize));
+
+	// The count is the answer's, not this end's arithmetic: a size the API clamped is a count only the
+	// API saw the records for. The fallback covers an endpoint that answers rows and a total without
+	// one — the same arithmetic, at the size that was asked for.
+	const pageCount = data?.pageCount ?? pageCountOf({ total, pageSize });
 
 	// The wait, as one word. Until the first answer lands the read is still the opening one — including
 	// the frame between mounting and the call the effect below schedules, which is why `initial` and not
@@ -95,6 +109,15 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 		setPage(1);
 	}, []);
 
+	/**
+	 * A size the reader picked. It starts over from the first page: the records they were looking at
+	 * are not at the same row any more, and page five of ten is not page five of fifty.
+	 */
+	const setPageSize = useCallback((next: number): void => {
+		setPageSizeState(next);
+		setPage(1);
+	}, []);
+
 	const reload = useCallback(() => {
 		// `owned` is annotated so its `order` widens to the wire's: the two halves together are exactly
 		// `TQuery`, which is what the fetcher takes.
@@ -102,33 +125,45 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 		void fetchData({ ...filters, ...owned } as TQuery);
 	}, [fetchData, filters, page, pageSize, sort]);
 
-	// The whole of the reading: the first answer, and every change of a settled filter, a page or an
-	// order. Both halves are state, so their identity moves only when the reader writes one.
+	// The whole of the reading: the first answer, and every change of a settled filter, a page, a size
+	// or an order. Both halves are state, so their identity moves only when the reader writes one.
 	useEffect(() => {
 		reload();
 	}, [reload]);
 
-	// A page that no longer exists — the last record of the last page was just deleted, or the URL
-	// asked for one — is answered by going back to the last page there is.
+	// A page that no longer exists — the last record of the last page was just deleted, a bigger size
+	// was picked, or the URL asked for one — is answered by going back to the last page there is.
 	useEffect(() => {
 		if (data !== null && page > pageCount) setPage(pageCount);
 	}, [data, page, pageCount]);
 
-	// What the reader is looking at, handed to the address bar: the page, the order and the filters,
-	// and nothing at all while they are still the screen's own. Compared first, because a query that
-	// has not changed is not a navigation.
+	// What the reader is looking at, handed to the address bar: the page, the size, the order and the
+	// filters, and nothing at all while they are still the screen's own. Compared first, because a
+	// query that has not changed is not a navigation.
 	useEffect(() => {
 		if (!sync) return;
 
 		const next = paramsFromState<TQuery>({
-			state: { page, sort, filters },
+			state: { page, pageSize, sort, filters },
 			sort: initialSort,
 			order: initialOrder,
+			pageSize: initialPageSize,
 		});
 		if (next.toString() === searchParams.toString()) return;
 
 		setSearchParams(next, { replace: true });
-	}, [sync, page, sort, filters, searchParams, setSearchParams, initialSort, initialOrder]);
+	}, [
+		sync,
+		page,
+		pageSize,
+		sort,
+		filters,
+		searchParams,
+		setSearchParams,
+		initialSort,
+		initialOrder,
+		initialPageSize,
+	]);
 
 	// Sorting is a query of its own, so it starts from the first page and the list's own order is
 	// where a cleared column lands.
@@ -175,6 +210,7 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 		wait,
 		error: error?.message,
 		setPage,
+		setPageSize,
 		onSort,
 		reload,
 		clearFilters,

@@ -1,9 +1,25 @@
-import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import {
+	ChevronLeft,
+	ChevronRight,
+	ChevronsLeft,
+	ChevronsRight,
+	MoreHorizontal,
+} from 'lucide-react';
 import pluralize from 'pluralize';
-import { createContext, use, useMemo, type ComponentProps, type ReactNode } from 'react';
+import {
+	createContext,
+	use,
+	useMemo,
+	useState,
+	type ComponentProps,
+	type FocusEvent,
+	type ReactNode,
+} from 'react';
 import { tv, type VariantProps } from 'tailwind-variants';
+import { clampPage, pageCountOf, PAGE_SIZE_DEFAULT } from '@lumo/shared';
 import { cn } from '@/lib/utils';
 import { iconSlot, stateLayer } from '@/lib/control';
+import { inputVariants } from './input';
 
 /** The words the component says on its own. Anything left out falls back to English. */
 export type PaginationLocale = {
@@ -11,15 +27,41 @@ export type PaginationLocale = {
 	previous?: string;
 	/** Named on the button that goes forward one. */
 	next?: string;
-	/** Before the number, in the accessible name of a page button. */
+	/** Named on the button that goes to the first page. */
+	first?: string;
+	/** Named on the button that goes to the last one. */
+	last?: string;
+	/** Before the number, in the accessible name of a page button — and the unit after the number typed
+	 * into the jump box, which is where a language that counts with a word puts it. */
 	page?: string;
+	/**
+	 * Named on the gap before the page in view: pressing it skips a run. `{count}` is where the number of
+	 * pages the press skips is said, so a language can put it where its sentence does — antd names the
+	 * same press `Previous 5 Pages`, and a reader who cannot see the two chevrons hears nothing else.
+	 */
+	previousPages?: string;
+	/** Named on the gap after it, for the same press in the other direction. */
+	nextPages?: string;
+	/** Named on the box a page can be asked for by number, before it. */
+	goTo?: string;
 };
 
 const defaultLocale: Required<PaginationLocale> = {
 	previous: 'previous page',
 	next: 'next page',
-	page: 'page',
+	first: 'first page',
+	last: 'last page',
+	page: 'Page',
+	previousPages: 'previous {count} pages',
+	nextPages: 'next {count} pages',
+	goTo: 'Go to',
 };
+
+/**
+ * How many pages one press on a gap skips: far enough to save a walk through the run it hides, near
+ * enough that the reader keeps their place afterwards — the number antd has always used.
+ */
+const JUMP_STEP = 5;
 
 /** The one word the range is written with, whatever the noun is: `Showing`, `from`. */
 const rangeWording = { leading: 'Showing', trailing: 'from' };
@@ -33,6 +75,8 @@ type PaginationState = {
 	items: string;
 	locale: Required<PaginationLocale>;
 	size: 'sm' | 'md' | 'lg';
+	/** A read is in the air: every control keeps its place and takes no press. */
+	busy: boolean;
 	go: (next: number) => void;
 };
 
@@ -84,7 +128,10 @@ export type RootProps = Omit<ComponentProps<'nav'>, 'onChange'> &
 	VariantProps<typeof paginationItemVariants> & {
 		/** The page in view, counted from one. A number outside the range is clamped. */
 		page: number;
-		/** The number of pages, when the caller already knows it. */
+		/**
+		 * The number of pages, when the caller already knows it. The API answers it with every page it
+		 * sends, so a caller reading from one has nothing to derive.
+		 */
 		pageCount?: number;
 		/** The number of records in all; with `pageSize` it is what the page count comes from. */
 		total?: number;
@@ -99,6 +146,8 @@ export type RootProps = Omit<ComponentProps<'nav'>, 'onChange'> &
 		items?: string;
 		/** Wording of the buttons, the labels and the range. */
 		locale?: PaginationLocale;
+		/** A read is in the air. Every press is held until it lands, so one page cannot be asked for twice. */
+		busy?: boolean;
 		/** Merged last through `cn()`. */
 		className?: string;
 	};
@@ -107,6 +156,10 @@ export type RootProps = Omit<ComponentProps<'nav'>, 'onChange'> &
  * The frame the parts read their page from. It owns no state: the page, the size and the total are
  * handed in and a press is handed back — the same contract the rest of the library keeps, and the
  * reason a page can be a URL, a store or a fetch as easily as a `useState`.
+ *
+ * The row it draws is one flex line: the parts are placed by whoever composes it, and the count pushes
+ * the rest to the end by taking the slack after itself (`me-auto`) — so the way through the records and
+ * the settings of the list sit together on the right, where a footer's controls belong.
  */
 export function Root({
 	page,
@@ -117,22 +170,39 @@ export function Root({
 	onPageChange,
 	items = 'item',
 	locale,
+	busy = false,
 	className,
 	children,
 	'aria-label': label = 'pagination',
 	...props
 }: RootProps) {
 	const words = useMemo(() => ({ ...defaultLocale, ...locale }), [locale]);
-	const count = Math.max(1, pageCount ?? Math.ceil((total ?? 0) / Math.max(1, pageSize ?? 1)));
-	const current = Math.min(Math.max(page, 1), count);
+
+	// Without a count from the caller it is derived from the two numbers that make it, at the size the
+	// API opens a list with — never at a size of one, which would say a page of records is a page each.
+	const count = Math.max(
+		1,
+		pageCount ?? pageCountOf({ total: total ?? 0, pageSize: pageSize ?? PAGE_SIZE_DEFAULT }),
+	);
+	const current = clampPage({ page, pageCount: count });
 
 	const value = useMemo(() => {
 		const go = (next: number) => {
-			const to = Math.min(Math.max(next, 1), count);
+			const to = clampPage({ page: next, pageCount: count });
 			if (to !== current) onPageChange?.(to);
 		};
-		return { page: current, pageCount: count, total, pageSize, items, locale: words, size, go };
-	}, [current, count, total, pageSize, items, words, size, onPageChange]);
+		return {
+			page: current,
+			pageCount: count,
+			total,
+			pageSize,
+			items,
+			locale: words,
+			size,
+			busy,
+			go,
+		};
+	}, [current, count, total, pageSize, items, words, size, busy, onPageChange]);
 
 	return (
 		<PaginationContext value={value}>
@@ -140,7 +210,8 @@ export function Root({
 				data-slot="pagination"
 				data-size={size}
 				aria-label={label}
-				className={cn('flex items-center gap-1', className)}
+				aria-busy={busy || undefined}
+				className={cn('flex items-center gap-2', className)}
 				{...props}
 			>
 				{children}
@@ -156,6 +227,15 @@ function usePagination(part: string) {
 	return state;
 }
 
+/**
+ * Whether a part takes a press. A read in the air holds every one of them, and each part holds itself
+ * on the edge it cannot go past — the two reasons a control looks dead, told apart by nothing a reader
+ * has to know.
+ */
+function heldBy({ state, edge = false }: { state: PaginationState; edge?: boolean }): boolean {
+	return state.busy || edge;
+}
+
 export type ItemProps = Omit<ComponentProps<'button'>, 'type'> & {
 	/** Merged last through `cn()`. */
 	className?: string;
@@ -167,6 +247,7 @@ export type PageProps = ItemProps & { value: number };
 export function Page({ value, className, children, ...props }: PageProps) {
 	const state = usePagination('Page');
 	const active = state.page === value;
+	const held = heldBy({ state });
 
 	return (
 		<button
@@ -176,6 +257,7 @@ export function Page({ value, className, children, ...props }: PageProps) {
 			data-active={active ? '' : undefined}
 			aria-current={active ? 'page' : undefined}
 			aria-label={`${state.locale.page} ${value}`}
+			disabled={held}
 			onClick={() => state.go(value)}
 			className={itemOf({ size: state.size, className })}
 			{...props}
@@ -190,16 +272,16 @@ export type PrevProps = ItemProps;
 /** One page back. Disabled on the first page, where there is nowhere to go. */
 export function Prev({ className, children, ...props }: PrevProps) {
 	const state = usePagination('Prev');
-	const first = state.page <= 1;
+	const held = heldBy({ state, edge: state.page <= 1 });
 
 	return (
 		<button
 			type="button"
 			data-slot="pagination-prev"
 			data-size={state.size}
-			data-disabled={first ? '' : undefined}
+			data-disabled={state.page <= 1 ? '' : undefined}
 			aria-label={state.locale.previous}
-			disabled={first}
+			disabled={held}
 			onClick={() => state.go(state.page - 1)}
 			className={itemOf({ size: state.size, className })}
 			{...props}
@@ -215,6 +297,7 @@ export type NextProps = ItemProps;
 export function Next({ className, children, ...props }: NextProps) {
 	const state = usePagination('Next');
 	const last = state.page >= state.pageCount;
+	const held = heldBy({ state, edge: last });
 
 	return (
 		<button
@@ -223,7 +306,7 @@ export function Next({ className, children, ...props }: NextProps) {
 			data-size={state.size}
 			data-disabled={last ? '' : undefined}
 			aria-label={state.locale.next}
-			disabled={last}
+			disabled={held}
 			onClick={() => state.go(state.page + 1)}
 			className={itemOf({ size: state.size, className })}
 			{...props}
@@ -233,56 +316,164 @@ export function Next({ className, children, ...props }: NextProps) {
 	);
 }
 
+export type FirstProps = ItemProps;
+
+/** The first page, for a list too long to walk back through a page at a time. */
+export function First({ className, children, ...props }: FirstProps) {
+	const state = usePagination('First');
+	const first = state.page <= 1;
+	const held = heldBy({ state, edge: first });
+
+	return (
+		<button
+			type="button"
+			data-slot="pagination-first"
+			data-size={state.size}
+			data-disabled={first ? '' : undefined}
+			aria-label={state.locale.first}
+			disabled={held}
+			onClick={() => state.go(1)}
+			className={itemOf({ size: state.size, className })}
+			{...props}
+		>
+			{children ?? <ChevronsLeft />}
+		</button>
+	);
+}
+
+export type LastProps = ItemProps;
+
+/** The last page. The far end of `First`. */
+export function Last({ className, children, ...props }: LastProps) {
+	const state = usePagination('Last');
+	const last = state.page >= state.pageCount;
+	const held = heldBy({ state, edge: last });
+
+	return (
+		<button
+			type="button"
+			data-slot="pagination-last"
+			data-size={state.size}
+			data-disabled={last ? '' : undefined}
+			aria-label={state.locale.last}
+			disabled={held}
+			onClick={() => state.go(state.pageCount)}
+			className={itemOf({ size: state.size, className })}
+			{...props}
+		>
+			{children ?? <ChevronsRight />}
+		</button>
+	);
+}
+
 export type EllipsisProps = Omit<ComponentProps<'span'>, 'children'> & {
 	/** Replaces the three dots. */
 	children?: ReactNode;
+	/**
+	 * Where the gap goes. Given, the gap is a press that skips the pages it stands for, and the dots
+	 * become two chevrons pointing that way — the way a long list is crossed without walking it.
+	 */
+	onJump?: () => void;
+	/** Which way that press is: the chevron drawn, and the sentence the press is named with. */
+	direction?: 'prev' | 'next';
 	/** Merged last through `cn()`. */
 	className?: string;
 };
 
 /**
- * A gap between two numbers: the pages that are not worth a box. Decoration, not a control — it is
- * `aria-hidden`, so a reader hears the numbers on either side of it and nothing else.
+ * A gap between two numbers: the pages that are not worth a box. Decoration by default — it is
+ * `aria-hidden`, so a reader hears the numbers on either side of it and nothing else. Given `onJump`
+ * it is a control instead: one press skips the run, and the dots give way to two chevrons under the
+ * pointer, which is how it says there is something to press without a box for every hidden page.
  */
-export function Ellipsis({ className, children, ...props }: EllipsisProps) {
+export function Ellipsis({
+	className,
+	children,
+	onJump,
+	direction = 'next',
+	...props
+}: EllipsisProps) {
 	const state = usePagination('Ellipsis');
+	const face = children ?? <MoreHorizontal />;
+	const named = direction === 'prev' ? state.locale.previousPages : state.locale.nextPages;
+
+	if (onJump === undefined) {
+		return (
+			<span
+				data-slot="pagination-ellipsis"
+				data-size={state.size}
+				aria-hidden
+				className={cn(
+					paginationItemVariants({ size: state.size }),
+					'text-muted-foreground',
+					className,
+				)}
+				{...props}
+			>
+				{face}
+			</span>
+		);
+	}
 
 	return (
-		<span
+		<button
+			type="button"
 			data-slot="pagination-ellipsis"
 			data-size={state.size}
-			aria-hidden
-			className={cn(
-				paginationItemVariants({ size: state.size }),
-				'text-muted-foreground',
-				className,
-			)}
-			{...props}
+			aria-label={named.replace('{count}', String(JUMP_STEP))}
+			disabled={state.busy}
+			onClick={onJump}
+			className={cn(itemOf({ size: state.size, className }), 'group')}
+			// The same attributes on the element that can take a press: a gap that jumps is a button.
+			{...(props as ComponentProps<'button'>)}
 		>
-			{children ?? <MoreHorizontal />}
-		</span>
+			{/* Both faces hold the same box, so the gap does not breathe as the pointer arrives. */}
+			<span
+				aria-hidden
+				className="inline-flex items-center justify-center opacity-100 transition-opacity duration-(--duration-state) group-hover:opacity-0 group-focus-visible:opacity-0"
+			>
+				{face}
+			</span>
+			<span
+				aria-hidden
+				className="absolute inline-flex items-center justify-center opacity-0 transition-opacity duration-(--duration-state) group-hover:opacity-100 group-focus-visible:opacity-100"
+			>
+				{direction === 'prev' ? <ChevronsLeft /> : <ChevronsRight />}
+			</span>
+		</button>
 	);
 }
 
 /**
  * Which numbers a run shows: the first and last pages, and the page in view with `siblings` on each
  * side. Everything between is one gap, however many pages it hides — a pagination that listed them
- * all would be a list of pages rather than a way through them.
+ * all would be a list of pages rather than a way through them. A run of exactly one is not a gap: a
+ * single page is a box like any other, and hiding it would cost the reader a press to gain nothing.
+ *
+ * A gap says which way it lies, which is what its press needs: the ones before the page in view go
+ * back, the ones after it go on.
  */
 function pageList({ page, count, siblings }: { page: number; count: number; siblings: number }) {
-	const pages: { key: string; value?: number }[] = [];
 	const near = siblings + 1;
+	const nearEdge = (value: number) => value <= near || value > count - near;
+	const shown = (value: number) => nearEdge(value) || Math.abs(value - page) <= siblings;
 
-	for (let value = 1; value <= count; value += 1) {
-		const edge = value <= near || value > count - near;
-		const around = Math.abs(value - page) <= siblings;
+	const pages: { key: string; value?: number; direction?: 'prev' | 'next' }[] = [];
+	let previous = 0;
 
-		if (edge || around) {
-			pages.push({ key: `page-${value}`, value });
-		} else if (pages.at(-1)?.value !== undefined) {
+	for (const value of Array.from({ length: count }, (_, index) => index + 1).filter(shown)) {
+		const hidden = value - previous - 1;
+
+		if (hidden === 1) {
+			// The one page between the two runs is drawn rather than dotted over.
+			pages.push({ key: `page-${previous + 1}`, value: previous + 1 });
+		} else if (hidden > 1) {
 			// The run of hidden pages between two numbers becomes one gap, named by the page it follows.
-			pages.push({ key: `gap-${value - 1}` });
+			pages.push({ key: `gap-${previous + 1}`, direction: value < page ? 'prev' : 'next' });
 		}
+
+		pages.push({ key: `page-${value}`, value });
+		previous = value;
 	}
 
 	return pages;
@@ -295,14 +486,23 @@ export type PagesProps = {
 	className?: string;
 };
 
-/** The numbers, in a row, with the gaps between them. */
+/** The numbers, in a row, with the gaps between them — each gap a press that skips its run. */
 export function Pages({ siblings = 1, className }: PagesProps) {
 	const state = usePagination('Pages');
 
 	return (
 		<span data-slot="pagination-pages" className={cn('flex items-center gap-1', className)}>
-			{pageList({ page: state.page, count: state.pageCount, siblings }).map(({ key, value }) =>
-				value === undefined ? <Ellipsis key={key} /> : <Page key={key} value={value} />,
+			{pageList({ page: state.page, count: state.pageCount, siblings }).map(
+				({ key, value, direction }) =>
+					value === undefined ? (
+						<Ellipsis
+							key={key}
+							direction={direction}
+							onJump={() => state.go(state.page + (direction === 'prev' ? -JUMP_STEP : JUMP_STEP))}
+						/>
+					) : (
+						<Page key={key} value={value} />
+					),
 			)}
 		</span>
 	);
@@ -339,7 +539,7 @@ export function Range({ className, ...props }: RangeProps) {
 		<span
 			data-slot="pagination-range"
 			data-size={state.size}
-			className={cn('px-1 text-sm text-muted-foreground tabular-nums', className)}
+			className={cn('text-sm text-muted-foreground tabular-nums', className)}
 			{...props}
 		>
 			{text}
@@ -347,5 +547,86 @@ export function Range({ className, ...props }: RangeProps) {
 	);
 }
 
-/** A page control: the frame, the two arrows, the numbers, and the line that summarises them. */
-export const LumoPagination = { Root, Prev, Next, Pages, Page, Ellipsis, Range };
+export type JumpProps = Omit<ComponentProps<'input'>, 'value' | 'onChange' | 'size' | 'type'> & {
+	/** Merged last through `cn()`, on the box. */
+	className?: string;
+};
+
+/**
+ * A page asked for by number: the box is empty until something is typed into it, and empty again once
+ * the number has been taken, so it is only ever the page the reader is asking for and never a second
+ * place the page in view is written. Enter takes it, and so does leaving the box; Escape, or something
+ * that is not a page, empties it. For the list long enough that the numbers beside the one in view are
+ * never the one the reader wants.
+ *
+ * The box is the library's field, without the cross: what it holds is typed once and handed over, so
+ * there is no value to empty and nothing for a browser to fill — which is why it is not `LumoInput`.
+ */
+export function Jump({ className, ...props }: JumpProps) {
+	const state = usePagination('Jump');
+	const [draft, setDraft] = useState('');
+
+	const ask = () => {
+		const value = Number(draft.trim());
+		// Nothing typed, or nothing that is a page: the box goes back to empty either way. The frame is
+		// what clamps a number past the last page, so the press has one reader of the range, not two.
+		if (Number.isInteger(value) && value > 0) state.go(value);
+		setDraft('');
+	};
+
+	/**
+	 * Leaving the box is a press too: a reader who typed 12 and moved on meant 12. What is not a press
+	 * is moving to another control of this row — an arrow, a number, a gap, the size box — because that
+	 * control is a navigation of its own, and taking both would ask for two pages at once.
+	 */
+	const leave = (event: FocusEvent<HTMLInputElement>) => {
+		const next = event.relatedTarget;
+		if (next instanceof HTMLElement && next.closest('[data-slot="pagination"]') !== null) {
+			setDraft('');
+			return;
+		}
+
+		ask();
+	};
+
+	return (
+		<label className="inline-flex items-center gap-1.5 whitespace-nowrap">
+			<span className="text-sm text-muted-foreground">{state.locale.goTo}</span>
+			<input
+				type="text"
+				inputMode="numeric"
+				data-slot="pagination-jump"
+				data-size={state.size}
+				value={draft}
+				disabled={state.busy}
+				onFocus={(event) => event.currentTarget.select()}
+				onChange={(event) => setDraft(event.target.value)}
+				onKeyDown={(event) => {
+					if (event.key === 'Enter') {
+						event.preventDefault();
+						ask();
+					}
+					if (event.key === 'Escape') {
+						event.preventDefault();
+						setDraft('');
+					}
+				}}
+				onBlur={leave}
+				className={cn(
+					inputVariants({ size: state.size }),
+					'w-14 px-1 text-center tabular-nums',
+					className,
+				)}
+				{...props}
+			/>
+			<span className="text-sm text-muted-foreground">{state.locale.page}</span>
+		</label>
+	);
+}
+
+/**
+ * A page control: the frame, the arrows at either end, the numbers with their gaps, the line that
+ * summarises them, and the box a page can be asked for by number. What it is drawn with — and how
+ * many records a page holds — is a `pro` assembly's business: this layer only knows how to be pressed.
+ */
+export const LumoPagination = { Root, First, Prev, Next, Last, Pages, Page, Ellipsis, Range, Jump };

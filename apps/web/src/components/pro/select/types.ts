@@ -18,6 +18,8 @@ export type SelectProps<Value extends string = string> = {
 	defaultValue?: Value | null;
 	/** The value picked — `null` when the way back was taken. */
 	onChange?: (value: Value | null) => void;
+	/** The name a reader hears, for a select whose visible label is the value itself. */
+	ariaLabel?: string;
 	/** Shown in the trigger while no option is chosen. */
 	placeholder?: ReactNode;
 	size?: TriggerProps['size'];

@@ -17,6 +17,7 @@ export const Select = <Value extends string>({
 	value,
 	defaultValue,
 	onChange,
+	ariaLabel,
 	placeholder,
 	size = 'md',
 	disabled = false,
@@ -39,6 +40,10 @@ export const Select = <Value extends string>({
 
 	return (
 		<LumoSelect.Root
+			/* The rows the trigger reads its label from. The popup is not in the DOM while it is closed, so
+			   without these the trigger has nothing to call the chosen value by and falls back to the raw
+			   `20`, which is the value rather than the word. */
+			items={options}
 			value={chosen}
 			onValueChange={choose}
 			disabled={disabled}
@@ -47,7 +52,7 @@ export const Select = <Value extends string>({
 			required={required}
 		>
 			<LumoSelect.TriggerGroup className={cn(className, classNames?.group)}>
-				<LumoSelect.Trigger size={size} className={classNames?.trigger}>
+				<LumoSelect.Trigger size={size} className={classNames?.trigger} aria-label={ariaLabel}>
 					<LumoSelect.Value placeholder={placeholder} className={classNames?.value} />
 					<LumoSelect.Icon />
 				</LumoSelect.Trigger>
