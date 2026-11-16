@@ -3,6 +3,7 @@ import { LumoAlertDialog } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
 import { Button } from '../button';
 import type { AlertDialogProps } from './types';
+import { FillIcon } from '@/components/icons';
 
 /** What Base UI's `actionsRef` exposes: closing from a part that is not a `Close`. */
 type Actions = NonNullable<ComponentProps<typeof LumoAlertDialog.Root>['actionsRef']>['current'];
@@ -39,15 +40,27 @@ export const AlertDialog = ({
 						if (event.target === event.currentTarget) actions.current?.close();
 					}}
 				>
-					<LumoAlertDialog.Popup className={cn(className, classNames?.popup)}>
-						<LumoAlertDialog.Title className={classNames?.title}>{title}</LumoAlertDialog.Title>
-						{description !== undefined && (
-							<LumoAlertDialog.Description className={classNames?.description}>
-								{description}
-							</LumoAlertDialog.Description>
-						)}
+					<LumoAlertDialog.Popup
+						className={cn(className, classNames?.popup, 'flex flex-col items-center gap-2')}
+					>
+						<FillIcon
+							name="circle-exclamation"
+							className="size-10 text-destructive"
+							aria-hidden={false}
+							aria-label="Failed"
+						/>
+						<div>
+							<LumoAlertDialog.Title className={cn(classNames?.title, 'text-center')}>
+								{title}
+							</LumoAlertDialog.Title>
+							{description !== undefined && (
+								<LumoAlertDialog.Description className={cn(classNames?.description, 'text-center')}>
+									{description}
+								</LumoAlertDialog.Description>
+							)}
+						</div>
 						{children}
-						<div className={cn('flex justify-end gap-2', classNames?.actions)}>
+						<div className={cn('grid w-full grid-cols-2 gap-4 mt-4', classNames?.actions)}>
 							<LumoAlertDialog.Close render={<Button variant="outline">{cancelLabel}</Button>} />
 							<LumoAlertDialog.Close
 								render={
