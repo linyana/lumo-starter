@@ -1,8 +1,9 @@
 import { createUserSchema, ROLES, ROLE_META, type Role } from '@lumo/shared';
 import { useState } from 'react';
+import { usersApi } from '@/api';
 import { Button, Dialog, Field, Form, Input, ToggleGroup, useForm } from '@/components';
 import { useHttp } from '@/hooks';
-import { usersApi } from '@/api';
+
 type IPropsType = {
 	onCreated: () => void;
 };

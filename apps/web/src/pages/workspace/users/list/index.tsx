@@ -1,16 +1,25 @@
 import { ROLE_META, type ListUsersQuery, type Role, type User } from '@lumo/shared';
 import { Pencil, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, type ReactElement } from 'react';
 import { Badge, Field, Form, Input, Table, type TableColumn } from '@/components';
-import type { SortKeyOf, UseQueryResult } from '@/hooks';
+import type { UseQueryResult } from '@/hooks';
 import { useAuth } from '@/providers/auth';
-import { DeleteUsers } from '../batch-delete';
-import { DeleteUser } from '../delete';
+import { DeleteUsers } from '../delete';
 import { EditUser } from '../edit';
-
-type UserSortKey = SortKeyOf<ListUsersQuery>;
+import type { OverlayArgs, Panel, UserSortKey } from './types';
 
 type IPropsType = { list: UseQueryResult<User, ListUsersQuery> };
+
+const renderOverlay = ({ panel, onOpenChange, reload }: OverlayArgs): ReactElement => {
+	switch (panel.kind) {
+		case 'edit':
+			return <EditUser user={panel.user} open onOpenChange={onOpenChange} onUpdated={reload} />;
+		case 'delete':
+			return (
+				<DeleteUsers users={panel.users} open onOpenChange={onOpenChange} onDeleted={reload} />
+			);
+	}
+};
 
 const ROLE_VARIANT: Record<Role, 'default' | 'info' | 'secondary'> = {
 	OWNER: 'default',
@@ -21,8 +30,11 @@ const ROLE_VARIANT: Record<Role, 'default' | 'info' | 'secondary'> = {
 export const UserList = ({ list }: IPropsType) => {
 	const { user: currentUser } = useAuth();
 
-	const [panel, setPanel] = useState<{ user: User; kind: 'edit' | 'delete' } | null>(null);
-	const [batch, setBatch] = useState<readonly User[] | null>(null);
+	const [panel, setPanel] = useState<Panel | null>(null);
+
+	const onOpenChange = (open: boolean) => {
+		if (!open) setPanel(null);
+	};
 
 	const columns: TableColumn<User, UserSortKey>[] = [
 		{
@@ -80,10 +92,10 @@ export const UserList = ({ list }: IPropsType) => {
 							access: { permission: 'user:delete' },
 							variant: 'default',
 							blocked: (rows) =>
-								rows.some((user: User) => user.id === currentUser?.id)
+								rows.some((user) => user.id === currentUser?.id)
 									? 'You cannot delete your own account'
 									: undefined,
-							onClick: ({ rows }) => setBatch(rows),
+							onClick: ({ rows }) => setPanel({ kind: 'delete', users: rows }),
 						},
 					]}
 					rowActions={(item) => [
@@ -91,7 +103,7 @@ export const UserList = ({ list }: IPropsType) => {
 							label: 'Edit',
 							icon: <Pencil />,
 							access: { permission: 'user:write' },
-							onClick: () => setPanel({ user: item, kind: 'edit' }),
+							onClick: () => setPanel({ kind: 'edit', user: item }),
 						},
 						{
 							label: 'Delete',
@@ -99,44 +111,13 @@ export const UserList = ({ list }: IPropsType) => {
 							destructive: true,
 							separatorBefore: true,
 							access: { permission: 'user:delete', when: () => item.id !== currentUser?.id },
-							onClick: () => setPanel({ user: item, kind: 'delete' }),
+							onClick: () => setPanel({ kind: 'delete', users: [item] }),
 						},
 					]}
 				/>
 			</Form>
 
-			<>
-				{panel === null ? null : panel.kind === 'edit' ? (
-					<EditUser
-						user={panel.user}
-						currentUserId={currentUser?.id}
-						open
-						onOpenChange={(next: boolean) => {
-							if (!next) setPanel(null);
-						}}
-						onUpdated={list.reload}
-					/>
-				) : (
-					<DeleteUser
-						user={panel.user}
-						open
-						onOpenChange={(next: boolean) => {
-							if (!next) setPanel(null);
-						}}
-						onDeleted={list.reload}
-					/>
-				)}
-				{batch !== null && (
-					<DeleteUsers
-						users={batch}
-						open
-						onOpenChange={(next) => {
-							if (!next) setBatch(null);
-						}}
-						onDeleted={list.reload}
-					/>
-				)}
-			</>
+			{panel !== null && renderOverlay({ panel, onOpenChange, reload: list.reload })}
 		</>
 	);
 };

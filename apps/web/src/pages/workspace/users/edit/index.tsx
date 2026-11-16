@@ -6,20 +6,22 @@ import {
 	type UpdateUserInput,
 	type User,
 } from '@lumo/shared';
+import { usersApi } from '@/api';
 import { Button, Dialog, Field, Form, Input, ToggleGroup, useForm } from '@/components';
 import { useHttp } from '@/hooks';
-import { usersApi } from '@/api';
+import { useAuth } from '@/providers/auth';
+
 type IPropsType = {
 	user: User;
-	currentUserId?: string;
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	onUpdated: () => void;
 };
 
-export const EditUser = ({ user, currentUserId, open, onOpenChange, onUpdated }: IPropsType) => {
+export const EditUser = ({ user, open, onOpenChange, onUpdated }: IPropsType) => {
 	const form = useForm();
-	const ownRow = user.id === currentUserId;
+	const { user: currentUser } = useAuth();
+	const ownRow = user.id === currentUser?.id;
 
 	const submit = useHttp({
 		endpoint: (input: UpdateUserInput) => usersApi.update({ id: user.id, input }),
