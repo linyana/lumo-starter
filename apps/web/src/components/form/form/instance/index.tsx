@@ -9,8 +9,9 @@ import {
 	type ReactNode,
 } from 'react';
 import { ZodError } from 'zod';
-import { errorFields, firstIssueName, prune, toFormErrors } from '@/lib';
+import { errorFields, firstIssueName, prune, sameValues, toFormErrors } from '@/lib';
 import type {
+	FormArgs,
 	FormConfig,
 	FormContextValue,
 	FormErrors,
@@ -70,6 +71,11 @@ export const useForm = (): FormInstance => {
 
 		return view.current.values;
 	}, []);
+
+	const changed = useCallback(
+		(): boolean => !sameValues({ left: read(), right: prune(opened.current) }),
+		[read],
+	);
 
 	const set = useCallback(
 		({ name, value }: { name: string; value: unknown }): void => {
@@ -154,6 +160,7 @@ export const useForm = (): FormInstance => {
 		epoch,
 		get: (name) => held.current[name],
 		values: read,
+		changed,
 		set,
 		notify,
 		subscribe,
@@ -169,18 +176,24 @@ export const useForm = (): FormInstance => {
 };
 
 /**
- * One field's value, followed — or the whole form's, when no name is given. `values()` is a read of
- * a ref, so it answers what the last render wrote and never schedules another one; a screen that
- * draws something out of a field asks here instead.
+ * The whole form's values, followed by identity: one object until the next write, so every write
+ * re-renders the caller.
  */
-export const useWatch = <Value = unknown,>({ form, name }: WatchArgs): Value | undefined => {
+export function useWatch({ form }: FormArgs): FormValues;
+/** One field's value, followed — `undefined` until something writes that name. */
+export function useWatch<Value = unknown>({ form, name }: WatchArgs): Value | undefined;
+export function useWatch({ form, name }: FormArgs & { name?: string }): unknown {
 	const snapshot = useCallback(
 		(): unknown => (name === undefined ? form.values() : form.values()[name]),
 		[form.values, name],
 	);
 
-	return useSyncExternalStore(form.subscribe, snapshot) as Value | undefined;
-};
+	return useSyncExternalStore(form.subscribe, snapshot);
+}
+
+/** Whether the form differs from what it opened with, followed — one re-render per flip. */
+export const useChanged = ({ form }: FormArgs): boolean =>
+	useSyncExternalStore(form.subscribe, form.changed);
 
 /** The form the caller's fields are in, or `null` when they stand alone. */
 export const useFormContext = (): FormContextValue | null => useContext(FormContext);

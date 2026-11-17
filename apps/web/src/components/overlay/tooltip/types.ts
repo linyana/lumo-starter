@@ -14,6 +14,8 @@ export type TooltipProps = TooltipPlacement & {
 	arrow?: boolean;
 	/** How long the pointer rests before the hint arrives. */
 	delay?: number;
+	/** A hint that is not worth showing now — the trigger keeps working, and nothing pops. */
+	disabled?: boolean;
 	/** The hint's own box — the shorthand for `classNames.popup`. */
 	className?: string;
 	classNames?: SlotClassNames<TooltipSlots>;

@@ -7,7 +7,17 @@ import {
 	type User,
 } from '@lumo/shared';
 import { usersApi } from '@/api';
-import { Button, Dialog, Field, Form, Input, ToggleGroup, useForm } from '@/components';
+import {
+	Button,
+	Dialog,
+	Field,
+	Form,
+	Input,
+	ToggleGroup,
+	Tooltip,
+	useChanged,
+	useForm,
+} from '@/components';
 import { useHttp } from '@/hooks';
 import { useAuth } from '@/providers/auth';
 
@@ -22,6 +32,7 @@ export const EditUser = ({ user, open, onOpenChange, onUpdated }: IPropsType) =>
 	const form = useForm();
 	const { user: currentUser } = useAuth();
 	const ownRow = user.id === currentUser?.id;
+	const changed = useChanged({ form });
 
 	const submit = useHttp({
 		endpoint: (input: UpdateUserInput) => usersApi.update({ id: user.id, input }),
@@ -43,9 +54,12 @@ export const EditUser = ({ user, open, onOpenChange, onUpdated }: IPropsType) =>
 				form={form}
 				schema={updateUserSchema}
 				initial={{ email: user.email, name: user.name, roles: user.roles }}
-				onSubmit={(values) =>
-					submit.fetchData(ownRow ? { email: values.email, name: values.name } : values)
-				}
+				onSubmit={(values) => {
+					// A field that is focused submits the form on Enter, which never passes the disabled button.
+					if (!changed) return;
+
+					return submit.fetchData(ownRow ? { email: values.email, name: values.name } : values);
+				}}
 			>
 				<Field name="email" label="Email">
 					<Input type="email" autoComplete="off" />
@@ -69,9 +83,17 @@ export const EditUser = ({ user, open, onOpenChange, onUpdated }: IPropsType) =>
 					/>
 				</Field>
 
-				<Button loading={submit.loading} onClick={form.submit} className="mt-2">
-					Save changes
-				</Button>
+				<Tooltip content="Nothing has changed yet." disabled={changed}>
+					<Button
+						disabled={!changed}
+						focusableWhenDisabled={!changed}
+						loading={submit.loading}
+						onClick={form.submit}
+						className="mt-2"
+					>
+						Save changes
+					</Button>
+				</Tooltip>
 			</Form>
 		</Dialog>
 	);

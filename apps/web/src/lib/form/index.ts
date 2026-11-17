@@ -38,6 +38,28 @@ export const prune = (values: Values): Values =>
 		Object.entries(values).filter(([, value]) => value !== '' && value !== undefined),
 	);
 
+/**
+ * Whether two sets of values say the same thing. A list of choices is the same list in any order — a
+ * control that offers several hands its picks back in the order they were made, so turning one off
+ * and on again is a reorder, not an edit.
+ */
+export const sameValues = ({ left, right }: { left: Values; right: Values }): boolean => {
+	const keys = new Set([...Object.keys(left), ...Object.keys(right)]);
+
+	for (const key of keys) {
+		const one = left[key];
+		const other = right[key];
+
+		if (Array.isArray(one) && Array.isArray(other)) {
+			if (one.length !== other.length || !one.every((item) => other.includes(item))) return false;
+		} else if (one !== other) {
+			return false;
+		}
+	}
+
+	return true;
+};
+
 const pathOf = (issue: { path: PropertyKey[] }): string => issue.path.map(String).join('.');
 
 /**

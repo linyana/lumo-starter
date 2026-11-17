@@ -3,8 +3,9 @@ import { FormProvider, useForm } from './instance';
 import { FormRoot } from './parts';
 import type { FormProps } from './types';
 
-export { useForm, useFormContext, useWatch } from '@/components/form/form/instance';
+export { useChanged, useForm, useFormContext, useWatch } from '@/components/form/form/instance';
 export type {
+	FormArgs,
 	FormErrors,
 	FormInstance,
 	FormProps,

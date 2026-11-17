@@ -45,6 +45,11 @@ export type FormInstance = {
 	 * the next write, so a caller may compare two reads by identity.
 	 */
 	values: () => FormValues;
+	/**
+	 * Whether anything differs from what the form opened with — blank on both sides is no difference.
+	 * The baseline is the `initial` values the instance already keeps, so a screen never restates them.
+	 */
+	changed: () => boolean;
 	get: (name: string) => unknown;
 	set: (update: { name: string; value: unknown }) => void;
 	/**
@@ -71,14 +76,15 @@ export type FormInstance = {
 	config: (next: FormConfig) => void;
 };
 
-/** The field a watcher follows, and the instance it reads through. */
-export type WatchArgs = {
+/** The form a reader follows, with nothing named. */
+export type FormArgs = {
 	form: FormInstance;
-	/**
-	 * The `name` on the `FieldRoot`, the same key `errors` is held under. Left out, the watcher follows
-	 * the whole form and every write re-renders it.
-	 */
-	name?: string;
+};
+
+/** The form a watcher follows, and the one field it names. */
+export type WatchArgs = FormArgs & {
+	/** The `name` on the `FieldRoot`, the same key `errors` is held under. */
+	name: string;
 };
 
 /** What the fields of a form read: the instance, and the rules each of them is held to. */

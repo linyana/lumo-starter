@@ -165,7 +165,11 @@ way in is `useWatch({ form, name })`: a subscription on the same store, reading 
 screen that asks re-renders and the form does not. Leave the name out and the watcher follows the
 whole form, which re-renders on every write — `values()` keeps one object until the next write, so
 the comparison React makes is by identity and no write that changed nothing costs a render.
-`onChange` stays the answer for a caller that only needs to hear a change and paint nothing.
+`onChange` stays the answer for a caller that only needs to hear a change and paint nothing, and
+`useChanged({ form })` for one that draws from _whether_ anything moved: the baseline is the
+`initial` values the instance already seeds itself with, so a save button that waits for the first
+edit never restates them. Its snapshot is one boolean, so it re-renders on the flip and not on the
+keystrokes between.
 
 **Rejected.** react-hook-form + `zodResolver`: better for very large forms with field arrays, but it
 would mean a second state machine beside the instance, and the schema is already the only rule.

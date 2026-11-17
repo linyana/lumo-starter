@@ -17,10 +17,11 @@ export const Tooltip = ({
 	align = 'center',
 	arrow = false,
 	delay = 100,
+	disabled = false,
 	className,
 	classNames,
 }: TooltipProps) => (
-	<TooltipRoot>
+	<TooltipRoot disabled={disabled}>
 		<TooltipTrigger render={children} delay={delay} />
 		<TooltipPortal>
 			<TooltipPositioner side={side} align={align}>
