@@ -5,13 +5,17 @@ import { cn } from '@/lib/utils';
  * background: an `after` layer inheriting the radius, coloured by `currentColor`, so one rule covers
  * a primary button, an outlined row and a transparent trigger. The opacities are tokens, because
  * what reads as a tint under light text is not what reads under dark.
+ *
+ * A disabled control is not answered: the tint is the promise of a press, and there is none to make.
+ * The gate is here rather than in each variant because a control that stays focusable so it can be
+ * explained — a disabled action with a reason — would otherwise light up under every ordinary one.
  */
 export const stateLayer = cn(
 	'after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit]',
 	'after:bg-current after:opacity-0 after:transition-opacity',
 	'after:duration-(--duration-state)',
-	'hover:after:opacity-(--state-layer-hover-opacity)',
-	'active:after:opacity-(--state-layer-pressed-opacity)',
+	'hover:not-data-disabled:after:opacity-(--state-layer-hover-opacity)',
+	'active:not-data-disabled:after:opacity-(--state-layer-pressed-opacity)',
 );
 
 /**

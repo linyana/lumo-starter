@@ -12,8 +12,8 @@ export const buttonVariants = tv({
 		'relative rounded-md font-medium select-none',
 		'transition-[color,background-color,border-color,translate]',
 		'ease-(--ease-spring) duration-(--duration-state)',
-		'active:not-aria-[haspopup]:translate-y-(--press-offset)',
-		'active:not-aria-[haspopup]:duration-(--duration-press)',
+		'active:not-data-disabled:not-aria-[haspopup]:translate-y-(--press-offset)',
+		'active:not-data-disabled:not-aria-[haspopup]:duration-(--duration-press)',
 		stateLayer,
 		'data-pressed:after:opacity-(--state-layer-hover-opacity)',
 		// A button whose popup is open keeps the tint the pointer left: the popup has the reader's
@@ -21,8 +21,10 @@ export const buttonVariants = tv({
 		// tint lasts instead of ending with the hover that opened it. Base UI writes the flag on every
 		// trigger, and a button that opens a menu its caller owns writes it too.
 		'data-popup-open:after:opacity-(--state-layer-hover-opacity)',
-		'data-disabled:pointer-events-none',
+		'disabled:pointer-events-none',
 		'data-disabled:not-data-loading:opacity-50',
+		'data-disabled:not-data-loading:cursor-not-allowed',
+		'data-loading:cursor-progress',
 		iconSlot,
 		'cursor-pointer',
 	],
@@ -102,6 +104,10 @@ export type ButtonProps = Omit<ComponentProps<typeof BaseButton>, 'className'> &
  * default of `submit`: a button is almost never the form's submit — inside a `<form>` the browser's
  * default would reload the page on a press that only opens a menu — so submitting is said out loud
  * with `type="submit"`, and every other button is harmless wherever it is drawn.
+ *
+ * A disabled button is out of the pointer's way, so a hint that says why cannot hang on it. One that
+ * has to explain itself passes `focusableWhenDisabled`: it stays focusable and reachable, takes no
+ * tint and no press, and a `<Tooltip>` around it arrives on hover and on focus.
  */
 export function Button({
 	className,

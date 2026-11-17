@@ -1,6 +1,6 @@
 import { filterAccess, permits } from '@lumo/shared';
 import { ArrowDown, ArrowUp, ArrowUpDown, Ellipsis, ListFilter, RotateCcw } from 'lucide-react';
-import { useId, useState, type MouseEvent } from 'react';
+import { Fragment, useId, useState, type MouseEvent } from 'react';
 import { Pagination, type PaginationProps } from '@/components/data/pagination';
 import { Skeleton } from '@/components/feedback/skeleton';
 import { Button } from '@/components/form/button';
@@ -284,19 +284,19 @@ const SelectionBar = <Row,>({ rows, actions, onClear, className }: SelectionBarP
 							{words}
 						</Button>
 					) : (
-						// The press keeps its name and its place and stops being a press. It stays focusable so
-						// the sentence is not hover-only, and the hint hangs on the wrap: a disabled button takes
-						// no pointer events, so a tooltip anchored to the button itself would never arrive.
-						<Tooltip key={index} content={reason}>
-							<span className="inline-flex">
+						// The press keeps its name and its place and stops being a press. It stays focusable, so the
+						// sentence is not hover-only, and it is drawn as it stands: a disabled button here keeps taking
+						// the pointer, so the hint arrives on hover as well as on focus.
+						<Fragment key={index}>
+							<Tooltip content={reason}>
 								<Button {...look} disabled focusableWhenDisabled aria-describedby={why}>
 									{words}
 								</Button>
-								<span id={why} className="sr-only">
-									{reason}
-								</span>
+							</Tooltip>
+							<span id={why} className="sr-only">
+								{reason}
 							</span>
-						</Tooltip>
+						</Fragment>
 					);
 				})}
 			</div>
