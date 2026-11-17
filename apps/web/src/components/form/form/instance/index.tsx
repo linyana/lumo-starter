@@ -5,11 +5,19 @@ import {
 	useEffect,
 	useRef,
 	useState,
+	useSyncExternalStore,
 	type ReactNode,
 } from 'react';
 import { ZodError } from 'zod';
 import { errorFields, firstIssueName, prune, toFormErrors } from '@/lib';
-import type { FormConfig, FormContextValue, FormErrors, FormInstance, FormValues } from '../types';
+import type {
+	FormConfig,
+	FormContextValue,
+	FormErrors,
+	FormInstance,
+	FormValues,
+	WatchArgs,
+} from '../types';
 
 const EMPTY: FormValues = {};
 
@@ -18,7 +26,8 @@ const FormContext = createContext<FormContextValue | null>(null);
 /**
  * One form's values and verdicts, for one screen. Every control under the form writes into it
  * through `set` — which touches a ref, not state, because the controls hold their own DOM value and
- * a form does not need to re-render to know what was typed. Only a verdict re-renders anything.
+ * a form does not need to re-render to know what was typed. Only a verdict re-renders it; a write is
+ * announced, so whatever follows one name re-renders on its own.
  *
  * The instance is rebuilt on every render, so the props it reads through `config` are the latest
  * ones — `submit` keeps no closure over an older `onSubmit`.
@@ -31,6 +40,9 @@ export const useForm = (): FormInstance => {
 	const held = useRef<FormValues>(EMPTY);
 	const opened = useRef<FormValues>(EMPTY);
 	const config = useRef<FormConfig>({});
+	const watchers = useRef(new Set<() => void>());
+	/** The pruned copy of `held`, kept until the next write so a reader can compare it by identity. */
+	const view = useRef<{ from: FormValues; values: FormValues }>({ from: EMPTY, values: EMPTY });
 
 	useEffect(
 		() => () => {
@@ -39,20 +51,44 @@ export const useForm = (): FormInstance => {
 		[],
 	);
 
-	const set = useCallback(({ name, value }: { name: string; value: unknown }): void => {
-		held.current = { ...held.current, [name]: value };
-
-		// A live form hears its own writes, once the reader has stopped. Typing is a burst of them and
-		// picking is one, so the pause is the only thing told apart here.
-		const { onChange, settle = 0 } = config.current;
-		if (onChange === undefined) return;
-
-		if (timer.current !== null) clearTimeout(timer.current);
-		timer.current = setTimeout(() => {
-			timer.current = null;
-			onChange(prune(held.current));
-		}, settle);
+	const notify = useCallback((): void => {
+		for (const watcher of watchers.current) watcher();
 	}, []);
+
+	const subscribe = useCallback((watcher: () => void): (() => void) => {
+		watchers.current.add(watcher);
+
+		return () => {
+			watchers.current.delete(watcher);
+		};
+	}, []);
+
+	const read = useCallback((): FormValues => {
+		if (view.current.from !== held.current) {
+			view.current = { from: held.current, values: prune(held.current) };
+		}
+
+		return view.current.values;
+	}, []);
+
+	const set = useCallback(
+		({ name, value }: { name: string; value: unknown }): void => {
+			held.current = { ...held.current, [name]: value };
+			notify();
+
+			// A live form hears its own writes, once the reader has stopped. Typing is a burst of them and
+			// picking is one, so the pause is the only thing told apart here.
+			const { onChange, settle = 0 } = config.current;
+			if (onChange === undefined) return;
+
+			if (timer.current !== null) clearTimeout(timer.current);
+			timer.current = setTimeout(() => {
+				timer.current = null;
+				onChange(prune(held.current));
+			}, settle);
+		},
+		[notify],
+	);
 
 	const setErrors = useCallback((input: FormErrors | ZodError): void => {
 		setErrorState(input instanceof ZodError ? toFormErrors(input) : input);
@@ -77,15 +113,19 @@ export const useForm = (): FormInstance => {
 		held.current = { ...opened.current };
 	}, []);
 
-	const reset = useCallback((name?: string): void => {
-		held.current =
-			name === undefined
-				? { ...opened.current }
-				: Object.fromEntries(Object.entries(held.current).filter(([key]) => key !== name));
+	const reset = useCallback(
+		(name?: string): void => {
+			held.current =
+				name === undefined
+					? { ...opened.current }
+					: Object.fromEntries(Object.entries(held.current).filter(([key]) => key !== name));
 
-		setErrorState({});
-		setEpoch((count) => count + 1);
-	}, []);
+			setErrorState({});
+			setEpoch((count) => count + 1);
+			notify();
+		},
+		[notify],
+	);
 
 	const submit = useCallback((): void => {
 		const { schema, onSubmit, element } = config.current;
@@ -113,8 +153,10 @@ export const useForm = (): FormInstance => {
 		errors,
 		epoch,
 		get: (name) => held.current[name],
-		values: () => prune(held.current),
+		values: read,
 		set,
+		notify,
+		subscribe,
 		seed,
 		reset,
 		submit,
@@ -124,6 +166,20 @@ export const useForm = (): FormInstance => {
 			config.current = { ...config.current, ...next };
 		},
 	};
+};
+
+/**
+ * One field's value, followed — or the whole form's, when no name is given. `values()` is a read of
+ * a ref, so it answers what the last render wrote and never schedules another one; a screen that
+ * draws something out of a field asks here instead.
+ */
+export const useWatch = <Value = unknown,>({ form, name }: WatchArgs): Value | undefined => {
+	const snapshot = useCallback(
+		(): unknown => (name === undefined ? form.values() : form.values()[name]),
+		[form.values, name],
+	);
+
+	return useSyncExternalStore(form.subscribe, snapshot) as Value | undefined;
 };
 
 /** The form the caller's fields are in, or `null` when they stand alone. */

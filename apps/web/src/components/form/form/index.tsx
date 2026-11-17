@@ -3,8 +3,14 @@ import { FormProvider, useForm } from './instance';
 import { FormRoot } from './parts';
 import type { FormProps } from './types';
 
-export { useForm, useFormContext } from '@/components/form/form/instance';
-export type { FormErrors, FormInstance, FormProps, FormValues } from '@/components/form/form/types';
+export { useForm, useFormContext, useWatch } from '@/components/form/form/instance';
+export type {
+	FormErrors,
+	FormInstance,
+	FormProps,
+	FormValues,
+	WatchArgs,
+} from '@/components/form/form/types';
 
 /**
  * The fields as one submission: their values, the rules they are read by, and each verdict back on
@@ -36,8 +42,11 @@ export const Form = <Input, Values extends Record<string, unknown> = Record<stri
 	const latest = useRef(instance);
 	latest.current = instance;
 
+	// The values the form opens with land while this renders, before anything below is willing to
+	// listen, so they are announced once the fields are in.
 	useLayoutEffect(() => {
 		if (Object.keys(latest.current.errors).length > 0) latest.current.setErrors({});
+		latest.current.notify();
 	}, []);
 
 	if (!opened.current) {

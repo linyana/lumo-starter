@@ -159,12 +159,20 @@ fill), and it is why `reset` is a remount rather than a write back into each con
 taking from `Form.Item` is exactly this much: the injection of `value`/`onChange`, and a `values()`
 that a body, a query or a rule can read without the screen keeping a copy.
 
+**Reading a value while rendering.** `values()` reads that mirror, so a screen that draws something
+out of a field cannot get it from a render — it would read what the previous render wrote. The one
+way in is `useWatch({ form, name })`: a subscription on the same store, reading one name, so the
+screen that asks re-renders and the form does not. Leave the name out and the watcher follows the
+whole form, which re-renders on every write — `values()` keeps one object until the next write, so
+the comparison React makes is by identity and no write that changed nothing costs a render.
+`onChange` stays the answer for a caller that only needs to hear a change and paint nothing.
+
 **Rejected.** react-hook-form + `zodResolver`: better for very large forms with field arrays, but it
 would mean a second state machine beside the instance, and the schema is already the only rule.
 `rules` on each field (antd): the schema is the rule, and it is the same object the API parses the
 body with, so a per-field rule language would be a second source of truth.
 
-**Cost.** A small store of our own (~140 lines in `components/form/form/instance`), and one
+**Cost.** A small store of our own (~180 lines in `components/form/form/instance`), and one
 implementation detail: a `<button>` inside a form is a `submit` by default, so `Button` defaults to
 `type="button"` and submitting is said out loud.
 

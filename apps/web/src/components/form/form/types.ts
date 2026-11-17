@@ -40,10 +40,20 @@ export type FormInstance = {
 	readonly errors: FormErrors;
 	/** Bumped by `reset`; the form is drawn under it, so a reset remounts the fields. */
 	readonly epoch: number;
-	/** Every value now, blanks left out — what a schema, a query or a body reads. */
+	/**
+	 * Every value now, blanks left out — what a schema, a query or a body reads. The same object until
+	 * the next write, so a caller may compare two reads by identity.
+	 */
 	values: () => FormValues;
 	get: (name: string) => unknown;
 	set: (update: { name: string; value: unknown }) => void;
+	/**
+	 * Announce that the values moved without writing one. `<Form>` says it once the values it opens
+	 * with are in, because that lands during a render no watcher is listening to yet.
+	 */
+	notify: () => void;
+	/** Hear every write. `useWatch` is the only caller. */
+	subscribe: (watcher: () => void) => () => void;
 	/** Back to what the form opened with; one name clears one field. */
 	reset: (name?: string) => void;
 	/** Draw the fields from these values, now. What `<Form initial>` does on the render it mounts. */
@@ -59,6 +69,16 @@ export type FormInstance = {
 	setApiError: (error: unknown) => boolean;
 	/** Called by `<Form>` while it renders, so the latest props are the ones `submit` reads. */
 	config: (next: FormConfig) => void;
+};
+
+/** The field a watcher follows, and the instance it reads through. */
+export type WatchArgs = {
+	form: FormInstance;
+	/**
+	 * The `name` on the `FieldRoot`, the same key `errors` is held under. Left out, the watcher follows
+	 * the whole form and every write re-renders it.
+	 */
+	name?: string;
 };
 
 /** What the fields of a form read: the instance, and the rules each of them is held to. */
