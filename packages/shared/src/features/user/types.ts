@@ -1,12 +1,10 @@
 import type { z } from 'zod';
-import type {
-	batchDeleteUsersSchema,
-	createUserSchema,
-	listUsersQuerySchema,
-	updateUserSchema,
-	userParamsSchema,
-	userSchema,
-} from './schema';
+import type { createUserSchema } from './create';
+import type { listUsersQuerySchema } from './list';
+import type { userParamsSchema } from './params';
+import type { batchDeleteUsersSchema } from './remove';
+import type { userSchema } from './row';
+import type { updateUserSchema } from './update';
 
 export type User = z.infer<typeof userSchema>;
 

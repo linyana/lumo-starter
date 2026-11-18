@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { toastError as raiseToast, toApiError } from '@/lib';
+import {
+	toastError as raiseError,
+	toastSettle,
+	toastSuccess as raiseSuccess,
+	toastWait,
+	toApiError,
+} from '@/lib';
 import type { FetchData, FetchResult, UseHttpOptions, UseHttpResult, UseHttpState } from './types';
 
 export type { FetchData, FetchResult, UseHttpOptions, UseHttpResult, UseHttpState } from './types';
@@ -51,18 +57,36 @@ export const useHttp = <TData, TVariables = void>({
 		async (variables?: TVariables): Promise<FetchResult<TData> | null> => {
 			const id = ++requestId.current;
 			const { endpoint, options: current } = latest.current;
+			const wait =
+				current.loadingMessage === undefined ? undefined : toastWait(current.loadingMessage);
+
+			/** Where the wait this call opened goes; nothing at all when it opened none. */
+			const settle = ({ message, failed }: { message?: string; failed?: boolean }): void => {
+				if (wait !== undefined) toastSettle({ id: wait, message, failed });
+			};
 
 			setState((previous) => ({ ...previous, loading: true, error: null }));
 
 			try {
 				const data = await endpoint(variables as TVariables);
-				if (id !== requestId.current) return null;
+				if (id !== requestId.current) {
+					settle({});
+					return null;
+				}
 
 				setState({ data, error: null, loading: false, initial: false });
 				current.onSuccess?.(data, variables as TVariables);
+				if (wait !== undefined) {
+					settle({ message: current.successMessage });
+				} else if (current.successMessage !== undefined) {
+					raiseSuccess(current.successMessage);
+				}
 				return { ok: true, data };
 			} catch (cause) {
-				if (id !== requestId.current) return null;
+				if (id !== requestId.current) {
+					settle({});
+					return null;
+				}
 
 				const error = toApiError(cause);
 				const handled = current.onError?.(error);
@@ -70,9 +94,15 @@ export const useHttp = <TData, TVariables = void>({
 
 				// A handler that answered `false` did not take the failure — the toast is still the
 				// default, and the screen has only said where the verdict belongs, not that none is due.
-				if (!quiet && (current.onError === undefined || handled === false)) {
-					raiseToast(error.message);
+				// The one exception is a session that is gone: the auth provider acts on it by itself.
+				const spoken = !quiet && (current.onError === undefined || handled === false);
+
+				if (wait !== undefined) {
+					settle({ message: spoken ? error.message : undefined, failed: true });
+				} else if (spoken) {
+					raiseError(error.message);
 				}
+
 				setState((previous) => ({ ...previous, error, loading: false, initial: false }));
 				return { ok: false, error };
 			}

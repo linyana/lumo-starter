@@ -44,6 +44,13 @@ export const springSlide: Transition = {
  */
 export const quickSize: Transition = { duration: 0.18, ease: [0.22, 1, 0.36, 1] };
 
+/**
+ * A line saying again what it already said: two sways and home. Longer than a size — a few pixels
+ * over a fifth of a second is a flicker, and the segments of a keyframe each eases on their own, so
+ * the time is spread over the middle rather than the ends.
+ */
+export const quickSway: Transition = { duration: 0.32, ease: [0.22, 1, 0.36, 1] };
+
 /** The distance, in pixels, under which a size is `quickSize` rather than a spring. */
 export const SHORT_MOVE = 120;
 

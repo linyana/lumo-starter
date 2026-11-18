@@ -43,6 +43,29 @@ export const clearButton = cn(
 );
 
 /**
+ * The edge of a bordered control, in the three states it has: `--input` at rest, `--input-strong`
+ * under the pointer, `--input-strong` under the caret — and, for a value the field says failed, the
+ * error's own red at rest and under the caret, a lighter red under the pointer.
+ *
+ * The step is a colour and not a ring, because a hover that was a colour and a focus that was a ring
+ * would make one field look like two different states of attention — so both leave the outline off. The
+ * pointer's step is the one the caret overrules: a field being typed into is focused, and a hover step
+ * that stood beside it would land with whichever rule came last.
+ *
+ * `failed` is the question, asked once, in the theme: the attribute the field writes on the box around
+ * the control, and the two a control can carry itself — Base UI's `Field.Control`, or a form that is
+ * not ours.
+ */
+const shellEdge = cn(
+	'[--shell-hover:var(--input-strong)] [--shell-focus:var(--input-strong)]',
+	'hover:not-focus-visible:not-disabled:not-data-disabled:border-(--shell-hover)',
+	'focus-visible:border-(--shell-focus) focus-visible:outline-none',
+	'failed:border-destructive',
+	'failed:[--shell-hover:var(--destructive-soft)]',
+	'failed:[--shell-focus:var(--destructive)]',
+);
+
+/**
  * The shell of a text control — the input, and the textarea, which differ only in the element they
  * are drawn on and the shape of their size. Selection is not here: it is one rule in the theme,
  * because a reader expects the same colour wherever they drag across a page.
@@ -51,46 +74,32 @@ export const clearButton = cn(
  * that is not editable, a `<button>` and a `<div>` included, so the tint would follow a select's
  * trigger around for its whole life. Only a field that can be typed into and is being withheld — the
  * input, the textarea — puts it on, and a control with a state of its own spells that state instead.
- *
- * Pointed at, and reached by keyboard, are the same edge: both step the border to `--input-strong`,
- * and both leave the focus outline off. A field already says with its own box where the reader is
- * working, and an input takes focus on every click rather than only on a tab, so an outline around
- * that box would be drawn nearly all the time. The colour is the shell's own second step and not the
- * ring's, because a hover that was a colour and a focus that was a ring would make one field look
- * like two different states of attention.
  */
 export const fieldShell = cn(
 	'w-full min-w-0 rounded-md border border-input bg-background text-foreground',
 	'dark:border-border dark:bg-card',
 	'placeholder:text-muted-foreground',
 	'transition-colors duration-(--duration-state)',
-	'hover:not-disabled:not-data-disabled:border-input-strong',
-	'focus-visible:border-input-strong focus-visible:outline-none',
+	shellEdge,
 	'disabled:cursor-not-allowed disabled:opacity-50',
 	'data-disabled:cursor-not-allowed data-disabled:opacity-50',
-	// Written by the field when the control fails validation; aria-invalid is the same fact for a form
-	// that is not Base UI's. Both sit after the hover and focus rules above, so a field that is
-	// wrong stays destructive while it is pointed at: the stronger thing it has to say wins.
-	'data-invalid:border-destructive aria-invalid:border-destructive',
 );
 
 /**
- * The box a checkbox and a radio are drawn in: the same 16px square, the same invalid border, the
- * same disabled fade. What fills it once it is checked is theirs — a checkbox fills, a radio keeps
- * its ring and puts a dot in it — so only the part they agree on is here.
+ * The box a checkbox and a radio are drawn in: the same 16px square, the same edge, the same disabled
+ * fade. What fills it once it is checked is theirs — a checkbox fills, a radio keeps its ring and puts
+ * a dot in it — so only the part they agree on is here.
+ *
+ * A checked box wears `--primary` at rest. Pointed at or focused it speaks the same two steps as any
+ * other control, which is what keeps a box that failed as loud as a field that did.
  */
 export const toggleBox = cn(
 	'inline-flex size-4 shrink-0 cursor-pointer items-center justify-center align-middle',
 	'border border-input bg-background',
 	'transition-[color,background-color,border-color] duration-(--duration-state)',
-	// The same two states a field wears, on the box instead of the shell. Only focus moves the edge of
-	// a box that is already checked: hover has nothing to add to "on", and a tick that greyed under a
-	// passing cursor would read as being cleared.
-	'hover:not-disabled:not-data-disabled:border-input-strong',
-	'focus-visible:border-input-strong focus-visible:outline-none',
+	shellEdge,
 	'data-checked:border-primary',
-	'data-checked:focus-visible:border-input-strong',
-	'data-invalid:border-destructive',
+	'data-checked:focus-visible:border-(--shell-focus)',
 	'data-disabled:cursor-not-allowed data-disabled:opacity-50',
 );
 

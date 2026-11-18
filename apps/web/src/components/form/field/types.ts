@@ -8,6 +8,11 @@ export type FieldSlots = 'root' | 'label' | 'description' | 'error';
 
 export type FieldProps = FieldRootPicked & {
 	label?: ReactNode;
+	/**
+	 * Whether the field must be answered. Left out, the schema answers for it — a field its rules can
+	 * read blank needs nothing — and a form with no schema draws no mark at all.
+	 */
+	required?: boolean;
 	/** The line under the control, in place of `error` while the field is valid. */
 	description?: ReactNode;
 	/** Shown by the control's own verdict; a form's verdict for this name wins over it. */

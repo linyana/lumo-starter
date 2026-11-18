@@ -8,6 +8,18 @@ export interface UseHttpOptions<TData, TVariables> {
 	toastError?: boolean;
 	/** Custom failure handling. Supplying this replaces the toast; answering `false` keeps it. */
 	onError?: (error: ApiError) => void | boolean;
+	/**
+	 * The wait, in the words of the call that started it: the notice opens here and is rewritten in
+	 * place when the call lands. What a write with nothing left on screen has to show progress with —
+	 * a dialog answered by the press that closes on it, a row whose only surface is the row.
+	 */
+	loadingMessage?: string;
+	/**
+	 * Raise a toast when the call lands. Left out, the screen says what happened itself — a dialog
+	 * closing, a row appearing — which is why a read never passes one. With `loadingMessage` this is
+	 * what the open notice becomes; without one, it opens on success.
+	 */
+	successMessage?: string;
 	/** Runs after a successful call. */
 	onSuccess?: (data: TData, variables: TVariables) => void;
 }

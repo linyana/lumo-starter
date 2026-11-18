@@ -14,6 +14,7 @@ export const CreateUser = ({ onCreated }: IPropsType) => {
 
 	const submit = useHttp({
 		endpoint: usersApi.create,
+		successMessage: 'Account created',
 		onSuccess: () => {
 			setOpen(false);
 			onCreated();

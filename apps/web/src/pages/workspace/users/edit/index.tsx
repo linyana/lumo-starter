@@ -1,7 +1,7 @@
 import {
 	ROLE_META,
 	ROLES,
-	updateUserSchema,
+	updateUserFormSchema,
 	type Role,
 	type UpdateUserInput,
 	type User,
@@ -36,6 +36,7 @@ export const EditUser = ({ user, open, onOpenChange, onUpdated }: IPropsType) =>
 
 	const submit = useHttp({
 		endpoint: (input: UpdateUserInput) => usersApi.update({ id: user.id, input }),
+		successMessage: 'Changes saved',
 		onSuccess: () => {
 			onOpenChange(false);
 			onUpdated();
@@ -52,7 +53,7 @@ export const EditUser = ({ user, open, onOpenChange, onUpdated }: IPropsType) =>
 		>
 			<Form
 				form={form}
-				schema={updateUserSchema}
+				schema={updateUserFormSchema}
 				initial={{ email: user.email, name: user.name, roles: user.roles }}
 				onSubmit={(values) => {
 					// A field that is focused submits the form on Enter, which never passes the disabled button.

@@ -223,7 +223,7 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 
 	const clearFilter = useCallback(
 		(name: string) => {
-			form.reset(name);
+			form.clear(name);
 			setFilters((was) => {
 				const next = { ...was };
 				delete next[name as keyof ListFilters<TQuery>];

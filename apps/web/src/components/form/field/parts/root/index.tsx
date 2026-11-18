@@ -12,7 +12,9 @@ export function FieldRoot({ className, ...props }: FieldRootProps) {
 	return (
 		<BaseField.Root
 			data-slot="field"
-			className={cn('flex flex-col gap-1.5', className)}
+			// `group`, because the control inside cannot say it failed on its own: the fact is written on
+			// the field, and the shell reads it up from here.
+			className={cn('group flex flex-col gap-1.5', className)}
 			{...props}
 		/>
 	);

@@ -9,11 +9,12 @@ import {
 	type ReactNode,
 } from 'react';
 import { ZodError } from 'zod';
-import { errorFields, firstIssueName, prune, sameValues, toFormErrors } from '@/lib';
+import { errorFields, firstIssueName, omit, prune, sameValues, toFormErrors } from '@/lib';
 import type {
 	FormArgs,
 	FormConfig,
 	FormContextValue,
+	FormError,
 	FormErrors,
 	FormInstance,
 	FormValues,
@@ -22,17 +23,18 @@ import type {
 
 const EMPTY: FormValues = {};
 
-const FormContext = createContext<FormContextValue | null>(null);
+const NO_ERRORS: FormErrors = {};
 
 /**
- * One form's values and verdicts, for one screen. Every control under the form writes into it
- * through `set` — which touches a ref, not state, because the controls hold their own DOM value and
- * a form does not need to re-render to know what was typed. Only a verdict re-renders it; a write is
- * announced, so whatever follows one name re-renders on its own.
- *
- * The instance is rebuilt on every render, so the props it reads through `config` are the latest
- * ones — `submit` keeps no closure over an older `onSubmit`.
+ * The same thing said twice. A field can fail with two rules at once and a server sends one sentence,
+ * so a list is compared by what it holds — the count and the order of the words are not the message.
  */
+const sameMessage = ({ left, right }: { left: FormError; right: FormError }): boolean =>
+	(Array.isArray(left) ? left.join('\n') : left) ===
+	(Array.isArray(right) ? right.join('\n') : right);
+
+const FormContext = createContext<FormContextValue | null>(null);
+
 export const useForm = (): FormInstance => {
 	const [errors, setErrorState] = useState<FormErrors>({});
 	const [epoch, setEpoch] = useState(0);
@@ -40,9 +42,12 @@ export const useForm = (): FormInstance => {
 	const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const held = useRef<FormValues>(EMPTY);
 	const opened = useRef<FormValues>(EMPTY);
+	const revisions = useRef<Record<string, number>>({});
+	const nudges = useRef<Record<string, number>>({});
+	/** The verdict on screen, kept beside the state so the next one has something to be compared with. */
+	const shown = useRef<FormErrors>(NO_ERRORS);
 	const config = useRef<FormConfig>({});
 	const watchers = useRef(new Set<() => void>());
-	/** The pruned copy of `held`, kept until the next write so a reader can compare it by identity. */
 	const view = useRef<{ from: FormValues; values: FormValues }>({ from: EMPTY, values: EMPTY });
 
 	useEffect(
@@ -64,6 +69,42 @@ export const useForm = (): FormInstance => {
 		};
 	}, []);
 
+	/** The verdict on screen, and everyone told about it. */
+	const show = useCallback(
+		(next: FormErrors): void => {
+			shown.current = next;
+			setErrorState(next);
+			notify();
+		},
+		[notify],
+	);
+
+	/**
+	 * A verdict arriving: put on screen, and remembered. A sentence that is already showing is one the
+	 * reader has had their chance to read, so being told it again is a reminder — and there is one, on the
+	 * first line that repeated, because a form whose every field jittered would say nothing about where
+	 * to look. What a reminder looks like belongs to the line that draws it.
+	 *
+	 * A verdict leaving is `show`: there is nothing arriving for the fields it says nothing about.
+	 */
+	const publish = useCallback(
+		(next: FormErrors): void => {
+			const again = Object.entries(next).find(
+				([name, message]) =>
+					shown.current[name] !== undefined &&
+					sameMessage({ left: shown.current[name], right: message }),
+			);
+
+			if (again !== undefined) {
+				const [name] = again;
+				nudges.current = { ...nudges.current, [name]: (nudges.current[name] ?? 0) + 1 };
+			}
+
+			show(next);
+		},
+		[show],
+	);
+
 	const read = useCallback((): FormValues => {
 		if (view.current.from !== held.current) {
 			view.current = { from: held.current, values: prune(held.current) };
@@ -82,8 +123,6 @@ export const useForm = (): FormInstance => {
 			held.current = { ...held.current, [name]: value };
 			notify();
 
-			// A live form hears its own writes, once the reader has stopped. Typing is a burst of them and
-			// picking is one, so the pause is the only thing told apart here.
 			const { onChange, settle = 0 } = config.current;
 			if (onChange === undefined) return;
 
@@ -96,41 +135,73 @@ export const useForm = (): FormInstance => {
 		[notify],
 	);
 
-	const setErrors = useCallback((input: FormErrors | ZodError): void => {
-		setErrorState(input instanceof ZodError ? toFormErrors(input) : input);
-	}, []);
+	const setErrors = useCallback(
+		(input: FormErrors | ZodError): void => {
+			publish(input instanceof ZodError ? toFormErrors(input) : input);
+		},
+		[publish],
+	);
 
-	const setApiError = useCallback((error: unknown): boolean => {
-		const fields = errorFields(error);
-		if (Object.keys(fields).length === 0) return false;
+	const setApiError = useCallback(
+		(error: unknown): boolean => {
+			const fields = errorFields(error);
+			if (Object.keys(fields).length === 0) return false;
 
-		setErrorState(fields);
-		return true;
-	}, []);
+			publish(fields);
+			return true;
+		},
+		[publish],
+	);
 
-	/**
-	 * The values the form opens with. A ref write and nothing else: it happens while `<Form>` renders,
-	 * which may be a different component from the one holding this instance, and a render may not
-	 * schedule another component's state. What it leaves behind — a verdict from the last time the
-	 * panel was open — is cleared by `<Form>` before it paints.
-	 */
 	const seed = useCallback((values?: FormValues): void => {
 		opened.current = values ?? EMPTY;
 		held.current = { ...opened.current };
 	}, []);
 
-	const reset = useCallback(
-		(name?: string): void => {
-			held.current =
-				name === undefined
-					? { ...opened.current }
-					: Object.fromEntries(Object.entries(held.current).filter(([key]) => key !== name));
+	/**
+	 * One field starting over: the counter its control is keyed by moves, and its verdict goes with the
+	 * value that was just replaced. A field with no verdict is left alone, so nothing re-renders.
+	 */
+	const startOver = useCallback(
+		(name: string): void => {
+			revisions.current = { ...revisions.current, [name]: (revisions.current[name] ?? 0) + 1 };
 
-			setErrorState({});
-			setEpoch((count) => count + 1);
+			if (Object.hasOwn(shown.current, name)) {
+				const next = { ...shown.current };
+				delete next[name];
+				show(next);
+			}
+
 			notify();
 		},
-		[notify],
+		[notify, show],
+	);
+
+	const reset = useCallback(
+		(name?: string): void => {
+			if (name === undefined) {
+				held.current = { ...opened.current };
+				show(NO_ERRORS);
+				setEpoch((count) => count + 1);
+				return;
+			}
+
+			held.current =
+				opened.current[name] === undefined
+					? omit({ values: held.current, name })
+					: { ...held.current, [name]: opened.current[name] };
+			startOver(name);
+		},
+		[show, startOver],
+	);
+
+	const clear = useCallback(
+		(name: string): void => {
+			opened.current = omit({ values: opened.current, name });
+			held.current = omit({ values: held.current, name });
+			startOver(name);
+		},
+		[startOver],
 	);
 
 	const submit = useCallback((): void => {
@@ -139,7 +210,7 @@ export const useForm = (): FormInstance => {
 		const parsed = schema === undefined ? null : schema.safeParse(values);
 
 		if (parsed !== null && !parsed.success) {
-			setErrorState(toFormErrors(parsed.error));
+			publish(toFormErrors(parsed.error));
 
 			const first = firstIssueName(parsed.error);
 			const control =
@@ -151,13 +222,15 @@ export const useForm = (): FormInstance => {
 			return;
 		}
 
-		setErrorState({});
+		show(NO_ERRORS);
 		void onSubmit?.((parsed === null ? values : parsed.data) as never);
-	}, []);
+	}, [publish, show]);
 
 	return {
 		errors,
 		epoch,
+		revision: (name) => revisions.current[name] ?? 0,
+		nudge: (name) => nudges.current[name] ?? 0,
 		get: (name) => held.current[name],
 		values: read,
 		changed,
@@ -166,6 +239,7 @@ export const useForm = (): FormInstance => {
 		subscribe,
 		seed,
 		reset,
+		clear,
 		submit,
 		setErrors,
 		setApiError,
@@ -188,12 +262,12 @@ export function useWatch({ form, name }: FormArgs & { name?: string }): unknown 
 		[form.values, name],
 	);
 
-	return useSyncExternalStore(form.subscribe, snapshot);
+	return useSyncExternalStore(form.subscribe, snapshot, snapshot);
 }
 
 /** Whether the form differs from what it opened with, followed — one re-render per flip. */
 export const useChanged = ({ form }: FormArgs): boolean =>
-	useSyncExternalStore(form.subscribe, form.changed);
+	useSyncExternalStore(form.subscribe, form.changed, form.changed);
 
 /** The form the caller's fields are in, or `null` when they stand alone. */
 export const useFormContext = (): FormContextValue | null => useContext(FormContext);

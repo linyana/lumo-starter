@@ -1,9 +1,9 @@
-import { cloneElement, isValidElement, type ReactElement, type ReactNode } from 'react';
+import { cloneElement, Fragment, isValidElement, type ReactElement, type ReactNode } from 'react';
 import { useFormContext } from '@/components/form/form/instance';
 import type { FormInstance } from '@/components/form/form/types';
-import { fieldRule } from '@/lib/form';
+import { fieldRequired, fieldRule } from '@/lib/form';
 import { cn } from '@/lib/utils';
-import { FieldDescription, FieldError, FieldLabel, FieldRoot } from './parts';
+import { FieldDescription, FieldError, FieldLabel, FieldRoot, useFormRevision } from './parts';
 import type { FieldProps } from './types';
 
 export type { FieldProps } from '@/components/form/field/types';
@@ -44,6 +44,25 @@ const wire = ({
 };
 
 /**
+ * The control, drawn under the field's revision: a reset moves that number, the key changes, and the
+ * control is mounted again from what the form now holds. The label and the line beneath it are
+ * outside this, so they stay where they are.
+ */
+const Wired = ({
+	form,
+	name,
+	children,
+}: {
+	form: FormInstance;
+	name: string;
+	children: ReactNode;
+}): ReactNode => {
+	const revision = useFormRevision(name);
+
+	return <Fragment key={revision}>{wire({ form, name, children })}</Fragment>;
+};
+
+/**
  * One control, its name, and the line beneath it. The control inside is labelled, and held to the
  * rules its name has in the form's schema, so nothing is wired between the two by hand.
  *
@@ -55,6 +74,7 @@ const wire = ({
 export const Field = ({
 	name,
 	label,
+	required,
 	description,
 	error,
 	children,
@@ -66,6 +86,7 @@ export const Field = ({
 	const form = context?.form;
 	const schema = context?.schema;
 	const named = form !== undefined && name !== undefined;
+	const mandatory = required ?? (named && schema !== undefined && fieldRequired({ schema, name }));
 
 	return (
 		<FieldRoot
@@ -78,8 +99,18 @@ export const Field = ({
 			className={cn(className, classNames?.root)}
 			{...props}
 		>
-			{label !== undefined && <FieldLabel className={classNames?.label}>{label}</FieldLabel>}
-			{named ? wire({ form, name, children }) : children}
+			{label !== undefined && (
+				<FieldLabel required={mandatory} className={classNames?.label}>
+					{label}
+				</FieldLabel>
+			)}
+			{named ? (
+				<Wired form={form} name={name}>
+					{children}
+				</Wired>
+			) : (
+				children
+			)}
 			{description !== undefined && (
 				<FieldDescription className={classNames?.description}>{description}</FieldDescription>
 			)}

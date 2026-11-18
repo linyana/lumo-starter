@@ -6,7 +6,10 @@ import type { FormRootProps } from './parts';
  * The verdicts a form holds for its fields, keyed by the `name` on their `FieldRoot` — the same
  * shape a server action returns, so what a server answers goes in unchanged.
  */
-export type FormErrors = Record<string, string | string[]>;
+export type FormErrors = Record<string, FormError>;
+
+/** One verdict: a sentence, or the several a field can fail with at once. */
+export type FormError = string | string[];
 
 /** What the fields of one form hold, by name. The controls' own values, before any rule reads them. */
 export type FormValues = Record<string, unknown>;
@@ -29,7 +32,8 @@ export type FormConfig = {
  *
  * The controls keep their own DOM value; this is the copy the wire reads, written by their
  * `onChange`. `reset` is the one write that goes the other way, and it does it by remounting the
- * fields, so nothing stale survives on the other side of the two.
+ * fields — the one that was reset, or all of them — so nothing stale survives on the other side of
+ * the two.
  *
  * `submit` is the only validation path: it reads the values, holds them to the schema, puts every
  * verdict under the field it is about, and hands the parsed values to `onSubmit` only once nothing
@@ -38,7 +42,10 @@ export type FormConfig = {
 export type FormInstance = {
 	/** The last verdict, by field name. */
 	readonly errors: FormErrors;
-	/** Bumped by `reset`; the form is drawn under it, so a reset remounts the fields. */
+	/**
+	 * Bumped by the whole-form `reset`; the form is drawn under it, so every field is mounted again.
+	 * One field starting over moves its `revision` instead, and the rest keep what they hold.
+	 */
 	readonly epoch: number;
 	/**
 	 * Every value now, blanks left out — what a schema, a query or a body reads. The same object until
@@ -50,6 +57,17 @@ export type FormInstance = {
 	 * The baseline is the `initial` values the instance already keeps, so a screen never restates them.
 	 */
 	changed: () => boolean;
+	/**
+	 * How many times this field has been told to start over — the key its control is drawn under. A
+	 * write does not move it, so a field keeps its DOM value and its caret while it is typed into.
+	 */
+	revision: (name: string) => number;
+	/**
+	 * How many times this field has been told the same thing again — a submit that finds the sentence it
+	 * already put on screen, rather than a new one. One submit reminds once, at the first field that
+	 * repeated; what to do about being repeated is the line's own business, this only counts it.
+	 */
+	nudge: (name: string) => number;
 	get: (name: string) => unknown;
 	set: (update: { name: string; value: unknown }) => void;
 	/**
@@ -59,8 +77,16 @@ export type FormInstance = {
 	notify: () => void;
 	/** Hear every write. `useWatch` is the only caller. */
 	subscribe: (watcher: () => void) => () => void;
-	/** Back to what the form opened with; one name clears one field. */
+	/**
+	 * Back to what the form opened with: naming one field restores that one, and naming nothing restores
+	 * the whole form. Its verdict goes with it, because it was about a value that is no longer there.
+	 */
 	reset: (name?: string) => void;
+	/**
+	 * The same start over as `reset(name)`, for a field with nothing to go back to: the name leaves the
+	 * values the form opened with as well, so a filter a reader lifts is lifted rather than restored.
+	 */
+	clear: (name: string) => void;
 	/** Draw the fields from these values, now. What `<Form initial>` does on the render it mounts. */
 	seed: (values?: FormValues) => void;
 	/** Validate, then hand the parsed values to `onSubmit`. What every submit button calls. */

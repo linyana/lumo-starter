@@ -93,7 +93,20 @@ export const fieldRule =
 		return messages.length > 0 ? messages : null;
 	};
 
-const omit = ({ values, name }: { values: Values; name: string }): Values =>
+/**
+ * Whether a field has to be answered. The schema is asked to read the name with nothing in it, and a
+ * rule that answers nothing — an optional field, or one a default fills in — is a field the reader may
+ * leave alone. `.refine()` keeps the object it was called on, so a refined schema is still asked here.
+ */
+export const fieldRequired = ({ schema, name }: { schema: ZodType; name: string }): boolean => {
+	// Read off `shape` rather than asserted by `instanceof`: the schema may have been built by another
+	// copy of zod than this bundle holds, and a class check there answers `false` instead of failing.
+	const field = (schema as { shape?: Record<string, ZodType> }).shape?.[name];
+	return field !== undefined && !field.safeParse(undefined).success;
+};
+
+/** The same values without one name — a field read as if it had never been answered. */
+export const omit = ({ values, name }: { values: Values; name: string }): Values =>
 	Object.fromEntries(Object.entries(values).filter(([key]) => key !== name));
 
 /**
