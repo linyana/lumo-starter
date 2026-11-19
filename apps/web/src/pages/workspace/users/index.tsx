@@ -5,7 +5,7 @@ import { CreateUser } from './create';
 import { UserList } from './list';
 
 export const UsersPage = () => {
-	const list = useQuery({ fetcher: usersApi.list, sort: 'createdAt', order: 'desc' });
+	const list = useQuery({ fetcher: usersApi.list });
 
 	return (
 		<div className="space-y-3">

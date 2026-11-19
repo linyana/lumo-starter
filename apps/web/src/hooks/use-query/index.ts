@@ -63,7 +63,7 @@ const sameValues = (was: FormValues, next: FormValues): boolean => {
  * the filters, so `<Form>` owns what they hold and this owns what was last read, in the address bar.
  *
  * ```tsx
- * const users = useQuery({ fetcher: usersApi.list, sort: 'createdAt' });
+ * const users = useQuery({ fetcher: usersApi.list });
  * <Form form={users.form} initial={users.opened} onChange={users.write} settle={300}>
  * ```
  *
@@ -73,8 +73,6 @@ const sameValues = (was: FormValues, next: FormValues): boolean => {
  */
 export const useQuery = <TItem, TQuery extends ListQuery>({
 	fetcher,
-	sort: initialSort,
-	order: initialOrder = 'desc',
 	pageSize: initialPageSize = PAGE_SIZE_DEFAULT,
 	sync = true,
 }: UseQueryOptions<TItem, TQuery>): UseQueryResult<TItem, TQuery> => {
@@ -86,22 +84,13 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 	// the same screen is not.
 	const [opened] = useState<ListState<TQuery>>(() =>
 		sync
-			? stateFromParams<TQuery>({
-					params: searchParams,
-					sort: initialSort,
-					order: initialOrder,
-					pageSize: initialPageSize,
-				})
-			: emptyState<TQuery>({
-					sort: initialSort,
-					order: initialOrder,
-					pageSize: initialPageSize,
-				}),
+			? stateFromParams<TQuery>({ params: searchParams, pageSize: initialPageSize })
+			: emptyState<TQuery>({ pageSize: initialPageSize }),
 	);
 
 	const [page, setPage] = useState(opened.page);
 	const [pageSize, setPageSizeState] = useState(opened.pageSize);
-	const [sort, setSort] = useState<ListSort<SortKeyOf<TQuery>>>(opened.sort);
+	const [sort, setSort] = useState<ListSort<SortKeyOf<TQuery>> | undefined>(opened.sort);
 	const [filters, setFilters] = useState<ListFilters<TQuery>>(opened.filters);
 
 	// Whether anything is narrowed, which is what a blank list is asked to explain: "nothing matched"
@@ -161,9 +150,15 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 
 	const reload = useCallback(() => {
 		asked.current = page;
-		// `owned` is annotated so its `order` widens to the wire's: the two halves together are exactly
-		// `TQuery`, which is what the fetcher takes.
-		const owned: ListQuery = { page, pageSize, sort: sort.key, order: sort.order };
+		// The order is asked for only when the reader picked one: left out, the endpoint reads the
+		// records the way it reads them, so the wire never carries a default a second time. `owned` is
+		// annotated so its `order` widens to the wire's: the two halves together are exactly `TQuery`,
+		// which is what the fetcher takes.
+		const owned: ListQuery = { page, pageSize };
+		if (sort !== undefined) {
+			owned.sort = sort.key;
+			owned.order = sort.order;
+		}
 		void fetchData({ ...filters, ...owned } as TQuery);
 	}, [fetchData, filters, page, pageSize, sort]);
 
@@ -193,35 +188,19 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 
 		const next = paramsFromState<TQuery>({
 			state: { page, pageSize, sort, filters },
-			sort: initialSort,
-			order: initialOrder,
 			pageSize: initialPageSize,
 		});
 		if (next.toString() === searchParams.toString()) return;
 
 		setSearchParams(next, { replace: true });
-	}, [
-		sync,
-		page,
-		pageSize,
-		sort,
-		filters,
-		searchParams,
-		setSearchParams,
-		initialSort,
-		initialOrder,
-		initialPageSize,
-	]);
+	}, [sync, page, pageSize, sort, filters, searchParams, setSearchParams, initialPageSize]);
 
-	// Sorting is a query of its own, so it starts from the first page and the list's own order is
-	// where a cleared column lands.
-	const onSort = useCallback(
-		(next: ListSort<SortKeyOf<TQuery>> | undefined) => {
-			setSort(next ?? { key: initialSort, order: initialOrder });
-			setPage(1);
-		},
-		[initialSort, initialOrder],
-	);
+	// Sorting is a query of its own, so it starts from the first page. A cleared column is the order
+	// the endpoint reads the list in — no order of the reader's, and so no column marked.
+	const onSort = useCallback((next: ListSort<SortKeyOf<TQuery>> | undefined) => {
+		setSort(next);
+		setPage(1);
+	}, []);
 
 	// The way back to the whole list: the fields are redrawn empty in one write, so it is one read and
 	// not one per key. What the list was opened with goes too — a reader who asks for everything wants

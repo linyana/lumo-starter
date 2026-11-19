@@ -151,8 +151,11 @@ export type TableList<Row, Key extends string = string> = {
 	items: Row[];
 	/** Which wait this is, if any — `opening` before the first answer, `refreshing` after one. */
 	wait: ListWait;
-	/** The column the records were read by, and which way. */
-	sort: TableSort<Key>;
+	/**
+	 * The column the reader asked the records to be read by, and which way. Left out while they have
+	 * asked for none — the list is in the endpoint's own order, and marks no column.
+	 */
+	sort?: TableSort<Key>;
 	/** A title was pressed: the order to read them by next. */
 	onSort: (next: TableSort<Key> | undefined) => void;
 	page: number;

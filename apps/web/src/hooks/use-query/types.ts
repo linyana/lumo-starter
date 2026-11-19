@@ -33,7 +33,11 @@ export type ListSort<Key extends string = string> = { key: Key; order: SortOrder
 export type ListState<TQuery extends ListQuery> = {
 	page: number;
 	pageSize: number;
-	sort: ListSort<SortKeyOf<TQuery>>;
+	/**
+	 * The order the reader asked for, if any. Nothing means the endpoint reads the records the way it
+	 * reads them — its own default is the only declaration of it, and one the client never restates.
+	 */
+	sort?: ListSort<SortKeyOf<TQuery>>;
 	filters: ListFilters<TQuery>;
 };
 
@@ -47,16 +51,13 @@ export type ListOwnedKey = 'page' | 'pageSize' | 'sort' | 'order';
 export type ListFilters<TQuery extends ListQuery> = Omit<TQuery, ListOwnedKey>;
 
 /**
- * What the screen fixes for the life of the query: the order it opens in. The page, the size the
- * reader picks, the sort they pick and what they narrow on are the hook's own state.
+ * What the screen fixes for the life of the query: how many records one page holds, and whether the
+ * query lives in the address bar. The page, the order the reader picks and what they narrow on are
+ * the hook's own state, and the order a list reads in until the reader picks one is the endpoint's.
  */
 export type UseQueryOptions<TItem, TQuery extends ListQuery> = {
 	/** The endpoint one read calls; it is handed the whole query, filters and page alike. */
 	fetcher: (query: TQuery) => Promise<Paginated<TItem>>;
-	/** The column the records read by until the reader picks another. */
-	sort: SortKeyOf<TQuery>;
-	/** Which way round that column reads. Descending by default: the newest record first. */
-	order?: SortOrder;
 	/**
 	 * How many records one page holds until the reader picks another. The size the API opens at by
 	 * default — one table's worth.
@@ -99,8 +100,12 @@ export type UseQueryResult<TItem, TQuery extends ListQuery> = {
 	 * nothing is not a list that has nothing, and the two are the same empty row.
 	 */
 	narrowed: boolean;
-	/** The column the records were read by, and which way. The table draws its arrow from this. */
-	sort: ListSort<SortKeyOf<TQuery>>;
+	/**
+	 * The column the reader asked the records to be read by, and which way; the table draws its arrow
+	 * from this. Nothing while they have asked for none: the list is in the endpoint's own order, and
+	 * a list in its own order marks no column.
+	 */
+	sort?: ListSort<SortKeyOf<TQuery>>;
 	/** Which wait this is, if any: `opening` before the first answer, `refreshing` after one. */
 	wait: ListWait;
 	/** The API's sentence when the last read failed. The caller renders it where the records go. */
@@ -114,7 +119,7 @@ export type UseQueryResult<TItem, TQuery extends ListQuery> = {
 	setPageSize: (pageSize: number) => void;
 	/**
 	 * A title was pressed: another column, the other direction round, or nothing — which is the
-	 * press after the last direction, and puts the list back in the order the screen asked for.
+	 * press after the last direction, and puts the list back in the endpoint's own order.
 	 */
 	onSort: (next: ListSort<SortKeyOf<TQuery>> | undefined) => void;
 	/** Read the same page again — what a write elsewhere in the domain ends with. */
