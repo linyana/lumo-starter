@@ -158,6 +158,10 @@ common/      api/ auth/ error/ field/ pagination/ rbac/   everything cross-cutti
 ```
 
 - Most work lands in `features/`; anything cross-cutting goes to `common/`, never inside a feature.
+- **One verb, one schema.** A screen validates with the same object the API parses, so `createUserSchema`
+  is both the form's rules and the request body. A second, looser shape of the same body — a `.partial()`
+  nobody sends, a `Form` copy of a wire schema — is a shape with no second caller: add it when a caller
+  exists, not before.
 - Inside the package, import the domain itself (`../field`, `../../../common/pagination`), not a
   group barrel: the groups exist for the root barrel and for the reader.
 - `index.ts` and `types.ts` are the only files — kinds are folders: `constants/`, `schema/`,

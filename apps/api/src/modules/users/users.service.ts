@@ -99,33 +99,23 @@ export class UsersService {
 
 		// A roles field the reader cannot edit still travels with the form, so the rule reads the value
 		// that arrived rather than its presence.
-		if (
-			id === actor.id &&
-			input.roles !== undefined &&
-			rolesKey(input.roles) !== rolesKey(row.roles)
-		) {
+		if (id === actor.id && rolesKey(input.roles) !== rolesKey(row.roles)) {
 			throw new AppException({ code: 'FORBIDDEN', message: 'You cannot change your own roles' });
 		}
 
-		if (input.email !== undefined && input.email !== row.email) {
-			await this.assertEmailFree(input.email);
-		}
+		if (input.email !== row.email) await this.assertEmailFree(input.email);
 
 		// Never let the last owner lose the role: the app would be unadministrable.
-		if (input.roles && !input.roles.includes('OWNER')) {
+		if (row.roles.includes('OWNER') && !input.roles.includes('OWNER')) {
 			const owners = await this.prisma.user.count({ where: { roles: { has: 'OWNER' } } });
-			if (owners <= 1 && row.roles.includes('OWNER')) {
+			if (owners <= 1) {
 				throw new AppException({ code: 'FORBIDDEN', message: 'The last owner cannot be demoted' });
 			}
 		}
 
 		const updated = await this.prisma.user.update({
 			where: { id },
-			data: {
-				...(input.email === undefined ? {} : { email: input.email }),
-				...(input.name === undefined ? {} : { name: input.name }),
-				...(input.roles === undefined ? {} : { roles: input.roles }),
-			},
+			data: { email: input.email, name: input.name, roles: input.roles },
 		});
 
 		return toWireUser(updated);

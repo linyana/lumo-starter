@@ -1,7 +1,7 @@
 import {
 	ROLE_META,
 	ROLES,
-	updateUserFormSchema,
+	updateUserSchema,
 	type Role,
 	type UpdateUserInput,
 	type User,
@@ -53,7 +53,7 @@ export const EditUser = ({ user, open, onOpenChange, onUpdated }: IPropsType) =>
 		>
 			<Form
 				form={form}
-				schema={updateUserFormSchema}
+				schema={updateUserSchema}
 				initial={{ email: user.email, name: user.name, roles: user.roles }}
 				onSubmit={(values) => {
 					// A field that is focused submits the form on Enter, which never passes the disabled button.
