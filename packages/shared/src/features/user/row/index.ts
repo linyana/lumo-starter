@@ -10,4 +10,3 @@ export const userSchema = z.object({
 	permissions: z.array(permissionSchema),
 	createdAt: z.iso.datetime(),
 });
- 
