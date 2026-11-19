@@ -1,5 +1,5 @@
 import { PAGE_SIZE_DEFAULT, pageCountOf } from '@lumo/shared';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { useForm, type FormValues } from '@/components/form/form';
 import { useHttp } from '../use-http';
@@ -155,7 +155,12 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 		setPage(1);
 	}, []);
 
+	// The page the read in flight asked for, so the answer is compared with the question it answers and
+	// not with one asked since.
+	const asked = useRef(opened.page);
+
 	const reload = useCallback(() => {
+		asked.current = page;
 		// `owned` is annotated so its `order` widens to the wire's: the two halves together are exactly
 		// `TQuery`, which is what the fetcher takes.
 		const owned: ListQuery = { page, pageSize, sort: sort.key, order: sort.order };
@@ -171,9 +176,14 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 	// The page that is gone — the last record of the last page was just deleted, a size under the reader
 	// was picked, or the URL asked for one — is answered by the page the API actually read, so the screen
 	// follows that answer instead of asking again for one that does not exist.
+	//
+	// Keyed on the answer alone: the page the reader just picked is already a question, and the answer on
+	// screen belongs to the page before it — correcting against that one would send them back where they
+	// came from, one read later.
 	useEffect(() => {
-		if (data !== null && data.page !== page) setPage(data.page);
-	}, [data, page]);
+		if (data === null) return;
+		if (data.page !== asked.current) setPage(data.page);
+	}, [data]);
 
 	// What the reader is looking at, handed to the address bar: the page, the size, the order and the
 	// filters, and nothing at all while they are still the screen's own. Compared first, because a
