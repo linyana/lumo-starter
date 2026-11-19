@@ -154,8 +154,8 @@ and the difference is the one prop that says when to read: `onSubmit`, or `onCha
 
 **Why the store, when §8 first rejected antd's.** The controls keep their own DOM value and the
 instance is a mirror written by their `onChange`; it is not a controlled store. That is what lets a
-browser autofill land (the read-only gate opens the field first, and Chrome dispatches `input` on a
-fill), and it is why `reset` is a remount rather than a write back into each control. What was worth
+browser autofill land, and it is why `reset` is a remount rather than a write back into each
+control. What was worth
 taking from `Form.Item` is exactly this much: the injection of `value`/`onChange`, and a `values()`
 that a body, a query or a rule can read without the screen keeping a copy.
 
