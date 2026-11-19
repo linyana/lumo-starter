@@ -16,10 +16,6 @@ import { toWireUser } from './mapper/index.js';
 
 export type UserActor = { id: string; roles: readonly Role[] };
 
-/**
- * Roles read as a set: a pick made twice is the pick that was already there, and the same picks in
- * another order are the same answer.
- */
 const rolesKey = (roles: readonly string[]): string => [...new Set(roles)].sort().join(',');
 
 @Injectable()
@@ -27,9 +23,6 @@ export class UsersService {
 	constructor(private readonly prisma: PrismaService) {}
 
 	async list(query: ListUsersQuery): Promise<Paginated<WireUser>> {
-		// Two ways to narrow, and one is the other read narrower: `search` matches anywhere in the name or
-		// the address, `email` matches the address whole. Prisma leaves an `undefined` out of the clause,
-		// so the query is one object rather than one object per combination of the two.
 		const where: Prisma.UserWhereInput = {
 			email: query.email ? { equals: query.email, mode: 'insensitive' } : undefined,
 			OR: query.search
@@ -43,8 +36,6 @@ export class UsersService {
 		const page = await paginate({
 			prisma: this.prisma,
 			query,
-			// The sort key is a closed union in the shared schema, so the cast cannot be reached with an
-			// arbitrary column name from the query string.
 			find: ({ client, window }) =>
 				client.user.findMany({
 					where,
@@ -78,7 +69,6 @@ export class UsersService {
 		return toWireUser(row);
 	}
 
-	/** One email holds one account, so the unique index is asked before it is hit. */
 	private async assertEmailFree(email: string): Promise<void> {
 		const taken = await this.prisma.user.findUnique({ where: { email }, select: { id: true } });
 		if (taken)
@@ -97,15 +87,12 @@ export class UsersService {
 		const row = await this.prisma.user.findUnique({ where: { id } });
 		if (!row) throw new AppException('NOT_FOUND');
 
-		// A roles field the reader cannot edit still travels with the form, so the rule reads the value
-		// that arrived rather than its presence.
 		if (id === actor.id && rolesKey(input.roles) !== rolesKey(row.roles)) {
 			throw new AppException({ code: 'FORBIDDEN', message: 'You cannot change your own roles' });
 		}
 
 		if (input.email !== row.email) await this.assertEmailFree(input.email);
 
-		// Never let the last owner lose the role: the app would be unadministrable.
 		if (row.roles.includes('OWNER') && !input.roles.includes('OWNER')) {
 			const owners = await this.prisma.user.count({ where: { roles: { has: 'OWNER' } } });
 			if (owners <= 1) {
@@ -121,11 +108,6 @@ export class UsersService {
 		return toWireUser(updated);
 	}
 
-	/**
-	 * The rules one account has to pass to be deleted: not the reader's own, and not the last owner. They
-	 * live here, once, because a batch is the same question asked about more rows — and a batch that
-	 * answered differently from a row would be a second set of rules to keep in step.
-	 */
 	private async assertDeletable({
 		client,
 		ids,
@@ -158,20 +140,12 @@ export class UsersService {
 		await this.removeMany({ ids: [id], actor });
 	}
 
-	/**
-	 * The same question about a screenful: the rows are read and asked about once, and the delete happens
-	 * once — so a row that may not go takes none of the others with it.
-	 *
-	 * The same id twice is one row, and the answer is about the rows that were named, so the duplicates
-	 * are dropped before anything is counted.
-	 */
 	async removeMany({ ids, actor }: { ids: readonly string[]; actor: UserActor }): Promise<void> {
 		const named = [...new Set(ids)];
 
 		await this.prisma.$transaction(async (client) => {
 			await this.assertDeletable({ client, ids: named, actor });
 
-			// Refresh tokens cascade (onDelete: Cascade), so the session dies with the user.
 			await client.user.deleteMany({ where: { id: { in: named } } });
 		});
 	}
