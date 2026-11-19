@@ -29,7 +29,7 @@ import type { TableLocale, TableSort } from '../root';
  *
  * ```tsx
  * filter: {
- *   field: <Field name="email"><Input placeholder="Filter by email" /></Field>,
+ *   field: <Field name="email"><Input placeholder="Exact email" /></Field>,
  *   active: users.filters.email !== undefined,
  *   clear: () => users.clearFilter('email'),
  * }

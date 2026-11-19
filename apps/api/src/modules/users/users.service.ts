@@ -27,11 +27,11 @@ export class UsersService {
 	constructor(private readonly prisma: PrismaService) {}
 
 	async list(query: ListUsersQuery): Promise<Paginated<WireUser>> {
-		// Two ways to narrow, and they add up: `search` reads the name or the address, `email` only the
-		// address. Prisma leaves an `undefined` out of the clause, so the query is one object rather
-		// than one object per combination of the two.
+		// Two ways to narrow, and one is the other read narrower: `search` matches anywhere in the name or
+		// the address, `email` matches the address whole. Prisma leaves an `undefined` out of the clause,
+		// so the query is one object rather than one object per combination of the two.
 		const where: Prisma.UserWhereInput = {
-			email: query.email ? { contains: query.email, mode: 'insensitive' } : undefined,
+			email: query.email ? { equals: query.email, mode: 'insensitive' } : undefined,
 			OR: query.search
 				? [
 						{ email: { contains: query.search, mode: 'insensitive' } },

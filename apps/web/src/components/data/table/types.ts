@@ -57,7 +57,7 @@ export type TableColumn<Row, Key extends string = string> = {
 	 *
 	 * ```tsx
 	 * filter: {
-	 *   field: <Field name="email"><Input placeholder="Filter by email" /></Field>,
+	 *   field: <Field name="email"><Input placeholder="Exact email" /></Field>,
 	 *   active: users.filters.email !== undefined,
 	 *   clear: () => users.clearFilter('email'),
 	 * }
