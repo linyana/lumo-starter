@@ -59,7 +59,7 @@ export const EditUser = ({ user, open, onOpenChange, onUpdated }: IPropsType) =>
 					// A field that is focused submits the form on Enter, which never passes the disabled button.
 					if (!changed) return;
 
-					return submit.fetchData(ownRow ? { email: values.email, name: values.name } : values);
+					return submit.fetchData(values);
 				}}
 			>
 				<Field name="email" label="Email">

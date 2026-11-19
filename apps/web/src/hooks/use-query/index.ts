@@ -168,11 +168,12 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 		reload();
 	}, [reload]);
 
-	// A page that no longer exists — the last record of the last page was just deleted, a bigger size
-	// was picked, or the URL asked for one — is answered by going back to the last page there is.
+	// The page that is gone — the last record of the last page was just deleted, a size under the reader
+	// was picked, or the URL asked for one — is answered by the page the API actually read, so the screen
+	// follows that answer instead of asking again for one that does not exist.
 	useEffect(() => {
-		if (data !== null && page > pageCount) setPage(pageCount);
-	}, [data, page, pageCount]);
+		if (data !== null && data.page !== page) setPage(data.page);
+	}, [data, page]);
 
 	// What the reader is looking at, handed to the address bar: the page, the size, the order and the
 	// filters, and nothing at all while they are still the screen's own. Compared first, because a
