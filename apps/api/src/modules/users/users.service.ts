@@ -16,6 +16,12 @@ import { toWireUser } from './mapper/index.js';
 
 export type UserActor = { id: string; roles: readonly Role[] };
 
+/**
+ * Roles read as a set: a pick made twice is the pick that was already there, and the same picks in
+ * another order are the same answer.
+ */
+const rolesKey = (roles: readonly string[]): string => [...new Set(roles)].sort().join(',');
+
 @Injectable()
 export class UsersService {
 	constructor(private readonly prisma: PrismaService) {}
@@ -39,13 +45,13 @@ export class UsersService {
 			query,
 			// The sort key is a closed union in the shared schema, so the cast cannot be reached with an
 			// arbitrary column name from the query string.
-			find: (window) =>
-				this.prisma.user.findMany({
+			find: ({ client, window }) =>
+				client.user.findMany({
 					where,
 					orderBy: { [query.sort]: query.order } as Prisma.UserOrderByWithRelationInput,
 					...window,
 				}),
-			count: () => this.prisma.user.count({ where }),
+			count: ({ client }) => client.user.count({ where }),
 		});
 
 		return { ...page, items: page.items.map(toWireUser) };
@@ -88,12 +94,18 @@ export class UsersService {
 		input: UpdateUserInput;
 		actor: UserActor;
 	}): Promise<WireUser> {
-		if (input.roles && id === actor.id) {
-			throw new AppException({ code: 'FORBIDDEN', message: 'You cannot change your own roles' });
-		}
-
 		const row = await this.prisma.user.findUnique({ where: { id } });
 		if (!row) throw new AppException('NOT_FOUND');
+
+		// A roles field the reader cannot edit still travels with the form, so the rule reads the value
+		// that arrived rather than its presence.
+		if (
+			id === actor.id &&
+			input.roles !== undefined &&
+			rolesKey(input.roles) !== rolesKey(row.roles)
+		) {
+			throw new AppException({ code: 'FORBIDDEN', message: 'You cannot change your own roles' });
+		}
 
 		if (input.email !== undefined && input.email !== row.email) {
 			await this.assertEmailFree(input.email);
@@ -124,37 +136,53 @@ export class UsersService {
 	 * live here, once, because a batch is the same question asked about more rows — and a batch that
 	 * answered differently from a row would be a second set of rules to keep in step.
 	 */
-	private async assertDeletable({ id, actor }: { id: string; actor: UserActor }): Promise<void> {
-		if (id === actor.id) {
+	private async assertDeletable({
+		client,
+		ids,
+		actor,
+	}: {
+		client: Prisma.TransactionClient;
+		ids: readonly string[];
+		actor: UserActor;
+	}): Promise<void> {
+		if (ids.includes(actor.id)) {
 			throw new AppException({ code: 'FORBIDDEN', message: 'You cannot delete your own account' });
 		}
 
-		const row = await this.prisma.user.findUnique({ where: { id }, select: { roles: true } });
-		if (!row) throw new AppException('NOT_FOUND');
+		const rows = await client.user.findMany({
+			where: { id: { in: [...ids] } },
+			select: { id: true, roles: true },
+		});
+		if (rows.length !== ids.length) throw new AppException('NOT_FOUND');
 
-		if (row.roles.includes('OWNER')) {
-			const owners = await this.prisma.user.count({ where: { roles: { has: 'OWNER' } } });
-			if (owners <= 1) {
-				throw new AppException({ code: 'FORBIDDEN', message: 'The last owner cannot be deleted' });
-			}
+		const owners = rows.filter((row) => row.roles.includes('OWNER')).length;
+		if (owners === 0) return;
+
+		const live = await client.user.count({ where: { roles: { has: 'OWNER' } } });
+		if (live - owners < 1) {
+			throw new AppException({ code: 'FORBIDDEN', message: 'The last owner cannot be deleted' });
 		}
 	}
 
 	async remove({ id, actor }: { id: string; actor: UserActor }): Promise<void> {
-		await this.assertDeletable({ id, actor });
-
-		// Refresh tokens cascade (onDelete: Cascade), so the session dies with the user.
-		await this.prisma.user.delete({ where: { id } });
+		await this.removeMany({ ids: [id], actor });
 	}
 
 	/**
-	 * The same question about a screenful: every id is asked first and the delete happens once, so a
-	 * batch never half-succeeds under a failure — either nothing went, or the answer counts what did.
+	 * The same question about a screenful: the rows are read and asked about once, and the delete happens
+	 * once — so a row that may not go takes none of the others with it.
+	 *
+	 * The same id twice is one row, and the answer is about the rows that were named, so the duplicates
+	 * are dropped before anything is counted.
 	 */
-	async removeMany({ ids, actor }: { ids: readonly string[]; actor: UserActor }) {
-		for (const id of ids) await this.assertDeletable({ id, actor });
+	async removeMany({ ids, actor }: { ids: readonly string[]; actor: UserActor }): Promise<void> {
+		const named = [...new Set(ids)];
 
-		const { count } = await this.prisma.user.deleteMany({ where: { id: { in: [...ids] } } });
-		return { deleted: count };
+		await this.prisma.$transaction(async (client) => {
+			await this.assertDeletable({ client, ids: named, actor });
+
+			// Refresh tokens cascade (onDelete: Cascade), so the session dies with the user.
+			await client.user.deleteMany({ where: { id: { in: named } } });
+		});
 	}
 }

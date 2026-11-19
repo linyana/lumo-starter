@@ -8,5 +8,3 @@ export const batchDeleteUsersSchema = z.object({
 		.min(1, { error: 'Send at least one id to delete' })
 		.max(BATCH_MAX, { error: `Delete at most ${BATCH_MAX} accounts at a time` }),
 });
-
-export const batchDeleteUsersResponseSchema = z.object({ deleted: z.number() });
