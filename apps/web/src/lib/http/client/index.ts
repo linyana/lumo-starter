@@ -155,7 +155,14 @@ http.interceptors.response.use(
 
 const unwrap = <T>(response: AxiosResponse<ApiSuccess<T>>): T => response.data.data;
 
-/** Thin typed wrapper so call sites never see the `{ data }` envelope. */
+/**
+ * Thin typed wrapper so call sites never see the `{ data }` envelope — every request the app makes goes
+ * through here, so a verb is one function and the envelope is one unwrap.
+ *
+ * `send` is the verb that has no envelope to unwrap: the endpoint's whole answer is the status. It
+ * names the method rather than fixing one, because a delete and a batch answered `204` are the same
+ * answer and two different wires.
+ */
 export const api = {
 	get: async <T>({ url, params }: { url: string; params?: Record<string, unknown> }): Promise<T> =>
 		unwrap(await http.get<ApiSuccess<T>>(url, { params })),
@@ -163,7 +170,15 @@ export const api = {
 		unwrap(await http.post<ApiSuccess<T>>(url, body)),
 	patch: async <T>({ url, body }: { url: string; body?: unknown }): Promise<T> =>
 		unwrap(await http.patch<ApiSuccess<T>>(url, body)),
-	delete: async (url: string): Promise<void> => {
-		await http.delete(url);
+	send: async ({
+		method,
+		url,
+		body,
+	}: {
+		method: 'delete' | 'patch' | 'post';
+		url: string;
+		body?: unknown;
+	}): Promise<void> => {
+		await http.request({ method, url, data: body });
 	},
 };

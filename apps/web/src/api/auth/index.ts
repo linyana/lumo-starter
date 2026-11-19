@@ -1,5 +1,5 @@
 import type { AuthResult, LoginInput, RegisterInput, User } from '@lumo/shared';
-import { api, http } from '@/lib';
+import { api } from '@/lib';
 
 const login = (input: LoginInput): Promise<AuthResult> =>
 	api.post<AuthResult>({ url: '/auth/login', body: input });
@@ -11,8 +11,8 @@ const register = (input: RegisterInput): Promise<AuthResult> =>
 const me = (): Promise<User> =>
 	api.get<{ user: User }>({ url: '/auth/me' }).then((payload) => payload.user);
 
-/** 204 No Content — the envelope is skipped on the server for this route. */
-const logout = (): Promise<void> => http.post('/auth/logout').then(() => undefined);
+/** Answered `204`: the session is over, and the server has nothing to say about it. */
+const logout = (): Promise<void> => api.send({ method: 'post', url: '/auth/logout' });
 
 /**
  * Verbs rather than a resource, because that is what a session is: a login is not a thing anyone

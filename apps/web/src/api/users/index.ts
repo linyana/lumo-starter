@@ -16,10 +16,10 @@ const create = (input: CreateUserInput): Promise<User> =>
 const update = ({ id, input }: { id: string; input: UpdateUserInput }): Promise<User> =>
 	api.patch<{ user: User }>({ url: `/users/${id}`, body: input }).then((payload) => payload.user);
 
-const remove = (id: string): Promise<void> => api.delete(`/users/${id}`);
+const remove = (id: string): Promise<void> => api.send({ method: 'delete', url: `/users/${id}` });
 
-const removeMany = (ids: string[]): Promise<{ deleted: number }> =>
-	api.post<{ deleted: number }>({ url: '/users/batch-delete', body: { ids } });
+const removeMany = (ids: string[]): Promise<void> =>
+	api.send({ method: 'post', url: '/users/batch-delete', body: { ids } });
 
 /**
  * The resource as one client: `POST /users` and the rest of it, named by what the caller asks for
