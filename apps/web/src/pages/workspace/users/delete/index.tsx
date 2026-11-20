@@ -28,8 +28,8 @@ export const DeleteUsers = ({ users, closePanel, reload }: IPropsType) => {
 	return (
 		<AlertDialog
 			open
-			// Confirming, cancelling, Escape and a press on the page behind it all end the same way here: the
-			// panel goes away, and the removal that was already started reports back by itself.
+			// Confirming, cancelling and Escape all end the same way here: the panel goes away, and the
+			// removal that was already started reports back by itself.
 			onOpenChange={(next) => {
 				if (!next) closePanel();
 			}}
