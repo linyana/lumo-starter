@@ -92,9 +92,9 @@ function pagerOf<Row, Key extends string>(
 		pageSize: list.pageSize,
 		onPageChange: list.setPage,
 		onPageSizeChange: list.setPageSize,
-		// A read in the air holds the footer's presses: the rows are about to be replaced, so a press
-		// would be aimed at a page the reader has not seen yet.
-		busy: list.wait === 'refreshing',
+		// Any read in the air holds the footer's presses, the opening one as much as a refresh: either way
+		// the rows a press is aimed at have not arrived, so the press would ask for a page of nothing.
+		busy: list.wait !== null,
 	};
 }
 

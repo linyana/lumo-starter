@@ -51,6 +51,7 @@ export function PaginationPage({ value, className, children, ...props }: Paginat
 			data-slot="pagination-page"
 			data-size={state.size}
 			data-active={active ? '' : undefined}
+			data-disabled={held ? '' : undefined}
 			aria-current={active ? 'page' : undefined}
 			aria-label={`${state.locale.page} ${value}`}
 			disabled={held}

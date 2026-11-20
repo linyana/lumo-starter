@@ -141,7 +141,7 @@ export function PaginationRoot({
 				data-size={size}
 				aria-label={label}
 				aria-busy={busy || undefined}
-				className={cn('flex items-center gap-2', className)}
+				className={cn('flex items-center gap-2 aria-busy:cursor-progress', className)}
 				{...props}
 			>
 				{children}

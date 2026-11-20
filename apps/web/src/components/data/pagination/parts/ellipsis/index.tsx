@@ -65,6 +65,7 @@ export function PaginationEllipsis({
 			type="button"
 			data-slot="pagination-ellipsis"
 			data-size={state.size}
+			data-disabled={state.busy ? '' : undefined}
 			aria-label={named.replace('{count}', String(JUMP_STEP))}
 			disabled={state.busy}
 			onClick={onJump}
