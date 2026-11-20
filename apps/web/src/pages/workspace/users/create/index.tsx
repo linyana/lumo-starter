@@ -28,7 +28,7 @@ export const CreateUser = ({ onCreated }: IPropsType) => {
 			onOpenChange={setOpen}
 			trigger={
 				<Button variant="default" size="sm">
-					Invite
+					Create
 				</Button>
 			}
 			title="New account"
