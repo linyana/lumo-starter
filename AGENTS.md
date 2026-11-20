@@ -1,13 +1,17 @@
 # Agent instructions
 
-## Design
+Two tests decide whether a line belongs in this file: **a comment is worth writing only where the
+code cannot say what it means**, and **a rule no tool executes is a comment pretending to be a
+standard**. So every rule below names its judge — a compiler error, a lint rule, an `ls` — or it is
+decidable by reading the one file in front of you. Anything else is a preference, and a preference
+belongs in the pull request that argues for it, not here.
 
-Prefer simple, extensible designs. Optimize for fewer concepts, no special cases, and changes that
-stay local.
+## Design
 
 **A branch the wire cannot produce is a comment pretending to be code.** Read the service before
 drawing a partial outcome: a batch that asks about every row before it deletes answers all-or-nothing,
-so a `deleted < ids.length` notice is a path nobody reaches and a reader will still believe.
+so a `deleted < ids.length` notice is a path nobody reaches and a reader will still believe. Judge:
+follow the call, name the input that reaches the branch. There is none, or the branch goes.
 
 ## Comments
 
@@ -21,9 +25,9 @@ did not, the second narrates a change instead of the code that remains.
 
 ## Functions
 
-**Two or more parameters become one object parameter.** A function takes a single positional value
-at most; anything beyond that is a named object, so a call site reads as labels and a new field
-never re-orders existing arguments.
+**Two or more parameters become one object parameter.** A function takes one positional value at most;
+anything beyond that is a named object, so a call site reads as labels and a new field never re-orders
+existing arguments.
 
 ```ts
 // no
@@ -32,81 +36,48 @@ getUsers(page, pageSize, filter);
 getUsers({ page, pageSize, filter });
 ```
 
-The only exception is a signature the framework dictates (Nest guards, interceptors and pipes,
-React event handlers, third-party callbacks): we cannot reshape those, so leave them alone.
+The only exception is a signature the framework dictates (Nest guards, interceptors and pipes, React
+event handlers, third-party callbacks): we cannot reshape those, so leave them alone. Judge: read the
+signature. Nobody needs the history to count the commas.
 
 ## Layout
 
-Domain first, then one folder per unit, at every level. **A folder holds two files, at most:
-`index.ts` (its entry, or the barrel of what is below it) and `types.ts` (declarations).** Every
-other name is a folder with its own `index.ts` — `constants/index.ts`, `schema/index.ts`,
-`api/index.ts`, `mapper/index.ts`. kebab-case for folders and files.
-
-Imports are alphabetical by specifier — `@/api` before `@/components`, `../delete` before `./types`
-— and the block ends with one blank line before the first declaration. `oxfmt` leaves both alone, so
-both are written by hand.
+**A folder holds two files at most: `index.ts` (its entry, or the barrel of what is below it) and
+`types.ts` (declarations). Every other name is a folder with its own `index.ts`.** Judge: `ls`. A
+third file is the finding; a `PascalCase` or `camelCase` name is the other one.
 
 ### `apps/web/src`
 
 ```
-api/<resource>/index.ts             the wire: one folder per resource, `index` is the barrel
-pages/<domain>/<screen>/index.tsx    screens, grouped by the rail's own groups
-pages/<domain>/<screen>/types.ts     the screen's declarations, named by its siblings
-providers/<concern>/{index, session/, guards/}
-providers/layout/{frame,shell,auth}/  the block a screen sits in, the frames built on it,
-                                     `index` is the barrel
-hooks/<name>/{index, types}          request state, the app-wide store
-lib/<module>/{index, client/, error/}
-components/<group>/<name>/          the kit, one folder per component
-components/<group>/{index.ts}       the six groups: form overlay display feedback navigation data
-components/<group>/<name>/{index.tsx, types.ts, parts/}
-components/<group>/<name>/parts/<part>/index.tsx
-providers/access/                    the grant a gated row is filtered by — a provider and a hook
+api/<resource>/index.ts              the wire, one folder per resource
+pages/<domain>/<screen>/index.tsx    a screen
+hooks/<name>/{index,types}           request state, the app-wide store
+lib/<module>/{index,client,error}    transport and the small shared modules
+components/<group>/<name>/           the kit: index.tsx, types.ts, optional parts/
+providers/<concern>/                 the session, the grant, the frames
 routes.tsx                           the route table, importing screens from `@/pages`
 ```
 
-- **A component is filed by what a screen needs it for, and there are six answers.** `form/` — a
-  control whose value the screen collects (button, input, select, checkbox, field, form…);
-  `overlay/` — something drawn over the page (dialog, drawer, menu, tooltip, action bar); `display/`
-  — a thing that shows one fact (badge, avatar, card, separator, expansion); `feedback/` — the state
-  of a wait or an outcome (toast, progress, spinner, skeleton); `navigation/` — moving between
-  places (nav, tabs); `data/` — a collection of records (table, pagination, steps). Provenance is
-  not the axis: a wrapper of Base UI and one written here sit side by side when they answer the same
-  need — `menu` and `context-menu` are both in `overlay/`. Where the behaviour comes from is the
-  first line of the file, and one `grep -rl "@base-ui/react" components` lists every wrapper.
-- **A component is one folder, and it opens up twice.** `index.tsx` is the shape a screen wants
-  (`Card` takes a title, a description, a footer); `parts/` is the same component taken apart
-  (`CardRoot`, `CardHeader`), for the rare screen that needs a different arrangement. Whether a
-  folder has a `parts/` is also how a leaf tells itself from an assembly. A preset that only
-  re-states a default belongs in neither: fold it into the part it defaults.
-- **A part is flat, and a shared value lives with the part that owns it.** `parts/root`, `parts/item`
-  — never a nested tree — and `buttonVariants`, a context, a locale table sit in the part that reads
-  them, not in a `variants.ts` beside the component.
-- Import the barrel (`@/api`, `@/pages`, `@/providers`, `@/hooks`, `@/lib`, `@/components`); siblings
-  inside a domain reach for each other relatively. A resource module names the sibling it needs
-  (`../roles`), never `@/api`: the barrel re-exports it, so that import would close a cycle.
-- A screen imports `@/components`; reaching into a component's `parts/` is the exception that says
-  so in the diff. Inside the kit the split is positional: a sibling part is relative (`../header`),
-  another component is `@/components/<group>/<name>` or `…/parts` — even one in the same group — and
-  never the `@/components` barrel, which re-exports all 42, so naming it from a part would make one
-  `div` depend on the whole kit.
-- A layout receives what it draws: `providers/routes` derives the rail rows from `routes.tsx` and
-  hands them to the shell, so no layout imports the table or the pages behind it. A frame a screen
-  imports may never close a cycle through `@/pages`, which is exactly what that would be.
-- The components keep importing the single module they need (`@/lib/utils`): the
-  barrels would close a cycle there.
-- A new screen is three edits: the folder, one line in its domain's `index.ts`, one row in
-  `routes.tsx`. A new resource adds `api/<resource>/index.ts` and one line in `api/index.ts` — and
-  no screen has to know where its calls live.
-- **Declarations live in `types.ts`, behavior in `index.tsx`.** The state a screen holds open, the
-  args a local dispatcher takes, the row and column shapes a caller is written against: all exported
-  from `types.ts` whether one sibling names them or five. It is where a reader looks, and it keeps a
-  doc comment on the declaration instead of on a function that happens to mention it. The one
-  exception is the entry's own props type — `IPropsType`, unexported, in the file that declares the
-  component — because a second name for it buys nothing. `components/` publishes `XxxProps` from its
-  `types.ts` as always, since every screen may name those.
-- **What a screen has open is one value, not a state per dialog.** The union lives in `types.ts`, the
-  screen holds `useState<Panel | null>(null)`, and one function draws whichever kind is open:
+- **A component is filed by what a screen needs it for, and there are six answers:** `form/` (a
+  control whose value the screen collects), `overlay/` (something drawn over the page), `display/`
+  (a thing that shows one fact), `feedback/` (the state of a wait or an outcome), `navigation/`
+  (moving between places), `data/` (a collection of records). Provenance is not the axis: a wrapper
+  of Base UI and one written here sit side by side when they answer the same need. Judge: name the
+  need; the group follows.
+- **A component is one folder, and it opens up twice.** `index.tsx` is the shape a screen wants;
+  `parts/` is the same component taken apart, flat — `parts/root`, `parts/item`, never a nested tree.
+  A folder that has a `parts/` is an assembly; one that does not is a leaf. Judge: `ls`.
+- **A props type a caller may name is exported from the component's own folder.** Whether it sits in
+  `types.ts` or in `index.tsx` is that folder's business; a screen redeclaring it is not.
+- A screen imports `@/components`; only the kit reaches past it into a `parts/`. Inside the kit, a
+  sibling part is relative (`../header`), another component is named by path
+  (`@/components/<group>/<name>`), never by the barrel — one part naming the barrel would make one
+  `div` depend on all 42. Judge: `grep -rn "parts/" apps/web/src/pages` finds nothing.
+- **What a screen has open is one value, not a state per dialog.** The union of the open kinds lives
+  in `types.ts`, the screen holds `useState<Panel | null>(null)`, and one function draws whichever
+  kind is open. Judge: `tsc`. The renderer returns `ReactElement`, so a kind with no case is a
+  function that can end without returning and `TS2366` says so — which is why there is no `default`
+  that throws, no `satisfies never`, and no table of renderers.
 
   ```tsx
   const renderPanel = ({ panel, onOpenChange, reload }: PanelArgs): ReactElement => {
@@ -121,19 +92,19 @@ routes.tsx                           the route table, importing screens from `@/
   };
   ```
 
-  Returning `ReactElement` rather than `ReactNode` is the whole guard: every case returns, so a kind
-  with no case is a function that can end without returning and `TS2366` says so — no `default` that
-  throws, no `satisfies never`, no mapped-type table. A table of renderers buys a line per kind and
-  costs three type declarations plus a generic that exists only to be callable, so it does not pay at
-  this size.
-
-- **No ternaries in JSX, and no truthiness on a nullable.** A nullable reads `panel !== null && …`; a
-  boolean reads `flag && …`. A chain of `a ? <A /> : b ? <B /> : <C />` is a union with a `switch`
-  behind it, and the branch that "must be" the last one is the one nobody checks.
-- **A folder is a verb, and one verb is one component.** `list`, `create`, `edit`, `delete`. A folder
-  named after a quantity (`batch-delete`) or a second noun is a component that should have taken the
-  rows as a payload: `DeleteUsers({ users })` deletes one row and a screenful with no branch, and the
-  screen's `Panel` keeps a single `delete`.
+- **A folder is a verb, and one verb is one component.** A screen's `list`, `create`, `edit` and
+  `delete` each own one folder. `DeleteUsers({ users })` deletes one row and a screenful with no
+  branch, so a folder named after a quantity — a second noun, not an action — is a component that
+  should have taken the rows as a payload.
+- **Declarations live in `types.ts` when a sibling or a screen has to name them:** the state a screen
+  holds open, the args of a dispatcher, the row shape a caller is written against. Behavior stays in
+  `index.tsx`.
+- **A layout receives what it draws.** `providers/routes` derives the rail rows from `routes.tsx` and
+  hands them to the shell, so no layout imports the table or the pages behind it, and a frame a
+  screen imports can never close a cycle through `@/pages`. Judge: the diff touches the layout's
+  props, not its imports.
+- **A new screen is three edits:** the folder, one line in its domain's `index.ts`, one row in
+  `routes.tsx`. A new resource is `api/<resource>/index.ts` plus one line in `api/index.ts`.
 
 ### `apps/api/src`
 
@@ -141,13 +112,15 @@ Nest's files keep Nest's naming; they are the framework's, and stay flat.
 
 ```
 modules/<domain>/    <domain>.{controller,module,service}.ts, plus mapper/ refresh-cookie/
-common/<kind>/       config/ db/ guards/ …, plus codec/ table/ setup/
+common/<kind>/       config/ db/ guards/ ..., plus codec/ table/ setup/
 ```
 
 - `*.controller|module|service|filter|guard|interceptor|pipe|decorator|exception.ts` stay flat and
   named after their class; everything else is a folder with an `index.ts`.
-- No barrels: the graph Nest reads is the file graph.
-- The API is ESM, so a relative specifier names the file (`.js` included), never a directory.
+- No barrels: the graph Nest reads is the file graph. Judge: `grep -rn "export \* from" src` finds
+  nothing.
+- **The API is ESM, so a relative specifier names the file (`.js` included), never a directory.**
+  Judge: `tsc`, under `moduleResolution: node16`.
 
 ### `packages/shared/src`
 
@@ -158,13 +131,16 @@ common/      api/ auth/ error/ field/ pagination/ rbac/   everything cross-cutti
 ```
 
 - Most work lands in `features/`; anything cross-cutting goes to `common/`, never inside a feature.
-- **One verb, one schema.** A screen validates with the same object the API parses, so `createUserSchema`
-  is both the form's rules and the request body. A second, looser shape of the same body — a `.partial()`
-  nobody sends, a `Form` copy of a wire schema — is a shape with no second caller: add it when a caller
-  exists, not before.
+- **One verb, one schema.** A screen validates with the same object the API parses, so
+  `createUserSchema` is both the form's rules and the request body. A second, looser shape of the
+  same body — a `.partial()` nobody sends, a `Form` copy of a wire schema — is a shape with no second
+  caller: add it when a caller exists, not before. Judge: `grep` the name; two schemas for one body
+  are one too many.
+- Kinds are folders where a domain has several of one — `common/<domain>/{constants,schema,rules}/`.
+  A feature verb is one schema and one type — `features/<feature>/<verb>/{index,types}.ts`.
 - Inside the package, import the domain itself (`../field`, `../../../common/pagination`), not a
   group barrel: the groups exist for the root barrel and for the reader.
-- `index.ts` and `types.ts` are the only files — kinds are folders: `constants/`, `schema/`,
-  `rules/`.
-- Runtime-agnostic: no `node:*`, no `fs`, no DOM.
 - Consumers import `@lumo/shared`, never a path below it.
+- **Runtime-agnostic: no `node:*`, no DOM.** Judge: `pnpm lint`. `no-restricted-imports` and
+  `no-restricted-globals` in `.oxlintrc.json` fail the build on either, so this one is not a promise
+  anybody has to remember.

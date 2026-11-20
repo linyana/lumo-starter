@@ -17,8 +17,8 @@
 		".agents/"
 	],
 	"rules": {
-		"no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
-		"typescript/no-explicit-any": "warn"
+		"no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+		"typescript/no-explicit-any": "error"
 	},
 	"overrides": [
 		{
@@ -28,14 +28,39 @@
 			"files": ["apps/web/**/*.{ts,tsx}", "packages/**/*.ts"],
 			"rules": {
 				"typescript/consistent-type-imports": [
-					"warn",
+					"error",
 					{ "prefer": "type-imports", "fixStyle": "inline-type-imports" }
 				]
 			}
 		},
 		{
-			"files": ["apps/api/**/*.ts", "packages/**/*.ts"],
+			"files": ["apps/api/**/*.ts"],
 			"env": { "node": true }
+		},
+		{
+			// The shared package runs in the browser and in Node, so it may name neither
+			// runtime: no `node:*`, no DOM. A rule nothing executes is not a rule, so the
+			// constraint lives here rather than in AGENTS.md.
+			"files": ["packages/**/*.ts"],
+			"rules": {
+				"no-restricted-globals": [
+					"error",
+					{ "name": "window", "message": "@lumo/shared must stay runtime-agnostic: no DOM." },
+					{ "name": "document", "message": "@lumo/shared must stay runtime-agnostic: no DOM." },
+					{ "name": "localStorage", "message": "@lumo/shared must stay runtime-agnostic: no DOM." }
+				],
+				"no-restricted-imports": [
+					"error",
+					{
+						"patterns": [
+							{
+								"group": ["node:*"],
+								"message": "@lumo/shared must stay runtime-agnostic: no node:* imports."
+							}
+						]
+					}
+				]
+			}
 		},
 		{
 			"files": ["apps/web/src/**/*.{ts,tsx}"],
