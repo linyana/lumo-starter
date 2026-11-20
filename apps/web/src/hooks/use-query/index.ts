@@ -2,6 +2,7 @@ import { PAGE_SIZE_DEFAULT, pageCountOf } from '@lumo/shared';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { useForm, type FormValues } from '@/components/form/form';
+import { sameValues } from '@/lib';
 import { useHttp } from '../use-http';
 import { emptyState, paramsFromState, stateFromParams } from './params';
 import type {
@@ -25,33 +26,6 @@ export type {
 	UseQueryOptions,
 	UseQueryResult,
 } from './types';
-
-/**
- * Whether two writes hold the same answers. A field's value is text, a number, a flag or a list of
- * them, so this is the keys and then the values — a list by what it holds, because a multi-select
- * picked again is a new array with the same content. Anything it cannot see into counts as a change:
- * a read too many is a read, and a stale list is not.
- */
-const sameValues = (was: FormValues, next: FormValues): boolean => {
-	const keys = Object.keys(was);
-	if (keys.length !== Object.keys(next).length) return false;
-
-	return keys.every((key) => {
-		const a = was[key];
-		const b = next[key];
-
-		if (Array.isArray(a) || Array.isArray(b)) {
-			return (
-				Array.isArray(a) &&
-				Array.isArray(b) &&
-				a.length === b.length &&
-				a.every((value, index) => value === b[index])
-			);
-		}
-
-		return a === b;
-	});
-};
 
 /**
  * One page of records and the way through them: `useHttp` under the hood, with the page, the size,
@@ -127,7 +101,7 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 	 */
 	const write = useCallback(
 		(values: FormValues): void => {
-			if (sameValues(filters as FormValues, values)) return;
+			if (sameValues({ left: filters as FormValues, right: values })) return;
 
 			setFilters(values as ListFilters<TQuery>);
 			setPage(1);
