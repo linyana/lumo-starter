@@ -151,14 +151,13 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 	const reload = useCallback(() => {
 		asked.current = page;
 		// The order is asked for only when the reader picked one: left out, the endpoint reads the
-		// records the way it reads them, so the wire never carries a default a second time. `owned` is
-		// annotated so its `order` widens to the wire's: the two halves together are exactly `TQuery`,
-		// which is what the fetcher takes.
-		const owned: ListQuery = { page, pageSize };
-		if (sort !== undefined) {
-			owned.sort = sort.key;
-			owned.order = sort.order;
-		}
+		// records the way it reads them, so the wire never carries a default a second time. What is
+		// left is the whole of `TQuery`; only the assertion is left over, because a spread of an `Omit`
+		// under a constraint is not something TypeScript can prove.
+		const owned =
+			sort === undefined
+				? { page, pageSize }
+				: { page, pageSize, sort: sort.key, order: sort.order };
 		void fetchData({ ...filters, ...owned } as TQuery);
 	}, [fetchData, filters, page, pageSize, sort]);
 

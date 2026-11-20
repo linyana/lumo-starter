@@ -9,6 +9,9 @@ export const listUsersQuerySchema = paginationSchema.extend({
 		.trim()
 		.max(EMAIL_MAX, { error: `Email must be at most ${EMAIL_MAX} characters` })
 		.optional(),
-	sort: z.enum(['email', 'name', 'createdAt']).default('createdAt'),
-	order: sortOrderSchema,
+	/** No `.default()` on these two: a reader who has not picked a column sends neither, and the order a
+	 * list reads in is decided where it is read — `UsersService.list` — not restated as a request field
+	 * the client would have to send back. */
+	sort: z.enum(['email', 'name', 'createdAt']).optional(),
+	order: sortOrderSchema.optional(),
 });

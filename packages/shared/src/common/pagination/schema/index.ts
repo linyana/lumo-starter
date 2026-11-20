@@ -11,4 +11,4 @@ export const paginationSchema = z.object({
 		.default(PAGE_SIZE_DEFAULT),
 });
 
-export const sortOrderSchema = z.enum(['asc', 'desc']).default('desc');
+export const sortOrderSchema = z.enum(['asc', 'desc']);
