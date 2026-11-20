@@ -11,6 +11,11 @@ import type { PrismaService } from '../db/prisma.service.js';
  * past the last one is answered by the last one there is, and the envelope names the page that was
  * read rather than the one that was asked for.
  *
+ * The two reads are not wrapped in a transaction. One would not make them a single view: at READ
+ * COMMITTED the count and the page are two snapshots either way. What it would add is a pooled
+ * connection held across the round trip, and Prisma's transaction timeout as one more way for a
+ * plain read to fail while the pool is busy.
+ *
  * ```ts
  * return paginate({
  * 	prisma: this.prisma,
@@ -29,25 +34,22 @@ export const paginate = async <Row>({
 	prisma: PrismaService;
 	/** The window asked for: which page, and how large. */
 	query: Pagination;
-	/** The rows of one page, read through the transaction the count was taken in. */
+	/** The rows of one page. */
 	find: (args: {
-		client: Prisma.TransactionClient;
+		client: PrismaService;
 		window: { skip: number; take: number };
 	}) => Prisma.PrismaPromise<Row[]>;
 	/** How many rows the same narrowing matches in all. */
-	count: (args: { client: Prisma.TransactionClient }) => Prisma.PrismaPromise<number>;
-}): Promise<Paginated<Row>> =>
-	// One transaction, so a write landing between the count and the read cannot tell the reader
-	// about a page the other half had just rearranged.
-	prisma.$transaction(async (client) => {
-		const total = await count({ client });
-		const pageCount = pageCountOf({ total, pageSize: query.pageSize });
-		const page = clampPage({ page: query.page, pageCount });
+	count: (args: { client: PrismaService }) => Prisma.PrismaPromise<number>;
+}): Promise<Paginated<Row>> => {
+	const total = await count({ client: prisma });
+	const pageCount = pageCountOf({ total, pageSize: query.pageSize });
+	const page = clampPage({ page: query.page, pageCount });
 
-		const items = await find({
-			client,
-			window: { skip: (page - 1) * query.pageSize, take: query.pageSize },
-		});
-
-		return { items, page, pageSize: query.pageSize, pageCount, total };
+	const items = await find({
+		client: prisma,
+		window: { skip: (page - 1) * query.pageSize, take: query.pageSize },
 	});
+
+	return { items, page, pageSize: query.pageSize, pageCount, total };
+};

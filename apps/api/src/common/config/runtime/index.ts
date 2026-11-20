@@ -26,3 +26,22 @@ export const REFRESH_TOKEN_TTL_DAYS = 30;
 
 /** One bucket per IP, every route. `ttl` is milliseconds. */
 export const THROTTLE = { ttl: 60_000, limit: 120 } as const;
+
+/**
+ * The connections one API process opens. `max` is also how many interactive transactions can run
+ * at once, since each one holds a connection for its whole duration; the driver's own default for
+ * `connectionTimeoutMillis` is no timeout at all, which turns a full pool into a request that
+ * never answers instead of one that fails.
+ */
+export const DB_POOL = {
+	max: 10,
+	connectionTimeoutMillis: 5_000,
+	idleTimeoutMillis: 30_000,
+} as const;
+
+/**
+ * How long an interactive transaction may wait for a connection, and then how long it may run.
+ * Prisma's defaults (2s / 5s) are sized for a warm server; a machine that is recompiling, or a
+ * database that has just been started, spends that budget before the first statement is sent.
+ */
+export const DB_TRANSACTION = { maxWait: 5_000, timeout: 10_000 } as const;

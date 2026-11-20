@@ -18,6 +18,7 @@ const STATUS_TO_CODE: Record<number, ErrorCode> = {
 	404: 'NOT_FOUND',
 	409: 'CONFLICT',
 	429: 'RATE_LIMITED',
+	503: 'SERVICE_UNAVAILABLE',
 };
 
 /** The body a code falls back to. */
@@ -30,6 +31,12 @@ const PRISMA_TO_CODE: Record<string, ErrorCode> = {
 	P2002: 'CONFLICT',
 	P2003: 'CONFLICT',
 	P2025: 'NOT_FOUND',
+	// The database was unreachable or out of connections for this attempt, which is neither the
+	// request's fault nor the client's to fix — the same request can succeed on a retry.
+	P1001: 'SERVICE_UNAVAILABLE',
+	P1017: 'SERVICE_UNAVAILABLE',
+	P2024: 'SERVICE_UNAVAILABLE',
+	P2028: 'SERVICE_UNAVAILABLE',
 };
 
 type PrismaLikeError = { code: string; meta?: unknown };

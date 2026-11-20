@@ -14,5 +14,6 @@ export const ERRORS: Record<ErrorCode, { status: number; message: string }> = {
 	NOT_FOUND: { status: 404, message: 'Not found' },
 	CONFLICT: { status: 409, message: 'That already exists' },
 	RATE_LIMITED: { status: 429, message: 'Too many requests, try again later' },
+	SERVICE_UNAVAILABLE: { status: 503, message: 'The database is busy, try again in a moment' },
 	INTERNAL: { status: 500, message: 'Something went wrong' },
 };
