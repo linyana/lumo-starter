@@ -1,5 +1,4 @@
 import { useRef, type ComponentProps } from 'react';
-import { FillIcon } from '@/components/display/icons';
 import { Button } from '@/components/form/button';
 import { cn } from '@/lib/utils';
 import {
@@ -53,12 +52,6 @@ export const AlertDialog = ({
 					<AlertDialogPopup
 						className={cn(className, classNames?.popup, 'flex flex-col items-center gap-2')}
 					>
-						<FillIcon
-							name="circle-exclamation"
-							className="size-10 text-destructive"
-							aria-hidden={false}
-							aria-label="Failed"
-						/>
 						<div>
 							<AlertDialogTitle className={cn(classNames?.title, 'text-center')}>
 								{title}

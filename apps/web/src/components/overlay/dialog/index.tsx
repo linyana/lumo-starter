@@ -28,10 +28,14 @@ export const Dialog = ({
 			<DialogBackdrop className={classNames?.backdrop} />
 			<DialogViewport className={classNames?.viewport}>
 				<DialogPopup className={cn(className, classNames?.popup)}>
-					<DialogTitle className={classNames?.title}>{title}</DialogTitle>
-					{description !== undefined && (
-						<DialogDescription className={classNames?.description}>{description}</DialogDescription>
-					)}
+					<div className="mb-6">
+						<DialogTitle className={classNames?.title}>{title}</DialogTitle>
+						{description !== undefined && (
+							<DialogDescription className={classNames?.description}>
+								{description}
+							</DialogDescription>
+						)}
+					</div>
 					{children}
 					{footer !== undefined && (
 						<div className={cn('flex justify-end gap-2', classNames?.footer)}>{footer}</div>

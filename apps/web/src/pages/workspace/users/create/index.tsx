@@ -64,11 +64,20 @@ export const CreateUser = ({ onCreated }: IPropsType) => {
 						items={ROLES.map((role) => ({ value: role, label: ROLE_META[role] }))}
 					/>
 				</Field>
-
-				<Button loading={submit.loading} onClick={form.submit} className="mt-2">
+			</Form>
+			<div className="grid grid-cols-2 gap-2 mt-6">
+				<Button
+					variant="outline"
+					onClick={() => {
+						setOpen(false);
+					}}
+				>
+					Cancel
+				</Button>
+				<Button loading={submit.loading} onClick={form.submit}>
 					Create account
 				</Button>
-			</Form>
+			</div>
 		</Dialog>
 	);
 };
