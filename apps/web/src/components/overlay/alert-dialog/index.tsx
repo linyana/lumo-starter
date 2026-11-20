@@ -14,15 +14,8 @@ import {
 } from './parts';
 import type { AlertDialogProps } from './types';
 
-/** What Base UI's `actionsRef` exposes: closing from a part that is not a `Close`. */
 type Actions = NonNullable<ComponentProps<typeof AlertDialogRoot>['actionsRef']>['current'];
 
-/**
- * A modal that asks rather than offers: answered by one of its two buttons, or by a click away from
- * the panel. Base UI closes an alert dialog on neither, so the outside click is ours — the viewport
- * is the layer the panel is centred in, so a click that lands on the viewport itself rather than on
- * anything drawn inside the panel is the click outside.
- */
 export const AlertDialog = ({
 	trigger,
 	title,
@@ -53,17 +46,17 @@ export const AlertDialog = ({
 						className={cn(className, classNames?.popup, 'flex flex-col items-center gap-2')}
 					>
 						<div>
-							<AlertDialogTitle className={cn(classNames?.title, 'text-center')}>
+							<AlertDialogTitle className={classNames?.title}>
 								{title}
 							</AlertDialogTitle>
 							{description !== undefined && (
-								<AlertDialogDescription className={cn(classNames?.description, 'text-center')}>
+								<AlertDialogDescription className={classNames?.description}>
 									{description}
 								</AlertDialogDescription>
 							)}
 						</div>
 						{children}
-						<div className={cn('grid w-full grid-cols-2 gap-4 mt-4', classNames?.actions)}>
+						<div className={cn('grid w-full grid-cols-2 gap-2 mt-3', classNames?.actions)}>
 							<AlertDialogClose render={<Button variant="outline">{cancelLabel}</Button>} />
 							<AlertDialogClose
 								render={

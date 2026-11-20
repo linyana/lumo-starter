@@ -83,19 +83,20 @@ export const EditUser = ({ user, open, onOpenChange, onUpdated }: IPropsType) =>
 						items={ROLES.map((role) => ({ value: role, label: ROLE_META[role] }))}
 					/>
 				</Field>
-
+			</Form>
+			<div className="grid grid-cols-2 gap-2 mt-6">
+				<Button variant="outline">Cancel</Button>
 				<Tooltip content="Nothing has changed yet." disabled={changed}>
 					<Button
 						disabled={!changed}
 						focusableWhenDisabled={!changed}
 						loading={submit.loading}
 						onClick={form.submit}
-						className="mt-2"
 					>
-						Save changes
+						Save
 					</Button>
 				</Tooltip>
-			</Form>
+			</div>
 		</Dialog>
 	);
 };
