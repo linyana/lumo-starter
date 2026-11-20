@@ -65,7 +65,7 @@ schema", the answer is usually "shared wasn't rebuilt", not "the code is wrong".
 ## 4. Roles are `String[]`, not a Postgres enum or a join table
 
 **Chosen.** `users.roles String[]`, valid values enforced by `roleSchema` at the boundary
-(`apps/api/src/common/db/codec.ts`).
+(`apps/api/src/common/db/codec/index.ts`).
 
 **Why.** Adding a role must not require a migration, and the role→permission table belongs in code
 (`ROLE_PERMISSIONS`) so the frontend can evaluate the identical rule. A `Role`/`Permission` join
@@ -119,7 +119,8 @@ in front of this would need its own rendering story.
 
 **Chosen.** `src/lib/http/` unwraps `{ data }`, attaches the bearer token, refreshes single-flight on
 401, and normalises every failure into `ApiError`. Components call endpoints through
-`pages/*/*/api.ts` with `useHttp`, which holds `data / error / loading`. A list puts `useQuery` on
+`apps/web/src/api/<resource>` with `useHttp`, which holds `data / error / loading`. A list puts
+`useQuery` on
 top of it: that one owns the page, the order, the address bar and the read, so a screen showing
 records holds no effect of its own and hands the whole result to the table as a single prop.
 What the reader narrows on is a `<Form>` — its fields are the filters — so `useQuery` holds the
@@ -211,7 +212,7 @@ shape; Vite resolves them back to source.
 `{ error: { code, message, details? } }`. `@SkipEnvelope()` for `/health` and 204s.
 
 **Why.** One shape to unwrap on the client, one place that maps codes to HTTP status and default
-wording (`apps/api/src/common/errors/errors.ts`).
+wording (`apps/api/src/common/errors/table/index.ts`).
 
 **Codes are transport-level, wording belongs to the thrower.** There are eight codes, not one per
 failure: `EMAIL_TAKEN` would have been a code that existed only to carry a sentence. Each code owns
@@ -263,13 +264,15 @@ A guard, a filter and a handler each name the request they were given.
 
 **Chosen.** Two keys: `DATABASE_URL` and `JWT_ACCESS_SECRET`. Port, log level, access-token lifetime,
 refresh lifetime, throttling and cookie security are constants in
-`apps/api/src/common/config/runtime.ts`. `NODE_ENV` is read from the process, not from `envSchema`.
+`apps/api/src/common/config/runtime/index.ts`. `NODE_ENV` is read from the process, not from
+`envSchema`.
 
 **One exception.** `API_DELAY_MS` is the third schema key, and it is a test knob instead of a
 setting: it holds every response back so a frontend can watch its spinners and empty states, and it
-differs per machine and per afternoon. Defaulting to 0 keeps it out of `.env.example`'s way, and
-`DelayInterceptor` reads it as 0 under `NODE_ENV=production`, so a forgotten value cannot slow a
-deployment.
+differs per machine and per afternoon. It is the one key `.env.example` spells out besides the two
+secrets — a knob is worth finding where someone looks for it, and its default of 0 means copying the
+file changes nothing. `DelayInterceptor` reads it as 0 under `NODE_ENV=production`, so a forgotten
+value cannot slow a deployment.
 
 **Why.** The previous `.env.example` had seventeen keys, of which fifteen never changed — and four of
 those did not exist in the schema at all. Config surface nobody turns costs attention on every read
@@ -277,8 +280,8 @@ and invites "did I set that?" doubt. A constant in a typed file is greppable, re
 diff as the code that reads it, and cannot drift from its validator.
 
 **Cost.** Changing the port or the rate limit is a code change, not a deploy-time edit. Promoting a
-value back into `env.schema.ts` is one line — and that edit is exactly the signal that a second
-environment now exists.
+value back into `common/config/env/index.ts` is one line — and that edit is exactly the signal that a
+second environment now exists.
 
 **Also dropped.** `enableCors` and its origin: development goes through the Vite proxy and production
 is same-origin behind a reverse proxy, so the CORS config only described a shape the starter does not

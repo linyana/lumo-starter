@@ -36,8 +36,9 @@ Open <http://localhost:5173>. API docs live at <http://localhost:3000/docs> in d
 | `admin@lumo.dev`  | `Admin1234`  | ADMIN  | `user:read`, `user:write` — no deletes      |
 | `member@lumo.dev` | `Member1234` | MEMBER | `user:read` only                            |
 
-Sign in as each one and watch the Users page change: the delete button and the route itself are
-gated by the same `hasPermission()` the API guard calls.
+Sign in as each one and watch the Users page change: a row's delete action and the route's `access`
+block are answered by the same grant the API guard evaluates, expanded from one `ROLE_PERMISSIONS`
+table.
 
 ---
 
@@ -88,7 +89,7 @@ packages/shared/src/
 | Form validation in the browser | the same schema, in `safeParse`, feeding Base UI's `Form errors` |
 | Swagger request bodies         | `z.toJSONSchema()` via the `ApiZodBody` decorator                |
 | Permission check (server)      | `hasPermission({ roles, required })` in `PermissionsGuard`       |
-| Permission check (client)      | the same function, in `useAuth().can()`                          |
+| Permission check (client)      | `useAuth().can()` reads the same `permissionsOf()` expansion     |
 | Nav/route visibility           | derived from the same `permissionsOf()` expansion                |
 
 Native labels live beside the constants: `ROLE_META` (role → label) and `PERMISSION_META` (permission
@@ -96,7 +97,8 @@ Native labels live beside the constants: `ROLE_META` (role → label) and `PERMI
 UI label exists.
 
 Database columns holding a role are plain `String[]`, decoded at the edge by
-`apps/api/src/common/db/codec.ts`. A bad row throws on the way out instead of leaking as `string`.
+`apps/api/src/common/db/codec/index.ts`. A bad row throws on the way out instead of leaking as
+`string`.
 
 ---
 
@@ -112,8 +114,9 @@ GET    /api/auth/me           → { user }
 GET    /api/users             ?page&pageSize&search&sort&order      (user:read)
 GET    /api/users/:id                                                (user:read)
 POST   /api/users             { email, name, password, roles? }      (user:write)
-PATCH  /api/users/:id         { email?, name?, roles? }              (user:write)
+PATCH  /api/users/:id         { email, name, roles }                 (user:write)
 DELETE /api/users/:id                                                (user:delete)
+POST   /api/users/batch-delete   { ids }                             (user:delete)
 
 GET    /api/health            terminus probe (not enveloped)
 ```
@@ -160,25 +163,27 @@ throw new AppException('NOT_FOUND'); // default text for that code
 throw new AppException(); // 500, default text
 ```
 
-The only table is `apps/api/src/common/errors/errors.ts`: one line per code with its status and
+The only table is `apps/api/src/common/errors/table/index.ts`: one line per code with its status and
 default sentence, and `Record<ErrorCode, …>` makes a new code a compile error until it has both.
 Shared holds the `ErrorCode` union and nothing else about errors — wording lives where the rule
 lives: field sentences inside the shared zod schemas (so a form and the API cannot disagree), and
 business sentences at the throw site.
 
-**Add an endpoint** — write or reuse a zod schema in the matching
-`packages/shared/src/<group>/<domain>`, add the handler with `@ZodBody` / `@ZodQuery`, gate it with
-`@RequirePermissions(...)`.
+**Add an endpoint** — write or reuse a zod schema in `packages/shared/src` — one verb, one schema:
+`features/<feature>/<verb>/index.ts` for a business body, `common/<domain>/schema/index.ts` for a
+cross-cutting one — then add the handler with `@ZodBody` / `@ZodQuery` / `@ZodParams` and gate it
+with `@RequirePermissions(...)`.
 
 **Add a screen** — add `apps/web/src/pages/<domain>/<screen>/index.tsx`, one line in that domain's
-`index.ts`, and an entry in the table in `apps/web/src/routes.tsx` (`layout`, `access`,
-`permission`, optional `nav`); `providers/routes` wraps it in the guards and `providers/layout` draws
-its nav row. Call the API through `pages/<domain>/<screen>/api.ts` (which uses the typed `api`
-helper), and hold its result with `useHttp` — or `useList`, which is `useHttp` plus the page,
-the filters and the sort, for a screen that shows a list. A filter control is written as
-`<Input {...list.text('search')} />` (or `choice` / `flag`, by the shape the control reports a
-value in), so no screen names a `value` or a setter. Give a table the same object and its
-`sortKey`-ed columns become sortable titles; nothing else has to be wired.
+`index.ts`, and a row in the table in `apps/web/src/routes.tsx` (`layout`, then `access` for a
+gated page or `audience` for a bare one, and an optional `nav`); `providers/routes` wraps it in the
+guards and `providers/layout` draws its nav row. Call the API through
+`apps/web/src/api/<resource>/index.ts` — written with the typed `api` helper, so no screen names a
+URL — and hold the result with `useHttp`, or `useQuery`, which is `useHttp` plus the page, the order,
+the address bar and the filters, for a screen that shows a list. The filters are the `<Field name>`s
+inside `<Form form={list.form} initial={list.opened} onChange={list.write} settle={300}>`, so no
+screen names a `value` or a setter either. Give a table the same object and its `sortKey`-ed columns
+become sortable titles; nothing else has to be wired.
 
 **Change a table** — edit `prisma/schema.prisma`, `pnpm db:migrate`, `pnpm db:generate`.
 
@@ -208,8 +213,8 @@ the action to take.
 - **The AI skill** is landed locally, not committed: it goes to `.agents/skills/lumo-ui`
   (`bunx skills`), and `bunx skills update` refreshes it.
 - **`.env` holds only `DATABASE_URL` and `JWT_ACCESS_SECRET`** — everything else is a constant in
-  `apps/api/src/common/config/runtime.ts` (port, log level, token lifetimes, throttling). The one
-  exception, `API_DELAY_MS`, is a test knob rather than config: it holds every response back so
+  `apps/api/src/common/config/runtime/index.ts` (port, log level, token lifetimes, throttling). The
+  exception is `API_DELAY_MS`, a test knob rather than config: it holds every response back so
   spinners and empty states are visible, `@SkipDelay()` opts a route out, and production ignores it.
 - **Cookies are host-only**, `Secure` outside development. Subdomain deployments edit
   `refresh-cookie/index.ts` deliberately (§5).
@@ -228,13 +233,14 @@ the action to take.
 │   │   ├── src/common/                  # pipes, filters, guards, swagger, db
 │   │   └── src/modules/{auth,users,health}
 │   └── web
-│       ├── src/routes.tsx               # the route table: page, access, permission, nav
+│       ├── src/routes.tsx               # the route table: page, access, audience, nav
+│       ├── src/api/{auth,users}         # every call the client makes, one folder per resource
 │       ├── src/pages/{auth,workspace}   # screens, one folder each, grouped by domain
 │       ├── src/providers/auth          # the session and the guards a route asks for
 │       ├── src/providers/access        # the grant a gated row is filtered by
 │       ├── src/providers/routes        # the table turned into route objects, plus the rail rows
 │       ├── src/providers/layout/{frame,shell,auth} # the rail block, the shell on it, the auth column
-│       ├── src/hooks/{use-http,use-list,use-global} # request state, paging, the store
+│       ├── src/hooks/{use-http,use-query,use-global} # one request, a list's page and filters, the store
 │       ├── src/lib/{http,form,toast,…}  # transport and the small shared modules
 │       └── src/components/{form,overlay,display,feedback,navigation,data} # the kit
 ├── packages/shared                      # the single source of truth
