@@ -56,30 +56,17 @@ const noChosen: string[] = [];
 
 const idOf = (row: unknown) => String((row as { id: unknown }).id);
 
-/**
- * The menu the table has open, whichever half of it asked: the actions of a record from a right press
- * on its row, or a column's own from one on its title. One list, one place on the page.
- */
 type OpenMenu = {
 	anchor: ContextMenuAnchor;
 	items: MenuEntry[];
-	/** The record it is about. Left out, it belongs to a title and names no row. */
 	rowKey?: string;
 };
 
-/**
- * Where a press asked for the menu: at the pointer, or at the element itself when the press came from
- * the keyboard, which reports a press at no coordinates at all.
- */
 const anchorOf = (event: MouseEvent<HTMLElement>): ContextMenuAnchor =>
 	event.clientX === 0 && event.clientY === 0
 		? event.currentTarget
 		: { x: event.clientX, y: event.clientY };
 
-/**
- * What a list says about the way through its records, as a `Pagination` takes it. The list's own page
- * size setter is handed over too, so a footer draws the size box without a screen naming it.
- */
 function pagerOf<Row, Key extends string>(
 	list: TableList<Row, Key> | undefined,
 ): PaginationProps | undefined {
@@ -92,8 +79,6 @@ function pagerOf<Row, Key extends string>(
 		pageSize: list.pageSize,
 		onPageChange: list.setPage,
 		onPageSizeChange: list.setPageSize,
-		// Any read in the air holds the footer's presses, the opening one as much as a refresh: either way
-		// the rows a press is aimed at have not arrived, so the press would ask for a page of nothing.
 		busy: list.wait !== null,
 	};
 }
@@ -104,11 +89,6 @@ const rowActionReveal = cn(
 	'group-has-[:focus-visible]/row:opacity-100 group-has-[:focus-visible]/row:pointer-events-auto',
 );
 
-/**
- * The room the column of actions is held at: one icon button, and the cell's own inset on either side,
- * read from the variable the size variant writes. Held rather than left to the content, so the column
- * does not breathe as the "..." comes and goes on hover — and so a sized header and its cells agree.
- */
 const actionsWidth = 'calc(var(--spacing) * 8 + var(--cell-px) * 2)';
 
 function ariaSortOf<Key extends string>({
@@ -139,19 +119,6 @@ function sortPressOf<Key extends string>({
 		);
 }
 
-/**
- * The press a column's arrow would make next: the two directions round, then the way back out. The
- * menu says this one thing rather than both directions and a reset, because a list of everything a
- * column could be is one the reader has to read their way out of before they can choose.
- */
-function nextSort(sort: AriaSort | undefined): 'ascending' | 'descending' | undefined {
-	if (sort === 'ascending') return 'descending';
-	if (sort === 'descending') return undefined;
-
-	return 'ascending';
-}
-
-/** What the press a column is about to make is called, and the arrow that says the same thing. */
 const sortPress = {
 	ascending: { label: 'Sort ascending', icon: <ArrowUp /> },
 	descending: { label: 'Sort descending', icon: <ArrowDown /> },
@@ -159,14 +126,23 @@ const sortPress = {
 } as const;
 
 /**
- * What a title offers about its own column, one line per thing it can do next: the press its arrow would
- * make, and the way out of the column's own narrowing while it is narrowed. Both are read from what the
- * column already declared — `sortKey` and `filter` — so a screen that declares its columns gets its
- * titles' menu without saying anything about it, and `menu` only adds what the table cannot know.
- *
- * A column whose next press is nothing at all — unsortable and unnarrowed, with nothing of its own to
- * add — offers no menu, and a right press on it stays the browser's.
+ * The column's whole cycle, drawn at once: a reader asks for the direction they want instead of pressing
+ * through the ones between. The step the column already stands in is the one that stays unpressed.
  */
+const sortSteps = ['ascending', 'descending', 'cleared'] as const;
+
+type SortStep = (typeof sortSteps)[number];
+
+/** Which step the column stands in. Every `aria-sort` but two is a column that is not sorted. */
+function stepOf(sort: AriaSort | undefined): SortStep {
+	return sort === 'ascending' || sort === 'descending' ? sort : 'cleared';
+}
+
+/** What a step asks the caller for, including the `undefined` that stops sorting the column. */
+function sortOf(step: SortStep): AriaSort | undefined {
+	return step === 'cleared' ? undefined : step;
+}
+
 function columnItems<Row, Key extends string>({
 	column,
 	sort,
@@ -179,12 +155,19 @@ function columnItems<Row, Key extends string>({
 	const items: MenuEntry[] = [];
 
 	if (onSort !== undefined) {
-		const next = nextSort(sort);
-		const { label, icon } = next === undefined ? sortPress.cleared : sortPress[next];
+		const applied = stepOf(sort);
 
-		// The current order is the one the title already says with its arrow, so the menu never repeats it:
-		// every line here is a press that changes something.
-		items.push({ label, icon, onClick: () => onSort(next) });
+		for (const step of sortSteps) {
+			const { label, icon } = sortPress[step];
+
+			items.push({
+				label,
+				icon,
+				separatorBefore: step === 'cleared',
+				disabled: step === applied,
+				onClick: () => onSort(sortOf(step)),
+			});
+		}
 	}
 
 	const filter: TableFilterProps | undefined = column.filter;
@@ -207,16 +190,6 @@ type SelectionBarProps<Row> = {
 	className?: string;
 };
 
-/**
- * What the table puts in the floating bar while records are chosen: how many on the start, the way back
- * beside them, and what can be done with them on the end. The list is the caller's minus what the session
- * is not granted, and an action the chosen records withhold is drawn unavailable with the reason on it
- * rather than dropped — the records are on the screen and the reader chose them, so "not these, because…"
- * is the answer, not silence.
- *
- * Each press is a `Button` drawn as the bar draws one — an outlined box for a word, a quiet glyph for an
- * icon alone — unless the press stated its own shape, in which case that is what is drawn.
- */
 const SelectionBar = <Row,>({ rows, actions, onClear, className }: SelectionBarProps<Row>) => {
 	const grant = useAccess();
 	const prefix = useId();
@@ -229,13 +202,7 @@ const SelectionBar = <Row,>({ rows, actions, onClear, className }: SelectionBarP
 				<p aria-live="polite" className="text-sm font-medium">
 					{rows.length === 1 ? '1 selected' : `${rows.length} selected`}
 				</p>
-				{/*
-				 * The way out of the choice, not a thing done with it: the same button as the bar's own, in the
-				 * quiet ink and one step down in type, so it reads as the count's aside rather than as something
-				 * the records offer. The one pixel of padding on top is optical: a smaller word's ink sits a hair
-				 * high in a box centred on the one beside it — its ascender tops line up while its baseline does
-				 * not — and half that difference back is what puts the two on one line to the eye.
-				 */}
+
 				<Button
 					variant="ghost"
 					size="sm"
@@ -247,8 +214,6 @@ const SelectionBar = <Row,>({ rows, actions, onClear, className }: SelectionBarP
 			</div>
 			<div className="flex flex-wrap items-center gap-2">
 				{offered.map((action, index) => {
-					// The bar's own fields, taken out so that everything left — `variant`, `tone`, `size`, `className`,
-					// `loading`, whatever else the button takes — is the button's and is spread on as it was stated.
 					const {
 						label,
 						icon,
@@ -260,22 +225,14 @@ const SelectionBar = <Row,>({ rows, actions, onClear, className }: SelectionBarP
 						...button
 					} = action;
 					const reason = blocked?.(rows);
-					// An icon alone is only a press once there is an icon to press: a wordless action is the one
-					// thing the bar refuses to draw, because nothing in it would say what it does.
 					const glyphOnly = iconOnly === true && icon !== undefined;
-					// What the bar draws when the press has no opinion, and only then: this object is spread over, so
-					// a screen stating its own `variant` or `tone` — a filled primary — is drawn as it asked.
 					const look = {
-						// A box drawn around one glyph is louder than the same box around a word, so the action that
-						// gave up its words gives up the edge with them and stands as the icon alone.
 						variant: glyphOnly ? ('ghost' as const) : ('outline' as const),
 						size: glyphOnly ? ('icon' as const) : ('sm' as const),
 						tone: destructive ? ('destructive' as const) : ('default' as const),
 						icon,
 						...button,
 					};
-					// The words stay in the button when the icon takes their place: the press keeps its name read
-					// out, and loses only the room it took.
 					const words = glyphOnly ? <span className="sr-only">{label}</span> : label;
 					const why = `${prefix}-blocked-${index}`;
 
@@ -284,9 +241,6 @@ const SelectionBar = <Row,>({ rows, actions, onClear, className }: SelectionBarP
 							{words}
 						</Button>
 					) : (
-						// The press keeps its name and its place and stops being a press. It stays focusable, so the
-						// sentence is not hover-only, and it is drawn as it stands: a disabled button here keeps taking
-						// the pointer, so the hint arrives on hover as well as on focus.
 						<Fragment key={index}>
 							<Tooltip content={reason}>
 								<Button {...look} disabled focusableWhenDisabled aria-describedby={why}>
@@ -332,11 +286,6 @@ export const Table = <Row, Key extends string = string>({
 	const menuRow = menu?.rowKey;
 	const [chosenKeys, setChosenKeys] = useState<string[]>(noChosen);
 
-	/**
-	 * The columns this app's grant allows: a screen states `access` on the ones that are not for
-	 * everyone and hands the whole list over, so the column and the row actions that follow it cannot
-	 * disagree about who is reading.
-	 */
 	const grant = useAccess();
 	const visible = filterAccess({ items: columns, grant });
 
@@ -355,18 +304,9 @@ export const Table = <Row, Key extends string = string>({
 	const actionsId = `${prefix}-actions`;
 	const cellId = (index: number) => `${prefix}-row-${index}`;
 
-	/** What one record offers, before the grant strips it. */
 	const declaredOf = (row: Row) => rowActions?.(row) ?? noItems;
 	const actionsOf = (row: Row) => filterAccess({ items: declaredOf(row), grant });
 
-	/**
-	 * Whether the column of actions exists at all, read from the same list the rows below it are drawn
-	 * from — so the column and the rows cannot disagree about who is reading. It asks only the session's
-	 * half of each condition (`permits`): `when` is one record's answer about its own data, and a column
-	 * whose existence followed it would come and go as the records do. With nothing in view to ask — the
-	 * first read, an empty page — the column is drawn as declared, the skeleton with it, because a
-	 * skeleton is a promise and there is no record yet to keep it.
-	 */
 	const hasActions =
 		rowActions !== undefined &&
 		(data.length === 0 ||
@@ -380,13 +320,6 @@ export const Table = <Row, Key extends string = string>({
 		setMenu({ items, anchor, rowKey: rowKey(row) });
 	};
 
-	/**
-	 * The press on a record's "...": a switch, not an opener. The button is where the menu came from, so
-	 * a second press puts it away — the same press that opened it is the one that closes it, which is
-	 * what a reader tries first. A right press is not this: it asks for the menu at the pointer and is
-	 * answered there every time, because a right press on a row is a request to see what it offers, not a
-	 * toggle on something the reader has to already know is open.
-	 */
 	const toggleRowMenu = ({
 		row,
 		key,
@@ -406,8 +339,6 @@ export const Table = <Row, Key extends string = string>({
 		setMenu({ items, anchor, rowKey: key });
 	};
 
-	// A title's list is built at the press, so a column nobody right-presses costs nothing on every
-	// render that draws it.
 	const openColumnMenu = ({
 		column,
 		sort,
@@ -419,8 +350,6 @@ export const Table = <Row, Key extends string = string>({
 		onSort: ((next: AriaSort | undefined) => void) | undefined;
 		anchor: ContextMenuAnchor;
 	}) => {
-		// A column's own menu lines may carry a condition too — the table's own (a sort step, a clear)
-		// never do — so it is stripped here as well: an emptied menu is not opened at all.
 		const items = filterAccess({ items: columnItems({ column, sort, onSort }), grant });
 		if (items.length === 0) return;
 		setMenu({ items, anchor });
@@ -437,11 +366,6 @@ export const Table = <Row, Key extends string = string>({
 
 	const records = data.map((row) => ({ row, key: rowKey(row), items: actionsOf(row) }));
 
-	/**
-	 * The records a reader has chosen, kept as keys because a page is what the table draws: the answer is
-	 * the chosen keys still in view, so a fresh read, another page or a narrowed column never leaves a
-	 * press acting on something that is no longer on the screen.
-	 */
 	const keys = records.map((one) => one.key);
 	const chosen = chosenKeys.filter((key) => keys.includes(key));
 	const chosenRows = records.filter((one) => chosen.includes(one.key)).map((one) => one.row);
