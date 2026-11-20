@@ -7,6 +7,6 @@ export type Panel = { kind: 'edit'; user: User } | { kind: 'delete'; users: read
 
 export type OverlayArgs = {
 	panel: Panel;
-	onOpenChange: (open: boolean) => void;
+	closePanel: () => void;
 	reload: () => void;
 };

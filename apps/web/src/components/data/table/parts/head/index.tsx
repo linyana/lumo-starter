@@ -137,13 +137,20 @@ function fixedClass(fixed: TableFixed | undefined) {
  * sits under as well: a colour that is round and a rule that stops at it are two pictures of one block,
  * and a line drawn across either edge would be the third. The hairline the line stood in stays, so the
  * block sits a hair off what it left behind rather than touching it.
+ *
+ * That hairline is the one band of a row no cell covers — it is the spacing between two rows — so the line
+ * layer is what takes the pointer there, and with it the record the line belongs to. Left to the table, a
+ * press on the line would land on no record at all and reach the browser, which answers with its own menu.
+ * For the same reason the line fades rather than leaves while its row is arrived at: a box taken off the
+ * page takes the pointer with it, and the pointer alone on the line would be what took it away — a line
+ * that blinks under a hand held still on it, and a press there that lands on nothing.
  */
 const rowRule = cn(
-	'after:pointer-events-none after:absolute after:inset-x-0 after:-bottom-px after:h-px after:bg-border',
-	'[[data-slot=table-container][data-hoverable=true]>table>tbody>tr:hover>&]:after:hidden',
-	'[[data-slot=table-container][data-hoverable=true]>table>tbody>tr:has(+_tr:hover)>&]:after:hidden',
-	'[tr[data-selected]>&]:after:hidden',
-	'[tr:has(+_tr[data-selected])>&]:after:hidden',
+	'after:absolute after:inset-x-0 after:-bottom-px after:h-px after:bg-border',
+	'[[data-slot=table-container][data-hoverable=true]>table>tbody>tr:hover>&]:after:opacity-0',
+	'[[data-slot=table-container][data-hoverable=true]>table>tbody>tr:has(+_tr:hover)>&]:after:opacity-0',
+	'[tr[data-selected]>&]:after:opacity-0',
+	'[tr:has(+_tr[data-selected])>&]:after:opacity-0',
 );
 
 /**

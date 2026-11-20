@@ -10,14 +10,12 @@ import type { OverlayArgs, Panel, UserSortKey } from './types';
 
 type IPropsType = { list: UseQueryResult<User, ListUsersQuery> };
 
-const renderOverlay = ({ panel, onOpenChange, reload }: OverlayArgs): ReactElement => {
+const renderOverlay = ({ panel, closePanel, reload }: OverlayArgs): ReactElement => {
 	switch (panel.kind) {
 		case 'edit':
-			return <EditUser user={panel.user} open onOpenChange={onOpenChange} onUpdated={reload} />;
+			return <EditUser user={panel.user} closePanel={closePanel} reload={reload} />;
 		case 'delete':
-			return (
-				<DeleteUsers users={panel.users} open onOpenChange={onOpenChange} onDeleted={reload} />
-			);
+			return <DeleteUsers users={panel.users} closePanel={closePanel} reload={reload} />;
 	}
 };
 
@@ -32,9 +30,7 @@ export const UserList = ({ list }: IPropsType) => {
 
 	const [panel, setPanel] = useState<Panel | null>(null);
 
-	const onOpenChange = (open: boolean) => {
-		if (!open) setPanel(null);
-	};
+	const closePanel = () => setPanel(null);
 
 	const columns: TableColumn<User, UserSortKey>[] = [
 		{
@@ -117,7 +113,7 @@ export const UserList = ({ list }: IPropsType) => {
 				/>
 			</Form>
 
-			{panel !== null && renderOverlay({ panel, onOpenChange, reload: list.reload })}
+			{panel !== null && renderOverlay({ panel, closePanel, reload: list.reload })}
 		</>
 	);
 };

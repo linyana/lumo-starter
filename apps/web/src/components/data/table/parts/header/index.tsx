@@ -29,8 +29,10 @@ export function TableHeader({ sticky = false, className, ...props }: TableHeader
 				data-slot="table-header"
 				data-sticky={sticky ? '' : undefined}
 				// The band names the columns and needs no line under it to say where it ends: the tone is the
-				// boundary, and a rule there would be the one line in the table that no record owns.
-				className={cn('[&>tr>th]:bg-table-head [&>tr>th]:after:hidden', className)}
+				// boundary, and a rule there would be the one line in the table that no record owns. The layer
+				// is kept for the pointer alone — it is the only box standing in the spacing under the names, and
+				// a right press there belongs to the column it sits under.
+				className={cn('[&>tr>th]:bg-table-head [&>tr>th]:after:opacity-0', className)}
 				{...props}
 			/>
 		</HeaderContext>

@@ -21,14 +21,17 @@ import {
 import { useHttp } from '@/hooks';
 import { useAuth } from '@/providers/auth';
 
+/**
+ * One record's edit panel. It is drawn only while it is open, so it is handed no open state — the two
+ * things the page does about it are what it takes: put the panel away, and read the list again.
+ */
 type IPropsType = {
 	user: User;
-	open: boolean;
-	onOpenChange: (open: boolean) => void;
-	onUpdated: () => void;
+	closePanel: () => void;
+	reload: () => void;
 };
 
-export const EditUser = ({ user, open, onOpenChange, onUpdated }: IPropsType) => {
+export const EditUser = ({ user, closePanel, reload }: IPropsType) => {
 	const form = useForm();
 	const { user: currentUser } = useAuth();
 	const ownRow = user.id === currentUser?.id;
@@ -38,16 +41,20 @@ export const EditUser = ({ user, open, onOpenChange, onUpdated }: IPropsType) =>
 		endpoint: (input: UpdateUserInput) => usersApi.update({ id: user.id, input }),
 		successMessage: 'Changes saved',
 		onSuccess: () => {
-			onOpenChange(false);
-			onUpdated();
+			closePanel();
+			reload();
 		},
 		onError: form.setApiError,
 	});
 
 	return (
 		<Dialog
-			open={open}
-			onOpenChange={onOpenChange}
+			open
+			// Escape and a press on the page behind it are the dialog's to report, and both mean what the
+			// Cancel press below means: the panel goes away.
+			onOpenChange={(next) => {
+				if (!next) closePanel();
+			}}
 			title={`Edit ${user.name}`}
 			description={user.email}
 		>
@@ -84,7 +91,9 @@ export const EditUser = ({ user, open, onOpenChange, onUpdated }: IPropsType) =>
 				</Field>
 			</Form>
 			<div className="grid grid-cols-2 gap-2 mt-6">
-				<Button variant="outline">Cancel</Button>
+				<Button variant="outline" onClick={closePanel}>
+					Cancel
+				</Button>
 				<Tooltip content="Nothing has changed yet." disabled={changed}>
 					<Button
 						disabled={!changed}
