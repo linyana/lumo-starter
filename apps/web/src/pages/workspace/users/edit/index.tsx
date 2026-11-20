@@ -56,7 +56,6 @@ export const EditUser = ({ user, open, onOpenChange, onUpdated }: IPropsType) =>
 				schema={updateUserSchema}
 				initial={{ email: user.email, name: user.name, roles: user.roles }}
 				onSubmit={(values) => {
-					// A field that is focused submits the form on Enter, which never passes the disabled button.
 					if (!changed) return;
 
 					return submit.fetchData(values);
