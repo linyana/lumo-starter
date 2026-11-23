@@ -62,7 +62,8 @@ export const useHttp = <TData, TVariables = void>({
 				}
 
 				const error = toApiError(cause);
-				const handled = current.onError?.(error);
+				const handled =
+					current.onError === undefined ? current.form?.setApiError(error) : current.onError(error);
 				const quiet = current.toastError === false || error.sessionExpired;
 
 				const spoken = !quiet && (current.onError === undefined || handled === false);

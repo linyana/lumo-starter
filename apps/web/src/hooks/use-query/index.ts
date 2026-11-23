@@ -1,11 +1,14 @@
 import { PAGE_SIZE_DEFAULT, pageCountOf } from '@lumo/shared';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
+import { textFilter } from '@/components/data/table/filter';
+import type { TableFilterProps } from '@/components/data/table/types';
 import { useForm, type FormValues } from '@/components/form/form';
 import { sameValues } from '@/lib';
 import { useHttp } from '../use-http';
 import { emptyState, paramsFromState, stateFromParams } from './params';
 import type {
+	FilterKey,
 	ListFilters,
 	ListQuery,
 	ListSort,
@@ -17,6 +20,7 @@ import type {
 } from './types';
 
 export type {
+	FilterKey,
 	ListFilters,
 	ListQuery,
 	ListState,
@@ -26,6 +30,9 @@ export type {
 	UseQueryOptions,
 	UseQueryResult,
 } from './types';
+
+const isSet = (value: unknown): boolean =>
+	Array.isArray(value) ? value.length > 0 : value !== undefined && value !== null && value !== '';
 
 export const useQuery = <TItem, TQuery extends ListQuery>({
 	fetcher,
@@ -46,9 +53,7 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 	const [sort, setSort] = useState<ListSort<SortKeyOf<TQuery>> | undefined>(opened.sort);
 	const [filters, setFilters] = useState<ListFilters<TQuery>>(opened.filters);
 
-	const narrowed = Object.values(filters).some((value) =>
-		Array.isArray(value) ? value.length > 0 : value !== undefined && value !== null && value !== '',
-	);
+	const narrowed = Object.values(filters).some(isSet);
 
 	const { data, loading, error, initial, fetchData } = useHttp({
 		endpoint: fetcher,
@@ -120,16 +125,27 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 	}, [form, write]);
 
 	const clearFilter = useCallback(
-		(name: string) => {
+		(name: FilterKey<TQuery>) => {
 			form.clear(name);
 			setFilters((was) => {
 				const next = { ...was };
-				delete next[name as keyof ListFilters<TQuery>];
+				delete next[name];
 				return next;
 			});
 			setPage(1);
 		},
 		[form],
+	);
+
+	const filterOf = useCallback(
+		({ name, placeholder }: { name: FilterKey<TQuery>; placeholder?: string }): TableFilterProps =>
+			textFilter({
+				name,
+				placeholder,
+				active: isSet(filters[name]),
+				clear: () => clearFilter(name),
+			}),
+		[filters, clearFilter],
 	);
 
 	return {
@@ -150,6 +166,7 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 		reload,
 		clearFilters,
 		clearFilter,
+		filterOf,
 		form,
 		write,
 	};

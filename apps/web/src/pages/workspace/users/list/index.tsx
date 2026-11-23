@@ -3,15 +3,13 @@ import { Pencil, Trash2 } from 'lucide-react';
 import { useState, type ReactElement } from 'react';
 import { Badge, Field, Form, Input, Table, type TableColumn } from '@/components';
 import type { UseQueryResult } from '@/hooks';
-import { useAuth } from '@/providers/auth';
 import { DeleteUsers } from '../delete';
 import { EditUser } from '../edit';
 import type { OverlayArgs, Panel, UserSortKey } from './types';
 
 type IPropsType = { list: UseQueryResult<User, ListUsersQuery> };
 
-const renderOverlay = ({ panel, setPanel, reload }: OverlayArgs): ReactElement => {
-	const closePanel = () => setPanel(null);
+const renderOverlay = ({ panel, closePanel, reload }: OverlayArgs): ReactElement => {
 	switch (panel.kind) {
 		case 'edit':
 			return <EditUser user={panel.user} closePanel={closePanel} reload={reload} />;
@@ -27,9 +25,8 @@ const ROLE_VARIANT: Record<Role, 'default' | 'info' | 'secondary'> = {
 };
 
 export const UserList = ({ list }: IPropsType) => {
-	const { user: currentUser } = useAuth();
-
 	const [panel, setPanel] = useState<Panel | null>(null);
+	const closePanel = () => setPanel(null);
 
 	const columns: TableColumn<User, UserSortKey>[] = [
 		{
@@ -42,15 +39,7 @@ export const UserList = ({ list }: IPropsType) => {
 			key: 'email',
 			header: 'Email',
 			sortKey: 'email',
-			filter: {
-				field: (
-					<Field name="email">
-						<Input placeholder="Filter email" />
-					</Field>
-				),
-				active: list.filters.email !== undefined,
-				clear: () => list.clearFilter('email'),
-			},
+			filter: list.filterOf({ name: 'email', placeholder: 'Filter email' }),
 			cell: (row) => <span className="text-muted-foreground">{row.email}</span>,
 		},
 		{
@@ -86,10 +75,6 @@ export const UserList = ({ list }: IPropsType) => {
 							destructive: true,
 							access: { permission: 'user:delete' },
 							variant: 'default',
-							blocked: (rows) =>
-								rows.some((user) => user.id === currentUser?.id)
-									? 'You cannot delete your own account'
-									: undefined,
 							onClick: ({ rows }) => setPanel({ kind: 'delete', users: rows }),
 						},
 					]}
@@ -105,14 +90,14 @@ export const UserList = ({ list }: IPropsType) => {
 							icon: <Trash2 />,
 							destructive: true,
 							separatorBefore: true,
-							access: { permission: 'user:delete', when: () => item.id !== currentUser?.id },
+							access: { permission: 'user:delete' },
 							onClick: () => setPanel({ kind: 'delete', users: [item] }),
 						},
 					]}
 				/>
 			</Form>
 
-			{panel !== null && renderOverlay({ panel, setPanel, reload: list.reload })}
+			{panel !== null && renderOverlay({ panel, closePanel, reload: list.reload })}
 		</>
 	);
 };

@@ -1,4 +1,4 @@
-import { filterAccess, permits } from '@lumo/shared';
+import { filterAccess } from '@lumo/shared';
 import { ArrowDown, ArrowUp, ArrowUpDown, Ellipsis, ListFilter, RotateCcw } from 'lucide-react';
 import { Fragment, useId, useState, type MouseEvent } from 'react';
 import { Pagination, type PaginationProps } from '@/components/data/pagination';
@@ -303,10 +303,7 @@ export const Table = <Row, Key extends string = string>({
 
 	const hasActions =
 		rowActions !== undefined &&
-		(data.length === 0 ||
-			data.some((row) =>
-				declaredOf(row).some((item) => permits({ condition: item.access, grant })),
-			));
+		(data.length === 0 || data.some((row) => actionsOf(row).length > 0));
 
 	const openRowMenu = ({ row, anchor }: { row: Row; anchor: ContextMenuAnchor }) => {
 		const items = actionsOf(row);

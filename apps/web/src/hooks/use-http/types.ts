@@ -1,6 +1,8 @@
+import type { FormInstance } from '@/components/form/form/types';
 import type { ApiError } from '@/lib';
 
 export interface UseHttpOptions<TData, TVariables> {
+	form?: Pick<FormInstance, 'setApiError'>;
 	toastError?: boolean;
 	onError?: (error: ApiError) => void | boolean;
 	loadingMessage?: string;

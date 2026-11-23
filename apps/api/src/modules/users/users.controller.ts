@@ -59,11 +59,8 @@ export class UsersController {
 	@RequirePermissions('user:delete')
 	@HttpCode(HttpStatus.NO_CONTENT)
 	@SkipEnvelope()
-	async remove(
-		@ZodParams(userParamsSchema) { id }: UserParams,
-		@CurrentUser() actor: AuthUser,
-	): Promise<void> {
-		await this.users.remove({ id, actor });
+	async remove(@ZodParams(userParamsSchema) { id }: UserParams): Promise<void> {
+		await this.users.remove({ id });
 	}
 
 	@Post('batch-delete')
@@ -71,10 +68,7 @@ export class UsersController {
 	@HttpCode(HttpStatus.NO_CONTENT)
 	@SkipEnvelope()
 	@ApiZodBody(batchDeleteUsersSchema)
-	async removeMany(
-		@ZodBody(batchDeleteUsersSchema) input: BatchDeleteUsersInput,
-		@CurrentUser() actor: AuthUser,
-	): Promise<void> {
-		await this.users.removeMany({ ids: input.ids, actor });
+	async removeMany(@ZodBody(batchDeleteUsersSchema) input: BatchDeleteUsersInput): Promise<void> {
+		await this.users.removeMany({ ids: input.ids });
 	}
 }

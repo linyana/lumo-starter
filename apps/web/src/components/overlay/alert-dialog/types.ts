@@ -25,6 +25,8 @@ export type AlertDialogProps = Pick<
 	cancelLabel?: string;
 	onConfirm?: () => void;
 	destructive?: boolean;
+	confirmCloses?: boolean;
+	pending?: boolean;
 	className?: string;
 	classNames?: SlotClassNames<AlertDialogSlots>;
 };

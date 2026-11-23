@@ -1,4 +1,5 @@
 import type { Paginated, SortOrder } from '@lumo/shared';
+import type { TableFilterProps } from '@/components/data/table/types';
 import type { FormInstance, FormValues } from '@/components/form/form/types';
 
 export type ListQuery = {
@@ -25,6 +26,8 @@ export type ListOwnedKey = 'page' | 'pageSize' | 'sort' | 'order';
 
 export type ListFilters<TQuery extends ListQuery> = Omit<TQuery, ListOwnedKey>;
 
+export type FilterKey<TQuery extends ListQuery> = keyof ListFilters<TQuery> & string;
+
 export type UseQueryOptions<TItem, TQuery extends ListQuery> = {
 	fetcher: (query: TQuery) => Promise<Paginated<TItem>>;
 	pageSize?: number;
@@ -50,7 +53,8 @@ export type UseQueryResult<TItem, TQuery extends ListQuery> = {
 	onSort: (next: ListSort<SortKeyOf<TQuery>> | undefined) => void;
 	reload: () => void;
 	clearFilters: () => void;
-	clearFilter: (name: string) => void;
+	clearFilter: (name: FilterKey<TQuery>) => void;
+	filterOf: (args: { name: FilterKey<TQuery>; placeholder?: string }) => TableFilterProps;
 	form: FormInstance;
 	write: (values: FormValues) => void;
 };

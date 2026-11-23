@@ -116,16 +116,10 @@ export class UsersService {
 	private async assertDeletable({
 		client,
 		ids,
-		actor,
 	}: {
 		client: Prisma.TransactionClient;
 		ids: readonly string[];
-		actor: UserActor;
 	}): Promise<void> {
-		if (ids.includes(actor.id)) {
-			throw new AppException({ code: 'FORBIDDEN', message: 'You cannot delete your own account' });
-		}
-
 		const rows = await client.user.findMany({
 			where: { id: { in: [...ids] } },
 			select: { id: true, roles: true },
@@ -141,15 +135,15 @@ export class UsersService {
 		}
 	}
 
-	async remove({ id, actor }: { id: string; actor: UserActor }): Promise<void> {
-		await this.removeMany({ ids: [id], actor });
+	async remove({ id }: { id: string }): Promise<void> {
+		await this.removeMany({ ids: [id] });
 	}
 
-	async removeMany({ ids, actor }: { ids: readonly string[]; actor: UserActor }): Promise<void> {
+	async removeMany({ ids }: { ids: readonly string[] }): Promise<void> {
 		const named = [...new Set(ids)];
 
 		await this.prisma.$transaction(async (client) => {
-			await this.assertDeletable({ client, ids: named, actor });
+			await this.assertDeletable({ client, ids: named });
 
 			await client.user.deleteMany({ where: { id: { in: named } } });
 		});

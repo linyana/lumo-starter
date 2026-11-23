@@ -27,7 +27,7 @@ const holdsRole = ({
 	wanted: AccessCondition['role'];
 }): boolean => wanted === undefined || listOf(wanted).some((role) => grant.roles.includes(role));
 
-export const permits = ({
+const permits = ({
 	condition,
 	grant,
 }: {

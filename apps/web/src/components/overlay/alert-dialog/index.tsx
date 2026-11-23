@@ -22,47 +22,62 @@ export const AlertDialog = ({
 	cancelLabel = 'Cancel',
 	onConfirm,
 	destructive = false,
+	confirmCloses = true,
+	pending = false,
 	className,
 	classNames,
 	onOpenChangeComplete,
 	onClosed,
 	...props
-}: AlertDialogProps) => (
-	<AlertDialogRoot
-		{...props}
-		onOpenChangeComplete={(next) => {
-			onOpenChangeComplete?.(next);
-			if (!next) onClosed?.();
-		}}
-	>
-		{trigger !== undefined && <AlertDialogTrigger render={trigger} />}
-		<AlertDialogPortal>
-			<AlertDialogBackdrop className={classNames?.backdrop} />
-			<AlertDialogViewport className={classNames?.viewport}>
-				<AlertDialogPopup
-					className={cn(className, classNames?.popup, 'flex flex-col items-center gap-2')}
-				>
-					<div>
-						<AlertDialogTitle className={classNames?.title}>{title}</AlertDialogTitle>
-						{description !== undefined && (
-							<AlertDialogDescription className={classNames?.description}>
-								{description}
-							</AlertDialogDescription>
-						)}
-					</div>
-					{children}
-					<div className={cn('grid w-full grid-cols-2 gap-2 mt-3', classNames?.actions)}>
-						<AlertDialogClose render={<Button variant="outline">{cancelLabel}</Button>} />
-						<AlertDialogClose
-							render={
-								<Button tone={destructive ? 'destructive' : 'default'} onClick={onConfirm}>
-									{confirmLabel}
-								</Button>
-							}
-						/>
-					</div>
-				</AlertDialogPopup>
-			</AlertDialogViewport>
-		</AlertDialogPortal>
-	</AlertDialogRoot>
-);
+}: AlertDialogProps) => {
+	const confirm = (
+		<Button
+			tone={destructive ? 'destructive' : 'default'}
+			loading={pending}
+			disabled={pending}
+			onClick={onConfirm}
+		>
+			{confirmLabel}
+		</Button>
+	);
+
+	return (
+		<AlertDialogRoot
+			{...props}
+			onOpenChangeComplete={(next) => {
+				onOpenChangeComplete?.(next);
+				if (!next) onClosed?.();
+			}}
+		>
+			{trigger !== undefined && <AlertDialogTrigger render={trigger} />}
+			<AlertDialogPortal>
+				<AlertDialogBackdrop className={classNames?.backdrop} />
+				<AlertDialogViewport className={classNames?.viewport}>
+					<AlertDialogPopup
+						className={cn(className, classNames?.popup, 'flex flex-col items-center gap-2')}
+					>
+						<div>
+							<AlertDialogTitle className={classNames?.title}>{title}</AlertDialogTitle>
+							{description !== undefined && (
+								<AlertDialogDescription className={classNames?.description}>
+									{description}
+								</AlertDialogDescription>
+							)}
+						</div>
+						{children}
+						<div className={cn('grid w-full grid-cols-2 gap-2 mt-3', classNames?.actions)}>
+							<AlertDialogClose
+								render={
+									<Button variant="outline" disabled={pending}>
+										{cancelLabel}
+									</Button>
+								}
+							/>
+							{confirmCloses ? <AlertDialogClose render={confirm} /> : confirm}
+						</div>
+					</AlertDialogPopup>
+				</AlertDialogViewport>
+			</AlertDialogPortal>
+		</AlertDialogRoot>
+	);
+};

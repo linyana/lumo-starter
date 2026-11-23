@@ -12,14 +12,14 @@ export const CreateUser = ({ onCreated }: IPropsType) => {
 	const [open, setOpen] = useState(false);
 	const form = useForm();
 
-	const submit = useHttp({
+	const create = useHttp({
+		form,
 		endpoint: usersApi.create,
 		successMessage: 'Account created',
 		onSuccess: () => {
 			setOpen(false);
 			onCreated();
 		},
-		onError: form.setApiError,
 	});
 
 	return (
@@ -38,7 +38,7 @@ export const CreateUser = ({ onCreated }: IPropsType) => {
 				form={form}
 				schema={createUserSchema}
 				initial={{ roles: ['MEMBER'] }}
-				onSubmit={submit.fetchData}
+				onSubmit={create.fetchData}
 			>
 				<Field name="email" label="Email">
 					<Input type="email" autoComplete="off" />
@@ -66,15 +66,10 @@ export const CreateUser = ({ onCreated }: IPropsType) => {
 				</Field>
 			</Form>
 			<div className="grid grid-cols-2 gap-2 mt-6">
-				<Button
-					variant="outline"
-					onClick={() => {
-						setOpen(false);
-					}}
-				>
+				<Button variant="outline" onClick={() => setOpen(false)}>
 					Cancel
 				</Button>
-				<Button loading={submit.loading} onClick={form.submit}>
+				<Button loading={create.loading} onClick={form.submit}>
 					Create account
 				</Button>
 			</div>
