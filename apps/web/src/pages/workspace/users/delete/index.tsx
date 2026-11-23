@@ -13,7 +13,7 @@ type IPropsType = {
 export const DeleteUsers = ({ users, closePanel, reload }: IPropsType) => {
 	const [open, setOpen] = useState(true);
 	const only = users.length === 1 ? users[0] : undefined;
-	const who = only?.email ?? users.map((one) => one.name).join(', ');
+	const who = only?.email ?? users.map(({ name }) => name).join(', ');
 	const label = only?.name ?? `${users.length} accounts`;
 
 	const remove = useHttp({
@@ -33,7 +33,7 @@ export const DeleteUsers = ({ users, closePanel, reload }: IPropsType) => {
 			confirmLabel="Delete"
 			destructive
 			onConfirm={() => {
-				remove.fetchData(users.map((one) => one.id));
+				remove.fetchData(users.map(({ id }) => id));
 			}}
 		/>
 	);
