@@ -1,14 +1,14 @@
 import { PAGE_SIZE_DEFAULT, pageCountOf } from '@lumo/shared';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import { textFilter } from '@/components/data/table/filter';
-import type { TableFilterProps } from '@/components/data/table/types';
 import { useForm, type FormValues } from '@/components/form/form';
 import { sameValues } from '@/lib';
 import { useHttp } from '../use-http';
+import { textFilter } from './filter';
 import { emptyState, paramsFromState, stateFromParams } from './params';
 import type {
 	FilterKey,
+	ListFilter,
 	ListFilters,
 	ListQuery,
 	ListSort,
@@ -21,6 +21,7 @@ import type {
 
 export type {
 	FilterKey,
+	ListFilter,
 	ListFilters,
 	ListQuery,
 	ListState,
@@ -138,7 +139,7 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 	);
 
 	const filterOf = useCallback(
-		({ name, placeholder }: { name: FilterKey<TQuery>; placeholder?: string }): TableFilterProps =>
+		({ name, placeholder }: { name: FilterKey<TQuery>; placeholder?: string }): ListFilter =>
 			textFilter({
 				name,
 				placeholder,

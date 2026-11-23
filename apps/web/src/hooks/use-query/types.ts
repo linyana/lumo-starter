@@ -1,5 +1,5 @@
 import type { Paginated, SortOrder } from '@lumo/shared';
-import type { TableFilterProps } from '@/components/data/table/types';
+import type { ReactNode } from 'react';
 import type { FormInstance, FormValues } from '@/components/form/form/types';
 
 export type ListQuery = {
@@ -36,6 +36,13 @@ export type UseQueryOptions<TItem, TQuery extends ListQuery> = {
 
 export type ListWait = 'opening' | 'refreshing' | null;
 
+export type ListFilter = {
+	field: ReactNode;
+	active?: boolean;
+	clear?: () => void;
+	className?: string;
+};
+
 export type UseQueryResult<TItem, TQuery extends ListQuery> = {
 	items: TItem[];
 	total: number;
@@ -54,7 +61,7 @@ export type UseQueryResult<TItem, TQuery extends ListQuery> = {
 	reload: () => void;
 	clearFilters: () => void;
 	clearFilter: (name: FilterKey<TQuery>) => void;
-	filterOf: (args: { name: FilterKey<TQuery>; placeholder?: string }) => TableFilterProps;
+	filterOf: (args: { name: FilterKey<TQuery>; placeholder?: string }) => ListFilter;
 	form: FormInstance;
 	write: (values: FormValues) => void;
 };

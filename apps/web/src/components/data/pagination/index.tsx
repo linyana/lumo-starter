@@ -15,6 +15,7 @@ import {
 import type { PaginationProps } from './types';
 
 export type { PaginationProps, PaginationSlots } from '@/components/data/pagination/types';
+export { pagerOf, type PagerSource } from '@/components/data/pagination/pager';
 
 const PageSizes = ({
 	value,

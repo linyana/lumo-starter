@@ -1,6 +1,7 @@
 import { ArrowDown, ArrowUp, ArrowUpDown, ListFilter } from 'lucide-react';
 import { use, useState, type ComponentProps, type MouseEvent, type ReactNode } from 'react';
 import { tv, type VariantProps } from 'tailwind-variants';
+import type { ListFilter as ListFilterProps } from '@/hooks';
 import {
 	PopoverPopup,
 	PopoverPortal,
@@ -21,12 +22,7 @@ import { fixedRowStates } from '../cell';
 import { HeaderContext, TableContext } from '../context';
 import type { TableLocale, TableSort } from '../root';
 
-export type TableFilterProps = {
-	field: ReactNode;
-	active?: boolean;
-	clear?: () => void;
-	className?: string;
-};
+export type TableFilterProps = ListFilterProps;
 
 export const textOf = (node: ReactNode) =>
 	typeof node === 'string' || typeof node === 'number' ? String(node) : undefined;

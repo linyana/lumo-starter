@@ -1,7 +1,7 @@
 import { filterAccess } from '@lumo/shared';
 import { ArrowDown, ArrowUp, ArrowUpDown, Ellipsis, ListFilter, RotateCcw } from 'lucide-react';
 import { Fragment, useId, useState, type MouseEvent } from 'react';
-import { Pagination, type PaginationProps } from '@/components/data/pagination';
+import { Pagination, pagerOf } from '@/components/data/pagination';
 import { Skeleton } from '@/components/feedback/skeleton';
 import { Button } from '@/components/form/button';
 import { ActionBar } from '@/components/overlay/action-bar';
@@ -28,7 +28,6 @@ import type {
 	SelectionChosen,
 	TableColumn,
 	TableFilterProps,
-	TableList,
 	TableProps,
 	TableSort,
 } from './types';
@@ -66,22 +65,6 @@ const anchorOf = (event: MouseEvent<HTMLElement>): ContextMenuAnchor =>
 	event.clientX === 0 && event.clientY === 0
 		? event.currentTarget
 		: { x: event.clientX, y: event.clientY };
-
-function pagerOf<Row, Key extends string>(
-	list: TableList<Row, Key> | undefined,
-): PaginationProps | undefined {
-	if (list === undefined) return undefined;
-
-	return {
-		page: list.page,
-		pageCount: list.pageCount,
-		total: list.total,
-		pageSize: list.pageSize,
-		onPageChange: list.setPage,
-		onPageSizeChange: list.setPageSize,
-		busy: list.wait !== null,
-	};
-}
 
 const rowActionReveal = cn(
 	'inline-flex opacity-0 pointer-events-none transition-opacity duration-(--duration-state)',
