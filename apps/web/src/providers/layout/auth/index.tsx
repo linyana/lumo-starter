@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import { ThemeToggle } from '@/providers/theme';
 
-/** What the column of an anonymous screen is handed. */
 type IPropsType = {
 	title: string;
 	description?: string;
@@ -9,7 +8,6 @@ type IPropsType = {
 	footer: ReactNode;
 };
 
-/** A full content surface inside the same inset frame as the app layout. */
 export const AuthLayout = ({ title, description, children, footer }: IPropsType) => (
 	<div className="min-h-svh bg-layout-background p-2">
 		<main className="grid min-h-[calc(100svh-1rem)] grid-rows-[auto_1fr_auto] rounded-xl bg-layout-content p-4 sm:p-6">

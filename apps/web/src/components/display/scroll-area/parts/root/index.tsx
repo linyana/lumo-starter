@@ -4,10 +4,6 @@ import { cn } from '@/lib/utils';
 
 export type ScrollAreaRootProps = ComponentProps<typeof BaseScrollArea.Root>;
 
-/**
- * Sizes the viewport has no say in: it always fills the root, so the area scrolls only once the
- * caller gives the root a height it can run out of.
- */
 export function ScrollAreaRoot({ className, ...props }: ScrollAreaRootProps) {
 	return (
 		<BaseScrollArea.Root

@@ -3,19 +3,9 @@ import { tv, type VariantProps } from 'tailwind-variants';
 import { iconSlot, stateLayer } from '@/lib/control';
 import { cn } from '@/lib/utils';
 
-/** The two tiers: one that is only there once it is on, and one that is drawn either way. */
 export type ToggleVariant = 'ghost' | 'outline';
 export type ToggleSize = 'sm' | 'md' | 'lg' | 'icon';
 
-/**
- * A control that stays where it was put — one setting spelled as a control, not an action.
- *
- * Being on is the tint the pointer leaves, kept: arriving is a hover, and staying is that same tint
- * made lasting. So the surface never changes colour between the two states, the layer over it does,
- * and a toggle that is both on and pointed at takes the one step between hover and press rather than
- * going still. There is no downward nudge on the press the way `Button` has one: a toggle has
- * already answered the press by staying pressed, and answering twice would read as unsure.
- */
 export const toggleVariants = tv({
 	base: [
 		'inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap',
@@ -49,14 +39,9 @@ export const toggleVariants = tv({
 
 export type ToggleProps<Value extends string = string> = Omit<BaseToggleProps<Value>, 'className'> &
 	VariantProps<typeof toggleVariants> & {
-		/** Merged with `cn()`, so a Base UI state callback is not accepted here. */
 		className?: string;
 	};
 
-/**
- * A button with a memory. Inside a `ToggleGroup` the group reads and writes the state instead, which
- * is why the value it is known by there is passed as `value`; on its own it is `pressed`.
- */
 export function Toggle<Value extends string>({
 	className,
 	variant = 'ghost',

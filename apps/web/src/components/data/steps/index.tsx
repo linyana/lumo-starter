@@ -2,7 +2,6 @@ import { cn } from '@/lib/utils';
 import { StepsDescription, StepsItem, StepsRoot, StepsTitle } from './parts';
 import type { StepsProps } from './types';
 
-/** A sequence of steps as one list: the index makes the ones before it finish and the ones after wait. */
 export const Steps = ({
 	items,
 	current,

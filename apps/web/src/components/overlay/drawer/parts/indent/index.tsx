@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils';
 
 export type DrawerIndentProps = ComponentProps<typeof BaseDrawer.Indent>;
 
-/** Wraps the app's own UI and draws back while a drawer inside the provider is open. */
 export function DrawerIndent({ className, ...props }: DrawerIndentProps) {
 	return (
 		<BaseDrawer.Indent

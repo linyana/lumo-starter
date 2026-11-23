@@ -125,20 +125,14 @@ const sortPress = {
 	cleared: { label: 'Clear sorting', icon: <ArrowUpDown /> },
 } as const;
 
-/**
- * The column's whole cycle, drawn at once: a reader asks for the direction they want instead of pressing
- * through the ones between. The step the column already stands in is the one that stays unpressed.
- */
 const sortSteps = ['ascending', 'descending', 'cleared'] as const;
 
 type SortStep = (typeof sortSteps)[number];
 
-/** Which step the column stands in. Every `aria-sort` but two is a column that is not sorted. */
 function stepOf(sort: AriaSort | undefined): SortStep {
 	return sort === 'ascending' || sort === 'descending' ? sort : 'cleared';
 }
 
-/** What a step asks the caller for, including the `undefined` that stops sorting the column. */
 function sortOf(step: SortStep): AriaSort | undefined {
 	return step === 'cleared' ? undefined : step;
 }
@@ -379,7 +373,6 @@ export const Table = <Row, Key extends string = string>({
 				};
 	const clearChosen = () => setChosenKeys(noChosen);
 
-	/** What the row says when it has no records to draw: the failure, the caller's word, or neither. */
 	const notice =
 		failure !== undefined ? (
 			<>
@@ -421,10 +414,6 @@ export const Table = <Row, Key extends string = string>({
 					className={classNames?.selection}
 				/>
 			)}
-			{/*
-			 * Only the table waits, and only the records inside it: the pages under it are not records
-			 * that have to arrive again, so they are left out of both the box and the ring.
-			 */}
 			<TableRoot
 				size={size}
 				variant={variant}
@@ -583,8 +572,6 @@ export const Table = <Row, Key extends string = string>({
 													aria-label={rowActionsLabel?.(row)}
 													aria-haspopup="menu"
 													aria-expanded={menuRow === key}
-													// The menu is the table's, not Base UI's, so the flag a trigger carries is written
-													// here: the button a menu came from stays tinted like one that owns it.
 													data-popup-open={menuRow === key ? '' : undefined}
 													onClick={(event) =>
 														toggleRowMenu({ row, key, anchor: event.currentTarget })
@@ -606,9 +593,6 @@ export const Table = <Row, Key extends string = string>({
 					page={pager.page ?? 1}
 					size={pager.size ?? size}
 					range={pager.range ?? true}
-					// The footer is outside the frame the table's own insets are set on, so the count is inset here by
-					// the same measurement it would be under the first column. The end is not: the last control of the
-					// row ends where the table ends, so the two share one edge down the side of the block.
 					className={cn('pt-(--cell-py) ps-(--cell-px)', pager.className, classNames?.footer)}
 				/>
 			)}

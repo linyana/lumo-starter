@@ -9,7 +9,6 @@ import {
 } from './parts';
 import type { AccordionProps } from './types';
 
-/** A list of folds that share one value: divided rows, one answer open at a time unless `multiple`. */
 export const Accordion = ({
 	items,
 	multiple = false,

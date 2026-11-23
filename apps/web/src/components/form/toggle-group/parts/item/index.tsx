@@ -10,13 +10,10 @@ export type ToggleGroupItemProps<Value extends string = string> = Omit<
 	ToggleProps<Value>,
 	'variant' | 'size'
 > & {
-	/** Overrides the group's tier for this one item, which is rarely what a row wants. */
 	variant?: ToggleVariant;
-	/** Overrides the group's scale for this one item, which is rarely what a row wants. */
 	size?: ToggleSize;
 };
 
-/** One toggle of the set. Its `value` is the word the group's state is written in. */
 export function ToggleGroupItem<Value extends string>({
 	variant,
 	size,

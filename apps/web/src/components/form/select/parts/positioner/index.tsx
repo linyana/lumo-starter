@@ -5,12 +5,6 @@ import { cn } from '@/lib/utils';
 
 export type SelectPositionerProps = ComponentProps<typeof BaseSelect.Positioner>;
 
-/**
- * Where the list is placed. Base UI aligns the selected row with the trigger by default, which lays
- * the popup over the control that opened it; here it is off, so a select opens under its trigger like
- * every other surface in the library. Pass `alignItemWithTrigger` for the native feel of a list
- * covering the row it belongs to.
- */
 export function SelectPositioner({
 	className,
 	align = 'start',

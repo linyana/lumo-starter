@@ -13,7 +13,6 @@ export function TooltipPopup({ className, ...props }: TooltipPopupProps) {
 				'relative rounded-md bg-primary text-xs',
 				'text-primary-foreground shadow-lifted',
 				'px-2.5 py-1',
-				// A TooltipViewport inside brings its own padding, so this one would double up.
 				'has-[>[data-slot=tooltip-viewport]]:p-0',
 				'max-w-xs',
 				popup,

@@ -3,7 +3,6 @@ import { cn } from '@/lib/utils';
 
 export type NavBadgeProps = ComponentProps<'div'>;
 
-/** A count or a state on the row's trailing edge. Purely decorative — the row must say it too. */
 export function NavBadge({ className, ...props }: NavBadgeProps) {
 	return (
 		<div

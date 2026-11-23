@@ -5,10 +5,6 @@ import { cn } from '@/lib/utils';
 import { TableContext } from '../context';
 import { headControl, textOf } from '../head';
 
-/**
- * The chevron shares the header controls' appearance, but an open record is marked only by its turn:
- * a tint that stayed would read as a chosen row.
- */
 const branchToggle = cn(
 	headControl,
 	iconSlot,
@@ -17,25 +13,14 @@ const branchToggle = cn(
 );
 
 export type TableBranchProps = {
-	/** The record's own name, at the end of the indent. */
 	children: ReactNode;
-	/** Rows sit under this one, so the toggle is drawn. `false` keeps the space and drops the glyph. */
 	hasChildren?: boolean;
-	/** Whether those rows are showing. */
 	open?: boolean;
 	onOpenChange?: (open: boolean) => void;
-	/** What the toggle is called, after the word for the direction it leads. */
 	label?: string;
-	/** Merged last through `cn()`. */
 	className?: string;
 };
 
-/**
- * A record's name, inset by the depth its row was given, with the control that opens what is filed
- * under it. The toggle matches a column's sort control and turns instead of filling, so
- * an open row is not read as a chosen one; a row with nothing under it keeps the space and drops the
- * glyph, which is what holds a tree's names to one line.
- */
 export function TableBranch({
 	children,
 	hasChildren = true,

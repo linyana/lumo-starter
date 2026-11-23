@@ -3,7 +3,6 @@ import { cn } from '@/lib/utils';
 
 type IPropsType = ComponentProps<'div'>;
 
-/** The padded body under a page's header. Pass `p-0` where the page draws its own. */
 export function Content({ className, ...props }: IPropsType) {
 	return (
 		<div

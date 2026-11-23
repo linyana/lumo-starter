@@ -15,9 +15,7 @@ export type ToastCloseProps = Omit<
 	ComponentProps<typeof BaseToast.Close>,
 	'className' | 'children'
 > & {
-	/** Merged with `cn()`, so a Base UI state callback is not accepted here. */
 	className?: string;
-	/** Defaults to a cross. Give one to say "dismiss" in another glyph. */
 	children?: ReactNode;
 };
 

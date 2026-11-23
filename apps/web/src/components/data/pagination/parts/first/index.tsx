@@ -4,7 +4,6 @@ import { heldBy, itemOf, type ItemProps } from '../page';
 
 export type PaginationFirstProps = ItemProps;
 
-/** The first page, for a list too long to walk back through a page at a time. */
 export function PaginationFirst({ className, children, ...props }: PaginationFirstProps) {
 	const state = usePagination('PaginationFirst');
 	const first = state.page <= 1;

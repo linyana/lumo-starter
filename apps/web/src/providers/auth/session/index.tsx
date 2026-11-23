@@ -28,14 +28,8 @@ type AuthContextValue = {
 	login: (input: LoginInput) => Promise<void>;
 	register: (input: RegisterInput) => Promise<void>;
 	logout: () => Promise<void>;
-	/** Asks the server who this tab is again — what the unreachable screen offers. */
 	refresh: () => Promise<void>;
-	/** The common case, spelled once: does this session hold that permission? */
 	can: (permission: Permission) => boolean;
-	/**
-	 * The same answer for a list no component draws itself. A table's columns and a menu's rows are
-	 * stripped where they are drawn; this is for the arrays that are not.
-	 */
 	filter: <T extends WithAccess>(items: readonly T[]) => T[];
 };
 
@@ -45,12 +39,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	const [user, setUser] = useState<User | null>(null);
 	const [status, setStatus] = useState<AuthStatus>('loading');
 
-	/**
-	 * A reload has no access token in memory; the httpOnly refresh cookie is the
-	 * only thing that survives, so the app's first act is trading it for a pair.
-	 * `refreshSession` reports every failure as an outcome instead of throwing,
-	 * which is why the three ended states are all read from one value.
-	 */
 	const refresh = useCallback(async () => {
 		setStatus('loading');
 
@@ -60,8 +48,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 			setUser(outcome.result.user);
 			setStatus('authenticated');
 		} else {
-			// Expired: the server rejected the cookie. Unavailable: it did not answer,
-			// which says nothing about the session — the guard keeps it, and retries.
 			setStatus(outcome.status === 'expired' ? 'anonymous' : 'unreachable');
 		}
 	}, []);
@@ -70,8 +56,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		refresh();
 	}, [refresh]);
 
-	// The http layer gives up on a 401 only once the refresh cookie is gone, so
-	// there is nothing to keep: the guards take it from here.
 	useEffect(() => {
 		onUnauthorized(() => {
 			setUser(null);
@@ -103,19 +87,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		try {
 			await authApi.logout();
 		} finally {
-			// Local state is cleared even if the request failed: the user asked to
-			// be signed out, and the cookie path is the server's problem.
 			setAccessToken(null);
 			setUser(null);
 			setStatus('anonymous');
 		}
 	}, []);
 
-	/**
-	 * Roles are the only fact the token carries, so the grant expands them here, once per session.
-	 * `can` and `filter` read it, and `AccessProvider` publishes it to the components that draw a
-	 * gated column, row or control — so the one expansion is the one answer.
-	 */
 	const grant = useMemo(() => grantFor(user?.roles ?? []), [user]);
 
 	const can = useCallback(

@@ -4,7 +4,6 @@ import type { SlotClassNames } from '@/components/types';
 export type FieldsetSlots = 'root' | 'legend';
 
 export type FieldsetProps = {
-	/** The heading over the fields — louder than a single field's label. */
 	legend?: ReactNode;
 	children: ReactNode;
 	className?: string;

@@ -27,24 +27,6 @@ export type {
 	UseQueryResult,
 } from './types';
 
-/**
- * One page of records and the way through them: `useHttp` under the hood, with the page, the size,
- * the order and what the reader narrowed on beside it. The screen renders what this hands back and
- * never assembles a query itself.
- *
- * What the reader narrows on is not this hook's state — it is a form's. `form` is the instance the
- * screen hands to `<Form form>`, and `write` is what that form calls on every change: the fields are
- * the filters, so `<Form>` owns what they hold and this owns what was last read, in the address bar.
- *
- * ```tsx
- * const users = useQuery({ fetcher: usersApi.list });
- * <Form form={users.form} initial={users.opened} onChange={users.write} settle={300}>
- * ```
- *
- * The effect owns the first read and every change of a filter, the page, the size or the order, so a
- * screen holds no `useEffect` of its own. The failure is not toasted: a list says it where the
- * records go.
- */
 export const useQuery = <TItem, TQuery extends ListQuery>({
 	fetcher,
 	pageSize: initialPageSize = PAGE_SIZE_DEFAULT,
@@ -53,9 +35,6 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 	const [searchParams, setSearchParams] = useSearchParams();
 	const form = useForm();
 
-	// The address bar opens the screen and the hook's own state is where the reader goes from there,
-	// so the URL is read once — and only when it is the URL this hook writes, which a second list on
-	// the same screen is not.
 	const [opened] = useState<ListState<TQuery>>(() =>
 		sync
 			? stateFromParams<TQuery>({ params: searchParams, pageSize: initialPageSize })
@@ -67,8 +46,6 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 	const [sort, setSort] = useState<ListSort<SortKeyOf<TQuery>> | undefined>(opened.sort);
 	const [filters, setFilters] = useState<ListFilters<TQuery>>(opened.filters);
 
-	// Whether anything is narrowed, which is what a blank list is asked to explain: "nothing matched"
-	// and "there is nothing yet" are two sentences about the same empty row.
 	const narrowed = Object.values(filters).some((value) =>
 		Array.isArray(value) ? value.length > 0 : value !== undefined && value !== null && value !== '',
 	);
@@ -80,25 +57,10 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 
 	const total = data?.total ?? 0;
 
-	// The count is the answer's, not this end's arithmetic: a size the API clamped is a count only the
-	// API saw the records for. The fallback covers an endpoint that answers rows and a total without
-	// one — the same arithmetic, at the size that was asked for.
 	const pageCount = data?.pageCount ?? pageCountOf({ total, pageSize });
 
-	// The wait, as one word. Until the first answer lands the read is still the opening one — including
-	// the frame between mounting and the call the effect below schedules, which is why `initial` and not
-	// `loading` is what asks the question.
 	const wait: ListWait = initial ? 'opening' : loading ? 'refreshing' : null;
 
-	/**
-	 * What a change in the fields means: the filters are exactly what the fields hold, and the records
-	 * under the cursor have moved, so the next read starts over from the first page.
-	 *
-	 * A write that says what the last one said is not a write — the value is picked again by the same
-	 * control, or the reader typed their way back to where they were. Nothing narrowed has changed, so
-	 * the page they were on is still theirs, and the filters keep their identity: the effect keyed on
-	 * them does not fire, and no read goes out for a question already answered.
-	 */
 	const write = useCallback(
 		(values: FormValues): void => {
 			if (sameValues({ left: filters as FormValues, right: values })) return;
@@ -109,25 +71,15 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 		[filters],
 	);
 
-	/**
-	 * A size the reader picked. It starts over from the first page: the records they were looking at
-	 * are not at the same row any more, and page five of ten is not page five of fifty.
-	 */
 	const setPageSize = useCallback((next: number): void => {
 		setPageSizeState(next);
 		setPage(1);
 	}, []);
 
-	// The page the read in flight asked for, so the answer is compared with the question it answers and
-	// not with one asked since.
 	const asked = useRef(opened.page);
 
 	const reload = useCallback(() => {
 		asked.current = page;
-		// The order is asked for only when the reader picked one: left out, the endpoint reads the
-		// records the way it reads them, so the wire never carries a default a second time. What is
-		// left is the whole of `TQuery`; only the assertion is left over, because a spread of an `Omit`
-		// under a constraint is not something TypeScript can prove.
 		const owned =
 			sort === undefined
 				? { page, pageSize }
@@ -135,27 +87,15 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 		void fetchData({ ...filters, ...owned } as TQuery);
 	}, [fetchData, filters, page, pageSize, sort]);
 
-	// The whole of the reading: the first answer, and every change of a settled filter, a page, a size
-	// or an order. Both halves are state, so their identity moves only when the reader writes one.
 	useEffect(() => {
 		reload();
 	}, [reload]);
 
-	// The page that is gone — the last record of the last page was just deleted, a size under the reader
-	// was picked, or the URL asked for one — is answered by the page the API actually read, so the screen
-	// follows that answer instead of asking again for one that does not exist.
-	//
-	// Keyed on the answer alone: the page the reader just picked is already a question, and the answer on
-	// screen belongs to the page before it — correcting against that one would send them back where they
-	// came from, one read later.
 	useEffect(() => {
 		if (data === null) return;
 		if (data.page !== asked.current) setPage(data.page);
 	}, [data]);
 
-	// What the reader is looking at, handed to the address bar: the page, the size, the order and the
-	// filters, and nothing at all while they are still the screen's own. Compared first, because a
-	// query that has not changed is not a navigation.
 	useEffect(() => {
 		if (!sync) return;
 
@@ -168,16 +108,11 @@ export const useQuery = <TItem, TQuery extends ListQuery>({
 		setSearchParams(next, { replace: true });
 	}, [sync, page, pageSize, sort, filters, searchParams, setSearchParams, initialPageSize]);
 
-	// Sorting is a query of its own, so it starts from the first page. A cleared column is the order
-	// the endpoint reads the list in — no order of the reader's, and so no column marked.
 	const onSort = useCallback((next: ListSort<SortKeyOf<TQuery>> | undefined) => {
 		setSort(next);
 		setPage(1);
 	}, []);
 
-	// The way back to the whole list: the fields are redrawn empty in one write, so it is one read and
-	// not one per key. What the list was opened with goes too — a reader who asks for everything wants
-	// everything, not the filters they were handed on arrival.
 	const clearFilters = useCallback(() => {
 		form.seed({});
 		form.reset();

@@ -12,7 +12,6 @@ import {
 } from './parts';
 import type { DrawerParts, DrawerProps } from './types';
 
-/** A panel that slides in from an edge, and can be swiped back out of it. */
 export const Drawer = ({
 	trigger,
 	title,
@@ -25,8 +24,6 @@ export const Drawer = ({
 	'data-slot': dataSlot,
 	...props
 }: DrawerProps) => {
-	// Built once, because both layouts draw the same three pieces: the default one in the order a
-	// panel reads in, a render function wherever its own layout wants them.
 	const parts: DrawerParts = {
 		title: <DrawerTitle className={classNames?.title}>{title}</DrawerTitle>,
 		description:

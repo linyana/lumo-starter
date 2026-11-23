@@ -5,13 +5,6 @@ import { ScrollAreaThumb } from '../thumb';
 
 export type ScrollAreaScrollbarProps = ComponentProps<typeof BaseScrollArea.Scrollbar>;
 
-/**
- * Drawn over the content, never beside it: Base UI hides the native bar and gives this track its
- * own absolute placement, so the viewport keeps its width whether or not anything overflows. It
- * stays out of sight until the area is scrolled or pointed at — the platform's overlay behaviour,
- * in the theme's colours — and takes no pointer events while hidden. It brings its own thumb, since
- * a track with nothing in it draws nothing.
- */
 export function ScrollAreaScrollbar({
 	className,
 	orientation = 'vertical',

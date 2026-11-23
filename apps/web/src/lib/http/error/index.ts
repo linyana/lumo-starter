@@ -1,11 +1,5 @@
 import type { ApiFailure, ErrorCode, FieldError } from '@lumo/shared';
 
-/**
- * Every failure converges on `ApiError`:
- * - status 0   transport layer (offline, DNS, timeout, aborted)
- * - 4xx        a request the caller can fix; show it where the user is
- * - 5xx        nothing the user can do; the message stays generic
- */
 const STATUS_MESSAGES: Record<number, string> = {
 	0: 'Cannot reach the server. Check your connection and try again.',
 	400: 'The request was invalid',
@@ -23,15 +17,9 @@ const STATUS_MESSAGES: Record<number, string> = {
 
 export interface ApiErrorOptions {
 	status: number;
-	/** Stable machine-readable code from the API. */
 	code?: ErrorCode;
 	message?: string;
-	/** One entry per failed field, as returned by the API. */
 	details?: readonly FieldError[];
-	/**
-	 * Set by the http layer when the session is gone for good. The auth provider
-	 * reacts to that on its own, so a caller must not show it a second time.
-	 */
 	sessionExpired?: boolean;
 	originalError?: unknown;
 }
@@ -68,13 +56,11 @@ export class ApiError extends Error {
 		return this.status === 401;
 	}
 
-	/** 4xx: fixable by the user, so it is worth showing inline as well as as a toast. */
 	get isExpected(): boolean {
 		return this.status >= 400 && this.status < 500;
 	}
 }
 
-/** The API sends `FieldError[]`; anything else in `details` is context, not a message. */
 function normalizeDetails(details: unknown): FieldError[] {
 	if (!Array.isArray(details)) return [];
 
@@ -88,7 +74,6 @@ function normalizeDetails(details: unknown): FieldError[] {
 	});
 }
 
-/** HTTP failure → `ApiError`, using the API's own sentence when there is one. */
 export function fromHttpStatus({
 	status,
 	body,
@@ -101,7 +86,6 @@ export function fromHttpStatus({
 	const failure = (body ?? {}) as Partial<ApiFailure>;
 	const error = failure.error;
 
-	// A 5xx body only ever says "Internal server error" — no information for the user.
 	if (status >= 500 || !error) {
 		return new ApiError({ status, originalError });
 	}
@@ -115,14 +99,12 @@ export function fromHttpStatus({
 	});
 }
 
-/** Structural match for axios errors — keeps this module free of an axios import. */
 interface AxiosLikeError {
 	isAxiosError?: boolean;
 	response?: { status: number; data: unknown };
 	code?: string;
 }
 
-/** Any thrown value → `ApiError` (axios failures, `ApiError`, plain errors). */
 export function toApiError(error: unknown): ApiError {
 	if (error instanceof ApiError) return error;
 
@@ -148,20 +130,14 @@ export function toApiError(error: unknown): ApiError {
 	return new ApiError({ status: 0, originalError: error });
 }
 
-/** Always-displayable text; safe to call with anything. */
 export const errorMessage = (error: unknown): string => toApiError(error).message;
 
-/**
- * Only text worth showing inline (4xx). 5xx and network failures return `null`:
- * their message is generic, and the toast already covers them.
- */
 export const inlineErrorMessage = (error: unknown): string | null => {
 	if (!error) return null;
 	const apiError = toApiError(error);
 	return apiError.isExpected ? apiError.message : null;
 };
 
-/** Field-level details from a 400, keyed by input name. */
 export const errorFields = (error: unknown): Record<string, string> => {
 	const fields: Record<string, string> = {};
 

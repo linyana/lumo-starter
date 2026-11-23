@@ -4,7 +4,6 @@ import { heldBy, itemOf, type ItemProps } from '../page';
 
 export type PaginationLastProps = ItemProps;
 
-/** The last page. The far end of `PaginationFirst`. */
 export function PaginationLast({ className, children, ...props }: PaginationLastProps) {
 	const state = usePagination('PaginationLast');
 	const last = state.page >= state.pageCount;

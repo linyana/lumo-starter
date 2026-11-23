@@ -30,8 +30,6 @@ export const Form = <Input, Values extends Record<string, unknown> = Record<stri
 	const latest = useRef(instance);
 	latest.current = instance;
 
-	// The values the form opens with land while this renders, before anything below is willing to
-	// listen, so they are announced once the fields are in.
 	useLayoutEffect(() => {
 		if (Object.keys(latest.current.errors).length > 0) latest.current.setErrors({});
 		latest.current.notify();

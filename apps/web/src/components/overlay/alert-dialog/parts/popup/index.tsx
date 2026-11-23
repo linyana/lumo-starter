@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils';
 
 export type AlertDialogPopupProps = ComponentProps<typeof BaseAlertDialog.Popup>;
 
-/** The same panel a dialog is drawn in: the role underneath is the only difference. */
 export function AlertDialogPopup({ className, ...props }: AlertDialogPopupProps) {
 	return (
 		<BaseAlertDialog.Popup

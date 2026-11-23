@@ -7,7 +7,6 @@ import {
 } from './parts';
 import type { ScrollAreaProps } from './types';
 
-/** A pane that scrolls under the platform's overlay bar, drawn only when there is something to scroll. */
 export const ScrollArea = ({
 	children,
 	height,

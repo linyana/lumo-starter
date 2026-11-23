@@ -2,18 +2,11 @@ import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
 type IPropsType = Omit<ComponentProps<'header'>, 'title'> & {
-	/** The page's own name. A page draws this itself — the shell never holds one. */
 	title?: ReactNode;
 	description?: ReactNode;
-	/** Trailing controls, pushed to the far edge. */
 	actions?: ReactNode;
 };
 
-/**
- * The page's header, drawn inside the surface so it scrolls with nothing: it sticks to the top
- * of the scroll container. Its chrome uses the shell's fill in light mode and the containing
- * surface's fill in dark mode.
- */
 export function Header({ title, description, actions, className, children, ...props }: IPropsType) {
 	return (
 		<header

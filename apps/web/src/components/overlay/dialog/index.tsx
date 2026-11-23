@@ -11,7 +11,6 @@ import {
 } from './parts';
 import type { DialogProps } from './types';
 
-/** A modal: a title, a body, and a footer, with the page behind it inert. */
 export const Dialog = ({
 	trigger,
 	title,

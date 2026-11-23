@@ -5,11 +5,6 @@ import { PERMISSIONS_KEY } from '../decorators/permissions.decorator.js';
 import { AppException } from '../errors/app.exception.js';
 import type { AuthenticatedRequest } from '../types/index.js';
 
-/**
- * Runs after `JwtAuthGuard`. Role → permission expansion happens in the shared
- * package, so the button the frontend hides is hidden by the same expression
- * the backend evaluates.
- */
 @Injectable()
 export class PermissionsGuard implements CanActivate {
 	constructor(private readonly reflector: Reflector) {}

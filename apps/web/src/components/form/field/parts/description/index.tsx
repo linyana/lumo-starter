@@ -6,7 +6,6 @@ export type FieldDescriptionProps = Omit<
 	ComponentProps<typeof BaseField.Description>,
 	'className'
 > & {
-	/** Merged with `cn()`, so a Base UI state callback is not accepted here. */
 	className?: string;
 };
 

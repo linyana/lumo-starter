@@ -10,7 +10,6 @@ import {
 } from './parts';
 import type { SliderProps } from './types';
 
-/** A setting that is a number on a line: a groove, what is already taken of it, and the knob. */
 export const Slider = ({ label, onChange, className, classNames, ...props }: SliderProps) => (
 	<SliderRoot onValueChange={onChange} className={cn(className, classNames?.root)} {...props}>
 		{label !== undefined && (

@@ -3,7 +3,6 @@ import { cn } from '@/lib/utils';
 
 export type SkeletonProps = ComponentProps<'div'>;
 
-/** Placeholder for content that has not arrived. Give it the size the real content will be. */
 export function Skeleton({ className, ...props }: SkeletonProps) {
 	return (
 		<div

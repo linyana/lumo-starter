@@ -13,16 +13,10 @@ const adornmentClass = cn(
 );
 
 export type ComboboxTriggerProps = Omit<ComponentProps<typeof BaseCombobox.Trigger>, 'children'> & {
-	/** Replaces the caret, at the size of the text around it. */
 	children?: ReactNode;
-	/** Merged with `cn()`. */
 	className?: string;
 };
 
-/**
- * The caret, and the button that opens the list without typing. It turns itself while the popup is
- * open, and it is labelled even though it draws nothing but a glyph.
- */
 export function ComboboxTrigger({
 	className,
 	children,

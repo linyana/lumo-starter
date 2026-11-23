@@ -3,7 +3,6 @@ import { cn } from '@/lib/utils';
 import { RadioGroupIndicator, RadioGroupItem, RadioGroupRoot } from './parts';
 import type { RadioGroupProps } from './types';
 
-/** Exactly one of these: the options, their labels, and the arrow keys between them. */
 export const RadioGroup = <Value extends string>({
 	options,
 	onChange,

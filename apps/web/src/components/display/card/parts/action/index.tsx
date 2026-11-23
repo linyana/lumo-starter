@@ -3,7 +3,6 @@ import { cn } from '@/lib/utils';
 
 export type CardActionProps = ComponentProps<'div'>;
 
-/** The slot in the corner of a header — one button, one menu trigger, nothing tall. */
 export function CardAction({ className, ...props }: CardActionProps) {
 	return (
 		<div

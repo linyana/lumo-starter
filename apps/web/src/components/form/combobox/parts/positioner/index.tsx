@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils';
 
 export type ComboboxPositionerProps = ComponentProps<typeof BaseCombobox.Positioner>;
 
-/** Where the list is placed: under the field, as wide as it, on the same offset Select uses. */
 export function ComboboxPositioner({
 	className,
 	align = 'start',

@@ -9,7 +9,6 @@ export function MenuViewport({ className, ...props }: MenuViewportProps) {
 	return (
 		<BaseMenu.Viewport
 			data-slot="menu-viewport"
-			// The popup's own padding is vertical only, so the track takes its full width.
 			className={cn(viewport, '[--viewport-inline-padding:--spacing(0)] py-0', className)}
 			{...props}
 		/>

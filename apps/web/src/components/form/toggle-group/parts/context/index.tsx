@@ -6,7 +6,6 @@ export type ToggleGroupContextValue = {
 	size: ToggleSize;
 };
 
-/** The tier and the scale, which every item of a group shares unless it overrides one. */
 export const ToggleGroupContext = createContext<ToggleGroupContextValue>({
 	variant: 'ghost',
 	size: 'md',

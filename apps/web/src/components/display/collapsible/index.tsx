@@ -2,7 +2,6 @@ import { cn } from '@/lib/utils';
 import { CollapsibleIcon, CollapsiblePanel, CollapsibleRoot, CollapsibleTrigger } from './parts';
 import type { CollapsibleProps } from './types';
 
-/** One question, and the answer folded under it. */
 export const Collapsible = ({
 	title,
 	children,

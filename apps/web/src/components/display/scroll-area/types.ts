@@ -7,7 +7,6 @@ export type ScrollAreaSlots = 'root' | 'viewport' | 'content' | 'scrollbar';
 
 export type ScrollAreaProps = {
 	children: ReactNode;
-	/** The height the area runs out of. Without one it never scrolls. */
 	height?: number | string;
 	orientation?: ScrollAreaOrientation;
 	className?: string;

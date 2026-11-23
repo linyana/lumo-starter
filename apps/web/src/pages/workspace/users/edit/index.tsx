@@ -21,10 +21,6 @@ import {
 import { useHttp } from '@/hooks';
 import { useAuth } from '@/providers/auth';
 
-/**
- * One record's edit panel. It is drawn only while it is open, so it is handed no open state — the two
- * things the page does about it are what it takes: put the panel away, and read the list again.
- */
 type IPropsType = {
 	user: User;
 	closePanel: () => void;
@@ -50,8 +46,6 @@ export const EditUser = ({ user, closePanel, reload }: IPropsType) => {
 	return (
 		<Dialog
 			open
-			// Escape and a press on the page behind it are the dialog's to report, and both mean what the
-			// Cancel press below means: the panel goes away.
 			onOpenChange={(next) => {
 				if (!next) closePanel();
 			}}

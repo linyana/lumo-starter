@@ -5,14 +5,9 @@ import { iconSlot } from '@/lib/control';
 import { cn } from '@/lib/utils';
 
 export type SelectIconProps = Omit<ComponentProps<typeof BaseSelect.Icon>, 'children'> & {
-	/** Replaces the caret, at the size of the text around it. */
 	children?: ReactNode;
 };
 
-/**
- * The caret. It owns its turn, because it is the only part that knows the popup is open — the same
- * reason `CollapsibleIcon` owns its own.
- */
 export function SelectIcon({ className, children, ...props }: SelectIconProps) {
 	return (
 		<BaseSelect.Icon

@@ -26,8 +26,6 @@ export class AuthService {
 
 		const passwordHash = await argon2.hash(input.password);
 
-		// Bootstrap: whoever registers into an empty table owns it. Every later
-		// sign-up is a plain member until an owner promotes them.
 		const isFirstUser = (await this.prisma.user.count()) === 0;
 
 		const row = await this.prisma.user.create({
@@ -52,8 +50,6 @@ export class AuthService {
 	async login(input: LoginInput): Promise<AuthenticatedResult> {
 		const row = await this.prisma.user.findUnique({ where: { email: input.email } });
 
-		// Same error for "no such user" and "wrong password": distinguishing them
-		// turns the login form into an account enumeration oracle.
 		if (!row)
 			throw new AppException({ code: 'UNAUTHORIZED', message: 'Incorrect email or password' });
 

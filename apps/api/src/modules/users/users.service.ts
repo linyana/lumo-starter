@@ -33,8 +33,6 @@ export class UsersService {
 				: undefined,
 		};
 
-		// The order a list reads in when the reader picked none. It is stated here because this is the
-		// only place that reads it, and left out of the schema so a client has no default to send back.
 		const orderBy = {
 			[query.sort ?? 'createdAt']: query.order ?? 'desc',
 		} as Prisma.UserOrderByWithRelationInput;

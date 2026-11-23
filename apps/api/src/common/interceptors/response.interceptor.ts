@@ -9,10 +9,6 @@ import type { ApiSuccess } from '@lumo/shared';
 import { map, type Observable } from 'rxjs';
 import { SKIP_ENVELOPE } from '../decorators/skip-envelope.decorator.js';
 
-/**
- * Wraps successful responses in `{ data }`. Health checks opt out — a probe
- * wants the terminus payload, not an envelope around it.
- */
 @Injectable()
 export class ResponseInterceptor<T> implements NestInterceptor<T, ApiSuccess<T> | T> {
 	constructor(private readonly reflector: Reflector) {}

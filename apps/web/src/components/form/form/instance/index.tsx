@@ -25,10 +25,6 @@ const EMPTY: FormValues = {};
 
 const NO_ERRORS: FormErrors = {};
 
-/**
- * The same thing said twice. A field can fail with two rules at once and a server sends one sentence,
- * so a list is compared by what it holds — the count and the order of the words are not the message.
- */
 const sameMessage = ({ left, right }: { left: FormError; right: FormError }): boolean =>
 	(Array.isArray(left) ? left.join('\n') : left) ===
 	(Array.isArray(right) ? right.join('\n') : right);
@@ -44,7 +40,6 @@ export const useForm = (): FormInstance => {
 	const opened = useRef<FormValues>(EMPTY);
 	const revisions = useRef<Record<string, number>>({});
 	const nudges = useRef<Record<string, number>>({});
-	/** The verdict on screen, kept beside the state so the next one has something to be compared with. */
 	const shown = useRef<FormErrors>(NO_ERRORS);
 	const config = useRef<FormConfig>({});
 	const watchers = useRef(new Set<() => void>());
@@ -69,7 +64,6 @@ export const useForm = (): FormInstance => {
 		};
 	}, []);
 
-	/** The verdict on screen, and everyone told about it. */
 	const show = useCallback(
 		(next: FormErrors): void => {
 			shown.current = next;
@@ -79,14 +73,6 @@ export const useForm = (): FormInstance => {
 		[notify],
 	);
 
-	/**
-	 * A verdict arriving: put on screen, and remembered. A sentence that is already showing is one the
-	 * reader has had their chance to read, so being told it again is a reminder — and there is one, on the
-	 * first line that repeated, because a form whose every field jittered would say nothing about where
-	 * to look. What a reminder looks like belongs to the line that draws it.
-	 *
-	 * A verdict leaving is `show`: there is nothing arriving for the fields it says nothing about.
-	 */
 	const publish = useCallback(
 		(next: FormErrors): void => {
 			const again = Object.entries(next).find(
@@ -158,10 +144,6 @@ export const useForm = (): FormInstance => {
 		held.current = { ...opened.current };
 	}, []);
 
-	/**
-	 * One field starting over: the counter its control is keyed by moves, and its verdict goes with the
-	 * value that was just replaced. A field with no verdict is left alone, so nothing re-renders.
-	 */
 	const startOver = useCallback(
 		(name: string): void => {
 			revisions.current = { ...revisions.current, [name]: (revisions.current[name] ?? 0) + 1 };
@@ -249,12 +231,7 @@ export const useForm = (): FormInstance => {
 	};
 };
 
-/**
- * The whole form's values, followed by identity: one object until the next write, so every write
- * re-renders the caller.
- */
 export function useWatch({ form }: FormArgs): FormValues;
-/** One field's value, followed — `undefined` until something writes that name. */
 export function useWatch<Value = unknown>({ form, name }: WatchArgs): Value | undefined;
 export function useWatch({ form, name }: FormArgs & { name?: string }): unknown {
 	const snapshot = useCallback(
@@ -265,14 +242,11 @@ export function useWatch({ form, name }: FormArgs & { name?: string }): unknown 
 	return useSyncExternalStore(form.subscribe, snapshot, snapshot);
 }
 
-/** Whether the form differs from what it opened with, followed — one re-render per flip. */
 export const useChanged = ({ form }: FormArgs): boolean =>
 	useSyncExternalStore(form.subscribe, form.changed, form.changed);
 
-/** The form the caller's fields are in, or `null` when they stand alone. */
 export const useFormContext = (): FormContextValue | null => useContext(FormContext);
 
-/** Drawn by `<Form>`; nothing else provides it. */
 export const FormProvider = ({
 	value,
 	children,

@@ -10,13 +10,9 @@ export type SidebarProps = {
 	onSelect?: (key: string) => void;
 	logo?: ReactNode;
 	title?: ReactNode;
-	/** Controls at the far end of the brand row, before the fold toggle. */
 	brandActions?: ReactNode;
-	/** Rows pinned above the nav, rendered inside this rail's own nav root. */
 	toolbar?: ReactNode;
-	/** Rows for the bottom edge, rendered inside this rail's own nav root. */
 	footer?: ReactNode;
-	/** Whether the rail can narrow to its icons at all. */
 	collapsible?: boolean;
 	collapsed?: boolean;
 	onToggle?: () => void;
@@ -25,11 +21,6 @@ export type SidebarProps = {
 
 const noNav: LayoutNavEntry[] = [];
 
-/**
- * The shell's navigation is what the eye lands on first, so its rows sit a notch above the
- * primitive's density: a 36px row and a 16px glyph — and the glyph at a fixed size rather than
- * the row's `1em`, because here the icon leads the label instead of following it.
- */
 const rowColor = cn(
 	'text-foreground/70 hover:text-foreground',
 	'dark:text-foreground/60 dark:hover:text-foreground dark:data-active:text-accent-foreground',
@@ -37,10 +28,6 @@ const rowColor = cn(
 const row = cn('h-9 [&_svg]:size-4', rowColor);
 const subRow = cn('h-8 [&_svg]:size-4', rowColor);
 
-/**
- * A strip at one edge of the rail, outside the scroll box: the same padded nav root at either end,
- * because what it holds is rows and rows want the list the nav gives them.
- */
 function RailSlot({
 	slot,
 	compact,
@@ -57,11 +44,6 @@ function RailSlot({
 	);
 }
 
-/**
- * The shell's left rail: a brand row, whatever is pinned above the nav, the nav, and whatever is
- * pinned to the bottom. It paints nothing of its own — the shell's fill shows through, which is what
- * makes it read as grey next to the card rather than as a second surface.
- */
 export function Sidebar({ className, collapsed = false, ...props }: SidebarProps) {
 	return (
 		<aside
@@ -103,8 +85,6 @@ export function SidebarContent({
 					data-slot="layout-brand"
 					className={cn(
 						'flex shrink-0 items-center gap-2 px-2 text-sm font-semibold [&_svg]:shrink-0',
-						// The narrow rail is a single 32px column wide, so its brand controls stand on
-						// top of each other instead of beside each other.
 						collapsed ? 'flex-col py-2' : 'h-14',
 					)}
 				>

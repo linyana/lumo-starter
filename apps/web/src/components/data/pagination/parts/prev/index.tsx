@@ -4,7 +4,6 @@ import { heldBy, itemOf, type ItemProps } from '../page';
 
 export type PaginationPrevProps = ItemProps;
 
-/** One page back. Disabled on the first page, where there is nowhere to go. */
 export function PaginationPrev({ className, children, ...props }: PaginationPrevProps) {
 	const state = usePagination('PaginationPrev');
 	const held = heldBy({ state, edge: state.page <= 1 });

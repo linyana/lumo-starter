@@ -7,15 +7,9 @@ export type AccordionTriggerProps = Omit<
 	ComponentProps<typeof BaseAccordion.Trigger>,
 	'className'
 > & {
-	/** Merged with `cn()`, so a Base UI state callback is not accepted here. */
 	className?: string;
 };
 
-/**
- * The row you press. The same appearance as a collapsible's trigger, `group` included, because the
- * caret inside it reads the open state off this element — and a row that opened a panel without saying
- * so in the same way would be a second kind of disclosure in one library.
- */
 export function AccordionTrigger({ className, ...props }: AccordionTriggerProps) {
 	return (
 		<BaseAccordion.Trigger

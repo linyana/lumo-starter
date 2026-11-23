@@ -2,14 +2,8 @@ import type { ApiSuccess, AuthResult } from '@lumo/shared';
 import axios, { type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
 import { ApiError, toApiError } from '../error';
 
-/** `/api` in dev, proxied by Vite; a deploy that splits origins sets this. */
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api';
 
-/**
- * Access token: memory only. It never touches localStorage, so an injected
- * script has to run while the tab is open to read it — and the durable
- * credential (the refresh cookie) is httpOnly and unreachable from JS.
- */
 let accessToken: string | null = null;
 
 export const setAccessToken = (token: string | null): void => {
@@ -19,10 +13,6 @@ export const setAccessToken = (token: string | null): void => {
 
 export const getAccessToken = (): string | null => accessToken;
 
-/**
- * What to do once the session is truly gone (clear state, go to login, tell the
- * user). One handler, registered by the auth provider.
- */
 let unauthorizedHandler: (() => void) | null = null;
 let unauthorizedNotified = false;
 
@@ -48,10 +38,6 @@ http.interceptors.request.use((config) => {
 	return config;
 });
 
-/**
- * A bare client for the refresh call: it must not go through the response
- * interceptor, or a failing refresh would trigger another refresh.
- */
 const refreshClient = axios.create({
 	baseURL: API_BASE_URL,
 	withCredentials: true,
@@ -59,27 +45,13 @@ const refreshClient = axios.create({
 
 const REFRESH_PATH = '/auth/refresh';
 
-/**
- * What a refresh attempt amounted to. Only `expired` signs anyone out;
- * `unavailable` is a failure to *check* the session, not to renew it — the
- * distinction is the caller's, so it survives as a value rather than a `null`.
- */
 export type RefreshOutcome =
 	| { status: 'refreshed'; result: AuthResult }
 	| { status: 'expired' }
 	| { status: 'unavailable' };
 
-/**
- * Single-flight: ten requests failing with 401 at once must produce one refresh
- * call, not ten. Everyone awaits the same promise, which never rejects — a
- * rejection would leave the other callers with an unhandled error.
- */
 let refreshing: Promise<RefreshOutcome> | null = null;
 
-/**
- * Asks the server who this tab is. The auth provider's view of a reload: one
- * call per app, and the retry behind the "unreachable" screen.
- */
 export const refreshSession = (): Promise<RefreshOutcome> => {
 	refreshing ??= refreshClient
 		.post<ApiSuccess<AuthResult>>(REFRESH_PATH)
@@ -89,8 +61,6 @@ export const refreshSession = (): Promise<RefreshOutcome> => {
 			return { status: 'refreshed', result };
 		})
 		.catch((error: unknown): RefreshOutcome => {
-			// The server rejected the cookie: the session is over. Anything else — a
-			// 5xx, offline, a timeout — says nothing about the session, so it is kept.
 			const response = axios.isAxiosError(error) ? error.response : undefined;
 			const rejected = response !== undefined && response.status < 500;
 
@@ -115,7 +85,6 @@ http.interceptors.response.use(
 			? (error.config as RetriableConfig | undefined)
 			: undefined;
 
-		// A request that carried a token came back 401: the token is stale, not the credentials.
 		const carriedToken = Boolean(config?.headers.Authorization);
 		const isAuthFailure = axios.isAxiosError(error) && error.response?.status === 401;
 
@@ -133,8 +102,6 @@ http.interceptors.response.use(
 		}
 
 		if (outcome.status === 'unavailable') {
-			// Signing out here would throw away a session that may still be valid,
-			// so the failure is reported as retryable and the next call gets another go.
 			throw new ApiError({
 				status: 0,
 				message: 'We could not confirm your session. Please try again in a moment.',
@@ -155,14 +122,6 @@ http.interceptors.response.use(
 
 const unwrap = <T>(response: AxiosResponse<ApiSuccess<T>>): T => response.data.data;
 
-/**
- * Thin typed wrapper so call sites never see the `{ data }` envelope — every request the app makes goes
- * through here, so a verb is one function and the envelope is one unwrap.
- *
- * `send` is the verb that has no envelope to unwrap: the endpoint's whole answer is the status. It
- * names the method rather than fixing one, because a delete and a batch answered `204` are the same
- * answer and two different wires.
- */
 export const api = {
 	get: async <T>({ url, params }: { url: string; params?: Record<string, unknown> }): Promise<T> =>
 		unwrap(await http.get<ApiSuccess<T>>(url, { params })),

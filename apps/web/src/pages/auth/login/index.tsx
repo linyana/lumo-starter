@@ -34,7 +34,6 @@ export const LoginPage = () => {
 				</>
 			}
 		>
-			{/* The same schema the API validates with — one rule, two runtimes. */}
 			<Form className="gap-6" schema={loginSchema} onSubmit={submit.fetchData}>
 				<Field name="email">
 					<Input

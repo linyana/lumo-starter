@@ -1,11 +1,6 @@
 import { PERMISSIONS, type Permission } from '../../permission';
 import type { Role } from '../types';
 
-/**
- * Roles are coarse buckets; permissions are the only thing guards check.
- * The mapping lives in code so the frontend can hide a button with the exact
- * same rule the backend enforces.
- */
 export const ROLES = ['OWNER', 'ADMIN', 'MEMBER'] as const;
 
 export const ROLE_META = {

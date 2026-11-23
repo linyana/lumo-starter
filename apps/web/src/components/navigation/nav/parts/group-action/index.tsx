@@ -4,7 +4,6 @@ import { ActionGlyph } from '../action';
 
 export type NavGroupActionProps = ComponentProps<'button'>;
 
-/** The "+" that belongs to a group rather than to one of its rows. */
 export function NavGroupAction({ className, ...props }: NavGroupActionProps) {
 	return (
 		<ActionGlyph

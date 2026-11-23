@@ -5,17 +5,10 @@ import { clearButton } from '@/lib/control';
 import { cn } from '@/lib/utils';
 
 export type ComboboxClearProps = Omit<ComponentProps<typeof BaseCombobox.Clear>, 'children'> & {
-	/** Replaces the cross. */
 	children?: ReactNode;
-	/** Merged with `cn()`. */
 	className?: string;
 };
 
-/**
- * The way back to an empty field. Base UI mounts it only while there is something to clear, which is
- * what the field's extra room on the end is keyed to — and it is the library's cross, the same button
- * an input, a textarea and a select draw, measured against the caret beside it rather than the edge.
- */
 export function ComboboxClear({
 	className,
 	children,

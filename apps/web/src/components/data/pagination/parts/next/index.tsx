@@ -4,7 +4,6 @@ import { heldBy, itemOf, type ItemProps } from '../page';
 
 export type PaginationNextProps = ItemProps;
 
-/** One page on. Disabled on the last, for the same reason as `PaginationPrev`. */
 export function PaginationNext({ className, children, ...props }: PaginationNextProps) {
 	const state = usePagination('PaginationNext');
 	const last = state.page >= state.pageCount;

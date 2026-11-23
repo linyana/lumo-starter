@@ -14,7 +14,6 @@ export function TooltipPositioner({
 		<BaseTooltip.Positioner
 			data-slot="tooltip-positioner"
 			sideOffset={sideOffset}
-			// Above every popup: a tooltip explains something that is already inside one.
 			className={cn('z-60', positioner, className)}
 			{...props}
 		/>

@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Button, Drawer } from '@/components';
 import { SidebarContent, type SidebarProps } from '../sidebar';
 
-/** What the drawer is handed: the rail's rows, narrowed to the ones a drawer shows. */
 type IPropsType = Pick<
 	SidebarProps,
 	'nav' | 'selectedKey' | 'onSelect' | 'logo' | 'title' | 'brandActions' | 'toolbar' | 'footer'
@@ -26,8 +25,6 @@ export function MobileNavigation({
 	const [route, setRoute] = useState([selectedKey, resetScrollKey]);
 	const bar = useRef<HTMLDivElement>(null);
 
-	// A new page closes the drawer. Adjusted during render rather than in an effect, so the drawer
-	// is already shut when the page it opened is first painted.
 	if (route[0] !== selectedKey || route[1] !== resetScrollKey) {
 		setRoute([selectedKey, resetScrollKey]);
 		setOpen(false);
@@ -37,7 +34,6 @@ export function MobileNavigation({
 		const element = bar.current;
 		if (!open || element === null) return;
 
-		// Follow the CSS breakpoint: a hidden bar must not leave a modal drawer active on desktop.
 		const observer = new ResizeObserver(() => {
 			if (element.getClientRects().length === 0) setOpen(false);
 		});

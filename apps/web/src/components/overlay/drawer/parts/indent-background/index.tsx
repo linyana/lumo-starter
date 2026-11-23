@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils';
 
 export type DrawerIndentBackgroundProps = ComponentProps<typeof BaseDrawer.IndentBackground>;
 
-/** The surface a scaled-down app reveals at its edges. */
 export function DrawerIndentBackground({ className, ...props }: DrawerIndentBackgroundProps) {
 	return (
 		<BaseDrawer.IndentBackground

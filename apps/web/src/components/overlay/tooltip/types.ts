@@ -8,15 +8,10 @@ export type TooltipSlots = 'popup' | 'arrow';
 
 export type TooltipProps = TooltipPlacement & {
 	content: ReactNode;
-	/** The element the hint belongs to. It becomes the tooltip's trigger. */
 	children: ReactElement;
-	/** Draws the pointer that ties the popup back to its trigger. */
 	arrow?: boolean;
-	/** How long the pointer rests before the hint arrives. */
 	delay?: number;
-	/** A hint that is not worth showing now — the trigger keeps working, and nothing pops. */
 	disabled?: boolean;
-	/** The hint's own box — the shorthand for `classNames.popup`. */
 	className?: string;
 	classNames?: SlotClassNames<TooltipSlots>;
 };

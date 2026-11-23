@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils';
 
 export type CollapsibleIconProps = ComponentProps<typeof ChevronRight>;
 
-/** Caret that turns with the panel. Reads `data-panel-open` off the trigger. */
 export function CollapsibleIcon({ className, ...props }: CollapsibleIconProps) {
 	return (
 		<ChevronRight

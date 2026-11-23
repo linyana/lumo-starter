@@ -66,10 +66,6 @@ export class UsersController {
 		await this.users.remove({ id, actor });
 	}
 
-	/**
-	 * The same delete asked for a screenful: every row is asked about first and they are removed in one
-	 * statement, so a failure leaves nothing gone.
-	 */
 	@Post('batch-delete')
 	@RequirePermissions('user:delete')
 	@HttpCode(HttpStatus.NO_CONTENT)

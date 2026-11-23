@@ -17,23 +17,16 @@ import type { LayoutNavEntry } from './types';
 
 export const layoutVariants = tv({
 	slots: {
-		// The shell's fill is the sidebar's: nothing paints the rail, and in `default` the card
-		// rises above the same colour, so one token covers both.
 		root: 'flex h-svh w-full overflow-hidden bg-layout-background',
 		main: 'flex min-h-0 min-w-0 flex-1 flex-col',
-		// `relative` makes the scroll box a containing block: an absolutely positioned descendant —
-		// Base UI's hidden checkbox input, most of the time — would otherwise sit against the initial
-		// containing block, escape this box's clipping and give the document a scrollbar of its own.
 		surface: 'relative flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto',
 	},
 	variants: {
 		variant: {
-			/** A rail, then a card inset on every edge. */
 			default: {
 				main: 'md:p-2 md:ps-0',
 				surface: 'bg-layout-content text-card-foreground md:rounded-xl',
 			},
-			/** A rail only: the content is the page, edge to edge. */
 			plain: {
 				surface: 'bg-layout-content',
 			},
@@ -44,36 +37,20 @@ export const layoutVariants = tv({
 	},
 });
 
-// `onSelect` is a div's own event; here the name belongs to the nav, so the DOM handler goes.
 type IPropsType = Omit<ComponentProps<'div'>, 'title' | 'onSelect'> & {
 	variant?: VariantProps<typeof layoutVariants>['variant'];
-	/** Shared by the desktop rail and the mobile drawer. Supplying it enables mobile navigation. */
 	nav?: LayoutNavEntry[];
 	selectedKey?: string;
 	onSelect?: (key: string) => void;
-	/** The brand mark in the rail's top-left, sized to its text. */
 	logo?: ReactNode;
 	title?: ReactNode;
-	/** Controls at the far end of the brand row, before the fold toggle — a theme switch, a tint. */
 	brandActions?: ReactNode;
-	/**
-	 * Pinned above the nav, under the brand row: a search trigger, a filter — a control the list
-	 * should not scroll past.
-	 */
 	toolbar?: ReactNode;
-	/** Pinned to the rail's bottom edge: a version, a status, a link. */
 	footer?: ReactNode;
-	/** Lets the rail narrow to its icons: the brand row carries the toggle, and cmd/ctrl+b does it. */
 	collapsible?: boolean;
-	/** Opens narrowed. The uncontrolled starting point — store it yourself in `onCollapsedChange`. */
 	defaultCollapsed?: boolean;
-	/** Controlled; pass `onCollapsedChange` to keep it. */
 	collapsed?: boolean;
 	onCollapsedChange?: (collapsed: boolean) => void;
-	/**
-	 * Scroll the surface back to the top whenever this changes — a route's path, most of the time.
-	 * The shell owns the box that scrolls, so the shell is what puts it back; a page has no way to.
-	 */
 	resetScrollKey?: string;
 };
 
@@ -102,8 +79,6 @@ function LayoutRoot({
 	const surfaceRef = useRef<HTMLElement>(null);
 	const shownKey = useRef(resetScrollKey);
 
-	// Before paint, so the page arriving is never seen at the height of the one leaving. Only a change
-	// scrolls: a shell that is mounted is already at the top of whatever it was opened on.
 	useLayoutEffect(() => {
 		if (shownKey.current === resetScrollKey) return;
 		shownKey.current = resetScrollKey;
@@ -116,8 +91,6 @@ function LayoutRoot({
 		onCollapsedChange?.(next);
 	}, [isCollapsed, onCollapsedChange]);
 
-	// The rail's own shortcut: chrome behaviour, so the shell owns it — but only when it asked
-	// to be collapsible, and only the state, never where that state is remembered.
 	useEffect(() => {
 		if (!collapsible) return;
 
@@ -175,12 +148,6 @@ function LayoutRoot({
 	);
 }
 
-/**
- * The responsive app shell. It owns the rail, the mobile drawer and the scrolling surface;
- * the page owns everything inside, header included.
- * So it takes the data a shell has (a variant, a nav, a selection) and hangs the page's parts
- * off the same name, the way antd's Layout does.
- */
 export const Layout = Object.assign(LayoutRoot, { Header, Content });
 
 export type { LayoutNavEntry, LayoutNavItem } from './types';

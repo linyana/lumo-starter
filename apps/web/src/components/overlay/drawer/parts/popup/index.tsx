@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils';
 
 export type DrawerPopupProps = ComponentProps<typeof BaseDrawer.Popup>;
 
-/** The edge the panel is anchored to is Base UI's `swipeDirection`: `down` is a bottom sheet. */
 export function DrawerPopup({ className, ...props }: DrawerPopupProps) {
 	return (
 		<BaseDrawer.Popup
@@ -33,8 +32,6 @@ export function DrawerPopup({ className, ...props }: DrawerPopupProps) {
 				'data-[swipe-direction=left]:data-ending-style:-translate-x-full',
 				'data-[swipe-direction=right]:data-starting-style:translate-x-full',
 				'data-[swipe-direction=right]:data-ending-style:translate-x-full',
-				// A drag is applied through these variables, so the panel follows the pointer without
-				// React re-rendering, and a snap point is the same expression with an offset.
 				'data-[swipe-direction=down]:[transform:translateY(calc(var(--drawer-swipe-movement-y,0px)+var(--drawer-snap-point-offset,0px)))]',
 				'data-[swipe-direction=up]:[transform:translateY(calc(var(--drawer-swipe-movement-y,0px)+var(--drawer-snap-point-offset,0px)))]',
 				'data-[swipe-direction=left]:[transform:translateX(var(--drawer-swipe-movement-x,0px))]',

@@ -19,10 +19,6 @@ export type IssuedTokens = {
 	refreshExpiresAt: Date;
 };
 
-/**
- * Structural type so both the root client and a transaction client can write a
- * refresh token without importing Prisma's generated namespace here.
- */
 type RefreshWriter = {
 	refreshToken: {
 		create(args: {
@@ -33,21 +29,8 @@ type RefreshWriter = {
 
 const hashToken = (token: string): string => createHash('sha256').update(token).digest('hex');
 
-/**
- * How long a token that was just rotated may still be presented. A reload aborts
- * the response that carried its successor, so the browser keeps the old cookie
- * for another try — that is a lost response, not a stolen token. Rotated long
- * ago, ended by logout or already caught as theft, it stays a replay.
- */
 const REUSE_GRACE_MS = 30_000;
 
-/**
- * Access tokens are short-lived JWTs returned in the body.
- *
- * Refresh tokens are opaque random strings, stored only as SHA-256 hashes and
- * rotated on every use. A replayed refresh token means the value leaked, so the
- * whole family is revoked instead of silently issuing another pair.
- */
 @Injectable()
 export class TokenService {
 	constructor(
@@ -81,11 +64,6 @@ export class TokenService {
 			});
 
 		if (existing.revokedAt) {
-			// `replacedBy` is what only rotation writes, so it separates "this token was
-			// swapped for a successor" from "this token was ended" — logout and theft
-			// both leave it null, and neither earns a second chance. The successor must
-			// still be live as well: once it is gone, the session is over and the token
-			// that led to it must not be able to mint another.
 			const successor = existing.replacedBy
 				? await this.prisma.refreshToken.findUnique({
 						where: { id: existing.replacedBy },
@@ -98,7 +76,6 @@ export class TokenService {
 				Date.now() - existing.revokedAt.getTime() <= REUSE_GRACE_MS;
 
 			if (!lostResponse) {
-				// Reuse of a rotated token: assume theft and drop every live session.
 				await this.prisma.refreshToken.updateMany({
 					where: { userId: existing.userId, revokedAt: null },
 					data: { revokedAt: new Date() },
@@ -127,9 +104,6 @@ export class TokenService {
 			const created = await this.createRefresh({ userId: existing.userId, writer: tx });
 			await tx.refreshToken.update({
 				where: { id: existing.id },
-				// A second presentation inside the grace window does not extend the first
-				// one's life: the clock starts when the token was first rotated, so a
-				// replayed token cannot keep postponing its own detection.
 				data: { revokedAt: existing.revokedAt ?? new Date(), replacedBy: created.id },
 			});
 			const accessToken = await this.signAccess(claims);

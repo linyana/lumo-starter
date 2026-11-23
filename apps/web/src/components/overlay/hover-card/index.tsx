@@ -9,7 +9,6 @@ import {
 } from './parts';
 import type { HoverCardProps } from './types';
 
-/** A card that arrives when a pointer rests on the thing it is about, and stays while it is inside. */
 export const HoverCard = ({
 	content,
 	children,

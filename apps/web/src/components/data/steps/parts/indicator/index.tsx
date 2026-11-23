@@ -6,8 +6,6 @@ import { StepStatusContext, useSteps } from '../context';
 
 export const stepsIndicatorVariants = tv({
 	base: [
-		// `z-1` keeps the circle above the connectors: each one is drawn to the centre of the next
-		// circle and covered by it, rather than stopped short of it.
 		'relative z-1 grid shrink-0 place-items-center rounded-full',
 		'size-(--steps-indicator) font-medium tabular-nums select-none',
 		'border transition-[color,background-color,border-color]',
@@ -17,13 +15,10 @@ export const stepsIndicatorVariants = tv({
 	variants: {
 		variant: {
 			numbered: '',
-			// A dot keeps the box, because the connector is positioned from it.
 			dot: 'after:size-2 after:rounded-full after:bg-current',
 		},
 		status: {
 			finish: 'border-primary bg-primary text-primary-foreground',
-			// Outlined rather than filled: done and now are both the primary colour, and only the
-			// fill tells them apart at a glance.
 			process: 'border-primary bg-background text-primary',
 			wait: 'border-border bg-muted text-muted-foreground',
 			error: 'border-destructive bg-destructive text-destructive-foreground',
@@ -59,11 +54,9 @@ export const stepsIndicatorVariants = tv({
 
 export type StepsIndicatorProps = Omit<ComponentProps<'div'>, 'className'> &
 	VariantProps<typeof stepsIndicatorVariants> & {
-		/** Merged with `cn()`. */
 		className?: string;
 	};
 
-/** The circle: the number, a check, a glyph a caller handed in, or a dot. */
 export function StepsIndicator({
 	className,
 	variant,

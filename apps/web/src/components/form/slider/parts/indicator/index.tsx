@@ -6,11 +6,9 @@ export type SliderIndicatorProps = Omit<
 	ComponentProps<typeof BaseSlider.Indicator>,
 	'className'
 > & {
-	/** Merged with `cn()`, so a Base UI state callback is not accepted here. */
 	className?: string;
 };
 
-/** The part of the groove already taken: from the start of the range to the thumb, or between two. */
 export function SliderIndicator({ className, ...props }: SliderIndicatorProps) {
 	return (
 		<BaseSlider.Indicator

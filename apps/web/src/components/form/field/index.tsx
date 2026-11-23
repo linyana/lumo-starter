@@ -8,17 +8,11 @@ import type { FieldProps } from './types';
 
 export type { FieldProps } from '@/components/form/field/types';
 
-/** What a control reports: a native event's value, or the value itself from a control that says one. */
 const valueOf = (change: unknown): unknown => {
 	const target = (change as { target?: { value?: unknown } } | null | undefined)?.target;
 	return target === undefined || target === null ? change : target.value;
 };
 
-/**
- * Hands the control its value and takes its changes back — the pair every control here speaks,
- * `value` and `onChange`, whichever control it is. A control the caller already gave a value keeps
- * it: the form only lends what it holds.
- */
 const wire = ({
 	form,
 	name,
@@ -43,11 +37,6 @@ const wire = ({
 	});
 };
 
-/**
- * The control, drawn under the field's revision: a reset moves that number, the key changes, and the
- * control is mounted again from what the form now holds. The label and the line beneath it are
- * outside this, so they stay where they are.
- */
 const Wired = ({
 	form,
 	name,
@@ -62,15 +51,6 @@ const Wired = ({
 	return <Fragment key={revision}>{wire({ form, name, children })}</Fragment>;
 };
 
-/**
- * One control, its name, and the line beneath it. The control inside is labelled, and held to the
- * rules its name has in the form's schema, so nothing is wired between the two by hand.
- *
- * The value reaches the form through the control's `onChange` and comes back as its `defaultValue`:
- * a control owns its own value, so a form never fights it for the caret, and a reset redraws the
- * fields rather than reassigning them. Outside a `<Form>` a field is a label and a line — there is
- * no name to hold it to, and nothing to report to.
- */
 export const Field = ({
 	name,
 	label,

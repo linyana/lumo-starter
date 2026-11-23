@@ -2,7 +2,6 @@ import { cn } from '@/lib/utils';
 import { TabsIndicator, TabsList, TabsPanel, TabsRoot, TabsTab } from './parts';
 import type { TabsProps } from './types';
 
-/** One panel at a time, chosen from a row of tabs, with the highlight travelling between them. */
 export const Tabs = ({
 	items,
 	value,

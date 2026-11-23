@@ -10,7 +10,6 @@ import {
 } from './parts';
 import type { CardProps } from './types';
 
-/** One surface for one subject: a header, a body, and a footer on the bottom edge. */
 export const Card = ({
 	title,
 	description,

@@ -7,7 +7,6 @@ export type ComboboxGroupLabelProps = Omit<
 	ComponentProps<typeof BaseCombobox.GroupLabel>,
 	'className'
 > & {
-	/** Merged with `cn()`. */
 	className?: string;
 };
 

@@ -8,15 +8,9 @@ import { ThemeToggle } from '@/providers/theme';
 import { Layout, type LayoutNavEntry } from '../frame';
 
 type IPropsType = {
-	/**
-	 * The rows the rail draws, handed over by `providers/routes` — derived there from the route
-	 * table, so the shell never reads `src/routes.tsx` and a screen can import this module without
-	 * closing a cycle through `@/pages`.
-	 */
 	nav: LayoutNavEntry[];
 };
 
-/** Every row that goes somewhere, by the href it goes to — the rows are the only key map. */
 const keysByHref = (entries: LayoutNavEntry[]): Map<string, string> =>
 	new Map(
 		entries.flatMap((entry): [string, string][] => {
@@ -26,15 +20,6 @@ const keysByHref = (entries: LayoutNavEntry[]): Map<string, string> =>
 		}),
 	);
 
-/**
- * The shell wraps `providers/layout/frame`: the lumo `layout` block, where a rail, a mobile drawer
- * and the scroll box all come with it. Each row is a router link, so the router stays the single
- * source of truth for "where am I" and a click never leaves the document.
- *
- * The rows arrive as a prop: `providers/routes` builds them from the table in `src/routes.tsx`, so
- * a new screen is still one row there and no write here, and this module stays a renderer — it
- * imports the session, never the route table or the pages behind it.
- */
 export const AppShell = ({ nav }: IPropsType) => {
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -57,8 +42,6 @@ export const AppShell = ({ nav }: IPropsType) => {
 			selectedKey={keysByHref(nav).get(location.pathname)}
 			logo={<img src="/logo.svg" alt="" className="size-5 shrink-0" />}
 			title="Lumo Starter"
-			// The rail's width is app state, not shell state: it is remembered between visits, and
-			// the shortcut the shell handles goes through the same setter.
 			collapsible
 			collapsed={collapsed}
 			onCollapsedChange={(next) => actions.set({ collapsed: next })}

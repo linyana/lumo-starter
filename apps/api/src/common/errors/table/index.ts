@@ -1,11 +1,5 @@
 import type { ErrorCode } from '@lumo/shared';
 
-/**
- * One line per code: the HTTP status and the sentence a client sees when the
- * thrower names nothing. This table belongs to the API because the API is the
- * only thing that sends it — `Record<ErrorCode, …>` makes a new code in shared
- * a compile error here until it has a status and a default.
- */
 export const ERRORS: Record<ErrorCode, { status: number; message: string }> = {
 	BAD_REQUEST: { status: 400, message: 'Bad request' },
 	VALIDATION_FAILED: { status: 400, message: 'The request contains invalid fields' },

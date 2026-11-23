@@ -3,7 +3,6 @@ import { cn } from '@/lib/utils';
 
 export type TableCaptionProps = ComponentProps<'caption'>;
 
-/** What the table is, for a reader who has not been told by the page around it. */
 export function TableCaption({ className, ...props }: TableCaptionProps) {
 	return (
 		<caption

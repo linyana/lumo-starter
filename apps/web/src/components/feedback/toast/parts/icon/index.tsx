@@ -4,7 +4,6 @@ import { Spinner } from '@/components/feedback/spinner';
 import { cn } from '@/lib/utils';
 import { useToastItem } from '../context';
 
-/** The glyph a type earns. `loading` is a state rather than an icon, so it gets the spinner. */
 function glyphOf(type: string | undefined): ReactNode {
 	switch (type) {
 		case 'success':
@@ -22,7 +21,6 @@ function glyphOf(type: string | undefined): ReactNode {
 	}
 }
 
-/** Every outcome takes its own ink; anything else falls back to the muted one. */
 function toneOf(type: string | undefined) {
 	if (type === 'success') return 'text-success';
 	if (type === 'error') return 'text-destructive';
@@ -32,14 +30,11 @@ function toneOf(type: string | undefined) {
 }
 
 export type ToastIconProps = {
-	/** Overrides the type carried by the toast this sits in. */
 	type?: string;
-	/** A glyph of your own, which wins over the type. */
 	icon?: ReactNode;
 	className?: string;
 };
 
-/** Draws the toast's type, read off the root it sits in. Nothing to draw renders nothing. */
 export function ToastIcon({ type, icon, className }: ToastIconProps) {
 	const toast = useToastItem();
 	const resolved = type ?? toast?.type;

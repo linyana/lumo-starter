@@ -5,11 +5,8 @@ import type { StepsOrientation, StepsSize, StepStatus, StepsVariant } from './pa
 export type StepItem = {
 	title: ReactNode;
 	description?: ReactNode;
-	/** A glyph in place of the number. `finish` draws a check on its own. */
 	icon?: ReactNode;
-	/** Overrides what the current index says about this step. */
 	status?: StepStatus;
-	/** Merged onto this step after `classNames.item`. */
 	className?: string;
 };
 

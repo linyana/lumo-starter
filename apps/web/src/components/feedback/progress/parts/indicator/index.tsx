@@ -6,19 +6,9 @@ export type ProgressIndicatorProps = Omit<
 	ComponentProps<typeof BaseProgress.Indicator>,
 	'className'
 > & {
-	/** Merged with `cn()`, so a Base UI state callback is not accepted here. */
 	className?: string;
 };
 
-/**
- * The fill. While the value is known its width is Base UI's — written as a percentage of the track
- * and eased, so a step from one value to the next is a move rather than a jump.
- *
- * When the value is `null` there is no width to draw, so the fill becomes a segment that sweeps the
- * groove on its own: the bar is saying that the work is happening and how much of it is left is not
- * known. The sweep is the theme's `--animate-progress-sweep`; a reader who asked for less motion
- * gets the segment held still at the start of its travel instead.
- */
 export function ProgressIndicator({ className, ...props }: ProgressIndicatorProps) {
 	return (
 		<BaseProgress.Indicator

@@ -14,7 +14,6 @@ import {
 } from './parts';
 import type { ComboboxProps } from './types';
 
-/** A select whose options are found by typing: the field is the control, and the query narrows the list. */
 export const Combobox = ({
 	items,
 	value,

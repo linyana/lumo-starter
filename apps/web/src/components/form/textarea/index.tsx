@@ -7,8 +7,6 @@ import { fieldShell } from '@/lib/control';
 import { cn } from '@/lib/utils';
 
 export const textareaVariants = tv({
-	// `read-only` is the textarea's own: the shell is shared with controls that cannot be typed into,
-	// where `:read-only` matches for their whole life.
 	base: [fieldShell, 'read-only:bg-muted', 'resize-y'],
 	variants: {
 		size: {
@@ -22,34 +20,16 @@ export const textareaVariants = tv({
 	},
 });
 
-/** The parts several lines are drawn from: the box, the field, and the way back to empty. */
 export type TextareaSlots = 'root' | 'textarea' | 'clear';
 
 export type TextareaProps = Omit<ComponentProps<'textarea'>, 'className'> &
 	VariantProps<typeof textareaVariants> & {
-		/** Merged with `cn()`. The box: a `w-56` here is what narrows the field. */
 		className?: string;
-		/** Every part, by name; `classNames.textarea` is the field itself. */
 		classNames?: SlotClassNames<TextareaSlots>;
-		/**
-		 * Whether the field offers the way back to empty once it holds text. On by default, so a field
-		 * that should not offer it says `clearable={false}`.
-		 */
 		clearable?: boolean;
-		/** The words the clear button is labelled with, for a reader who cannot see the cross. */
 		clearLabel?: string;
 	};
 
-/**
- * Several lines of text, with the way back to empty in it. The element is the browser's — there is no
- * Base UI textarea — and it is mounted through `FieldControl`, which is what hands it an id, a
- * describedby and the invalid flag when a field is above it. Its `size` is a minimum height; the
- * height itself is `rows`, or the corner the reader drags.
- *
- * The cross sits in the top corner and not the bottom one: the bottom is where the field is dragged
- * from, and a control there would be a second thing to hit. What fills the field is read the way an
- * input reads it — off the value when the caller holds one, off what has been typed otherwise.
- */
 export function Textarea({
 	className,
 	classNames,

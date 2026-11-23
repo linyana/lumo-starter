@@ -18,21 +18,11 @@ import type { MenuEntry, MenuProps, MenuSlots } from './types';
 
 export type { MenuEntry, MenuProps, MenuSlots } from '@/components/overlay/menu/types';
 
-/** The rows a list of actions is drawn from: one line each, a separator where it was asked for. */
 type MenuItemsProps = {
 	items: MenuEntry[];
 	classNames?: SlotClassNames<MenuSlots>;
 };
 
-/**
- * The rows themselves, drawn from data, and only those the surrounding grant allows — a caller states
- * `access` on a row and never asks who is reading. A separator that was only there to set a stripped
- * row apart goes with it: the first row never draws one.
- *
- * It is one implementation for two openings — a menu behind a trigger and a menu opened where the
- * pointer was pressed — because a reader should not be able to tell the two apart once they are open,
- * and the conditions they are drawn under are the same ones.
- */
 export const MenuItems = ({ items, classNames }: MenuItemsProps) => {
 	const grant = useAccess();
 
@@ -65,7 +55,6 @@ export const MenuItems = ({ items, classNames }: MenuItemsProps) => {
 	);
 };
 
-/** A menu of actions on a trigger: one list, and the rows it holds. */
 export const Menu = ({
 	trigger,
 	items,

@@ -7,7 +7,6 @@ export type SelectGroupLabelProps = Omit<
 	ComponentProps<typeof BaseSelect.GroupLabel>,
 	'className'
 > & {
-	/** Merged with `cn()`. */
 	className?: string;
 };
 

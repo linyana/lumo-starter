@@ -3,7 +3,6 @@ import { cn } from '@/lib/utils';
 import { CheckboxIndicator, CheckboxRoot } from './parts';
 import type { CheckboxProps } from './types';
 
-/** A box, the tick inside it, and the word that says what it is for. */
 export const Checkbox = ({
 	label,
 	id,

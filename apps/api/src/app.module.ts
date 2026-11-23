@@ -20,8 +20,6 @@ import { UsersModule } from './modules/users/users.module.js';
 	imports: [
 		ConfigModule.forRoot({
 			isGlobal: true,
-			// One .env at the repo root, shared with docker compose; a local
-			// apps/api/.env, if anyone creates one, wins.
 			envFilePath: ['../../.env', '.env'],
 			validate: validateEnv,
 		}),
@@ -50,12 +48,10 @@ import { UsersModule } from './modules/users/users.module.js';
 		HealthModule,
 	],
 	providers: [
-		// Order matters: throttle first, then identity, then authorisation.
 		{ provide: APP_GUARD, useClass: ThrottlerGuard },
 		{ provide: APP_GUARD, useClass: JwtAuthGuard },
 		{ provide: APP_GUARD, useClass: PermissionsGuard },
 		{ provide: APP_FILTER, useClass: AllExceptionsFilter },
-		// Outermost of the two, so the delay covers whatever the envelope does.
 		{ provide: APP_INTERCEPTOR, useClass: DelayInterceptor },
 		{ provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
 	],

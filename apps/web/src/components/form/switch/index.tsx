@@ -3,7 +3,6 @@ import { cn } from '@/lib/utils';
 import { SwitchRoot, SwitchThumb } from './parts';
 import type { SwitchProps } from './types';
 
-/** A track and a knob: on or off, in the space of one line of text. */
 export const Switch = ({
 	label,
 	id,

@@ -28,7 +28,6 @@ export const listVariants = tv({
 
 export type TabsListProps = Omit<ComponentProps<typeof BaseTabs.List>, 'className'> &
 	VariantProps<typeof listVariants> & {
-		/** Merged with `cn()`, so a Base UI state callback is not accepted here. */
 		className?: string;
 	};
 

@@ -19,7 +19,6 @@ export const tabVariants = tv({
 		variant: {
 			rounded: 'rounded-md',
 			pill: 'rounded-md data-active:text-secondary-foreground',
-			// Both of these are shaped by the space their indicator needs, not by a fixed height.
 			square: 'h-auto! rounded-none py-2',
 			point: 'h-auto! rounded-none pt-1.5 pb-3',
 		},
@@ -37,7 +36,6 @@ export const tabVariants = tv({
 
 export type TabsTabProps = Omit<ComponentProps<typeof BaseTabs.Tab>, 'className'> &
 	VariantProps<typeof tabVariants> & {
-		/** Merged with `cn()`, so a Base UI state callback is not accepted here. */
 		className?: string;
 	};
 

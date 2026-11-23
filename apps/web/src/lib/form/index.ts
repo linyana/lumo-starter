@@ -1,17 +1,8 @@
 import type { ZodError, ZodType } from 'zod';
 import type { FormErrors } from '@/components/form/form';
 
-/** What the fields of one form hold, by name. Spelled here so this module depends on no layer. */
 type Values = Record<string, unknown>;
 
-/**
- * Converts zod issues into the `errors` object Base UI's Form hands back to
- * each `Field`. Keys are dot paths, which is also what a `Field`
- * `name` uses — so a nested field's message lands on the right row.
- *
- * The shared schemas state their own sentences, so the form and the API say the
- * same thing without either side translating anything.
- */
 export const toFormErrors = (error: ZodError): FormErrors => {
 	const errors: FormErrors = {};
 
@@ -28,21 +19,11 @@ export const toFormErrors = (error: ZodError): FormErrors => {
 	return errors;
 };
 
-/**
- * Blank is not a value: a field the reader emptied is a field that is not answered, so the wire
- * carries no parameter for it and a rule that allows absence passes. `false` and `[]` stay — they are
- * answers, and an empty list of roles is exactly what a "at least one" rule has to see.
- */
 export const prune = (values: Values): Values =>
 	Object.fromEntries(
 		Object.entries(values).filter(([, value]) => value !== '' && value !== undefined),
 	);
 
-/**
- * Whether two sets of values say the same thing. A list of choices is the same list in any order — a
- * control that offers several hands its picks back in the order they were made, so turning one off
- * and on again is a reorder, not an edit.
- */
 export const sameValues = ({ left, right }: { left: Values; right: Values }): boolean => {
 	const keys = new Set([...Object.keys(left), ...Object.keys(right)]);
 
@@ -62,15 +43,6 @@ export const sameValues = ({ left, right }: { left: Values; right: Values }): bo
 
 const pathOf = (issue: { path: PropertyKey[] }): string => issue.path.map(String).join('.');
 
-/**
- * The rule one field is held to, cut out of the object's schema by handing the whole object to it —
- * so a rule that only makes sense across two fields ("passwords do not match") still arrives under
- * the field it names. A field is told about its own issues and no one else's; an issue about the
- * object as a whole belongs to no field and is left to `submit`.
- *
- * A blank answer is read a second time with the key dropped, so an optional field left empty passes
- * while a required one keeps its own sentence.
- */
 export const fieldRule =
 	({ schema, name }: { schema: ZodType; name: string }) =>
 	(value: unknown, values: Values): string[] | null => {
@@ -93,25 +65,13 @@ export const fieldRule =
 		return messages.length > 0 ? messages : null;
 	};
 
-/**
- * Whether a field has to be answered. The schema is asked to read the name with nothing in it, and a
- * rule that answers nothing — an optional field, or one a default fills in — is a field the reader may
- * leave alone. `.refine()` keeps the object it was called on, so a refined schema is still asked here.
- */
 export const fieldRequired = ({ schema, name }: { schema: ZodType; name: string }): boolean => {
-	// Read off `shape` rather than asserted by `instanceof`: the schema may have been built by another
-	// copy of zod than this bundle holds, and a class check there answers `false` instead of failing.
 	const field = (schema as { shape?: Record<string, ZodType> }).shape?.[name];
 	return field !== undefined && !field.safeParse(undefined).success;
 };
 
-/** The same values without one name — a field read as if it had never been answered. */
 export const omit = ({ values, name }: { values: Values; name: string }): Values =>
 	Object.fromEntries(Object.entries(values).filter(([key]) => key !== name));
 
-/**
- * The name of the field a set of verdicts is about first, so a failed submit can put the cursor on
- * it. Dot paths are the field names; a verdict about the object as a whole names no field.
- */
 export const firstIssueName = (error: ZodError): string | undefined =>
 	error.issues.map(pathOf).find((path) => path !== '' && path !== '(root)');

@@ -3,10 +3,6 @@ import { usersApi } from '@/api';
 import { AlertDialog } from '@/components';
 import { useHttp } from '@/hooks';
 
-/**
- * The confirmation for removing accounts. Drawn only while it is open, so it takes the two things the page
- * does about it: put the panel away, and read the list again once the removal lands.
- */
 type IPropsType = {
 	users: readonly User[];
 	closePanel: () => void;
@@ -28,8 +24,6 @@ export const DeleteUsers = ({ users, closePanel, reload }: IPropsType) => {
 	return (
 		<AlertDialog
 			open
-			// Confirming, cancelling and Escape all end the same way here: the panel goes away, and the
-			// removal that was already started reports back by itself.
 			onOpenChange={(next) => {
 				if (!next) closePanel();
 			}}

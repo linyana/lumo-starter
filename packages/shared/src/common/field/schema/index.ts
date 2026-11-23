@@ -1,20 +1,6 @@
 import { z } from 'zod';
 import { EMAIL_MAX, NAME_MAX, PASSWORD_MAX, PASSWORD_MIN } from '../constants';
 
-/**
- * Field rules are declared once and imported by both runtimes:
- *
- * - the API turns them into a `ZodValidationPipe` on the request body,
- * - the web app runs the same object in `safeParse` on submit and feeds the
- *   issues to Base UI's `<Form errors>` (see `apps/web/src/lib/form/index.ts`),
- *
- * so a rule can never drift between the two. The message is the sentence the
- * rule owns, written here because this is the one object both runtimes read.
- *
- * A rule lives with its field, not with the form that happens to show it: `auth`
- * and `user` both build on these three.
- */
-
 export const emailSchema = z
 	.string({ error: 'Email is required' })
 	.trim()

@@ -3,12 +3,6 @@ import { tv, type VariantProps } from 'tailwind-variants';
 import { iconSlot } from '@/lib/control';
 import { cn } from '@/lib/utils';
 
-/**
- * A word that labels something it sits beside. The three surface variants are the fills a button
- * already has, because a badge next to a control should read as the same family; the four outcomes
- * are a tint of their own colour rather than a fill, because an outcome is a fact to be read and a
- * solid block would make it look pressable.
- */
 export const badgeVariants = tv({
 	base: [
 		'inline-flex shrink-0 items-center gap-1 align-middle whitespace-nowrap',

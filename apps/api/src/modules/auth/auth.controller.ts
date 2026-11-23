@@ -43,14 +43,6 @@ export class AuthController {
 		return { accessToken: result.tokens.accessToken, user: result.user };
 	}
 
-	/**
-	 * The access token lives in memory on the client, so a page reload always
-	 * starts here: the refresh cookie is the only durable credential. Delayed like
-	 * everything else, so the startup loader is watchable too: a reload that
-	 * aborts this response leaves the browser holding the token it presented, and
-	 * the reuse grace window in `token.service` is what lets that retry return a
-	 * pair instead of reading as a replay.
-	 */
 	@Public()
 	@Post('refresh')
 	@HttpCode(HttpStatus.OK)
@@ -65,7 +57,6 @@ export class AuthController {
 		return { accessToken: result.tokens.accessToken, user: result.user };
 	}
 
-	/** Public on purpose: an expired access token must not trap the user signed in. */
 	@Public()
 	@Post('logout')
 	@HttpCode(HttpStatus.NO_CONTENT)

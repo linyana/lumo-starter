@@ -35,14 +35,9 @@ export const indicatorVariants = tv({
 
 export type TabsIndicatorProps = Omit<ComponentProps<typeof BaseTabs.Indicator>, 'className'> &
 	VariantProps<typeof indicatorVariants> & {
-		/** Merged with `cn()`, so a Base UI state callback is not accepted here. */
 		className?: string;
 	};
 
-/**
- * The moving highlight. Base UI measures the active tab and hands the result over as CSS
- * variables, so this only draws — and the same element follows the tab in either orientation.
- */
 export function TabsIndicator({ className, variant, ...props }: TabsIndicatorProps) {
 	const context = useTabs();
 	const resolved = variant ?? context.variant;

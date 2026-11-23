@@ -11,23 +11,15 @@ import type { TableFixed } from '../head';
 import type { TableSelection } from '../selection-head';
 
 export type TableSelectionCellProps = Omit<ComponentProps<'td'>, 'children' | 'align'> & {
-	/** The logical edge the cell is set from. */
 	align?: 'start' | 'center' | 'end';
-	/** The chosen rows, and the way back — the same object the header was given. */
 	selection: TableSelection;
-	/** The key of the record this box belongs to. */
 	value: string;
-	/** What a screen reader hears instead of the key: the record's own name. */
 	label?: string;
-	/** A record that cannot be chosen. */
 	disabled?: boolean;
-	/** Pin the column, exactly as `TableCell` does. */
 	fixed?: TableFixed;
-	/** Merged last through `cn()`. */
 	className?: string;
 };
 
-/** One box, for one record, belonging to the set the header is holding. */
 export function TableSelectionCell({
 	selection,
 	value,

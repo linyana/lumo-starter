@@ -21,23 +21,16 @@ import { NavSubList } from '../sub-list';
 export type NavSubProps = {
 	icon?: ReactNode;
 	label: string;
-	/** `NavSubItem` rows. The same ones serve the inline list and the compact popover. */
 	children: ReactNode;
 	className?: string;
-	/** Highlights the row, so a parent reads as current when one of its children is. */
 	isActive?: boolean;
 	defaultOpen?: boolean;
 	disabled?: boolean;
-	/** Which side the popover opens on when the nav is compact. Defaults to the row's right. */
 	popoverSide?: 'top' | 'right' | 'bottom' | 'left';
 };
 
 const NavRow = NavButton;
 
-/**
- * A row that owns a list of sub rows: it expands inline when the nav has width, and opens a
- * popover instead once it is compact, because there is no room left to expand into.
- */
 export function NavSub({
 	icon,
 	label,
@@ -86,10 +79,6 @@ export function NavSub({
 
 	return (
 		<CollapsibleRoot defaultOpen={defaultOpen} disabled={disabled}>
-			{/* Base UI's own trigger rather than `CollapsibleTrigger`: that one paints a collapsible
-			    header, and a nav row already has an appearance of its own. Two looks on one element
-			    mean every shared property — padding, text size, the icon's size — is settled by
-			    whichever rule lands later in the stylesheet, which is neither look. */}
 			<BaseCollapsible.Trigger
 				data-slot="nav-sub-trigger"
 				render={

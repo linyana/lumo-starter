@@ -2,32 +2,16 @@ import { useEffect, useState, type ComponentProps, type ReactNode } from 'react'
 import { cn } from '@/lib/utils';
 
 export type SpinnerProps = ComponentProps<'span'> & {
-	/**
-	 * The box: a number is ems of the text around it, a string is any CSS length. It wins over a
-	 * `size-*` class, so a call site sizes the spinner one way or the other.
-	 */
 	size?: number | string;
-	/** Visually hidden status text. Pass `null` inside a control that already announces itself. */
 	label?: ReactNode;
-	/**
-	 * The words under the ring. They are said only once a wait has run past `captionDelay`, because a
-	 * wait that ends in a moment never needed them — so passing no caption says nothing at all.
-	 */
 	caption?: ReactNode;
-	/** How long the wait is before the caption is worth saying, in milliseconds. Defaults to five seconds. */
 	captionDelay?: number;
 };
 
-/** Eight dots, each a fifth of the box, on a ring a third of it across. */
 const dotCount = 8;
 const dotScale = 0.2;
 const radiusScale = 0.34;
 
-/**
- * The ring itself, and the words it is worth putting under one. It draws no layer of its own: what a
- * wait covers is the business of what is being waited on — a table covers the rows it already had —
- * so the box that a spinner sits in the middle of is the caller's to make.
- */
 export function Spinner({
 	className,
 	style,
@@ -39,8 +23,6 @@ export function Spinner({
 }: SpinnerProps) {
 	const box = typeof size === 'number' ? `${size}em` : size;
 
-	// The clock belongs to the wait and not to the spinner: it starts when the spinner does, and a
-	// wait ending — the caller dropping the caption — takes the words away with it.
 	const [waited, setWaited] = useState(false);
 	useEffect(() => {
 		if (caption === undefined || caption === null) return;

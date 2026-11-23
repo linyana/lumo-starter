@@ -25,7 +25,6 @@ export type {
 	NavSlots,
 } from '@/components/navigation/nav/types';
 
-/** Navigation rows, groups and submenus share the same compact rail context. */
 export const Nav = ({
 	items,
 	children,
@@ -128,12 +127,6 @@ export const Nav = ({
 		return renderItem(entry);
 	}
 
-	/**
-	 * Groups are padded; a loose row is not, so a row typed straight into the array would sit
-	 * against the rail's edge while its neighbours sit 8px in. Everything outside a group is
-	 * wrapped in one, and an unbroken run of them shares a single group instead of gaining a
-	 * gap per row.
-	 */
 	function renderEntries(entries: NavEntry[]) {
 		const blocks = entries.reduce<(NavEntry | NavEntry[])[]>((acc, entry) => {
 			if (entry.type === 'group' || entry.type === 'separator') return [...acc, entry];

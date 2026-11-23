@@ -13,12 +13,6 @@ export type TabsRootProps = ComponentProps<typeof BaseTabs.Root> & {
 	size?: TabsSize;
 };
 
-/**
- * Base UI owns the value. It is mirrored here because a part that is not a Base UI part — the
- * track that has to know how many lanes to the left the selected one is — has to read it too, and
- * it is handed out through a context of its own so that a click on a tab does not re-render the
- * look every tab already agreed on.
- */
 export function TabsRoot({
 	className,
 	variant = 'rounded',

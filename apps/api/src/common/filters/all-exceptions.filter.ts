@@ -10,7 +10,6 @@ import type { ApiFailure, ErrorCode, FieldError } from '@lumo/shared';
 import type { NodeRequest, NodeResponse } from '@nestjs/platform-node';
 import { ERRORS } from '../errors/table/index.js';
 
-/** Status → code, for exceptions thrown by Nest itself (404 on an unknown route…). */
 const STATUS_TO_CODE: Record<number, ErrorCode> = {
 	400: 'BAD_REQUEST',
 	401: 'UNAUTHORIZED',
@@ -21,18 +20,14 @@ const STATUS_TO_CODE: Record<number, ErrorCode> = {
 	503: 'SERVICE_UNAVAILABLE',
 };
 
-/** The body a code falls back to. */
 const defaultBody = ({ code, details }: { code: ErrorCode; details?: unknown }): ApiFailure => ({
 	error: { code, message: ERRORS[code].message, details },
 });
 
-/** Prisma's `Pxxxx` codes that have a domain meaning. */
 const PRISMA_TO_CODE: Record<string, ErrorCode> = {
 	P2002: 'CONFLICT',
 	P2003: 'CONFLICT',
 	P2025: 'NOT_FOUND',
-	// The database was unreachable or out of connections for this attempt, which is neither the
-	// request's fault nor the client's to fix — the same request can succeed on a retry.
 	P1001: 'SERVICE_UNAVAILABLE',
 	P1017: 'SERVICE_UNAVAILABLE',
 	P2024: 'SERVICE_UNAVAILABLE',
@@ -49,11 +44,6 @@ const asPrismaError = (error: unknown): PrismaLikeError | undefined => {
 		: undefined;
 };
 
-/**
- * One response shape for every failure: `{ error: { code, message, details } }`.
- * Anything unexpected is logged with its stack and reported as INTERNAL — no
- * driver or ORM message ever reaches the client.
- */
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
 	private readonly logger = new Logger(AllExceptionsFilter.name);
@@ -112,7 +102,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
 		};
 	}
 
-	/** `AppException` sends a sentence; Nest's own exceptions may send an array. */
 	private readMessage({ raw, code }: { raw: unknown; code: ErrorCode }): string {
 		if (typeof raw === 'string' && raw.length > 0) return raw;
 		if (Array.isArray(raw) && raw.every((item) => typeof item === 'string')) {

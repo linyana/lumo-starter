@@ -9,7 +9,6 @@ import {
 } from './parts';
 import type { TooltipProps } from './types';
 
-/** Hover and focus hint anchored to its trigger. */
 export const Tooltip = ({
 	content,
 	children,

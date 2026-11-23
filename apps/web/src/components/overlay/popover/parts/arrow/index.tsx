@@ -9,7 +9,6 @@ export function PopoverArrow({ className, ...props }: PopoverArrowProps) {
 	return (
 		<BasePopover.Arrow
 			data-slot="popover-arrow"
-			// The point carries the popup's own border and fill, so the outline reads as one shape.
 			className={cn(arrow, 'before:border before:border-border before:bg-popover', className)}
 			{...props}
 		/>

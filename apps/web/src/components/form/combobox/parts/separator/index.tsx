@@ -7,11 +7,9 @@ export type ComboboxSeparatorProps = Omit<
 	ComponentProps<typeof BaseCombobox.Separator>,
 	'className'
 > & {
-	/** Merged with `cn()`. */
 	className?: string;
 };
 
-/** A line between two groups of options. */
 export function ComboboxSeparator({ className, ...props }: ComboboxSeparatorProps) {
 	return (
 		<BaseCombobox.Separator

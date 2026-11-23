@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils';
 
 export type DrawerSwipeAreaProps = ComponentProps<typeof BaseDrawer.SwipeArea>;
 
-/** The gesture points into the drawer, so the strip sits on the opposite edge. */
 export function DrawerSwipeArea({ className, ...props }: DrawerSwipeAreaProps) {
 	return (
 		<BaseDrawer.SwipeArea

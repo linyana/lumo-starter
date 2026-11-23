@@ -10,14 +10,6 @@ import { delay, type Observable } from 'rxjs';
 import { SKIP_DELAY } from '../decorators/skip-delay.decorator.js';
 import { isProduction } from '../config/runtime/index.js';
 
-/**
- * Holds every response back by `API_DELAY_MS`. Spinners, skeletons and empty
- * states are invisible against a local API that answers in two milliseconds, so
- * the delay is what a frontend test asks for; nothing else in the app changes.
- *
- * Zero is off, and production is always zero: the knob exists to slow a
- * developer's machine down, never a deployment.
- */
 @Injectable()
 export class DelayInterceptor implements NestInterceptor {
 	private readonly ms: number;

@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils';
 
 export type ScrollAreaThumbProps = ComponentProps<typeof BaseScrollArea.Thumb>;
 
-/** Its length comes from Base UI, as a CSS variable it writes on every scroll — never from here. */
 export function ScrollAreaThumb({ className, ...props }: ScrollAreaThumbProps) {
 	return (
 		<BaseScrollArea.Thumb

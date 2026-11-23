@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils';
 
 export type SelectBackdropProps = ComponentProps<typeof BaseSelect.Backdrop>;
 
-/** The scrim a modal select drops over the page it was opened from. */
 export function SelectBackdrop({ className, ...props }: SelectBackdropProps) {
 	return (
 		<BaseSelect.Backdrop

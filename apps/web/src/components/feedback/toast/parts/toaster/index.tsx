@@ -11,11 +11,9 @@ import { ToastTitle } from '../title';
 import { ToastViewport, type ToastViewportProps } from '../viewport';
 
 export type ToastToasterProps = Omit<ToastViewportProps, 'children'> & {
-	/** Draws each toast yourself, given the toast being drawn. */
 	children?: (toast: ToastRootToastObject) => ReactNode;
 };
 
-/** A toast unless you say otherwise: its type, its words, then whatever acts on it. */
 function Interior({ toast }: { toast: ToastRootToastObject }) {
 	return (
 		<>
@@ -23,7 +21,6 @@ function Interior({ toast }: { toast: ToastRootToastObject }) {
 			<div className="flex min-w-0 flex-1 items-start gap-2">
 				<div className="flex min-w-0 flex-1 flex-col gap-1">
 					<ToastTitle />
-					{/* With no title the description is the whole message, so it takes the body size. */}
 					<ToastDescription className={toast.title === undefined ? 'text-sm' : undefined} />
 				</div>
 				<ToastAction />
@@ -33,10 +30,6 @@ function Interior({ toast }: { toast: ToastRootToastObject }) {
 	);
 }
 
-/**
- * The stack, mounted once inside a `ToastProvider`. It maps the queue to parts — the one piece of a
- * toast nobody should have to write twice — and leaves everything else to them.
- */
 export function ToastToaster({ className, children, ...props }: ToastToasterProps) {
 	const { toasts } = BaseToast.useToastManager();
 

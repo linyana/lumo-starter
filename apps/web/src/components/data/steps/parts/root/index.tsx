@@ -9,14 +9,10 @@ export const stepsRootVariants = tv({
 	base: ['flex list-none'],
 	variants: {
 		orientation: {
-			// No gap between items: each one's connector runs into the next one's box, up to the
-			// centre of its circle, so the items are what the space is made of.
 			horizontal: 'flex-row items-start',
 			vertical: 'flex-col',
 		},
 		size: {
-			// The one number the whole component measures from: the circle's box and, through it,
-			// where the connector starts. Everything else sizes itself in `em` from the type.
 			sm: 'text-xs [--steps-indicator:calc(var(--spacing)*6)]',
 			md: 'text-sm [--steps-indicator:calc(var(--spacing)*7)]',
 		},
@@ -34,10 +30,6 @@ export type StepsRootProps = Omit<ComponentProps<'ol'>, 'children'> &
 		children?: ReactNode;
 	};
 
-/**
- * The list itself. It owns the order, so an item reads its position from here rather than being
- * told one — items have to be direct children for that to hold.
- */
 export function StepsRoot({
 	className,
 	current,

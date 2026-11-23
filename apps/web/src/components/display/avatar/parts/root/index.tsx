@@ -4,7 +4,6 @@ import { tv, type VariantProps } from 'tailwind-variants';
 import { iconSlot } from '@/lib/control';
 import { cn } from '@/lib/utils';
 
-/** Three sizes, because an avatar is drawn at the size of the row it sits in and nowhere else. */
 export const avatarVariants = tv({
 	base: [
 		'inline-flex shrink-0 items-center justify-center overflow-hidden align-middle',
@@ -26,14 +25,9 @@ export const avatarVariants = tv({
 
 export type AvatarRootProps = Omit<ComponentProps<typeof BaseAvatar.Root>, 'className'> &
 	VariantProps<typeof avatarVariants> & {
-		/** Merged with `cn()`, so a Base UI state callback is not accepted here. */
 		className?: string;
 	};
 
-/**
- * The circle itself. Base UI decides which of the two children is drawn — the image while it loads
- * and once it has, the fallback when there is none or it failed — so neither is conditional here.
- */
 export function AvatarRoot({ className, size = 'md', ...props }: AvatarRootProps) {
 	return (
 		<BaseAvatar.Root

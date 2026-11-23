@@ -21,11 +21,6 @@ const bearerToken = (request: NodeRequest): string | undefined => {
 	return scheme?.toLowerCase() === 'bearer' ? token : undefined;
 };
 
-/**
- * Global guard: every route requires a valid access token unless marked
- * `@Public()`. The token is read from the Authorization header only — it is
- * never stored in a cookie, so a CSRF-forged request cannot carry it.
- */
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
 	constructor(

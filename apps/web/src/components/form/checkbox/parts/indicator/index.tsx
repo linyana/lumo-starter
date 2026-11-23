@@ -8,16 +8,10 @@ export type CheckboxIndicatorProps = Omit<
 	ComponentProps<typeof BaseCheckbox.Indicator>,
 	'className' | 'children'
 > & {
-	/** Merged with `cn()`, so a Base UI state callback is not accepted here. */
 	className?: string;
-	/** Replaces the tick. The indeterminate dash is drawn for you, so this is for another tick. */
 	children?: ReactNode;
 };
 
-/**
- * The tick. Mounted only while the box holds a value: Base UI takes it out of the DOM otherwise,
- * which is why the glyph does not need a hidden state of its own.
- */
 export function CheckboxIndicator({ className, children, ...props }: CheckboxIndicatorProps) {
 	return (
 		<BaseCheckbox.Indicator

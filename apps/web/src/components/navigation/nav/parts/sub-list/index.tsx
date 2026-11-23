@@ -3,7 +3,6 @@ import { cn } from '@/lib/utils';
 
 export type NavSubListProps = ComponentProps<'ul'>;
 
-/** The list of sub rows: indented from the nav edge, then filling the rest of the line. */
 export function NavSubList({ className, ...props }: NavSubListProps) {
 	return (
 		<ul
