@@ -8,7 +8,7 @@ export const selectTriggerVariants = tv({
 	base: [
 		fieldShell,
 		'group relative flex cursor-pointer items-center justify-between gap-2 text-left select-none',
-		'data-popup-open:bg-muted',
+		'pressed:bg-muted data-popup-open:bg-muted',
 		'data-readonly:bg-muted data-readonly:cursor-default',
 		iconSlot,
 	],

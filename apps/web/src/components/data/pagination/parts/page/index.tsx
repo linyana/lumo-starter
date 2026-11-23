@@ -1,5 +1,5 @@
 import type { ComponentProps } from 'react';
-import { stateLayer } from '@/lib/control';
+import { pressable, stateLayer } from '@/lib/control';
 import { cn } from '@/lib/utils';
 import { usePagination, type PaginationState } from '../context';
 import { paginationItemVariants } from '../root';
@@ -8,6 +8,7 @@ const paginationItemStates = cn(
 	'relative cursor-pointer text-muted-foreground',
 	'hover:text-foreground',
 	stateLayer,
+	pressable,
 	'data-active:font-medium data-active:text-foreground',
 	'data-active:after:opacity-(--state-layer-hover-opacity)',
 	'data-active:hover:after:opacity-(--state-layer-selected-hover-opacity)',

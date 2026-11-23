@@ -59,7 +59,7 @@ export function MobileNavigation({
 					<Button
 						data-slot="layout-navigation-trigger"
 						variant="ghost"
-						size="icon"
+						size="icon-sm"
 						icon={<Menu />}
 						aria-label="Open navigation"
 					/>
@@ -78,7 +78,7 @@ export function MobileNavigation({
 						brandActions={
 							<Button
 								variant="ghost"
-								size="icon"
+								size="icon-sm"
 								icon={<X />}
 								aria-label="Close navigation"
 								onClick={() => setOpen(false)}

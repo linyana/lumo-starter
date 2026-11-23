@@ -10,7 +10,7 @@ export const tabVariants = tv({
 		'relative z-1 flex cursor-pointer items-center justify-center gap-1.5',
 		'font-medium whitespace-nowrap select-none',
 		'text-muted-foreground transition-[color,translate] duration-(--duration-state)',
-		'active:translate-y-(--press-offset)',
+		'pressed:translate-y-(--press-offset)',
 		'hover:text-foreground data-active:text-foreground',
 		'data-disabled:pointer-events-none data-disabled:opacity-50',
 		iconSlot,

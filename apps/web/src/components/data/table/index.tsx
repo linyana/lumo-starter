@@ -205,7 +205,7 @@ const SelectionBar = <Row,>({ rows, actions, onClear, className }: SelectionBarP
 					const glyphOnly = iconOnly === true && icon !== undefined;
 					const look = {
 						variant: glyphOnly ? ('ghost' as const) : ('outline' as const),
-						size: glyphOnly ? ('icon' as const) : ('sm' as const),
+						size: glyphOnly ? ('icon-sm' as const) : ('sm' as const),
 						tone: destructive ? ('destructive' as const) : ('default' as const),
 						icon,
 						...button,
@@ -542,7 +542,7 @@ export const Table = <Row, Key extends string = string>({
 											>
 												<Button
 													variant="ghost"
-													size="icon"
+													size="icon-sm"
 													icon={<Ellipsis />}
 													aria-labelledby={
 														rowActionsLabel === undefined && headed.length > 0

@@ -2,17 +2,16 @@ import { Button as BaseButton } from '@base-ui/react/button';
 import type { ComponentProps, ReactNode } from 'react';
 import { tv, type VariantProps } from 'tailwind-variants';
 import { Spinner } from '@/components/feedback/spinner';
-import { iconSlot, stateLayer } from '@/lib/control';
+import { iconSlot, pressable, stateLayer } from '@/lib/control';
 import { cn } from '@/lib/utils';
 
 export const buttonVariants = tv({
 	base: [
 		'inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap',
 		'relative rounded-md font-medium select-none',
-		'transition-[color,background-color,border-color,translate]',
+		'transition-[color,background-color,border-color,translate,scale]',
 		'ease-(--ease-spring) duration-(--duration-state)',
-		'active:not-data-disabled:not-aria-[haspopup]:translate-y-(--press-offset)',
-		'active:not-data-disabled:not-aria-[haspopup]:duration-(--duration-press)',
+		pressable,
 		stateLayer,
 		'data-pressed:after:opacity-(--state-layer-hover-opacity)',
 		'data-popup-open:after:opacity-(--state-layer-hover-opacity)',
@@ -21,6 +20,7 @@ export const buttonVariants = tv({
 		'data-disabled:not-data-loading:cursor-not-allowed',
 		'data-loading:cursor-progress',
 		iconSlot,
+		"[&_svg:not([class*='stroke-'])]:stroke-[1.85]",
 		'cursor-pointer',
 	],
 	variants: {
@@ -32,10 +32,12 @@ export const buttonVariants = tv({
 			link: 'text-primary underline-offset-4 hover:underline after:hidden',
 		},
 		size: {
-			sm: 'min-h-8 gap-1.5 px-3 text-sm',
-			md: 'min-h-9 px-4 text-sm',
-			lg: 'min-h-10 px-6 text-base',
-			icon: 'size-8 text-sm',
+			sm: 'min-h-8 gap-1.5 px-3 text-sm has-data-[icon=start]:ps-2 has-data-[icon=end]:pe-2',
+			md: 'min-h-9 px-4 text-sm has-data-[icon=start]:ps-3 has-data-[icon=end]:pe-3',
+			lg: 'min-h-10 px-6 text-base has-data-[icon=start]:ps-5 has-data-[icon=end]:pe-5',
+			'icon-sm': 'size-8 text-sm',
+			'icon-md': 'size-9 text-sm',
+			'icon-lg': 'size-10 text-base',
 		},
 		tone: {
 			default: '',
@@ -106,7 +108,9 @@ export function Button({
 		>
 			{icon ? (
 				<>
-					{loading ? spinner : icon}
+					<span data-icon="start" className="contents">
+						{loading ? spinner : icon}
+					</span>
 					{children}
 				</>
 			) : (

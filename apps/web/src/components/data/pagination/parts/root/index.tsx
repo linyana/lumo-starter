@@ -21,7 +21,7 @@ export const paginationItemVariants = tv({
 	base: [
 		'inline-flex shrink-0 items-center justify-center rounded-md',
 		'select-none whitespace-nowrap tabular-nums font-normal',
-		'transition-colors duration-(--duration-state)',
+		'transition-[color,translate,scale] duration-(--duration-state)',
 		iconSlot,
 	],
 	variants: {

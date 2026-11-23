@@ -8,6 +8,14 @@ export const stateLayer = cn(
 	'active:not-data-disabled:after:opacity-(--state-layer-pressed-opacity)',
 );
 
+/** Consumers must list `translate` and `scale` in their own transition property list. */
+export const pressable = cn(
+	'pressed:translate-y-(--press-offset)',
+	'pressed:scale-(--press-scale)',
+	'pressed:duration-(--duration-press)',
+	'pressed:ease-in-out',
+);
+
 export const iconSlot = '[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg]:size-[1em]';
 
 export const clearButton = cn(

@@ -5,7 +5,7 @@ import { buttonVariants } from '@/components/form/button';
 import { cn } from '@/lib/utils';
 
 const closeClasses = cn(
-	buttonVariants({ variant: 'ghost', size: 'icon' }),
+	buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
 	'-my-1 size-7 text-muted-foreground',
 );
 

@@ -103,7 +103,7 @@ export function SidebarContent({
 							{collapsible && (
 								<Button
 									variant="ghost"
-									size="icon"
+									size="icon-sm"
 									aria-label={collapsed ? 'expand sidebar' : 'collapse sidebar'}
 									aria-expanded={!collapsed}
 									onClick={onToggle}

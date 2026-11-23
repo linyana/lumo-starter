@@ -11,7 +11,7 @@ export const ThemeToggle = () => {
 		<Button
 			type="button"
 			variant="ghost"
-			size="icon"
+			size="icon-sm"
 			aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
 			aria-pressed={dark}
 			icon={dark ? <Sun /> : <Moon />}

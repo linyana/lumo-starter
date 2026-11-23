@@ -83,7 +83,7 @@ export const Dialog = ({
 							render={
 								<Button
 									variant="ghost"
-									size="icon"
+									size="icon-sm"
 									icon={<X />}
 									aria-label={closeLabel}
 									className={cn('absolute top-3 right-3', classNames?.close)}

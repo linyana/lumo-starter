@@ -1,6 +1,6 @@
 import { Toggle as BaseToggle, type ToggleProps as BaseToggleProps } from '@base-ui/react/toggle';
 import { tv, type VariantProps } from 'tailwind-variants';
-import { iconSlot, stateLayer } from '@/lib/control';
+import { iconSlot, pressable, stateLayer } from '@/lib/control';
 import { cn } from '@/lib/utils';
 
 export type ToggleVariant = 'ghost' | 'outline';
@@ -10,8 +10,9 @@ export const toggleVariants = tv({
 	base: [
 		'inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap',
 		'relative rounded-md font-medium select-none',
-		'transition-[color,background-color,border-color]',
+		'transition-[color,background-color,border-color,translate,scale]',
 		'ease-(--ease-spring) duration-(--duration-state)',
+		pressable,
 		stateLayer,
 		'data-pressed:after:opacity-(--state-layer-hover-opacity)',
 		'data-pressed:hover:after:opacity-(--state-layer-selected-hover-opacity)',

@@ -1,7 +1,7 @@
 import { Combobox as BaseCombobox } from '@base-ui/react/combobox';
 import { ChevronDown } from 'lucide-react';
 import type { ComponentProps, ReactNode } from 'react';
-import { iconSlot } from '@/lib/control';
+import { iconSlot, stateLayer } from '@/lib/control';
 import { cn } from '@/lib/utils';
 
 const adornmentClass = cn(
@@ -10,6 +10,7 @@ const adornmentClass = cn(
 	'hover:text-foreground',
 	'data-disabled:pointer-events-none data-disabled:opacity-50',
 	iconSlot,
+	stateLayer,
 );
 
 export type ComboboxTriggerProps = Omit<ComponentProps<typeof BaseCombobox.Trigger>, 'children'> & {
