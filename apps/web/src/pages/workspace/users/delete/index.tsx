@@ -19,7 +19,10 @@ export const DeleteUsers = ({ users, closePanel, reload }: IPropsType) => {
 	const label = only?.name ?? `${users.length} accounts`;
 	const self = users.some(({ id }) => id === currentUser?.id);
 
-	const remove = useHttp({
+	const { 
+		fetchData,
+		loading,
+	} = useHttp({
 		endpoint: usersApi.removeMany,
 		loadingMessage: `Deleting ${label}…`,
 		successMessage: `${label} deleted`,
@@ -41,7 +44,7 @@ export const DeleteUsers = ({ users, closePanel, reload }: IPropsType) => {
 			onOpenChange={setOpen}
 			onClosed={closePanel}
 			confirmCloses={false}
-			pending={remove.loading}
+			pending={loading}
 			title={`Delete ${label}?`}
 			description={
 				self
@@ -51,7 +54,7 @@ export const DeleteUsers = ({ users, closePanel, reload }: IPropsType) => {
 			confirmLabel="Delete"
 			destructive
 			onConfirm={() => {
-				remove.fetchData(users.map(({ id }) => id));
+				fetchData(users.map(({ id }) => id));
 			}}
 		/>
 	);

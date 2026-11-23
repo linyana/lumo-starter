@@ -35,7 +35,7 @@ export const EditUser = ({ user, closePanel, reload }: IPropsType) => {
 	const ownRow = user.id === currentUser?.id;
 	const changed = useChanged({ form });
 
-	const save = useHttp({
+	const { fetchData, loading } = useHttp({
 		form,
 		endpoint: (input: UpdateUserInput) => usersApi.update({ id: user.id, input }),
 		successMessage: 'Changes saved',
@@ -60,7 +60,7 @@ export const EditUser = ({ user, closePanel, reload }: IPropsType) => {
 				onSubmit={(values) => {
 					if (!changed) return;
 
-					return save.fetchData(values);
+					return fetchData(values);
 				}}
 			>
 				<Field name="email" label="Email">
@@ -93,7 +93,7 @@ export const EditUser = ({ user, closePanel, reload }: IPropsType) => {
 					<Button
 						disabled={!changed}
 						focusableWhenDisabled={!changed}
-						loading={save.loading}
+						loading={loading}
 						onClick={form.submit}
 					>
 						Save
