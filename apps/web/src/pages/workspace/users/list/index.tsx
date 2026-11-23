@@ -45,7 +45,7 @@ export const UserList = ({ list }: IPropsType) => {
 			filter: {
 				field: (
 					<Field name="email">
-						<Input placeholder="Exact email" />
+						<Input placeholder="Filter email" />
 					</Field>
 				),
 				active: list.filters.email !== undefined,
