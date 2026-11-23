@@ -79,7 +79,7 @@ export const row = cn(
 	'flex py-2 pl-4 text-sm leading-4 outline-none select-none',
 	'data-disabled:cursor-not-allowed data-disabled:opacity-50',
 	'relative z-0',
-	"before:absolute before:inset-x-1 before:inset-y-0 before:z-[-1] before:rounded-md before:content-['']",
+	"before:absolute before:inset-x-1 before:inset-y-px before:z-[-1] before:rounded-md before:content-['']",
 	'before:bg-current before:opacity-0',
 	'data-highlighted:text-accent-foreground',
 	'data-highlighted:before:opacity-(--state-layer-hover-opacity)',
