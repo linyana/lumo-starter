@@ -10,7 +10,8 @@ import type { OverlayArgs, Panel, UserSortKey } from './types';
 
 type IPropsType = { list: UseQueryResult<User, ListUsersQuery> };
 
-const renderOverlay = ({ panel, closePanel, reload }: OverlayArgs): ReactElement => {
+const renderOverlay = ({ panel, setPanel, reload }: OverlayArgs): ReactElement => {
+	const closePanel = () => setPanel(null);
 	switch (panel.kind) {
 		case 'edit':
 			return <EditUser user={panel.user} closePanel={closePanel} reload={reload} />;
@@ -29,8 +30,6 @@ export const UserList = ({ list }: IPropsType) => {
 	const { user: currentUser } = useAuth();
 
 	const [panel, setPanel] = useState<Panel | null>(null);
-
-	const closePanel = () => setPanel(null);
 
 	const columns: TableColumn<User, UserSortKey>[] = [
 		{
@@ -113,7 +112,7 @@ export const UserList = ({ list }: IPropsType) => {
 				/>
 			</Form>
 
-			{panel !== null && renderOverlay({ panel, closePanel, reload: list.reload })}
+			{panel !== null && renderOverlay({ panel, setPanel, reload: list.reload })}
 		</>
 	);
 };
