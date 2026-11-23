@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 
 export const inputVariants = tv({
 	base: [
-		fieldShell,
+		fieldShell(),
 		'file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground',
 	],
 	variants: {

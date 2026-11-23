@@ -7,7 +7,7 @@ import { fieldShell } from '@/lib/control';
 import { cn } from '@/lib/utils';
 
 export const textareaVariants = tv({
-	base: [fieldShell, 'read-only:bg-muted', 'resize-y'],
+	base: [fieldShell(), 'read-only:bg-muted', 'resize-y'],
 	variants: {
 		size: {
 			sm: 'min-h-16 px-2.5 py-1.5 text-sm',

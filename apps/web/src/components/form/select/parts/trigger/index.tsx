@@ -6,9 +6,9 @@ import { cn } from '@/lib/utils';
 
 export const selectTriggerVariants = tv({
 	base: [
-		fieldShell,
+		fieldShell({ hover: 'tint' }),
 		'group relative flex cursor-pointer items-center justify-between gap-2 text-left select-none',
-		'pressed:bg-muted data-popup-open:bg-muted',
+		'hover:bg-accent pressed:bg-accent data-popup-open:bg-accent',
 		'data-readonly:bg-muted data-readonly:cursor-default',
 		iconSlot,
 	],

@@ -5,7 +5,7 @@ import { fieldShell } from '@/lib/control';
 import { cn } from '@/lib/utils';
 
 export const comboboxInputVariants = tv({
-	base: [fieldShell, 'read-only:bg-muted', 'pe-9'],
+	base: [fieldShell(), 'read-only:bg-muted', 'pe-9'],
 	variants: {
 		size: {
 			sm: 'h-8 ps-2.5 text-sm',

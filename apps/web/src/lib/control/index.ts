@@ -28,24 +28,31 @@ export const clearButton = cn(
 	stateLayer,
 );
 
-const shellEdge = cn(
-	'[--shell-hover:var(--input-strong)] [--shell-focus:var(--input-strong)]',
-	'hover:not-focus-visible:not-disabled:not-data-disabled:border-(--shell-hover)',
+const shellFocus = cn(
+	'[--shell-focus:var(--input-strong)]',
 	'focus-visible:border-(--shell-focus) focus-visible:outline-none',
 	'failed:border-destructive',
 	'failed:[--shell-hover:var(--destructive-soft)]',
 	'failed:[--shell-focus:var(--destructive)]',
 );
 
-export const fieldShell = cn(
-	'w-full min-w-0 rounded-md border border-input bg-background text-foreground',
-	'dark:border-border dark:bg-card',
-	'placeholder:text-muted-foreground',
-	'transition-colors duration-(--duration-state)',
-	shellEdge,
-	'disabled:cursor-not-allowed disabled:opacity-50',
-	'data-disabled:cursor-not-allowed data-disabled:opacity-50',
+const shellEdge = cn(
+	'[--shell-hover:var(--input-strong)]',
+	'hover:not-focus-visible:not-disabled:not-data-disabled:border-(--shell-hover)',
+	shellFocus,
 );
+
+/** `hover: 'tint'` keeps the resting border and lets the caller answer in fill. */
+export const fieldShell = ({ hover = 'border' }: { hover?: 'border' | 'tint' } = {}) =>
+	cn(
+		'w-full min-w-0 rounded-md border border-input bg-background text-foreground',
+		'dark:border-border dark:bg-card',
+		'placeholder:text-muted-foreground',
+		'transition-colors duration-(--duration-state)',
+		hover === 'border' ? shellEdge : shellFocus,
+		'disabled:cursor-not-allowed disabled:opacity-50',
+		'data-disabled:cursor-not-allowed data-disabled:opacity-50',
+	);
 
 export const toggleBox = cn(
 	'inline-flex size-4 shrink-0 cursor-pointer items-center justify-center align-middle',
