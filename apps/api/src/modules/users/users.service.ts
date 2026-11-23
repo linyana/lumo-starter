@@ -12,7 +12,7 @@ import { PrismaService } from '../../common/db/prisma.service.js';
 import { AppException } from '../../common/errors/app.exception.js';
 import { paginate } from '../../common/pagination/index.js';
 import type { UpdateUserInput } from '@lumo/shared';
-import { toWireUser } from './mapper/index.js';
+import { toWireUser, userWireSelect } from './mapper/index.js';
 
 export type UserActor = { id: string; roles: readonly Role[] };
 
@@ -24,7 +24,7 @@ export class UsersService {
 
 	async list(query: ListUsersQuery): Promise<Paginated<WireUser>> {
 		const where: Prisma.UserWhereInput = {
-			email: query.email ? { equals: query.email, mode: 'insensitive' } : undefined,
+			email: query.email ? { contains: query.email, mode: 'insensitive' } : undefined,
 			OR: query.search
 				? [
 						{ email: { contains: query.search, mode: 'insensitive' } },
@@ -44,6 +44,7 @@ export class UsersService {
 				client.user.findMany({
 					where,
 					orderBy,
+					select: userWireSelect,
 					...window,
 				}),
 			count: ({ client }) => client.user.count({ where }),
