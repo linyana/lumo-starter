@@ -13,9 +13,23 @@ type IPropsType = { list: UseQueryResult<User, ListUsersQuery> };
 const renderOverlay = ({ panel, closePanel, reload }: OverlayArgs): ReactElement => {
 	switch (panel.kind) {
 		case 'edit':
-			return <EditUser user={panel.user} closePanel={closePanel} reload={reload} />;
+			return (
+				<EditUser
+					key={`edit-${panel.user.id}`}
+					user={panel.user}
+					closePanel={closePanel}
+					reload={reload}
+				/>
+			);
 		case 'delete':
-			return <DeleteUsers users={panel.users} closePanel={closePanel} reload={reload} />;
+			return (
+				<DeleteUsers
+					key={`delete-${panel.users.map((one) => one.id).join()}`}
+					users={panel.users}
+					closePanel={closePanel}
+					reload={reload}
+				/>
+			);
 	}
 };
 

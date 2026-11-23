@@ -14,7 +14,7 @@ export type AlertDialogSlots =
 
 export type AlertDialogProps = Pick<
 	AlertDialogRootProps,
-	'open' | 'defaultOpen' | 'onOpenChange'
+	'open' | 'defaultOpen' | 'onOpenChange' | 'onOpenChangeComplete'
 > & {
 	trigger?: ReactElement;
 	title: ReactNode;

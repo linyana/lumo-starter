@@ -1,4 +1,5 @@
 import type { User } from '@lumo/shared';
+import { useState } from 'react';
 import { usersApi } from '@/api';
 import { AlertDialog } from '@/components';
 import { useHttp } from '@/hooks';
@@ -10,6 +11,7 @@ type IPropsType = {
 };
 
 export const DeleteUsers = ({ users, closePanel, reload }: IPropsType) => {
+	const [open, setOpen] = useState(true);
 	const only = users.length === 1 ? users[0] : undefined;
 	const who = only?.email ?? users.map((one) => one.name).join(', ');
 	const label = only?.name ?? `${users.length} accounts`;
@@ -23,8 +25,9 @@ export const DeleteUsers = ({ users, closePanel, reload }: IPropsType) => {
 
 	return (
 		<AlertDialog
-			open
-			onOpenChange={(next) => {
+			open={open}
+			onOpenChange={setOpen}
+			onOpenChangeComplete={(next) => {
 				if (!next) closePanel();
 			}}
 			title={`Delete ${label}?`}

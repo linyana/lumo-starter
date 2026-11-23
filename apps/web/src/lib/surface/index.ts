@@ -2,17 +2,20 @@ import { cn } from '@/lib/utils';
 
 export const backdrop = cn(
 	'fixed inset-0 z-40 min-h-dvh bg-(--overlay) transition-opacity',
-	'duration-(--duration-state) ease-(--ease-overlay)',
+	'duration-(--duration-modal) ease-out',
 	'supports-[-webkit-touch-callout:none]:absolute',
-	'data-starting-style:opacity-0 data-ending-style:opacity-0',
+	'starting:opacity-0 data-starting-style:opacity-0 data-ending-style:opacity-0',
 );
 
 export const panel = cn(
 	'w-full max-w-md rounded-xl border bg-popover p-6 text-popover-foreground shadow-overlay',
 	'max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain',
-	'transition-[scale,opacity] duration-(--duration-state) ease-(--ease-overlay)',
+	'transform-gpu transition-[scale,opacity] duration-(--duration-modal) ease-(--ease-spring)',
 	'data-starting-style:scale-95 data-starting-style:opacity-0',
+	'starting:scale-95 starting:opacity-0',
 	'data-ending-style:scale-95 data-ending-style:opacity-0',
+	'data-ending-style:duration-(--duration-modal-exit) data-ending-style:ease-out',
+	'data-nested-dialog-open:scale-95 data-nested-dialog-open:opacity-0',
 );
 
 export const modalViewport = cn(

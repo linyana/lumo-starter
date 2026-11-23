@@ -6,6 +6,7 @@ import {
 	type UpdateUserInput,
 	type User,
 } from '@lumo/shared';
+import { useState } from 'react';
 import { usersApi } from '@/api';
 import {
 	Button,
@@ -28,6 +29,7 @@ type IPropsType = {
 };
 
 export const EditUser = ({ user, closePanel, reload }: IPropsType) => {
+	const [open, setOpen] = useState(true);
 	const form = useForm();
 	const { user: currentUser } = useAuth();
 	const ownRow = user.id === currentUser?.id;
@@ -37,7 +39,7 @@ export const EditUser = ({ user, closePanel, reload }: IPropsType) => {
 		endpoint: (input: UpdateUserInput) => usersApi.update({ id: user.id, input }),
 		successMessage: 'Changes saved',
 		onSuccess: () => {
-			closePanel();
+			setOpen(false);
 			reload();
 		},
 		onError: form.setApiError,
@@ -45,8 +47,9 @@ export const EditUser = ({ user, closePanel, reload }: IPropsType) => {
 
 	return (
 		<Dialog
-			open
-			onOpenChange={(next) => {
+			open={open}
+			onOpenChange={setOpen}
+			onOpenChangeComplete={(next) => {
 				if (!next) closePanel();
 			}}
 			title={`Edit ${user.name}`}
@@ -85,7 +88,7 @@ export const EditUser = ({ user, closePanel, reload }: IPropsType) => {
 				</Field>
 			</Form>
 			<div className="grid grid-cols-2 gap-2 mt-6">
-				<Button variant="outline" onClick={closePanel}>
+				<Button variant="outline" onClick={() => setOpen(false)}>
 					Cancel
 				</Button>
 				<Tooltip content="Nothing has changed yet." disabled={changed}>

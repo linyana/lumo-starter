@@ -71,6 +71,8 @@
 	--color-overlay: var(--overlay);
 	--duration-overlay: var(--duration-overlay);
 	--ease-overlay: var(--ease-overlay);
+	--duration-modal: var(--duration-modal);
+	--duration-modal-exit: var(--duration-modal-exit);
 	--duration-press: var(--duration-press);
 	--duration-turn: var(--duration-turn);
 	--duration-state: var(--duration-state);
@@ -117,6 +119,8 @@
 	--duration-press: 80ms;
 	--ease-overlay: cubic-bezier(0.22, 1, 0.36, 1);
 	--duration-overlay: 350ms;
+	--duration-modal: 250ms;
+	--duration-modal-exit: 100ms;
 	--success: oklch(0.627 0.194 149.214);
 	--warning: oklch(0.666 0.179 58.318);
 	--info: oklch(0.546 0.245 262.881);
@@ -245,5 +249,7 @@
 		--duration-press: 1ms;
 		--ease-overlay: linear;
 		--duration-overlay: 1ms;
+		--duration-modal: 1ms;
+		--duration-modal-exit: 1ms;
 	}
 }

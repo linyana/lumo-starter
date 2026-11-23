@@ -6,7 +6,10 @@ type DialogRootProps = ComponentProps<typeof DialogRoot>;
 
 export type DialogSlots = 'backdrop' | 'viewport' | 'popup' | 'title' | 'description' | 'footer';
 
-export type DialogProps = Pick<DialogRootProps, 'open' | 'defaultOpen' | 'onOpenChange'> & {
+export type DialogProps = Pick<
+	DialogRootProps,
+	'open' | 'defaultOpen' | 'onOpenChange' | 'onOpenChangeComplete'
+> & {
 	trigger?: ReactElement;
 	title: ReactNode;
 	description?: ReactNode;
