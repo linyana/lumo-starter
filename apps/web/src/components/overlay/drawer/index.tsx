@@ -19,6 +19,11 @@ export const Drawer = ({
 	children,
 	footer,
 	side = 'right',
+	container,
+	keepMounted,
+	portalProps,
+	backdropProps,
+	viewportProps,
 	className,
 	classNames,
 	'data-slot': dataSlot,
@@ -41,9 +46,15 @@ export const Drawer = ({
 	return (
 		<DrawerRoot swipeDirection={side} {...props}>
 			<DrawerTrigger render={trigger} />
-			<DrawerPortal>
-				<DrawerBackdrop className={classNames?.backdrop} />
-				<DrawerViewport className={classNames?.viewport}>
+			<DrawerPortal container={container} keepMounted={keepMounted} {...portalProps}>
+				<DrawerBackdrop
+					{...backdropProps}
+					className={cn(classNames?.backdrop, backdropProps?.className)}
+				/>
+				<DrawerViewport
+					{...viewportProps}
+					className={cn(classNames?.viewport, viewportProps?.className)}
+				>
 					<DrawerPopup
 						data-slot={dataSlot ?? 'drawer-popup'}
 						className={cn(className, classNames?.popup)}

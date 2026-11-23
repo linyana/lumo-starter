@@ -1,6 +1,7 @@
 import type { ComponentProps, ReactElement, ReactNode } from 'react';
+import type { ModalEscapeHatches } from '@/components/overlay/modal';
 import type { SlotClassNames } from '@/components/types';
-import type { DrawerRoot } from './parts';
+import type { DrawerBackdrop, DrawerPortal, DrawerRoot, DrawerViewport } from './parts';
 
 type DrawerRootProps = ComponentProps<typeof DrawerRoot>;
 
@@ -21,8 +22,13 @@ export type DrawerParts = {
 	footer: ReactNode;
 };
 
-export type DrawerProps = Pick<DrawerRootProps, 'open' | 'defaultOpen' | 'onOpenChange'> & {
-	trigger: ReactElement;
+export type DrawerProps = Omit<DrawerRootProps, 'children' | 'swipeDirection'> &
+	ModalEscapeHatches<
+		ComponentProps<typeof DrawerPortal>,
+		ComponentProps<typeof DrawerBackdrop>,
+		ComponentProps<typeof DrawerViewport>
+	> & {
+		trigger: ReactElement;
 	title: ReactNode;
 	description?: ReactNode;
 	children?: ReactNode | ((parts: DrawerParts) => ReactNode);

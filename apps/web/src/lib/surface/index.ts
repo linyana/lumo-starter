@@ -8,19 +8,27 @@ export const backdrop = cn(
 );
 
 export const panel = cn(
-	'w-full max-w-md rounded-xl border bg-popover p-6 text-popover-foreground shadow-overlay',
-	'max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain',
+	'relative isolate flex max-h-[calc(100dvh-2rem)] w-full max-w-md min-h-0 flex-col',
+	'rounded-xl border bg-popover text-popover-foreground shadow-overlay',
 	'transform-gpu transition-[scale,opacity] duration-(--duration-modal) ease-(--ease-spring)',
 	'data-starting-style:scale-95 data-starting-style:opacity-0',
 	'starting:scale-95 starting:opacity-0',
 	'data-ending-style:scale-95 data-ending-style:opacity-0',
 	'data-ending-style:duration-(--duration-modal-exit) data-ending-style:ease-out',
-	'data-nested-dialog-open:scale-95 data-nested-dialog-open:opacity-0',
+	'data-nested-dialog-open:pointer-events-none data-nested-dialog-open:scale-95 data-nested-dialog-open:opacity-0',
 );
 
 export const modalViewport = cn(
 	'fixed inset-0 z-50 grid place-items-center-safe overflow-y-auto p-4',
 );
+
+export const modalContent = cn('relative flex min-h-0 flex-1 flex-col gap-4 px-6 py-6');
+
+export const modalHeader = 'flex shrink-0 flex-col';
+
+export const modalBody = 'min-h-0 flex-1 overflow-y-auto overscroll-contain';
+
+export const modalFooter = 'flex shrink-0 justify-end gap-2';
 
 export const popup = cn(
 	'origin-(--transform-origin)',

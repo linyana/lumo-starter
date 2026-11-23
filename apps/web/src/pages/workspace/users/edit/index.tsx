@@ -52,6 +52,23 @@ export const EditUser = ({ user, closePanel, reload }: IPropsType) => {
 			onClosed={closePanel}
 			title={`Edit ${user.name}`}
 			description={user.email}
+			footer={
+				<>
+					<Button variant="outline" onClick={() => setOpen(false)}>
+						Cancel
+					</Button>
+					<Tooltip content="Nothing has changed yet." disabled={changed}>
+						<Button
+							disabled={!changed}
+							focusableWhenDisabled={!changed}
+							loading={loading}
+							onClick={form.submit}
+						>
+							Save
+						</Button>
+					</Tooltip>
+				</>
+			}
 		>
 			<Form
 				form={form}
@@ -85,21 +102,6 @@ export const EditUser = ({ user, closePanel, reload }: IPropsType) => {
 					/>
 				</Field>
 			</Form>
-			<div className="grid grid-cols-2 gap-2 mt-6">
-				<Button variant="outline" onClick={() => setOpen(false)}>
-					Cancel
-				</Button>
-				<Tooltip content="Nothing has changed yet." disabled={changed}>
-					<Button
-						disabled={!changed}
-						focusableWhenDisabled={!changed}
-						loading={loading}
-						onClick={form.submit}
-					>
-						Save
-					</Button>
-				</Tooltip>
-			</div>
 		</Dialog>
 	);
 };

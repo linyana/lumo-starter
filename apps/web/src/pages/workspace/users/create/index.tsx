@@ -36,6 +36,16 @@ export const CreateUser = ({ onCreated }: IPropsType) => {
 			}
 			title="New account"
 			description="They sign in with this email and the password you set."
+			footer={
+				<>
+					<Button variant="outline" onClick={() => setOpen(false)}>
+						Cancel
+					</Button>
+					<Button loading={loading} onClick={form.submit}>
+						Create account
+					</Button>
+				</>
+			}
 		>
 			<Form
 				form={form}
@@ -68,14 +78,6 @@ export const CreateUser = ({ onCreated }: IPropsType) => {
 					/>
 				</Field>
 			</Form>
-			<div className="grid grid-cols-2 gap-2 mt-6">
-				<Button variant="outline" onClick={() => setOpen(false)}>
-					Cancel
-				</Button>
-				<Button loading={loading} onClick={form.submit}>
-					Create account
-				</Button>
-			</div>
 		</Dialog>
 	);
 };

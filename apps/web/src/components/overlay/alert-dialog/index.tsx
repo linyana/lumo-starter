@@ -1,4 +1,5 @@
 import { Button } from '@/components/form/button';
+import { modalBody, modalContent, modalHeader } from '@/lib/surface';
 import { cn } from '@/lib/utils';
 import {
 	AlertDialogBackdrop,
@@ -24,6 +25,12 @@ export const AlertDialog = ({
 	destructive = false,
 	confirmCloses = true,
 	pending = false,
+	backdrop = true,
+	container,
+	keepMounted,
+	portalProps,
+	backdropProps,
+	viewportProps,
 	className,
 	classNames,
 	onOpenChangeComplete,
@@ -50,30 +57,54 @@ export const AlertDialog = ({
 			}}
 		>
 			{trigger !== undefined && <AlertDialogTrigger render={trigger} />}
-			<AlertDialogPortal>
-				<AlertDialogBackdrop className={classNames?.backdrop} />
-				<AlertDialogViewport className={classNames?.viewport}>
-					<AlertDialogPopup
-						className={cn(className, classNames?.popup, 'flex flex-col items-center gap-2')}
-					>
-						<div>
-							<AlertDialogTitle className={classNames?.title}>{title}</AlertDialogTitle>
-							{description !== undefined && (
-								<AlertDialogDescription className={classNames?.description}>
-									{description}
-								</AlertDialogDescription>
+			<AlertDialogPortal container={container} keepMounted={keepMounted} {...portalProps}>
+				{backdrop && (
+					<AlertDialogBackdrop
+						{...backdropProps}
+						className={cn(classNames?.backdrop, backdropProps?.className)}
+					/>
+				)}
+				<AlertDialogViewport
+					{...viewportProps}
+					className={cn(classNames?.viewport, viewportProps?.className)}
+				>
+					<AlertDialogPopup className={cn('max-w-sm', className, classNames?.popup)}>
+						<div
+							data-slot="alert-dialog-content"
+							className={cn(modalContent, classNames?.content)}
+						>
+							<div
+								data-slot="alert-dialog-header"
+								className={cn(modalHeader, classNames?.header)}
+							>
+								<AlertDialogTitle className={classNames?.title}>{title}</AlertDialogTitle>
+								{description !== undefined && (
+									<AlertDialogDescription className={classNames?.description}>
+										{description}
+									</AlertDialogDescription>
+								)}
+							</div>
+							{children !== undefined && (
+								<div
+									data-slot="alert-dialog-body"
+									className={cn(modalBody, classNames?.body)}
+								>
+									{children}
+								</div>
 							)}
-						</div>
-						{children}
-						<div className={cn('grid w-full grid-cols-2 gap-2 mt-3', classNames?.actions)}>
-							<AlertDialogClose
-								render={
-									<Button variant="outline" disabled={pending}>
-										{cancelLabel}
-									</Button>
-								}
-							/>
-							{confirmCloses ? <AlertDialogClose render={confirm} /> : confirm}
+							<div
+								data-slot="alert-dialog-actions"
+								className={cn('grid shrink-0 grid-cols-2 gap-2', classNames?.actions)}
+							>
+								<AlertDialogClose
+									render={
+										<Button variant="outline" disabled={pending}>
+											{cancelLabel}
+										</Button>
+									}
+								/>
+								{confirmCloses ? <AlertDialogClose render={confirm} /> : confirm}
+							</div>
 						</div>
 					</AlertDialogPopup>
 				</AlertDialogViewport>
