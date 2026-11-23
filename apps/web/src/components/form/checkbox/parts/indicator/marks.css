@@ -1,0 +1,29 @@
+[data-checkbox-mark='check'] {
+	opacity: 0;
+	stroke-dasharray: 1 2;
+	stroke-dashoffset: 1;
+}
+
+[data-checkbox-mark='dash'] {
+	scale: 0 1;
+	transform-origin: center;
+}
+
+[data-slot='checkbox-indicator'][data-checked] > svg > [data-checkbox-mark='check'] {
+	opacity: 1;
+	stroke-dashoffset: 0;
+
+	@media (prefers-reduced-motion: no-preference) {
+		transition:
+			stroke-dashoffset 190ms ease-out 80ms,
+			opacity 80ms ease-out 80ms;
+	}
+}
+
+[data-slot='checkbox-indicator'][data-indeterminate] > svg > [data-checkbox-mark='dash'] {
+	scale: 1;
+
+	@media (prefers-reduced-motion: no-preference) {
+		transition: scale 140ms ease-out 80ms;
+	}
+}
