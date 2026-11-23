@@ -11,6 +11,7 @@ export type DialogProps = Pick<
 	'open' | 'defaultOpen' | 'onOpenChange' | 'onOpenChangeComplete'
 > & {
 	trigger?: ReactElement;
+	onClosed?: () => void;
 	title: ReactNode;
 	description?: ReactNode;
 	children?: ReactNode;

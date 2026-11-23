@@ -49,9 +49,7 @@ export const EditUser = ({ user, closePanel, reload }: IPropsType) => {
 		<Dialog
 			open={open}
 			onOpenChange={setOpen}
-			onOpenChangeComplete={(next) => {
-				if (!next) closePanel();
-			}}
+			onClosed={closePanel}
 			title={`Edit ${user.name}`}
 			description={user.email}
 		>

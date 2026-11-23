@@ -19,9 +19,17 @@ export const Dialog = ({
 	footer,
 	className,
 	classNames,
+	onOpenChangeComplete,
+	onClosed,
 	...props
 }: DialogProps) => (
-	<DialogRoot {...props}>
+	<DialogRoot
+		{...props}
+		onOpenChangeComplete={(next) => {
+			onOpenChangeComplete?.(next);
+			if (!next) onClosed?.();
+		}}
+	>
 		{trigger !== undefined && <DialogTrigger render={trigger} />}
 		<DialogPortal>
 			<DialogBackdrop className={classNames?.backdrop} />

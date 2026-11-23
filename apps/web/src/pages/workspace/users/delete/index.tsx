@@ -27,9 +27,7 @@ export const DeleteUsers = ({ users, closePanel, reload }: IPropsType) => {
 		<AlertDialog
 			open={open}
 			onOpenChange={setOpen}
-			onOpenChangeComplete={(next) => {
-				if (!next) closePanel();
-			}}
+			onClosed={closePanel}
 			title={`Delete ${label}?`}
 			description={`${who} — access ends immediately. What they wrote stays. This cannot be undone.`}
 			confirmLabel="Delete"

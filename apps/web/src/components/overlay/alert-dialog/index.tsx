@@ -24,9 +24,17 @@ export const AlertDialog = ({
 	destructive = false,
 	className,
 	classNames,
+	onOpenChangeComplete,
+	onClosed,
 	...props
 }: AlertDialogProps) => (
-	<AlertDialogRoot {...props}>
+	<AlertDialogRoot
+		{...props}
+		onOpenChangeComplete={(next) => {
+			onOpenChangeComplete?.(next);
+			if (!next) onClosed?.();
+		}}
+	>
 		{trigger !== undefined && <AlertDialogTrigger render={trigger} />}
 		<AlertDialogPortal>
 			<AlertDialogBackdrop className={classNames?.backdrop} />
