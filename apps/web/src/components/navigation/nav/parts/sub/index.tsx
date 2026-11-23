@@ -1,5 +1,5 @@
 import { Collapsible as BaseCollapsible } from '@base-ui/react/collapsible';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import {
 	CollapsibleIcon,
 	CollapsiblePanel,
@@ -42,6 +42,13 @@ export function NavSub({
 	popoverSide = 'right',
 }: NavSubProps) {
 	const { compact } = useNav();
+	const [open, setOpen] = useState(defaultOpen || isActive);
+	const [wasActive, setWasActive] = useState(isActive);
+
+	if (isActive !== wasActive) {
+		setWasActive(isActive);
+		if (isActive) setOpen(true);
+	}
 
 	if (compact) {
 		return (
@@ -78,7 +85,7 @@ export function NavSub({
 	}
 
 	return (
-		<CollapsibleRoot defaultOpen={defaultOpen} disabled={disabled}>
+		<CollapsibleRoot open={open} onOpenChange={setOpen} disabled={disabled}>
 			<BaseCollapsible.Trigger
 				data-slot="nav-sub-trigger"
 				render={

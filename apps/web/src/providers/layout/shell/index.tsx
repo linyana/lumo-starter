@@ -16,7 +16,8 @@ const keysByHref = (entries: LayoutNavEntry[]): Map<string, string> =>
 		entries.flatMap((entry): [string, string][] => {
 			if (entry.type === 'separator' || entry.type === 'skeleton') return [];
 			if (entry.type === 'group') return [...keysByHref(entry.children)];
-			return entry.href === undefined ? [] : [[entry.href, entry.key]];
+			const own: [string, string][] = entry.href === undefined ? [] : [[entry.href, entry.key]];
+			return [...own, ...keysByHref(entry.children ?? [])];
 		}),
 	);
 

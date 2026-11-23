@@ -1,39 +1,86 @@
 import { useMemo } from 'react';
-import { createBrowserRouter, Link, NavLink, type RouteObject } from 'react-router';
+import { createBrowserRouter, Link, NavLink, useLocation, type RouteObject } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import { RedirectIfAuthenticated, RequireAccess, RequireAuth, useAuth } from '@/providers/auth';
 import { AppShell, type LayoutNavEntry, type LayoutNavItem } from '@/providers/layout';
 import { routes } from '@/routes';
-import type { AppRoute, NavEntry } from './types';
+import type { AppRoute, NavChild, NavEntry } from './types';
 
-export type { AppRoute, NavEntry, RouteAudience } from './types';
+export type { AppRoute, NavChild, NavEntry, RouteAudience } from './types';
 
 type ShellRoute = Extract<AppRoute, { layout: 'shell' }>;
 
 type NavRoute = ShellRoute & { nav: NavEntry };
 
-const keyFor = (route: AppRoute): string => route.path ?? 'index';
-const hrefFor = (route: AppRoute): string => (route.path ? `/${route.path}` : '/');
+type AccessFilter = <T extends { access?: NavChild['access'] }>(items: readonly T[]) => T[];
 
-const itemFor = (route: NavRoute): LayoutNavItem => {
-	const { label, icon: Icon } = route.nav;
-	const href = hrefFor(route);
+const keyFor = (route: AppRoute): string => route.path ?? 'index';
+const hrefFor = (path?: string): string => (path ? `/${path}` : '/');
+
+const linkFor = ({
+	key,
+	label,
+	icon: Icon,
+	href,
+}: {
+	key: string;
+	label: string;
+	icon?: NavEntry['icon'];
+	href: string;
+}): LayoutNavItem => ({
+	type: 'item',
+	key,
+	label,
+	icon: Icon ? <Icon /> : undefined,
+	href,
+	render: <NavLink to={href} />,
+});
+
+const childFor = (child: NavChild): LayoutNavItem =>
+	linkFor({ key: child.path, label: child.label, icon: child.icon, href: hrefFor(child.path) });
+
+const itemFor = ({
+	route,
+	children,
+	pathname,
+}: {
+	route: NavRoute;
+	children: LayoutNavItem[];
+	pathname: string;
+}): LayoutNavItem => {
+	const href = hrefFor(route.path);
 	return {
-		type: 'item',
-		key: keyFor(route),
-		label,
-		icon: Icon ? <Icon /> : undefined,
-		href,
-		render: <NavLink to={href} />,
+		...linkFor({ key: keyFor(route), label: route.nav.label, icon: route.nav.icon, href }),
+		children: children.length === 0 ? undefined : children,
+		defaultOpen: children.some((child) => child.href === pathname) || undefined,
 	};
 };
 
-const navFor = (navRoutes: NavRoute[]): LayoutNavEntry[] =>
-	[...new Set(navRoutes.map((route) => route.nav.group))].map((group) => ({
+const navFor = ({
+	navRoutes,
+	pathname,
+	filter,
+}: {
+	navRoutes: NavRoute[];
+	pathname: string;
+	filter: AccessFilter;
+}): LayoutNavEntry[] => {
+	const childrenOf = (route: NavRoute): LayoutNavItem[] =>
+		filter(route.nav.children ?? []).map(childFor);
+
+	const visible = navRoutes.filter(
+		(route) => route.nav.children === undefined || childrenOf(route).length > 0,
+	);
+	const groups = [...new Set(visible.map((route) => route.nav.group))];
+
+	return groups.map((group) => ({
 		type: 'group',
 		label: group,
-		children: navRoutes.filter((route) => route.nav.group === group).map(itemFor),
+		children: visible
+			.filter((route) => route.nav.group === group)
+			.map((route) => itemFor({ route, pathname, children: childrenOf(route) })),
 	}));
+};
 
 const NotFoundPage = () => (
 	<div className="grid place-items-center p-12 text-center">
@@ -74,7 +121,11 @@ const navRoutes = shellRoutes.filter((route): route is NavRoute => route.nav !==
 
 const AuthorizedShell = () => {
 	const { filter } = useAuth();
-	const nav = useMemo(() => navFor(filter(navRoutes)), [filter]);
+	const { pathname } = useLocation();
+	const nav = useMemo(
+		() => navFor({ navRoutes: filter(navRoutes), pathname, filter }),
+		[filter, pathname],
+	);
 
 	return <AppShell nav={nav} />;
 };

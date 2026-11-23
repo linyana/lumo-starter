@@ -1,6 +1,9 @@
-import { LayoutDashboard, Users } from 'lucide-react';
-import { DashboardPage, LoginPage, RegisterPage, UsersPage } from '@/pages';
+import { LayoutDashboard, Settings, Users } from 'lucide-react';
+import { Navigate } from 'react-router';
+import { DashboardPage, LoginPage, ProfileSetting, RegisterPage, UsersPage } from '@/pages';
 import type { AppRoute } from '@/providers/routes';
+
+const SettingsIndex = () => <Navigate to="/settings/profile" replace />;
 
 export const routes: AppRoute[] = [
 	{
@@ -14,6 +17,25 @@ export const routes: AppRoute[] = [
 		page: UsersPage,
 		access: { permission: 'user:read' },
 		nav: { group: 'Workspace', label: 'Users', icon: Users },
+	},
+	{
+		path: 'settings',
+		layout: 'shell',
+		page: SettingsIndex,
+		nav: {
+			group: 'Settings',
+			label: 'Settings',
+			icon: Settings,
+			children: [
+				{ label: 'Profile', path: 'settings/profile', access: { permission: 'user:read' } },
+			],
+		},
+	},
+	{
+		path: 'settings/profile',
+		layout: 'shell',
+		page: ProfileSetting,
+		access: { permission: 'user:read' },
 	},
 	{ path: 'login', layout: 'bare', page: LoginPage, audience: 'anonymous' },
 	{ path: 'register', layout: 'bare', page: RegisterPage, audience: 'anonymous' },

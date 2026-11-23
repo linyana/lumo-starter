@@ -3,10 +3,18 @@ import type { ComponentType } from 'react';
 
 export type RouteAudience = 'public' | 'authenticated' | 'anonymous';
 
+export type NavChild = {
+	label: string;
+	path: string;
+	icon?: ComponentType;
+	access?: AccessCondition;
+};
+
 export type NavEntry = {
 	group: string;
 	label: string;
 	icon?: ComponentType;
+	children?: NavChild[];
 };
 
 type Layout = { layout: 'shell' } | { layout: 'bare'; audience: RouteAudience };
