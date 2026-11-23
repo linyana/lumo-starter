@@ -70,6 +70,7 @@ export const Field = ({
 
 	return (
 		<FieldRoot
+			{...props}
 			name={name}
 			validate={
 				named && schema !== undefined
@@ -77,7 +78,6 @@ export const Field = ({
 					: undefined
 			}
 			className={cn(className, classNames?.root)}
-			{...props}
 		>
 			{label !== undefined && (
 				<FieldLabel required={mandatory} className={classNames?.label}>
