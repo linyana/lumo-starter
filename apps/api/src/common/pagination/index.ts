@@ -2,6 +2,11 @@ import { clampPage, pageCountOf, type Paginated, type Pagination } from '@lumo/s
 import type { Prisma } from '../../generated/prisma/client.js';
 import type { PrismaService } from '../db/prisma.service.js';
 
+const windowOf = ({ page, pageSize }: Pagination): { skip: number; take: number } => ({
+	skip: (page - 1) * pageSize,
+	take: pageSize,
+});
+
 export const paginate = async <Row>({
 	prisma,
 	query,
@@ -16,14 +21,18 @@ export const paginate = async <Row>({
 	}) => Prisma.PrismaPromise<Row[]>;
 	count: (args: { client: PrismaService }) => Prisma.PrismaPromise<number>;
 }): Promise<Paginated<Row>> => {
-	const total = await count({ client: prisma });
+	const [total, rows] = await prisma.$transaction([
+		count({ client: prisma }),
+		find({ client: prisma, window: windowOf(query) }),
+	]);
+
 	const pageCount = pageCountOf({ total, pageSize: query.pageSize });
 	const page = clampPage({ page: query.page, pageCount });
 
-	const items = await find({
-		client: prisma,
-		window: { skip: (page - 1) * query.pageSize, take: query.pageSize },
-	});
+	const items =
+		page === query.page
+			? rows
+			: await find({ client: prisma, window: windowOf({ ...query, page }) });
 
 	return { items, page, pageSize: query.pageSize, pageCount, total };
 };
