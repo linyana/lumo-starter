@@ -1,1 +1,1 @@
-export * from './personal'
+export * from './personal';

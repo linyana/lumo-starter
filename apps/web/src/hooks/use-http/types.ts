@@ -1,4 +1,4 @@
-import type { FormInstance } from '@/components/form/form/types';
+import type { FormInstance } from '@/components/ui/form/form/types';
 import type { ApiError } from '@/lib';
 
 export interface UseHttpOptions<TData, TVariables> {

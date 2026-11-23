@@ -1,4 +1,4 @@
-import { createToastManager } from '@/components/feedback/toast';
+import { createToastManager } from '@/components/ui/feedback/toast';
 
 export const toastManager = createToastManager();
 

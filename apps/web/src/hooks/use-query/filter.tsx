@@ -1,5 +1,5 @@
-import { Field } from '@/components/form/field';
-import { Input } from '@/components/form/input';
+import { Field } from '@/components/ui/form/field';
+import { Input } from '@/components/ui/form/input';
 import type { ListFilter } from './types';
 
 export const textFilter = ({

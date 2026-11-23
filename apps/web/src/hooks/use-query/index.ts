@@ -1,7 +1,7 @@
 import { PAGE_SIZE_DEFAULT, pageCountOf } from '@lumo/shared';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import { useForm, type FormValues } from '@/components/form/form';
+import { useForm, type FormValues } from '@/components/ui/form/form';
 import { sameValues } from '@/lib';
 import { useHttp } from '../use-http';
 import { textFilter } from './filter';

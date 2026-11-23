@@ -1,5 +1,5 @@
 import type { ZodError, ZodType } from 'zod';
-import type { FormErrors } from '@/components/form/form';
+import type { FormErrors } from '@/components/ui/form/form';
 
 type Values = Record<string, unknown>;
 

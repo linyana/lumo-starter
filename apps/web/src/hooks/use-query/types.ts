@@ -1,6 +1,6 @@
 import type { Paginated, SortOrder } from '@lumo/shared';
 import type { ReactNode } from 'react';
-import type { FormInstance, FormValues } from '@/components/form/form/types';
+import type { FormInstance, FormValues } from '@/components/ui/form/form/types';
 
 export type ListQuery = {
 	page: number;
