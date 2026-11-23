@@ -12,10 +12,7 @@ export const CreateUser = ({ onCreated }: IPropsType) => {
 	const [open, setOpen] = useState(false);
 	const form = useForm();
 
-	const { 
-		loading,
-		fetchData,
-	} = useHttp({
+	const { loading, fetchData } = useHttp({
 		form,
 		endpoint: usersApi.create,
 		successMessage: 'Account created',

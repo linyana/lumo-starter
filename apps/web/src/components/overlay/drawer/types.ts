@@ -29,12 +29,12 @@ export type DrawerProps = Omit<DrawerRootProps, 'children' | 'swipeDirection'> &
 		ComponentProps<typeof DrawerViewport>
 	> & {
 		trigger: ReactElement;
-	title: ReactNode;
-	description?: ReactNode;
-	children?: ReactNode | ((parts: DrawerParts) => ReactNode);
-	footer?: ReactNode;
-	side?: DrawerSide;
-	className?: string;
-	'data-slot'?: string;
-	classNames?: SlotClassNames<DrawerSlots>;
-};
+		title: ReactNode;
+		description?: ReactNode;
+		children?: ReactNode | ((parts: DrawerParts) => ReactNode);
+		footer?: ReactNode;
+		side?: DrawerSide;
+		className?: string;
+		'data-slot'?: string;
+		classNames?: SlotClassNames<DrawerSlots>;
+	};

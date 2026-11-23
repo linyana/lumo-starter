@@ -6,6 +6,10 @@ export type AlertDialogTriggerProps = ComponentProps<typeof BaseAlertDialog.Trig
 
 export function AlertDialogTrigger({ className, ...props }: AlertDialogTriggerProps) {
 	return (
-		<BaseAlertDialog.Trigger data-slot="alert-dialog-trigger" className={cn(className)} {...props} />
+		<BaseAlertDialog.Trigger
+			data-slot="alert-dialog-trigger"
+			className={cn(className)}
+			{...props}
+		/>
 	);
 }

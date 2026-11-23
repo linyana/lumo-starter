@@ -69,14 +69,8 @@ export const AlertDialog = ({
 					className={cn(classNames?.viewport, viewportProps?.className)}
 				>
 					<AlertDialogPopup className={cn('max-w-sm', className, classNames?.popup)}>
-						<div
-							data-slot="alert-dialog-content"
-							className={cn(modalContent, classNames?.content)}
-						>
-							<div
-								data-slot="alert-dialog-header"
-								className={cn(modalHeader, classNames?.header)}
-							>
+						<div data-slot="alert-dialog-content" className={cn(modalContent, classNames?.content)}>
+							<div data-slot="alert-dialog-header" className={cn(modalHeader, classNames?.header)}>
 								<AlertDialogTitle className={classNames?.title}>{title}</AlertDialogTitle>
 								{description !== undefined && (
 									<AlertDialogDescription className={classNames?.description}>
@@ -85,10 +79,7 @@ export const AlertDialog = ({
 								)}
 							</div>
 							{children !== undefined && (
-								<div
-									data-slot="alert-dialog-body"
-									className={cn(modalBody, classNames?.body)}
-								>
+								<div data-slot="alert-dialog-body" className={cn(modalBody, classNames?.body)}>
 									{children}
 								</div>
 							)}

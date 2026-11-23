@@ -19,10 +19,7 @@ export const DeleteUsers = ({ users, closePanel, reload }: IPropsType) => {
 	const label = only?.name ?? `${users.length} accounts`;
 	const self = users.some(({ id }) => id === currentUser?.id);
 
-	const { 
-		fetchData,
-		loading,
-	} = useHttp({
+	const { fetchData, loading } = useHttp({
 		endpoint: usersApi.removeMany,
 		loadingMessage: `Deleting ${label}…`,
 		successMessage: `${label} deleted`,

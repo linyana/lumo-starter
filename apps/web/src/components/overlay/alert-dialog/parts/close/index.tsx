@@ -5,5 +5,7 @@ import { cn } from '@/lib/utils';
 export type AlertDialogCloseProps = ComponentProps<typeof BaseAlertDialog.Close>;
 
 export function AlertDialogClose({ className, ...props }: AlertDialogCloseProps) {
-	return <BaseAlertDialog.Close data-slot="alert-dialog-close" className={cn(className)} {...props} />;
+	return (
+		<BaseAlertDialog.Close data-slot="alert-dialog-close" className={cn(className)} {...props} />
+	);
 }

@@ -1,12 +1,7 @@
 import type { ComponentProps, ReactElement, ReactNode } from 'react';
 import type { ModalEscapeHatches } from '@/components/overlay/modal';
 import type { SlotClassNames } from '@/components/types';
-import type {
-	DialogBackdrop,
-	DialogPortal,
-	DialogRoot,
-	DialogViewport,
-} from './parts';
+import type { DialogBackdrop, DialogPortal, DialogRoot, DialogViewport } from './parts';
 
 type DialogRootProps = ComponentProps<typeof DialogRoot>;
 
