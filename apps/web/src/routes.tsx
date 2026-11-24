@@ -1,4 +1,4 @@
-import { LayoutDashboard, Settings, Users } from 'lucide-react';
+import { LayoutDashboard, Settings, SlidersHorizontal, UserRound, Users } from 'lucide-react';
 import { Navigate } from 'react-router';
 import {
 	DashboardPage,
@@ -30,12 +30,17 @@ export const routes: AppRoute[] = [
 		layout: 'shell',
 		page: SettingsIndex,
 		nav: {
-			group: 'Settings',
 			label: 'Settings',
+			separator: true,
 			icon: Settings,
 			children: [
-				{ group: 'Personal', label: 'Profile', path: 'settings/profile' },
-				{ group: 'Personal', label: 'Preference', path: 'settings/preference' },
+				{
+					group: 'Personal',
+					label: 'Preference',
+					path: 'settings/preference',
+					icon: SlidersHorizontal,
+				},
+				{ group: 'Personal', label: 'Profile', path: 'settings/profile', icon: UserRound },
 			],
 		},
 	},

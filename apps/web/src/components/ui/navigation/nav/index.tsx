@@ -110,7 +110,8 @@ export const Nav = ({
 						icon={item.icon}
 						label={item.label}
 						className={cn(classNames?.button, item.className)}
-						isActive={active || entriesActive(item.children)}
+						isActive={active}
+						isTrail={entriesActive(item.children)}
 						defaultOpen={item.defaultOpen}
 						disabled={item.disabled}
 					>

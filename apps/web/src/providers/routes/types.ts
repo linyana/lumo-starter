@@ -16,6 +16,8 @@ export type NavEntry = {
 	label: string;
 	icon?: ComponentType;
 	children?: NavChild[];
+	/** Draws a divider above this entry. */
+	separator?: boolean;
 };
 
 type Layout = { layout: 'shell' } | { layout: 'bare'; audience: RouteAudience };

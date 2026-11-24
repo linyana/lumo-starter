@@ -6,6 +6,7 @@ import {
 	AppShell,
 	type LayoutNavEntry,
 	type LayoutNavItem,
+	type LayoutNavSeparator,
 	type LayoutNavSubEntry,
 	type LayoutNavSubGroup,
 } from '@/providers/layout';
@@ -103,6 +104,8 @@ const itemFor = ({
 	};
 };
 
+const navSeparator: LayoutNavSeparator = { type: 'separator' };
+
 const navFor = ({
 	navRoutes,
 	pathname,
@@ -119,11 +122,21 @@ const navFor = ({
 		(route) => route.nav.children === undefined || childrenOf(route).length > 0,
 	);
 
-	return grouped({
-		items: visible,
-		groupOf: (route) => route.nav.group,
-		toItem: (route) => itemFor({ route, pathname, children: childrenOf(route) }),
-	});
+	const sections: NavRoute[][] = [];
+	for (const route of visible) {
+		const current = sections.at(-1);
+		if (current === undefined || route.nav.separator === true) sections.push([route]);
+		else current.push(route);
+	}
+
+	return sections.flatMap((section, index) => [
+		...(index === 0 ? [] : [navSeparator]),
+		...grouped({
+			items: section,
+			groupOf: (route) => route.nav.group,
+			toItem: (route) => itemFor({ route, pathname, children: childrenOf(route) }),
+		}),
+	]);
 };
 
 const NotFoundPage = () => (

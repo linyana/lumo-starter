@@ -24,6 +24,7 @@ export type NavSubProps = {
 	children: ReactNode;
 	className?: string;
 	isActive?: boolean;
+	isTrail?: boolean;
 	defaultOpen?: boolean;
 	disabled?: boolean;
 	popoverSide?: 'top' | 'right' | 'bottom' | 'left';
@@ -37,17 +38,20 @@ export function NavSub({
 	children,
 	className,
 	isActive = false,
+	isTrail = false,
 	defaultOpen = false,
 	disabled = false,
 	popoverSide = 'right',
 }: NavSubProps) {
 	const { compact } = useNav();
-	const [open, setOpen] = useState(defaultOpen || isActive);
-	const [wasActive, setWasActive] = useState(isActive);
+	const inPath = isActive || isTrail;
+	const trail = isTrail && !isActive ? true : undefined;
+	const [open, setOpen] = useState(defaultOpen || inPath);
+	const [wasInPath, setWasInPath] = useState(inPath);
 
-	if (isActive !== wasActive) {
-		setWasActive(isActive);
-		if (isActive) setOpen(true);
+	if (inPath !== wasInPath) {
+		setWasInPath(inPath);
+		if (inPath) setOpen(true);
 	}
 
 	if (compact) {
@@ -62,6 +66,7 @@ export function NavSub({
 							icon={icon}
 							label={label}
 							isActive={isActive}
+							data-trail={trail}
 							disabled={disabled}
 							tooltip={false}
 							className={className}
@@ -93,10 +98,11 @@ export function NavSub({
 						icon={icon}
 						label={label}
 						isActive={isActive}
+						data-trail={trail}
 						disabled={disabled}
 						className={cn('group', className)}
 					>
-						<CollapsibleIcon className="ms-auto" />
+						<CollapsibleIcon />
 					</NavRow>
 				}
 			/>
