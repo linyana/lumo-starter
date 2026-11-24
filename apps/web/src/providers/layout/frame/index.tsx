@@ -8,6 +8,7 @@ import {
 	type ReactNode,
 } from 'react';
 import { tv, type VariantProps } from 'tailwind-variants';
+import { scrollArea } from '@/lib/surface';
 import { cn } from '@/lib/utils';
 import { Content } from './content';
 import { Header } from './header';
@@ -19,7 +20,7 @@ export const layoutVariants = tv({
 	slots: {
 		root: 'flex h-svh w-full overflow-hidden bg-layout-background',
 		main: 'flex min-h-0 min-w-0 flex-1 flex-col',
-		surface: 'relative flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto',
+		surface: cn('relative flex min-w-0 flex-1 flex-col', scrollArea),
 	},
 	variants: {
 		variant: {
