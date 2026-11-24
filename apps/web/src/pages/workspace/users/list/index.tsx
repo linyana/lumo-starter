@@ -61,7 +61,7 @@ export const UserList = ({ list }: IPropsType) => {
 		<>
 			<Form form={list.form} initial={list.opened} onChange={list.write} settle={300}>
 				<Field name="search">
-					<Input placeholder="Search name or email" />
+					<Input placeholder="Search name or email" clearable />
 				</Field>
 				<Table
 					columns={columns}

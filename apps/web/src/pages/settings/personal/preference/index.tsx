@@ -1,5 +1,7 @@
+import { PAGE_SIZE_OPTIONS } from '@lumo/shared';
 import { Page, Select, SettingsGroup, type SelectOption } from '@/components';
 import { themes, type Theme } from '@/hooks';
+import { useSetting } from '@/providers/setting';
 import { useTheme } from '@/providers/theme';
 
 const labels: Record<Theme, string> = {
@@ -13,8 +15,14 @@ const themeOptions: SelectOption<Theme>[] = themes.map((value) => ({
 	label: labels[value],
 }));
 
+const sizeOptions: SelectOption<string>[] = PAGE_SIZE_OPTIONS.map((size) => ({
+	value: String(size),
+	label: `${size} / page`,
+}));
+
 export const PreferenceSetting = () => {
 	const { theme, setTheme } = useTheme();
+	const { content, save, saving } = useSetting();
 
 	return (
 		<Page variant="settings" title="Preference">
@@ -25,14 +33,30 @@ export const PreferenceSetting = () => {
 						title: 'Theme',
 						description: 'Choose a color scheme or follow your system setting.',
 						content: (
-							<Select<Theme>
+							<Select
 								ariaLabel="Theme"
 								options={themeOptions}
 								value={theme}
 								onChange={(next) => {
 									if (next !== null) setTheme(next);
 								}}
-								clearable={false}
+								size="sm"
+							/>
+						),
+					},
+					{
+						title: 'Rows per page',
+						description:
+							'How many rows a list opens with.',
+						content: (
+							<Select
+								ariaLabel="Rows per page"
+								options={sizeOptions}
+								value={String(content.pageSize)}
+								disabled={saving}
+								onChange={(next) => {
+									if (next !== null) void save({ pageSize: Number(next) });
+								}}
 								size="sm"
 							/>
 						),

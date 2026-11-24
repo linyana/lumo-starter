@@ -32,7 +32,7 @@ const PageSizes = ({
 	onChange: (pageSize: number) => void;
 	className?: string;
 }) => (
-	<Select<string>
+	<Select
 		ariaLabel="rows per page"
 		size={size}
 		disabled={disabled}
@@ -42,7 +42,6 @@ const PageSizes = ({
 		onChange={(next) => {
 			if (next !== null) onChange(Number(next));
 		}}
-		clearable={false}
 	/>
 );
 

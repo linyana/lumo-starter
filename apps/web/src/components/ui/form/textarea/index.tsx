@@ -34,7 +34,7 @@ export function Textarea({
 	className,
 	classNames,
 	size = 'md',
-	clearable = true,
+	clearable = false,
 	clearLabel = 'Clear',
 	value,
 	defaultValue,

@@ -70,6 +70,7 @@ Everything below comes from **one edit** in `packages/shared`:
 packages/shared/src/
   index.ts                  the one barrel; consumers never import below it
   features/                 the business: one folder per feature (product, order…)
+    setting/                stored preferences: content schema, wire row, patch input
     user/                   the wire shape, update input, list query
   common/                   everything cross-cutting
     auth/                   register & login schemas, the sign-in response
@@ -117,6 +118,9 @@ POST   /api/users             { email, name, password, roles? }      (user:write
 PATCH  /api/users/:id         { email, name, roles }                 (user:write)
 DELETE /api/users/:id                                                (user:delete)
 POST   /api/users/batch-delete   { ids }                             (user:delete)
+
+GET    /api/settings/me       → { setting: { type, content, updatedAt } }   (any signed-in user)
+PATCH  /api/settings/me       { pageSize? } → { setting }                (any signed-in user)
 
 GET    /api/health            terminus probe (not enveloped)
 ```

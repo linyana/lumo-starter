@@ -1,11 +1,13 @@
 import { usersApi } from '@/api';
 import { useQuery } from '@/hooks';
 import { Can } from '@/providers/auth';
+import { useSetting } from '@/providers/setting';
 import { CreateUser } from './create';
 import { UserList } from './list';
 
 export const UsersPage = () => {
-	const list = useQuery({ fetcher: usersApi.list });
+	const { content } = useSetting();
+	const list = useQuery({ fetcher: usersApi.list, pageSize: content.pageSize });
 
 	return (
 		<div className="space-y-3">

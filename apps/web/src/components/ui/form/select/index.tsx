@@ -30,7 +30,7 @@ export const Select = <Value extends string>({
 	name,
 	id,
 	required = false,
-	clearable = true,
+	clearable = false,
 	clearLabel = 'Clear',
 	className,
 	classNames,

@@ -14,6 +14,7 @@ import { DelayInterceptor } from './common/interceptors/delay.interceptor.js';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { HealthModule } from './modules/health/health.module.js';
+import { SettingsModule } from './modules/settings/settings.module.js';
 import { UsersModule } from './modules/users/users.module.js';
 
 @Module({
@@ -45,6 +46,7 @@ import { UsersModule } from './modules/users/users.module.js';
 		PrismaModule,
 		AuthModule,
 		UsersModule,
+		SettingsModule,
 		HealthModule,
 	],
 	providers: [

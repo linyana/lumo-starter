@@ -39,7 +39,7 @@ export function Input({
 	className,
 	classNames,
 	size = 'md',
-	clearable = true,
+	clearable = false,
 	clearLabel = 'Clear',
 	value,
 	defaultValue,

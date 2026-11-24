@@ -41,7 +41,6 @@ export const LoginPage = () => {
 						autoComplete="username"
 						placeholder="Email"
 						aria-label="Email"
-						clearable={false}
 					/>
 				</Field>
 
@@ -51,7 +50,6 @@ export const LoginPage = () => {
 						autoComplete="current-password"
 						placeholder="Password"
 						aria-label="Password"
-						clearable={false}
 					/>
 				</Field>
 

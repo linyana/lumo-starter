@@ -2,4 +2,5 @@ export * from './access';
 export * from './auth';
 export * from './layout';
 export * from './routes';
+export * from './setting';
 export * from './theme';
