@@ -1,1 +1,1 @@
-export * from './settingGroup'
+export * from './settingGroup';

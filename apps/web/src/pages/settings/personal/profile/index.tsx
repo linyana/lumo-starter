@@ -1,9 +1,22 @@
-import { Page } from '@/components';
+import { Page, SettingsGroup } from '@/components';
 
 export const ProfileSetting = () => {
 	return (
 		<Page variant="settings" title="profile">
-			1
+			<SettingsGroup
+				items={[
+					{
+						title: 'xx',
+						description: 'xx',
+						content: <>1</>,
+					},
+					{
+						title: 'xx',
+						description: 'xx',
+						content: <>1</>,
+					},
+				]}
+			/>
 		</Page>
 	);
 };

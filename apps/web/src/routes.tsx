@@ -1,6 +1,13 @@
 import { LayoutDashboard, Settings, Users } from 'lucide-react';
 import { Navigate } from 'react-router';
-import { DashboardPage, LoginPage, ProfileSetting, RegisterPage, UsersPage } from '@/pages';
+import {
+	DashboardPage,
+	LoginPage,
+	PreferenceSetting,
+	ProfileSetting,
+	RegisterPage,
+	UsersPage,
+} from '@/pages';
 import type { AppRoute } from '@/providers/routes';
 
 const SettingsIndex = () => <Navigate to="/settings/profile" replace />;
@@ -28,6 +35,7 @@ export const routes: AppRoute[] = [
 			icon: Settings,
 			children: [
 				{ label: 'Profile', path: 'settings/profile', access: { permission: 'user:read' } },
+				{ label: 'Preference', path: 'settings/preference', access: { permission: 'user:read' } },
 			],
 		},
 	},
@@ -35,6 +43,12 @@ export const routes: AppRoute[] = [
 		path: 'settings/profile',
 		layout: 'shell',
 		page: ProfileSetting,
+		access: { permission: 'user:read' },
+	},
+	{
+		path: 'settings/preference',
+		layout: 'shell',
+		page: PreferenceSetting,
 		access: { permission: 'user:read' },
 	},
 	{ path: 'login', layout: 'bare', page: LoginPage, audience: 'anonymous' },

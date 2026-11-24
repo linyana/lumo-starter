@@ -7,7 +7,7 @@ export const pageVariants = tv({
 		root: 'flex w-full flex-col gap-6',
 		header: 'flex flex-wrap items-start gap-x-4 gap-y-2',
 		heading: 'flex min-w-0 flex-col gap-1',
-		title: 'truncate text-lg font-semibold',
+		title: 'truncate text-2xl font-semibold',
 		description: 'text-sm text-muted-foreground',
 		actions: 'ms-auto flex shrink-0 items-center gap-2',
 	},
