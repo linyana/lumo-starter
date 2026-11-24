@@ -11,7 +11,7 @@ export function ToastViewport({ className, ...props }: ToastViewportProps) {
 		<BaseToast.Viewport
 			data-slot="toast-viewport"
 			className={cn(
-				'pointer-events-none fixed inset-x-4 top-4 mx-auto max-w-96',
+				'pointer-events-none fixed top-4 right-4 w-96 max-w-[calc(100vw-2rem)]',
 				'z-70',
 				className,
 			)}
