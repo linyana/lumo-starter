@@ -1,29 +1,24 @@
 import { updateProfileSchema } from '@lumo/shared';
 import { Avatar, Field, Form, Input, Page, SettingsGroup, useForm } from '@/components';
-import { useAutoSave } from '@/hooks';
+import { useHttp } from '@/hooks';
 import { useAuth } from '@/providers/auth';
 
 export const ProfileSetting = () => {
 	const { user, updateProfile } = useAuth();
 	const form = useForm();
 
-	const { saved, blur, enter, busy, failed } = useAutoSave({
-		form,
-		schema: updateProfileSchema,
-		initial: {
-			username: user?.username ?? '',
-			email: user?.email ?? '',
-			name: user?.name ?? '',
-		},
-		endpoint: updateProfile,
-		successMessage: 'Profile saved',
-	});
+	const save = useHttp({ endpoint: updateProfile, successMessage: 'Profile saved', form });
 
 	if (user === null) return null;
 
 	return (
 		<Page variant="settings" title="Profile">
-			<Form form={form} schema={updateProfileSchema} initial={saved}>
+			<Form
+				form={form}
+				schema={updateProfileSchema}
+				initial={{ username: user.username, email: user.email, name: user.name }}
+				save={save}
+			>
 				<SettingsGroup
 					title="Account"
 					items={[
@@ -39,15 +34,7 @@ export const ProfileSetting = () => {
 							width: 'wide',
 							content: (
 								<Field name="username">
-									<Input
-										autoComplete="username"
-										autoCapitalize="none"
-										spellCheck={false}
-										loading={busy('username')}
-										invalid={failed('username')}
-										onBlur={blur('username')}
-										onKeyDown={enter('username')}
-									/>
+									<Input autoComplete="username" autoCapitalize="none" spellCheck={false} />
 								</Field>
 							),
 						},
@@ -57,14 +44,7 @@ export const ProfileSetting = () => {
 							width: 'wide',
 							content: (
 								<Field name="email">
-									<Input
-										type="email"
-										autoComplete="email"
-										loading={busy('email')}
-										invalid={failed('email')}
-										onBlur={blur('email')}
-										onKeyDown={enter('email')}
-									/>
+									<Input type="email" autoComplete="email" />
 								</Field>
 							),
 						},
@@ -74,13 +54,7 @@ export const ProfileSetting = () => {
 							width: 'wide',
 							content: (
 								<Field name="name">
-									<Input
-										autoComplete="name"
-										loading={busy('name')}
-										invalid={failed('name')}
-										onBlur={blur('name')}
-										onKeyDown={enter('name')}
-									/>
+									<Input autoComplete="name" />
 								</Field>
 							),
 						},

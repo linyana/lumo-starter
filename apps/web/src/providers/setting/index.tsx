@@ -19,9 +19,8 @@ import { FullPageLoader, useAuth } from '@/providers/auth';
 
 type SettingContextValue = {
 	content: UserSettingContent;
-	saving: boolean;
-	failed: (key: keyof UserSettingContent) => boolean;
-	save: (input: UpdateUserSettingInput) => Promise<void>;
+	/** A plain endpoint: rejects when the server keeps the stored content. */
+	save: (input: UpdateUserSettingInput) => Promise<UserSettingContent>;
 };
 
 const SettingContext = createContext<SettingContextValue | null>(null);
@@ -33,13 +32,9 @@ export const SettingProvider = ({ children }: { children: ReactNode }) => {
 
 	const [setting, setSetting] = useState<UserSetting>(EMPTY);
 	const [ready, setReady] = useState(false);
-	const [failed, setFailed] = useState<keyof UserSettingContent | null>(null);
 
 	const opener = useHttp({ endpoint: settingsApi.mine, toastError: false });
-	const saver = useHttp({ endpoint: settingsApi.update, successMessage: 'Preference saved' });
-
 	const { fetchData: open } = opener;
-	const { fetchData: persist, loading: saving } = saver;
 
 	useEffect(() => {
 		if (status !== 'authenticated') {
@@ -63,34 +58,15 @@ export const SettingProvider = ({ children }: { children: ReactNode }) => {
 		};
 	}, [status, open]);
 
-	const save = useCallback(
-		async (input: UpdateUserSettingInput): Promise<void> => {
-			const result = await persist(input);
-			if (result === null) return;
-
-			if (result.ok) {
-				setSetting(result.data);
-				// The red answers the value the server last refused, so only the save that replaces
-				// that verdict may clear it.
-				setFailed((current) =>
-					current !== null && Object.hasOwn(input, current) ? null : current,
-				);
-				return;
-			}
-
-			setFailed((Object.keys(input) as (keyof UserSettingContent)[])[0] ?? null);
-		},
-		[persist],
-	);
+	const save = useCallback(async (input: UpdateUserSettingInput): Promise<UserSettingContent> => {
+		const next = await settingsApi.update(input);
+		setSetting(next);
+		return next.content;
+	}, []);
 
 	const value = useMemo<SettingContextValue>(
-		() => ({
-			content: setting.content,
-			saving,
-			failed: (key) => failed === key,
-			save,
-		}),
-		[setting.content, saving, failed, save],
+		() => ({ content: setting.content, save }),
+		[setting.content, save],
 	);
 
 	if (status === 'authenticated' && !ready) return <FullPageLoader />;

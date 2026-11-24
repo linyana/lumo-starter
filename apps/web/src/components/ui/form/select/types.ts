@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import type { SlotClassNames } from '@/components/types';
 import type { SelectTriggerProps } from './parts';
 
-export type SelectOption<Value extends string = string> = {
+export type SelectOption<Value = string> = {
 	value: Value;
 	label: ReactNode;
 	className?: string;
@@ -11,7 +11,7 @@ export type SelectOption<Value extends string = string> = {
 
 export type SelectSlots = 'group' | 'trigger' | 'clear' | 'value' | 'popup' | 'list' | 'item';
 
-export type SelectProps<Value extends string = string> = {
+export type SelectProps<Value = string> = {
 	options: SelectOption<Value>[];
 	value?: Value | null;
 	defaultValue?: Value | null;

@@ -12,34 +12,46 @@ import {
 	useFormRevision,
 } from './parts';
 import type { FieldProps } from './types';
+import { mergeWiring, useFieldWiring } from './wiring';
 
 export type { FieldProps } from '@/components/ui/form/field/types';
+export type { FieldWiring } from '@/components/ui/form/field/wiring';
 
 const valueOf = (change: unknown): unknown => {
 	const target = (change as { target?: { value?: unknown } } | null | undefined)?.target;
 	return target === undefined || target === null ? change : target.value;
 };
 
+type ChangeHandler = (...args: unknown[]) => void;
+
+const handlersOf = (values: unknown[]): ChangeHandler[] =>
+	values.filter((value): value is ChangeHandler => typeof value === 'function');
+
 const wire = ({
 	form,
 	name,
 	children,
+	wiring,
 }: {
 	form: FormInstance;
 	name: string;
 	children: ReactNode;
+	wiring: Record<string, unknown>;
 }): ReactNode => {
 	if (!isValidElement(children)) return children;
 
 	const child = children as ReactElement<Record<string, unknown>>;
-	const own = child.props.onChange as ((...args: unknown[]) => void) | undefined;
+	const merged = mergeWiring({ wiring, own: child.props });
+	const changes = handlersOf([wiring.onChange, child.props.onChange]);
 	const value = form.get(name);
 
 	return cloneElement(child, {
 		...(value === undefined ? {} : { defaultValue: value }),
+		...merged,
+		// The form is written first: a wired handler asks the form what the field now holds.
 		onChange: (...args: unknown[]) => {
-			own?.(...args);
 			form.set({ name, value: valueOf(args[0]) });
+			for (const change of changes) change(...args);
 		},
 	});
 };
@@ -54,8 +66,9 @@ const Wired = ({
 	children: ReactNode;
 }): ReactNode => {
 	const revision = useFormRevision(name);
+	const wiring = useFieldWiring(name);
 
-	return <Fragment key={revision}>{wire({ form, name, children })}</Fragment>;
+	return <Fragment key={revision}>{wire({ form, name, children, wiring })}</Fragment>;
 };
 
 export const Field = ({

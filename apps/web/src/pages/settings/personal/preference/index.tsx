@@ -1,6 +1,6 @@
-import { PAGE_SIZE_OPTIONS } from '@lumo/shared';
-import { Page, Select, SettingsGroup, type SelectOption } from '@/components';
-import { themes, type Theme } from '@/hooks';
+import { PAGE_SIZE_OPTIONS, userSettingContentSchema } from '@lumo/shared';
+import { Field, Form, Page, Select, SettingsGroup, useForm, type SelectOption } from '@/components';
+import { themes, useHttp, type Theme } from '@/hooks';
 import { useSetting } from '@/providers/setting';
 import { useTheme } from '@/providers/theme';
 
@@ -15,54 +15,57 @@ const themeOptions: SelectOption<Theme>[] = themes.map((value) => ({
 	label: labels[value],
 }));
 
-const sizeOptions: SelectOption<string>[] = PAGE_SIZE_OPTIONS.map((size) => ({
-	value: String(size),
+const sizeOptions: SelectOption<number>[] = PAGE_SIZE_OPTIONS.map((size) => ({
+	value: size,
 	label: `${size} / page`,
 }));
 
 export const PreferenceSetting = () => {
 	const { theme, setTheme } = useTheme();
-	const { content, save, saving, failed } = useSetting();
+	const { content, save } = useSetting();
+	const form = useForm();
+
+	const saver = useHttp({ endpoint: save, successMessage: 'Preference saved', form });
 
 	return (
 		<Page variant="settings" title="Preference">
-			<SettingsGroup
-				title="General"
-				items={[
-					{
-						title: 'Theme',
-						description: 'Choose a color scheme or follow your system setting.',
-						content: (
-							<Select
-								ariaLabel="Theme"
-								options={themeOptions}
-								value={theme}
-								onChange={(next) => {
-									if (next !== null) setTheme(next);
-								}}
-								size="sm"
-							/>
-						),
-					},
-					{
-						title: 'Rows per page',
-						description: 'How many rows a list opens with.',
-						content: (
-							<Select
-								ariaLabel="Rows per page"
-								options={sizeOptions}
-								value={String(content.pageSize)}
-								loading={saving}
-								invalid={failed('pageSize')}
-								onChange={(next) => {
-									if (next !== null) void save({ pageSize: Number(next) });
-								}}
-								size="sm"
-							/>
-						),
-					},
-				]}
-			/>
+			<Form
+				form={form}
+				schema={userSettingContentSchema}
+				initial={content}
+				save={saver}
+				commitOn="change"
+			>
+				<SettingsGroup
+					title="General"
+					items={[
+						{
+							title: 'Theme',
+							description: 'Choose a color scheme or follow your system setting.',
+							content: (
+								<Select
+									ariaLabel="Theme"
+									options={themeOptions}
+									value={theme}
+									onChange={(next) => {
+										if (next !== null) setTheme(next);
+									}}
+									size="sm"
+								/>
+							),
+						},
+						{
+							title: 'Rows per page',
+							description: 'How many rows a list opens with.',
+							content: (
+								<Field name="pageSize">
+									<Select ariaLabel="Rows per page" options={sizeOptions} size="sm" />
+								</Field>
+							),
+						},
+					]}
+				/>
+			</Form>
 		</Page>
 	);
 };

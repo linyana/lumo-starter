@@ -37,10 +37,10 @@ const PageSizes = ({
 		size={size}
 		disabled={disabled}
 		className={cn('w-28', className)}
-		value={String(value)}
-		options={sizes.map((count) => ({ value: String(count), label: `${count} / page` }))}
+		value={value}
+		options={sizes.map((count) => ({ value: count, label: `${count} / page` }))}
 		onChange={(next) => {
-			if (next !== null) onChange(Number(next));
+			if (next !== null) onChange(next);
 		}}
 	/>
 );

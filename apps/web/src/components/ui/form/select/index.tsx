@@ -19,7 +19,7 @@ import type { SelectProps } from './types';
 
 export type { SelectOption, SelectProps, SelectSlots } from './types';
 
-export const Select = <Value extends string>({
+export const Select = <Value = string,>({
 	options,
 	value,
 	defaultValue,
@@ -83,7 +83,7 @@ export const Select = <Value extends string>({
 						<SelectList className={classNames?.list}>
 							{options.map((option) => (
 								<SelectItem
-									key={option.value}
+									key={String(option.value)}
 									value={option.value}
 									disabled={option.disabled}
 									className={cn(classNames?.item, option.className)}

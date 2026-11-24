@@ -1,9 +1,12 @@
 import { Fragment, useLayoutEffect, useRef } from 'react';
+import { useAutoSave } from '@/components/ui/form/auto-save/use-auto-save';
+import { FieldWiringProvider } from '@/components/ui/form/field/wiring';
 import { FormProvider, useForm } from './instance';
 import { FormRoot } from './parts';
-import type { FormProps } from './types';
+import type { FormProps, FormValues } from './types';
 
 export { useChanged, useForm, useFormContext, useWatch } from '@/components/ui/form/form/instance';
+export type { AutoSaveHandle } from '@/components/ui/form/auto-save/types';
 export type {
 	FormArgs,
 	FormErrors,
@@ -13,10 +16,14 @@ export type {
 	WatchArgs,
 } from '@/components/ui/form/form/types';
 
+const NO_VALUES: FormValues = {};
+
 export const Form = <Input, Values extends Record<string, unknown> = Record<string, unknown>>({
 	form,
 	schema,
 	initial,
+	save,
+	commitOn,
 	onSubmit,
 	onChange,
 	settle,
@@ -29,6 +36,14 @@ export const Form = <Input, Values extends Record<string, unknown> = Record<stri
 	const opened = useRef(false);
 	const latest = useRef(instance);
 	latest.current = instance;
+
+	const wiring = useAutoSave({
+		form: instance,
+		schema,
+		initial: initial ?? NO_VALUES,
+		save,
+		commitOn,
+	});
 
 	useLayoutEffect(() => {
 		if (Object.keys(latest.current.errors).length > 0) latest.current.setErrors({});
@@ -43,14 +58,16 @@ export const Form = <Input, Values extends Record<string, unknown> = Record<stri
 
 	return (
 		<FormProvider value={{ form: instance, schema }}>
-			<FormRoot
-				{...props}
-				ref={element}
-				errors={instance.errors}
-				onFormSubmit={() => instance.submit()}
-			>
-				<Fragment key={instance.epoch}>{children}</Fragment>
-			</FormRoot>
+			<FieldWiringProvider wiring={wiring}>
+				<FormRoot
+					{...props}
+					ref={element}
+					errors={instance.errors}
+					onFormSubmit={() => instance.submit()}
+				>
+					<Fragment key={instance.epoch}>{children}</Fragment>
+				</FormRoot>
+			</FieldWiringProvider>
 		</FormProvider>
 	);
 };
