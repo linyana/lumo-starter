@@ -43,6 +43,62 @@ export const sameValues = ({ left, right }: { left: Values; right: Values }): bo
 
 const pathOf = (issue: { path: PropertyKey[] }): string => issue.path.map(String).join('.');
 
+export type FieldCheck = { ok: true; value: unknown } | { ok: false; messages: string[] };
+
+export const checkField = ({
+	schema,
+	name,
+	value,
+	values,
+}: {
+	schema: ZodType;
+	name: string;
+	value: unknown;
+	values: Values;
+}): FieldCheck => {
+	const field = (schema as { shape?: Record<string, ZodType> }).shape?.[name];
+	const parsed =
+		field === undefined ? schema.safeParse({ ...values, [name]: value }) : field.safeParse(value);
+
+	if (parsed.success) {
+		const data = parsed.data as Values;
+		return { ok: true, value: field === undefined ? data[name] : parsed.data };
+	}
+
+	return {
+		ok: false,
+		messages: parsed.error.issues
+			.filter((issue) => issue.path.length === 0 || pathOf(issue) === name)
+			.map((issue) => issue.message),
+	};
+};
+
+/**
+ * The subset of `values` that differs from `saved` and passes validation,
+ * already normalised by each field's schema.
+ */
+export const patchOf = <TValues extends Values>({
+	schema,
+	values,
+	saved,
+}: {
+	schema: ZodType;
+	values: Values;
+	saved: Partial<TValues>;
+}): Partial<TValues> => {
+	const previous: Values = saved;
+	const patch: Values = {};
+
+	for (const [name, value] of Object.entries(values)) {
+		const checked = checkField({ schema, name, value, values });
+		if (!checked.ok || checked.value === previous[name]) continue;
+
+		patch[name] = checked.value;
+	}
+
+	return patch as Partial<TValues>;
+};
+
 export const fieldRule =
 	({ schema, name }: { schema: ZodType; name: string }) =>
 	(value: unknown, values: Values): string[] | null => {

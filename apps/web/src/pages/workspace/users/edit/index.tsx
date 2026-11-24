@@ -73,7 +73,7 @@ export const EditUser = ({ user, closePanel, reload }: IPropsType) => {
 			<Form
 				form={form}
 				schema={updateUserSchema}
-				initial={{ email: user.email, name: user.name, roles: user.roles }}
+				initial={{ email: user.email, username: user.username, name: user.name, roles: user.roles }}
 				onSubmit={(values) => {
 					if (!changed) return;
 
@@ -82,6 +82,14 @@ export const EditUser = ({ user, closePanel, reload }: IPropsType) => {
 			>
 				<Field name="email" label="Email">
 					<Input type="email" autoComplete="off" />
+				</Field>
+
+				<Field
+					name="username"
+					label="Username"
+					description="3–32 characters: lowercase letters, numbers and underscores."
+				>
+					<Input autoComplete="off" autoCapitalize="none" spellCheck={false} />
 				</Field>
 
 				<Field name="name" label="Display name">

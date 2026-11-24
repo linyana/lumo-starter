@@ -1,6 +1,13 @@
-import { Controller, Cookies, Get, HttpCode, HttpStatus, Post, Res } from '@nestjs/common';
+import { Controller, Cookies, Get, HttpCode, HttpStatus, Patch, Post, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { loginSchema, registerSchema, type LoginInput, type RegisterInput } from '@lumo/shared';
+import {
+	loginSchema,
+	patchProfileSchema,
+	registerSchema,
+	type LoginInput,
+	type PatchProfileInput,
+	type RegisterInput,
+} from '@lumo/shared';
 import type { NodeResponse } from '@nestjs/platform-node';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { Public } from '../../common/decorators/public.decorator.js';
@@ -72,6 +79,15 @@ export class AuthController {
 	@Get('me')
 	async me(@CurrentUser() user: AuthUser) {
 		return { user: await this.auth.me(user.id) };
+	}
+
+	@Patch('me')
+	@ApiZodBody(patchProfileSchema)
+	async updateMe(
+		@CurrentUser() user: AuthUser,
+		@ZodBody(patchProfileSchema) input: PatchProfileInput,
+	) {
+		return { user: await this.auth.updateProfile({ userId: user.id, input }) };
 	}
 
 	private attachRefreshCookie({ res, tokens }: { res: NodeResponse; tokens: IssuedTokens }): void {

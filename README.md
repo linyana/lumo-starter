@@ -106,16 +106,17 @@ Database columns holding a role are plain `String[]`, decoded at the edge by
 ## API contract
 
 ```
-POST   /api/auth/register     { email, name, password, confirmPassword } → { user }
+POST   /api/auth/register     { email, username, name, password, confirmPassword } → { user }
 POST   /api/auth/login        { email, password } → { accessToken, user } + Set-Cookie refresh
 POST   /api/auth/refresh      (cookie) → { accessToken, user }  — rotates the token
 POST   /api/auth/logout       (cookie) → 204, clears the cookie
 GET    /api/auth/me           → { user }
+PATCH  /api/auth/me           { username?, email?, name? } → { user }   (the signed-in user)
 
 GET    /api/users             ?page&pageSize&search&sort&order      (user:read)
 GET    /api/users/:id                                                (user:read)
-POST   /api/users             { email, name, password, roles? }      (user:write)
-PATCH  /api/users/:id         { email, name, roles }                 (user:write)
+POST   /api/users             { email, username, name, password, roles? } (user:write)
+PATCH  /api/users/:id         { email, username, name, roles }       (user:write)
 DELETE /api/users/:id                                                (user:delete)
 POST   /api/users/batch-delete   { ids }                             (user:delete)
 
@@ -187,7 +188,9 @@ URL — and hold the result with `useHttp`, or `useQuery`, which is `useHttp` pl
 the address bar and the filters, for a screen that shows a list. The filters are the `<Field name>`s
 inside `<Form form={list.form} initial={list.opened} onChange={list.write} settle={300}>`, so no
 screen names a `value` or a setter either. Give a table the same object and its `sortKey`-ed columns
-become sortable titles; nothing else has to be wired.
+become sortable titles; nothing else has to be wired. A settings page that saves as the user leaves
+a field holds its fields with `useAutoSave({ form, schema, initial, endpoint })`: it validates the
+field being left, sends only what changed, and returns `blur`, `enter` and `busy` for the control.
 
 **Change a table** — edit `prisma/schema.prisma`, `pnpm db:migrate`, `pnpm db:generate`.
 
@@ -244,7 +247,7 @@ the action to take.
 │       ├── src/providers/access        # the grant a gated row is filtered by
 │       ├── src/providers/routes        # the table turned into route objects, plus the rail rows
 │       ├── src/providers/layout/{frame,shell,auth} # the rail block, the shell on it, the auth column
-│       ├── src/hooks/{use-http,use-query,use-global} # one request, a list's page and filters, the store
+│       ├── src/hooks/{use-http,use-query,use-auto-save,use-global} # one request, a list, a field-at-a-time save, the store
 │       ├── src/lib/{http,form,toast,…}  # transport and the small shared modules
 │       └── src/components/{form,overlay,display,feedback,navigation,data} # the kit
 ├── packages/shared                      # the single source of truth

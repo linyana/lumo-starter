@@ -2,6 +2,7 @@ import {
 	filterAccess,
 	grantFor,
 	type LoginInput,
+	type PatchProfileInput,
 	type Permission,
 	type RegisterInput,
 	type User,
@@ -27,6 +28,7 @@ type AuthContextValue = {
 	status: AuthStatus;
 	login: (input: LoginInput) => Promise<void>;
 	register: (input: RegisterInput) => Promise<void>;
+	updateProfile: (input: PatchProfileInput) => Promise<User>;
 	logout: () => Promise<void>;
 	refresh: () => Promise<void>;
 	can: (permission: Permission) => boolean;
@@ -83,6 +85,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		[adopt],
 	);
 
+	const updateProfile = useCallback(async (input: PatchProfileInput): Promise<User> => {
+		const next = await authApi.updateProfile(input);
+		setUser(next);
+		return next;
+	}, []);
+
 	const logout = useCallback(async () => {
 		try {
 			await authApi.logout();
@@ -106,8 +114,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	);
 
 	const value = useMemo<AuthContextValue>(
-		() => ({ user, status, login, register, logout, refresh, can, filter }),
-		[user, status, login, register, logout, refresh, can, filter],
+		() => ({ user, status, login, register, updateProfile, logout, refresh, can, filter }),
+		[user, status, login, register, updateProfile, logout, refresh, can, filter],
 	);
 
 	return (

@@ -16,9 +16,27 @@ const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) })
  * UI without editing SQL. Passwords are dev-only and printed below.
  */
 const SEED_USERS = [
-	{ email: 'owner@lumo.dev', name: 'Olivia Owner', roles: ['OWNER'], password: 'Owner1234' },
-	{ email: 'admin@lumo.dev', name: 'Adam Admin', roles: ['ADMIN'], password: 'Admin1234' },
-	{ email: 'member@lumo.dev', name: 'Mia Member', roles: ['MEMBER'], password: 'Member1234' },
+	{
+		email: 'owner@lumo.dev',
+		username: 'olivia',
+		name: 'Olivia Owner',
+		roles: ['OWNER'],
+		password: 'Owner1234',
+	},
+	{
+		email: 'admin@lumo.dev',
+		username: 'adam',
+		name: 'Adam Admin',
+		roles: ['ADMIN'],
+		password: 'Admin1234',
+	},
+	{
+		email: 'member@lumo.dev',
+		username: 'mia',
+		name: 'Mia Member',
+		roles: ['MEMBER'],
+		password: 'Member1234',
+	},
 ];
 
 async function main(): Promise<void> {
@@ -26,8 +44,14 @@ async function main(): Promise<void> {
 		const passwordHash = await argon2.hash(seed.password);
 		await prisma.user.upsert({
 			where: { email: seed.email },
-			update: { name: seed.name, roles: seed.roles, passwordHash },
-			create: { email: seed.email, name: seed.name, roles: seed.roles, passwordHash },
+			update: { username: seed.username, name: seed.name, roles: seed.roles, passwordHash },
+			create: {
+				email: seed.email,
+				username: seed.username,
+				name: seed.name,
+				roles: seed.roles,
+				passwordHash,
+			},
 		});
 		console.log(`seeded ${seed.email} / ${seed.password} (${seed.roles.join(', ')})`);
 	}

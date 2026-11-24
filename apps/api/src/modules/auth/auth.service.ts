@@ -1,8 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import type { AuthResult, LoginInput, RegisterInput, User as WireUser } from '@lumo/shared';
+import type {
+	AuthResult,
+	LoginInput,
+	PatchProfileInput,
+	RegisterInput,
+	User as WireUser,
+} from '@lumo/shared';
 import argon2 from 'argon2';
 import { decodeRoles } from '../../common/db/codec/index.js';
 import { PrismaService } from '../../common/db/prisma.service.js';
+import { assertUserFieldFree } from '../../common/db/unique/index.js';
 import { AppException } from '../../common/errors/app.exception.js';
 import { toWireUser } from '../users/mapper/index.js';
 import { TokenService, type IssuedTokens } from './token.service.js';
@@ -17,12 +24,8 @@ export class AuthService {
 	) {}
 
 	async register(input: RegisterInput): Promise<AuthenticatedResult> {
-		const taken = await this.prisma.user.findUnique({
-			where: { email: input.email },
-			select: { id: true },
-		});
-		if (taken)
-			throw new AppException({ code: 'CONFLICT', message: 'That email is already registered' });
+		await assertUserFieldFree({ prisma: this.prisma, field: 'email', value: input.email });
+		await assertUserFieldFree({ prisma: this.prisma, field: 'username', value: input.username });
 
 		const passwordHash = await argon2.hash(input.password);
 
@@ -31,6 +34,7 @@ export class AuthService {
 		const row = await this.prisma.user.create({
 			data: {
 				email: input.email,
+				username: input.username,
 				name: input.name,
 				passwordHash,
 				roles: isFirstUser ? ['OWNER'] : ['MEMBER'],
@@ -84,5 +88,29 @@ export class AuthService {
 		const row = await this.prisma.user.findUnique({ where: { id: userId } });
 		if (!row) throw new AppException('NOT_FOUND');
 		return toWireUser(row);
+	}
+
+	async updateProfile({
+		userId,
+		input,
+	}: {
+		userId: string;
+		input: PatchProfileInput;
+	}): Promise<WireUser> {
+		const row = await this.prisma.user.findUnique({ where: { id: userId } });
+		if (!row) throw new AppException('NOT_FOUND');
+
+		if (input.email !== undefined && input.email !== row.email)
+			await assertUserFieldFree({ prisma: this.prisma, field: 'email', value: input.email });
+
+		if (input.username !== undefined && input.username !== row.username)
+			await assertUserFieldFree({ prisma: this.prisma, field: 'username', value: input.username });
+
+		const updated = await this.prisma.user.update({
+			where: { id: userId },
+			data: { username: input.username, email: input.email, name: input.name },
+		});
+
+		return toWireUser(updated);
 	}
 }

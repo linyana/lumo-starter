@@ -89,7 +89,7 @@ export function Input({
 				data-size={size}
 				value={value}
 				defaultValue={defaultValue}
-				disabled={disabled === true || loading}
+				disabled={disabled === true}
 				readOnly={readOnly}
 				data-loading={loading ? '' : undefined}
 				aria-busy={loading || undefined}

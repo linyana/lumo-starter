@@ -36,6 +36,12 @@ export const UserList = ({ list }: IPropsType) => {
 			cell: (row) => <span className="font-medium">{row.name}</span>,
 		},
 		{
+			key: 'username',
+			header: 'Username',
+			sortKey: 'username',
+			cell: (row) => <span className="font-mono text-muted-foreground">@{row.username}</span>,
+		},
+		{
 			key: 'email',
 			header: 'Email',
 			sortKey: 'email',
@@ -61,7 +67,7 @@ export const UserList = ({ list }: IPropsType) => {
 		<>
 			<Form form={list.form} initial={list.opened} onChange={list.write} settle={300}>
 				<Field name="search">
-					<Input placeholder="Search name or email" clearable />
+					<Input placeholder="Search name, username or email" clearable />
 				</Field>
 				<Table
 					columns={columns}

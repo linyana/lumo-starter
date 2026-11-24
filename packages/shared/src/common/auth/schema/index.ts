@@ -1,10 +1,11 @@
 import { z } from 'zod';
-import { emailSchema, nameSchema, passwordSchema } from '../../field';
+import { emailSchema, nameSchema, passwordSchema, usernameSchema } from '../../field';
 import { userSchema } from '../../../features/user';
 
 export const registerSchema = z
 	.object({
 		email: emailSchema,
+		username: usernameSchema,
 		name: nameSchema,
 		password: passwordSchema,
 		confirmPassword: z.string({ error: 'Password is required' }),

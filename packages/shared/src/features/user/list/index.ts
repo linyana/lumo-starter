@@ -9,6 +9,6 @@ export const listUsersQuerySchema = paginationSchema.extend({
 		.trim()
 		.max(EMAIL_MAX, { error: `Email must be at most ${EMAIL_MAX} characters` })
 		.optional(),
-	sort: z.enum(['email', 'name', 'createdAt']).optional(),
+	sort: z.enum(['email', 'username', 'name', 'createdAt']).optional(),
 	order: sortOrderSchema.optional(),
 });

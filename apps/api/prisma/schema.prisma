@@ -20,6 +20,7 @@ datasource db {
 model User {
   id           String   @id @default(uuid()) @db.Uuid
   email        String   @unique @db.VarChar(254)
+  username     String   @unique @db.VarChar(32)
   name         String   @db.VarChar(80)
   passwordHash String
   // Stored as text on purpose: valid values are enforced by the shared zod
@@ -31,7 +32,7 @@ model User {
   refreshTokens RefreshToken[]
   settings      Setting[]
 
-  @@index([email(ops: raw("gin_trgm_ops")), name(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([email(ops: raw("gin_trgm_ops")), username(ops: raw("gin_trgm_ops")), name(ops: raw("gin_trgm_ops"))], type: Gin)
   @@map("users")
 }
 

@@ -9,6 +9,7 @@ import type {
 import argon2 from 'argon2';
 import type { Prisma } from '../../generated/prisma/client.js';
 import { PrismaService } from '../../common/db/prisma.service.js';
+import { assertUserFieldFree } from '../../common/db/unique/index.js';
 import { AppException } from '../../common/errors/app.exception.js';
 import { paginate } from '../../common/pagination/index.js';
 import type { UpdateUserInput } from '@lumo/shared';
@@ -28,6 +29,7 @@ export class UsersService {
 			OR: query.search
 				? [
 						{ email: { contains: query.search, mode: 'insensitive' } },
+						{ username: { contains: query.search, mode: 'insensitive' } },
 						{ name: { contains: query.search, mode: 'insensitive' } },
 					]
 				: undefined,
@@ -60,11 +62,13 @@ export class UsersService {
 	}
 
 	async create(input: CreateUserInput): Promise<WireUser> {
-		await this.assertEmailFree(input.email);
+		await assertUserFieldFree({ prisma: this.prisma, field: 'email', value: input.email });
+		await assertUserFieldFree({ prisma: this.prisma, field: 'username', value: input.username });
 
 		const row = await this.prisma.user.create({
 			data: {
 				email: input.email,
+				username: input.username,
 				name: input.name,
 				passwordHash: await argon2.hash(input.password),
 				roles: input.roles,
@@ -75,9 +79,11 @@ export class UsersService {
 	}
 
 	private async assertEmailFree(email: string): Promise<void> {
-		const taken = await this.prisma.user.findUnique({ where: { email }, select: { id: true } });
-		if (taken)
-			throw new AppException({ code: 'CONFLICT', message: 'That email is already registered' });
+		await assertUserFieldFree({ prisma: this.prisma, field: 'email', value: email });
+	}
+
+	private async assertUsernameFree(username: string): Promise<void> {
+		await assertUserFieldFree({ prisma: this.prisma, field: 'username', value: username });
 	}
 
 	async update({
@@ -97,6 +103,7 @@ export class UsersService {
 		}
 
 		if (input.email !== row.email) await this.assertEmailFree(input.email);
+		if (input.username !== row.username) await this.assertUsernameFree(input.username);
 
 		if (row.roles.includes('OWNER') && !input.roles.includes('OWNER')) {
 			const owners = await this.prisma.user.count({ where: { roles: { has: 'OWNER' } } });
@@ -107,7 +114,7 @@ export class UsersService {
 
 		const updated = await this.prisma.user.update({
 			where: { id },
-			data: { email: input.email, name: input.name, roles: input.roles },
+			data: { email: input.email, username: input.username, name: input.name, roles: input.roles },
 		});
 
 		return toWireUser(updated);

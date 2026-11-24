@@ -42,6 +42,14 @@ export const RegisterPage = () => {
 				</Field>
 
 				<Field
+					name="username"
+					label="Username"
+					description="3–32 characters: lowercase letters, numbers and underscores."
+				>
+					<Input autoComplete="username" autoCapitalize="none" spellCheck={false} />
+				</Field>
+
+				<Field
 					name="password"
 					label="Password"
 					description="At least 8 characters, mixing letters and numbers."

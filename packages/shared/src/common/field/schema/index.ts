@@ -1,5 +1,12 @@
 import { z } from 'zod';
-import { EMAIL_MAX, NAME_MAX, PASSWORD_MAX, PASSWORD_MIN } from '../constants';
+import {
+	EMAIL_MAX,
+	NAME_MAX,
+	PASSWORD_MAX,
+	PASSWORD_MIN,
+	USERNAME_MAX,
+	USERNAME_MIN,
+} from '../constants';
 
 export const emailSchema = z
 	.string({ error: 'Email is required' })
@@ -14,6 +21,16 @@ export const passwordSchema = z
 	.max(PASSWORD_MAX, { error: `Password must be at most ${PASSWORD_MAX} characters` })
 	.refine((value) => /[a-z]/i.test(value) && /\d/.test(value), {
 		error: 'Password must mix letters and numbers',
+	});
+
+export const usernameSchema = z
+	.string({ error: 'Username is required' })
+	.trim()
+	.toLowerCase()
+	.min(USERNAME_MIN, { error: `Username must be at least ${USERNAME_MIN} characters` })
+	.max(USERNAME_MAX, { error: `Username must be at most ${USERNAME_MAX} characters` })
+	.regex(/^[a-z0-9_]+$/, {
+		error: 'Username may only use lowercase letters, numbers and underscores',
 	});
 
 export const nameSchema = z

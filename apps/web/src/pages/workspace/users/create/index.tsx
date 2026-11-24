@@ -54,6 +54,14 @@ export const CreateUser = ({ onCreated }: IPropsType) => {
 					<Input type="email" autoComplete="off" />
 				</Field>
 
+				<Field
+					name="username"
+					label="Username"
+					description="3–32 characters: lowercase letters, numbers and underscores."
+				>
+					<Input autoComplete="off" autoCapitalize="none" spellCheck={false} />
+				</Field>
+
 				<Field name="name" label="Display name">
 					<Input autoComplete="off" />
 				</Field>
