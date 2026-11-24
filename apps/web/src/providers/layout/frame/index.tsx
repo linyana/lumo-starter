@@ -150,5 +150,13 @@ function LayoutRoot({
 
 export const Layout = Object.assign(LayoutRoot, { Header, Content });
 
-export type { LayoutNavEntry, LayoutNavItem } from './types';
+export type {
+	LayoutNavEntry,
+	LayoutNavGroup,
+	LayoutNavItem,
+	LayoutNavSeparator,
+	LayoutNavSkeleton,
+	LayoutNavSubEntry,
+	LayoutNavSubGroup,
+} from './types';
 export type { SidebarProps } from './sidebar';

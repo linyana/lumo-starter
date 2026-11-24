@@ -12,5 +12,7 @@ export * from '@/components/ui/navigation/nav/parts/separator';
 export * from '@/components/ui/navigation/nav/parts/skeleton';
 export * from '@/components/ui/navigation/nav/parts/sub';
 export * from '@/components/ui/navigation/nav/parts/sub-button';
+export * from '@/components/ui/navigation/nav/parts/sub-group';
+export * from '@/components/ui/navigation/nav/parts/sub-group-label';
 export * from '@/components/ui/navigation/nav/parts/sub-item';
 export * from '@/components/ui/navigation/nav/parts/sub-list';

@@ -34,8 +34,8 @@ export const routes: AppRoute[] = [
 			label: 'Settings',
 			icon: Settings,
 			children: [
-				{ label: 'Profile', path: 'settings/profile' },
-				{ label: 'Preference', path: 'settings/preference' },
+				{ group: 'Personal', label: 'Profile', path: 'settings/profile' },
+				{ group: 'Personal', label: 'Preference', path: 'settings/preference' },
 			],
 		},
 	},

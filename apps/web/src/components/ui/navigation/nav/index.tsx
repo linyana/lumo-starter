@@ -11,9 +11,11 @@ import {
 	NavSkeleton,
 	NavSub,
 	NavSubButton,
+	NavSubGroup,
+	NavSubGroupLabel,
 	NavSubItem,
 } from './parts';
-import type { NavEntry, NavItemEntry, NavProps } from './types';
+import type { NavEntry, NavItemEntry, NavProps, NavSubEntry } from './types';
 
 export type {
 	NavEntry,
@@ -23,6 +25,8 @@ export type {
 	NavSeparatorEntry,
 	NavSkeletonEntry,
 	NavSlots,
+	NavSubEntry,
+	NavSubGroupEntry,
 } from '@/components/ui/navigation/nav/types';
 
 export const Nav = ({
@@ -37,6 +41,65 @@ export const Nav = ({
 	const isActive = ({ key, explicit }: { key: string; explicit?: boolean }) =>
 		explicit ?? key === selectedKey;
 
+	const entriesActive = (entries: NavSubEntry[]): boolean =>
+		entries.some((entry) =>
+			entry.type === 'group'
+				? entriesActive(entry.children)
+				: isActive({ key: entry.key, explicit: entry.isActive }),
+		);
+
+	function renderSubEntry({
+		entry,
+		index,
+		disabled,
+	}: {
+		entry: NavSubEntry;
+		index: number;
+		disabled?: boolean;
+	}) {
+		if (entry.type === 'group') {
+			return (
+				<NavSubItem key={entry.label ?? `sub-group-${index}`} className={classNames?.subItem}>
+					<NavSubGroup className={classNames?.subGroup}>
+						{entry.label !== undefined && (
+							<NavSubGroupLabel className={classNames?.subGroupLabel}>
+								{entry.label}
+							</NavSubGroupLabel>
+						)}
+						{entry.action}
+						<ul
+							data-slot="nav-sub-group-list"
+							className={cn('flex min-w-0 flex-col gap-1', classNames?.subList)}
+						>
+							{entry.children.map((child, childIndex) =>
+								renderSubEntry({ entry: child, index: childIndex, disabled }),
+							)}
+						</ul>
+					</NavSubGroup>
+				</NavSubItem>
+			);
+		}
+
+		return (
+			<NavSubItem key={entry.key} className={classNames?.subItem}>
+				<NavSubButton
+					icon={entry.icon}
+					className={cn(classNames?.subButton, entry.className)}
+					isActive={isActive({ key: entry.key, explicit: entry.isActive })}
+					disabled={disabled || entry.disabled}
+					href={entry.href}
+					render={entry.render}
+					onClick={() => {
+						entry.onClick?.();
+						onSelect?.(entry.key);
+					}}
+				>
+					{entry.label}
+				</NavSubButton>
+			</NavSubItem>
+		);
+	}
+
 	function renderItem(item: NavItemEntry) {
 		const active = isActive({ key: item.key, explicit: item.isActive });
 
@@ -47,31 +110,13 @@ export const Nav = ({
 						icon={item.icon}
 						label={item.label}
 						className={cn(classNames?.button, item.className)}
-						isActive={
-							active ||
-							item.children.some((child) => isActive({ key: child.key, explicit: child.isActive }))
-						}
+						isActive={active || entriesActive(item.children)}
 						defaultOpen={item.defaultOpen}
 						disabled={item.disabled}
 					>
-						{item.children.map((child) => (
-							<NavSubItem key={child.key}>
-								<NavSubButton
-									icon={child.icon}
-									className={cn(classNames?.subButton, child.className)}
-									isActive={isActive({ key: child.key, explicit: child.isActive })}
-									disabled={item.disabled || child.disabled}
-									href={child.href}
-									render={child.render}
-									onClick={() => {
-										child.onClick?.();
-										onSelect?.(child.key);
-									}}
-								>
-									{child.label}
-								</NavSubButton>
-							</NavSubItem>
-						))}
+						{item.children.map((child, index) =>
+							renderSubEntry({ entry: child, index, disabled: item.disabled }),
+						)}
 					</NavSub>
 				</NavItem>
 			);

@@ -13,16 +13,26 @@ export type NavItemEntry = {
 	badge?: ReactNode;
 	className?: string;
 	onClick?: () => void;
-	children?: NavItemEntry[];
+	children?: NavSubEntry[];
 	defaultOpen?: boolean;
 };
 
-export type NavGroupEntry = {
-	type: 'group';
+type NavGroupBase = {
 	label?: string;
 	action?: ReactNode;
+};
+
+export type NavGroupEntry = NavGroupBase & {
+	type: 'group';
 	children: NavEntry[];
 };
+
+export type NavSubGroupEntry = NavGroupBase & {
+	type: 'group';
+	children: NavSubEntry[];
+};
+
+export type NavSubEntry = NavItemEntry | NavSubGroupEntry;
 
 export type NavSeparatorEntry = { type: 'separator' };
 export type NavSkeletonEntry = { type: 'skeleton'; showIcon?: boolean; width?: string };
@@ -36,7 +46,11 @@ export type NavSlots =
 	| 'badge'
 	| 'group'
 	| 'groupLabel'
-	| 'subButton';
+	| 'subButton'
+	| 'subItem'
+	| 'subList'
+	| 'subGroup'
+	| 'subGroupLabel';
 
 export type NavProps = {
 	items?: NavEntry[];

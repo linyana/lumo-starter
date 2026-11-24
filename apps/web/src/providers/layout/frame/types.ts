@@ -4,6 +4,8 @@ import type {
 	NavItemEntry,
 	NavSeparatorEntry,
 	NavSkeletonEntry,
+	NavSubEntry,
+	NavSubGroupEntry,
 } from '@/components';
 
 export type LayoutNavLinkRender = NonNullable<NavItemEntry['render']>;
@@ -17,3 +19,7 @@ export type LayoutNavSeparator = NavSeparatorEntry;
 export type LayoutNavSkeleton = NavSkeletonEntry;
 
 export type LayoutNavEntry = NavEntry;
+
+export type LayoutNavSubGroup = NavSubGroupEntry;
+
+export type LayoutNavSubEntry = NavSubEntry;

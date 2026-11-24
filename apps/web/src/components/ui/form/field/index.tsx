@@ -3,7 +3,14 @@ import { useFormContext } from '@/components/ui/form/form/instance';
 import type { FormInstance } from '@/components/ui/form/form/types';
 import { fieldRequired, fieldRule } from '@/lib/form';
 import { cn } from '@/lib/utils';
-import { FieldDescription, FieldError, FieldLabel, FieldRoot, useFormRevision } from './parts';
+import {
+	FieldDescription,
+	FieldError,
+	FieldHint,
+	FieldLabel,
+	FieldRoot,
+	useFormRevision,
+} from './parts';
 import type { FieldProps } from './types';
 
 export type { FieldProps } from '@/components/ui/form/field/types';
@@ -79,10 +86,17 @@ export const Field = ({
 			}
 			className={cn(className, classNames?.root)}
 		>
-			{label !== undefined && (
-				<FieldLabel required={mandatory} className={classNames?.label}>
-					{label}
-				</FieldLabel>
+			{(label !== undefined || description !== undefined) && (
+				<div className="flex items-center gap-1">
+					{label !== undefined && (
+						<FieldLabel required={mandatory} className={classNames?.label}>
+							{label}
+						</FieldLabel>
+					)}
+					{description !== undefined && (
+						<FieldHint contentClassName={classNames?.description}>{description}</FieldHint>
+					)}
+				</div>
 			)}
 			{named ? (
 				<Wired form={form} name={name}>
@@ -92,7 +106,7 @@ export const Field = ({
 				children
 			)}
 			{description !== undefined && (
-				<FieldDescription className={classNames?.description}>{description}</FieldDescription>
+				<FieldDescription className="sr-only">{description}</FieldDescription>
 			)}
 			<FieldError className={classNames?.error}>{error}</FieldError>
 		</FieldRoot>

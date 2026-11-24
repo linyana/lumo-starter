@@ -4,6 +4,7 @@ import type { ComponentType } from 'react';
 export type RouteAudience = 'public' | 'authenticated' | 'anonymous';
 
 export type NavChild = {
+	group?: string;
 	label: string;
 	path: string;
 	icon?: ComponentType;
@@ -11,7 +12,7 @@ export type NavChild = {
 };
 
 export type NavEntry = {
-	group: string;
+	group?: string;
 	label: string;
 	icon?: ComponentType;
 	children?: NavChild[];

@@ -2,7 +2,13 @@ import { useMemo } from 'react';
 import { createBrowserRouter, Link, NavLink, useLocation, type RouteObject } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import { RedirectIfAuthenticated, RequireAccess, RequireAuth, useAuth } from '@/providers/auth';
-import { AppShell, type LayoutNavEntry, type LayoutNavItem } from '@/providers/layout';
+import {
+	AppShell,
+	type LayoutNavEntry,
+	type LayoutNavItem,
+	type LayoutNavSubEntry,
+	type LayoutNavSubGroup,
+} from '@/providers/layout';
 import { routes } from '@/routes';
 import type { AppRoute, NavChild, NavEntry } from './types';
 
@@ -36,8 +42,49 @@ const linkFor = ({
 	render: <NavLink to={href} />,
 });
 
+const grouped = <T,>({
+	items,
+	groupOf,
+	toItem,
+}: {
+	items: readonly T[];
+	groupOf: (item: T) => string | undefined;
+	toItem: (item: T) => LayoutNavItem;
+}): LayoutNavSubEntry[] => {
+	const blocks: LayoutNavSubEntry[] = [];
+	const groups = new Map<string, LayoutNavSubGroup>();
+
+	for (const item of items) {
+		const label = groupOf(item);
+		if (label === undefined) {
+			blocks.push(toItem(item));
+			continue;
+		}
+
+		let group = groups.get(label);
+		if (group === undefined) {
+			group = { type: 'group', label, children: [] };
+			groups.set(label, group);
+			blocks.push(group);
+		}
+		group.children.push(toItem(item));
+	}
+
+	return blocks;
+};
+
+const hasHref = ({ entries, href }: { entries: LayoutNavSubEntry[]; href: string }): boolean =>
+	entries.some((entry) =>
+		entry.type === 'group'
+			? hasHref({ entries: entry.children, href })
+			: entry.href === href || hasHref({ entries: entry.children ?? [], href }),
+	);
+
 const childFor = (child: NavChild): LayoutNavItem =>
 	linkFor({ key: child.path, label: child.label, icon: child.icon, href: hrefFor(child.path) });
+
+const childrenFor = (children: readonly NavChild[]): LayoutNavSubEntry[] =>
+	grouped({ items: children, groupOf: (child) => child.group, toItem: childFor });
 
 const itemFor = ({
 	route,
@@ -45,14 +92,14 @@ const itemFor = ({
 	pathname,
 }: {
 	route: NavRoute;
-	children: LayoutNavItem[];
+	children: LayoutNavSubEntry[];
 	pathname: string;
 }): LayoutNavItem => {
 	const href = hrefFor(route.path);
 	return {
 		...linkFor({ key: keyFor(route), label: route.nav.label, icon: route.nav.icon, href }),
 		children: children.length === 0 ? undefined : children,
-		defaultOpen: children.some((child) => child.href === pathname) || undefined,
+		defaultOpen: hasHref({ entries: children, href: pathname }) || undefined,
 	};
 };
 
@@ -65,21 +112,18 @@ const navFor = ({
 	pathname: string;
 	filter: AccessFilter;
 }): LayoutNavEntry[] => {
-	const childrenOf = (route: NavRoute): LayoutNavItem[] =>
-		filter(route.nav.children ?? []).map(childFor);
+	const childrenOf = (route: NavRoute): LayoutNavSubEntry[] =>
+		childrenFor(filter(route.nav.children ?? []));
 
 	const visible = navRoutes.filter(
 		(route) => route.nav.children === undefined || childrenOf(route).length > 0,
 	);
-	const groups = [...new Set(visible.map((route) => route.nav.group))];
 
-	return groups.map((group) => ({
-		type: 'group',
-		label: group,
-		children: visible
-			.filter((route) => route.nav.group === group)
-			.map((route) => itemFor({ route, pathname, children: childrenOf(route) })),
-	}));
+	return grouped({
+		items: visible,
+		groupOf: (route) => route.nav.group,
+		toItem: (route) => itemFor({ route, pathname, children: childrenOf(route) }),
+	});
 };
 
 const NotFoundPage = () => (
