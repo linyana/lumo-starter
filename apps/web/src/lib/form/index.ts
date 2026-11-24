@@ -73,32 +73,6 @@ export const checkField = ({
 	};
 };
 
-/**
- * The subset of `values` that differs from `saved` and passes validation,
- * already normalised by each field's schema.
- */
-export const patchOf = <TValues extends Values>({
-	schema,
-	values,
-	saved,
-}: {
-	schema: ZodType;
-	values: Values;
-	saved: Partial<TValues>;
-}): Partial<TValues> => {
-	const previous: Values = saved;
-	const patch: Values = {};
-
-	for (const [name, value] of Object.entries(values)) {
-		const checked = checkField({ schema, name, value, values });
-		if (!checked.ok || checked.value === previous[name]) continue;
-
-		patch[name] = checked.value;
-	}
-
-	return patch as Partial<TValues>;
-};
-
 export const fieldRule =
 	({ schema, name }: { schema: ZodType; name: string }) =>
 	(value: unknown, values: Values): string[] | null => {

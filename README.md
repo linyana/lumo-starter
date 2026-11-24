@@ -190,7 +190,8 @@ inside `<Form form={list.form} initial={list.opened} onChange={list.write} settl
 screen names a `value` or a setter either. Give a table the same object and its `sortKey`-ed columns
 become sortable titles; nothing else has to be wired. A settings page that saves as the user leaves
 a field holds its fields with `useAutoSave({ form, schema, initial, endpoint })`: it validates the
-field being left, sends only what changed, and returns `blur`, `enter` and `busy` for the control.
+field being left, sends that field alone when it differs from the last confirmed value, and returns
+`blur`, `enter`, `busy` and `failed` for the control.
 
 **Change a table** — edit `prisma/schema.prisma`, `pnpm db:migrate`, `pnpm db:generate`.
 

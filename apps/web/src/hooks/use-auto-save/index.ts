@@ -1,14 +1,14 @@
 import { useRef, useState, type KeyboardEvent } from 'react';
 import type { FormValues } from '@/components/ui/form/form/types';
-import { checkField, patchOf } from '@/lib';
+import { checkField } from '@/lib';
 import { useHttp } from '../use-http';
 import type { AutoSaveOptions, AutoSaveResult } from './types';
 
 export type { AutoSaveOptions, AutoSaveResult } from './types';
 
 /**
- * Saves a form field by field: leaving the control (blur or Enter) sends only
- * the fields whose value differs from what the server last confirmed.
+ * Saves a form field by field: leaving the control (blur or Enter) sends that
+ * field alone, and only when it differs from what the server last confirmed.
  */
 export const useAutoSave = <TValues extends FormValues>({
 	form,
@@ -20,7 +20,7 @@ export const useAutoSave = <TValues extends FormValues>({
 	const queue = useRef<Promise<unknown>>(Promise.resolve());
 	const [saved, setSaved] = useState<TValues>(initial);
 	const [pending, setPending] = useState<string | null>(null);
-	const [failed, setFailed] = useState<string | null>(null);
+	const [failed, setFailed] = useState<readonly string[]>([]);
 
 	const { fetchData, loading } = useHttp({
 		form,
@@ -38,6 +38,14 @@ export const useAutoSave = <TValues extends FormValues>({
 		form.setErrors(errors);
 	};
 
+	const fail = (name: string): void =>
+		setFailed((current) => (current.includes(name) ? current : [...current, name]));
+
+	const pass = (name: string): void =>
+		setFailed((current) =>
+			current.includes(name) ? current.filter((item) => item !== name) : current,
+		);
+
 	const commit = (name: keyof TValues & string): void => {
 		const values = form.values();
 		const checked = checkField({ schema, name, value: values[name], values });
@@ -47,17 +55,16 @@ export const useAutoSave = <TValues extends FormValues>({
 			return;
 		}
 
-		const patch = patchOf<TValues>({ schema, values, saved });
-		const changed = Object.keys(patch)[0];
-
-		if (changed === undefined) {
+		if (checked.value === saved[name]) {
 			// Nothing is sent, so nothing will answer this field.
 			forget({ names: [name] });
-			setFailed((current) => (current === name ? null : current));
+			pass(name);
 			return;
 		}
 
-		setPending(changed);
+		const patch = { [name]: checked.value } as Partial<TValues>;
+
+		setPending(name);
 		// What is on screen is the last verdict on this field, and the request is what replaces
 		// it. A retry that withdraws the message first reports a fix the server has not made yet.
 		// Saves land in the order the user made them; one failure must not stop
@@ -70,18 +77,17 @@ export const useAutoSave = <TValues extends FormValues>({
 				if (result === null) return;
 
 				if (!result.ok) {
-					setFailed(changed);
+					fail(name);
 					return;
 				}
 
-				// Answers the values that were sent, not the ones typed while they were in flight.
+				// Answers the value that was sent, not the one typed while it was in flight.
 				const latest = form.values();
-				const answered = Object.entries(patch)
-					.filter(([key, value]) => latest[key] === value)
-					.map(([key]) => key);
+				const answered = checkField({ schema, name, value: latest[name], values: latest });
+				if (!answered.ok || answered.value !== checked.value) return;
 
-				setFailed((current) => (current !== null && answered.includes(current) ? null : current));
-				forget({ names: answered });
+				pass(name);
+				forget({ names: [name] });
 			})
 			.catch(() => undefined);
 	};
@@ -100,6 +106,6 @@ export const useAutoSave = <TValues extends FormValues>({
 		blur: (name) => () => commit(name),
 		enter,
 		busy: (name) => loading && pending === name,
-		failed: (name) => failed === name,
+		failed: (name) => failed.includes(name),
 	};
 };
