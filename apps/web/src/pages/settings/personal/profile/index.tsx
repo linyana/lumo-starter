@@ -22,7 +22,7 @@ export const ProfileSetting = () => {
 	if (user === null) return null;
 
 	return (
-		<Page variant="settings" title="Profile" description="How you appear and how you sign in.">
+		<Page variant="settings" title="Profile">
 			<Form form={form} schema={updateProfileSchema} initial={saved}>
 				<SettingsGroup
 					title="Account"
