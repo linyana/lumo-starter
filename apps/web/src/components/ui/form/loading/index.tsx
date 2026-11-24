@@ -12,7 +12,10 @@ export function ControlSpinner({ className, size = '1em' }: ControlSpinnerProps)
 		<span
 			data-slot="control-spinner"
 			aria-hidden
-			className={cn('pointer-events-none inline-flex shrink-0', className)}
+			className={cn(
+				'pointer-events-none inline-flex shrink-0 items-center justify-center',
+				className,
+			)}
 		>
 			<Spinner size={size} label={null} />
 		</span>

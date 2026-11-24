@@ -18,6 +18,16 @@ export const pressable = cn(
 
 export const iconSlot = '[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg]:size-[1em]';
 
+/**
+ * A field's typography belongs to its root, not to the control: the control inherits the font through
+ * preflight's `font: inherit`, and overlays beside it (spinner, clear) size themselves in `em`.
+ */
+export const fieldText = {
+	sm: 'text-sm',
+	md: 'text-sm',
+	lg: 'text-base',
+} as const;
+
 export const clearButton = cn(
 	'relative flex size-5 shrink-0 cursor-pointer items-center justify-center rounded-full text-sm',
 	'text-muted-foreground transition-colors duration-(--duration-state)',

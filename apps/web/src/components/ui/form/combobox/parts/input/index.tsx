@@ -8,9 +8,9 @@ export const comboboxInputVariants = tv({
 	base: [fieldShell(), 'read-only:bg-muted', 'pe-9'],
 	variants: {
 		size: {
-			sm: 'h-8 ps-2.5 text-sm',
-			md: 'h-9 ps-3 text-sm',
-			lg: 'h-10 ps-3.5 text-base',
+			sm: 'h-8 ps-2.5',
+			md: 'h-9 ps-3',
+			lg: 'h-10 ps-3.5',
 		},
 	},
 	defaultVariants: {

@@ -1,4 +1,5 @@
 import { ControlSpinner } from '@/components/ui/form/loading';
+import { fieldText } from '@/lib/control';
 import { cn } from '@/lib/utils';
 import {
 	ComboboxClear,
@@ -38,7 +39,7 @@ export const Combobox = ({
 		name={name}
 	>
 		<ComboboxInputGroup
-			className={cn(className, classNames?.group)}
+			className={cn(fieldText[size], className, classNames?.group)}
 			data-loading={loading ? '' : undefined}
 		>
 			<ComboboxInput
@@ -50,7 +51,7 @@ export const Combobox = ({
 				readOnly={loading || undefined}
 			/>
 			{loading ? (
-				<ControlSpinner className="absolute inset-y-0 end-0.5 my-auto text-muted-foreground" />
+				<ControlSpinner className="absolute inset-y-0 end-0.5 text-muted-foreground" />
 			) : (
 				<>
 					<ComboboxTrigger />

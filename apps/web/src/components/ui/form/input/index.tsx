@@ -4,7 +4,7 @@ import { tv, type VariantProps } from 'tailwind-variants';
 import { Clear, clearField } from '@/components/ui/form/clear';
 import { ControlSpinner } from '@/components/ui/form/loading';
 import type { SlotClassNames } from '@/components/types';
-import { fieldShell } from '@/lib/control';
+import { fieldShell, fieldText } from '@/lib/control';
 import { cn } from '@/lib/utils';
 
 export const inputVariants = tv({
@@ -14,9 +14,9 @@ export const inputVariants = tv({
 	],
 	variants: {
 		size: {
-			sm: 'h-8 px-2.5 text-sm',
-			md: 'h-9 px-3 text-sm',
-			lg: 'h-10 px-3.5 text-base',
+			sm: 'h-8 px-2.5',
+			md: 'h-9 px-3',
+			lg: 'h-10 px-3.5',
 		},
 	},
 	defaultVariants: {
@@ -78,6 +78,7 @@ export function Input({
 			data-slot="input-root"
 			className={cn(
 				'relative',
+				fieldText[size],
 				'has-data-[slot=input-clear]:[&_input]:pe-8',
 				'has-data-[slot=control-spinner]:[&_input]:pe-8',
 				className,
@@ -102,7 +103,7 @@ export function Input({
 				{...props}
 			/>
 			{loading ? (
-				<ControlSpinner className="absolute inset-y-0 end-2 my-auto text-muted-foreground" />
+				<ControlSpinner className="absolute inset-y-0 end-2 text-muted-foreground" />
 			) : (
 				offered && (
 					<Clear
