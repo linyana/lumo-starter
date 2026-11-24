@@ -6,6 +6,7 @@ export * from './field';
 export * from './fieldset';
 export * from './form';
 export * from './input';
+export * from './loading';
 export * from './radio-group';
 export * from './select';
 export * from './slider';

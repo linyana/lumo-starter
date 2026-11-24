@@ -20,6 +20,7 @@ export type SelectProps<Value extends string = string> = {
 	placeholder?: ReactNode;
 	size?: SelectTriggerProps['size'];
 	disabled?: boolean;
+	loading?: boolean;
 	name?: string;
 	id?: string;
 	required?: boolean;

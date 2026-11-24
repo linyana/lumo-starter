@@ -46,14 +46,13 @@ export const PreferenceSetting = () => {
 					},
 					{
 						title: 'Rows per page',
-						description:
-							'How many rows a list opens with.',
+						description: 'How many rows a list opens with.',
 						content: (
 							<Select
 								ariaLabel="Rows per page"
 								options={sizeOptions}
 								value={String(content.pageSize)}
-								disabled={saving}
+								loading={saving}
 								onChange={(next) => {
 									if (next !== null) void save({ pageSize: Number(next) });
 								}}

@@ -13,6 +13,7 @@ export type SliderSlots = 'root' | 'label' | 'value' | 'control' | 'track' | 'in
 
 export type SliderProps = SliderRootPicked & {
 	label?: ReactNode;
+	loading?: boolean;
 	className?: string;
 	classNames?: SlotClassNames<SliderSlots>;
 };

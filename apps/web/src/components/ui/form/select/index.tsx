@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ControlSpinner } from '@/components/ui/form/loading';
 import { cn } from '@/lib/utils';
 import {
 	SelectClear,
@@ -27,6 +28,7 @@ export const Select = <Value extends string>({
 	placeholder,
 	size = 'md',
 	disabled = false,
+	loading = false,
 	name,
 	id,
 	required = false,
@@ -37,7 +39,7 @@ export const Select = <Value extends string>({
 }: SelectProps<Value>) => {
 	const [held, setHeld] = useState<Value | null>(defaultValue ?? null);
 	const chosen = value === undefined ? held : value;
-	const offered = clearable && chosen !== null && !disabled && !required;
+	const offered = clearable && chosen !== null && !disabled && !required && !loading;
 
 	const choose = (next: Value | null): void => {
 		if (value === undefined) setHeld(next);
@@ -49,15 +51,21 @@ export const Select = <Value extends string>({
 			items={options}
 			value={chosen}
 			onValueChange={choose}
-			disabled={disabled}
+			disabled={disabled || loading}
 			name={name}
 			id={id}
 			required={required}
 		>
 			<SelectTriggerGroup className={cn(className, classNames?.group)}>
-				<SelectTrigger size={size} className={classNames?.trigger} aria-label={ariaLabel}>
+				<SelectTrigger
+					size={size}
+					className={classNames?.trigger}
+					aria-label={ariaLabel}
+					aria-busy={loading || undefined}
+					data-loading={loading ? '' : undefined}
+				>
 					<SelectValue placeholder={placeholder} className={classNames?.value} />
-					<SelectIcon />
+					{loading ? <ControlSpinner className="text-muted-foreground" /> : <SelectIcon />}
 				</SelectTrigger>
 				{offered && (
 					<SelectClear

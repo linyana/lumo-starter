@@ -24,6 +24,7 @@ export type ToggleGroupProps<Value extends string = string> = ToggleGroupRootPic
 	items: ToggleGroupItem<Value>[];
 	variant?: ToggleGroupRootProps<Value>['variant'];
 	size?: ToggleGroupRootProps<Value>['size'];
+	loading?: boolean;
 	className?: string;
 	classNames?: SlotClassNames<ToggleGroupSlots>;
 };

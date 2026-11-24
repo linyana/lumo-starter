@@ -1,5 +1,6 @@
 import { Toggle as BaseToggle, type ToggleProps as BaseToggleProps } from '@base-ui/react/toggle';
 import { tv, type VariantProps } from 'tailwind-variants';
+import { ControlLoading } from '@/components/ui/form/loading';
 import { iconSlot, pressable, stateLayer } from '@/lib/control';
 import { cn } from '@/lib/utils';
 
@@ -18,6 +19,8 @@ export const toggleVariants = tv({
 		'data-pressed:hover:after:opacity-(--state-layer-selected-hover-opacity)',
 		'data-pressed:active:after:opacity-(--state-layer-pressed-opacity)',
 		'data-disabled:pointer-events-none data-disabled:opacity-50',
+		'data-loading:cursor-progress',
+		'data-loading:disabled:opacity-100 data-loading:data-disabled:opacity-100',
 		iconSlot,
 	],
 	variants: {
@@ -41,12 +44,16 @@ export const toggleVariants = tv({
 export type ToggleProps<Value extends string = string> = Omit<BaseToggleProps<Value>, 'className'> &
 	VariantProps<typeof toggleVariants> & {
 		className?: string;
+		loading?: boolean;
 	};
 
 export function Toggle<Value extends string>({
 	className,
 	variant = 'ghost',
 	size = 'md',
+	loading = false,
+	disabled = false,
+	children,
 	...props
 }: ToggleProps<Value>) {
 	return (
@@ -54,8 +61,13 @@ export function Toggle<Value extends string>({
 			data-slot="toggle"
 			data-variant={variant}
 			data-size={size}
+			data-loading={loading ? '' : undefined}
+			aria-busy={loading || undefined}
+			disabled={disabled || loading}
 			className={cn(toggleVariants({ variant, size }), className)}
 			{...props}
-		/>
+		>
+			{loading ? <ControlLoading loading>{children}</ControlLoading> : children}
+		</BaseToggle>
 	);
 }

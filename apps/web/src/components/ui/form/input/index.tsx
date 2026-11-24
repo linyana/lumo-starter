@@ -2,6 +2,7 @@ import { Input as BaseInput } from '@base-ui/react/input';
 import { useRef, useState, type ComponentProps } from 'react';
 import { tv, type VariantProps } from 'tailwind-variants';
 import { Clear, clearField } from '@/components/ui/form/clear';
+import { ControlSpinner } from '@/components/ui/form/loading';
 import type { SlotClassNames } from '@/components/types';
 import { fieldShell } from '@/lib/control';
 import { cn } from '@/lib/utils';
@@ -31,6 +32,7 @@ export type InputProps = Omit<ComponentProps<typeof BaseInput>, 'className' | 's
 		classNames?: SlotClassNames<InputSlots>;
 		clearable?: boolean;
 		clearLabel?: string;
+		loading?: boolean;
 	};
 
 type ChangeEvent = Parameters<NonNullable<InputProps['onChange']>>[0];
@@ -41,6 +43,7 @@ export function Input({
 	size = 'md',
 	clearable = false,
 	clearLabel = 'Clear',
+	loading = false,
 	value,
 	defaultValue,
 	disabled,
@@ -53,7 +56,7 @@ export function Input({
 		() => defaultValue !== undefined && String(defaultValue) !== '',
 	);
 	const filled = value === undefined ? typed : value !== null && String(value) !== '';
-	const offered = clearable && filled && disabled !== true && readOnly !== true;
+	const offered = clearable && filled && disabled !== true && readOnly !== true && !loading;
 
 	const handleChange = (event: ChangeEvent): void => {
 		if (value === undefined) setTyped(event.target.value !== '');
@@ -76,6 +79,7 @@ export function Input({
 			className={cn(
 				'relative',
 				'has-data-[slot=input-clear]:[&_input]:pe-8',
+				'has-data-[slot=control-spinner]:[&_input]:pe-8',
 				className,
 				classNames?.root,
 			)}
@@ -85,8 +89,10 @@ export function Input({
 				data-size={size}
 				value={value}
 				defaultValue={defaultValue}
-				disabled={disabled}
+				disabled={disabled === true || loading}
 				readOnly={readOnly}
+				data-loading={loading ? '' : undefined}
+				aria-busy={loading || undefined}
 				onChange={handleChange}
 				className={cn(
 					inputVariants({ size }),
@@ -95,13 +101,17 @@ export function Input({
 				)}
 				{...props}
 			/>
-			{offered && (
-				<Clear
-					data-slot="input-clear"
-					label={clearLabel}
-					onClick={handleClear}
-					className={cn('absolute inset-y-0 inset-e-1.5 my-auto', classNames?.clear)}
-				/>
+			{loading ? (
+				<ControlSpinner className="absolute inset-y-0 end-2 my-auto text-muted-foreground" />
+			) : (
+				offered && (
+					<Clear
+						data-slot="input-clear"
+						label={clearLabel}
+						onClick={handleClear}
+						className={cn('absolute inset-y-0 inset-e-1.5 my-auto', classNames?.clear)}
+					/>
+				)
 			)}
 		</div>
 	);

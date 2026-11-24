@@ -18,6 +18,8 @@ export function SwitchRoot({ className, ...props }: SwitchRootProps) {
 				'not-data-checked:focus-visible:outline-none',
 				'data-checked:bg-primary',
 				'data-disabled:cursor-not-allowed data-disabled:opacity-50',
+				'data-loading:cursor-progress',
+				'data-loading:data-disabled:opacity-100',
 				className,
 			)}
 			{...props}

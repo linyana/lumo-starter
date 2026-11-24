@@ -2,6 +2,7 @@ import { Field } from '@base-ui/react/field';
 import { useRef, useState, type ChangeEvent, type ComponentProps } from 'react';
 import { tv, type VariantProps } from 'tailwind-variants';
 import { Clear, clearField } from '@/components/ui/form/clear';
+import { ControlSpinner } from '@/components/ui/form/loading';
 import type { SlotClassNames } from '@/components/types';
 import { fieldShell } from '@/lib/control';
 import { cn } from '@/lib/utils';
@@ -28,6 +29,7 @@ export type TextareaProps = Omit<ComponentProps<'textarea'>, 'className'> &
 		classNames?: SlotClassNames<TextareaSlots>;
 		clearable?: boolean;
 		clearLabel?: string;
+		loading?: boolean;
 	};
 
 export function Textarea({
@@ -36,6 +38,7 @@ export function Textarea({
 	size = 'md',
 	clearable = false,
 	clearLabel = 'Clear',
+	loading = false,
 	value,
 	defaultValue,
 	disabled,
@@ -48,7 +51,7 @@ export function Textarea({
 		() => defaultValue !== undefined && String(defaultValue) !== '',
 	);
 	const filled = value === undefined ? typed : value !== null && String(value) !== '';
-	const offered = clearable && filled && disabled !== true && readOnly !== true;
+	const offered = clearable && filled && disabled !== true && readOnly !== true && !loading;
 
 	const handleChange = (event: ChangeEvent<HTMLTextAreaElement>): void => {
 		if (value === undefined) setTyped(event.target.value !== '');
@@ -71,6 +74,7 @@ export function Textarea({
 			className={cn(
 				'relative',
 				'has-[[data-slot=textarea-clear]]:[&_textarea]:pe-8',
+				'has-data-[slot=control-spinner]:[&_textarea]:pe-8',
 				className,
 				classNames?.root,
 			)}
@@ -82,21 +86,27 @@ export function Textarea({
 						data-size={size}
 						value={value}
 						defaultValue={defaultValue}
-						disabled={disabled}
+						disabled={disabled === true || loading}
 						readOnly={readOnly}
+						data-loading={loading ? '' : undefined}
+						aria-busy={loading || undefined}
 						onChange={handleChange}
 						className={cn(textareaVariants({ size }), classNames?.textarea)}
 						{...props}
 					/>
 				}
 			/>
-			{offered && (
-				<Clear
-					data-slot="textarea-clear"
-					label={clearLabel}
-					onClick={handleClear}
-					className={cn('absolute top-1.5 end-1.5', classNames?.clear)}
-				/>
+			{loading ? (
+				<ControlSpinner className="absolute top-2 end-2 text-muted-foreground" />
+			) : (
+				offered && (
+					<Clear
+						data-slot="textarea-clear"
+						label={clearLabel}
+						onClick={handleClear}
+						className={cn('absolute top-1.5 end-1.5', classNames?.clear)}
+					/>
+				)
 			)}
 		</div>
 	);

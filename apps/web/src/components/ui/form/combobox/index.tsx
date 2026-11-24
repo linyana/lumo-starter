@@ -1,3 +1,4 @@
+import { ControlSpinner } from '@/components/ui/form/loading';
 import { cn } from '@/lib/utils';
 import {
 	ComboboxClear,
@@ -22,6 +23,7 @@ export const Combobox = ({
 	placeholder,
 	size = 'md',
 	disabled = false,
+	loading = false,
 	name,
 	empty,
 	className,
@@ -32,13 +34,29 @@ export const Combobox = ({
 		value={value}
 		defaultValue={defaultValue}
 		onValueChange={onChange}
-		disabled={disabled}
+		disabled={disabled || loading}
 		name={name}
 	>
-		<ComboboxInputGroup className={cn(className, classNames?.group)}>
-			<ComboboxInput size={size} placeholder={placeholder} className={classNames?.input} />
-			<ComboboxTrigger />
-			<ComboboxClear />
+		<ComboboxInputGroup
+			className={cn(className, classNames?.group)}
+			data-loading={loading ? '' : undefined}
+		>
+			<ComboboxInput
+				size={size}
+				placeholder={placeholder}
+				className={classNames?.input}
+				data-loading={loading ? '' : undefined}
+				aria-busy={loading || undefined}
+				readOnly={loading || undefined}
+			/>
+			{loading ? (
+				<ControlSpinner className="absolute inset-y-0 end-0.5 my-auto text-muted-foreground" />
+			) : (
+				<>
+					<ComboboxTrigger />
+					<ComboboxClear />
+				</>
+			)}
 		</ComboboxInputGroup>
 		<ComboboxPortal>
 			<ComboboxPositioner>

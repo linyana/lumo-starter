@@ -1,4 +1,5 @@
 import { useId } from 'react';
+import { ControlSpinner } from '@/components/ui/form/loading';
 import { cn } from '@/lib/utils';
 import { CheckboxIndicator, CheckboxRoot } from './parts';
 import type { CheckboxProps } from './types';
@@ -8,6 +9,7 @@ export const Checkbox = ({
 	id,
 	value,
 	defaultValue,
+	loading = false,
 	onChange,
 	className,
 	classNames,
@@ -24,9 +26,16 @@ export const Checkbox = ({
 				defaultChecked={defaultValue}
 				onCheckedChange={onChange}
 				{...props}
+				disabled={props.disabled === true || loading}
+				data-loading={loading ? '' : undefined}
+				aria-busy={loading || undefined}
 				className={classNames?.box}
 			>
-				<CheckboxIndicator className={classNames?.indicator} />
+				{loading ? (
+					<ControlSpinner size="0.75em" />
+				) : (
+					<CheckboxIndicator className={classNames?.indicator} />
+				)}
 			</CheckboxRoot>
 			{label !== undefined && (
 				<label

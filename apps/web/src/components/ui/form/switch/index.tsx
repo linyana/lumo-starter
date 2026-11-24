@@ -1,4 +1,5 @@
 import { useId } from 'react';
+import { ControlSpinner } from '@/components/ui/form/loading';
 import { cn } from '@/lib/utils';
 import { SwitchRoot, SwitchThumb } from './parts';
 import type { SwitchProps } from './types';
@@ -8,6 +9,7 @@ export const Switch = ({
 	id,
 	value,
 	defaultValue,
+	loading = false,
 	onChange,
 	className,
 	classNames,
@@ -24,9 +26,24 @@ export const Switch = ({
 				defaultChecked={defaultValue}
 				onCheckedChange={onChange}
 				{...props}
-				className={classNames?.track}
+				disabled={props.disabled === true || loading}
+				data-loading={loading ? '' : undefined}
+				aria-busy={loading || undefined}
+				className={cn('group/switch', classNames?.track)}
 			>
-				<SwitchThumb className={classNames?.thumb} />
+				<SwitchThumb
+					className={cn(
+						loading && 'flex items-center justify-center bg-transparent shadow-none',
+						classNames?.thumb,
+					)}
+				>
+					{loading && (
+						<ControlSpinner
+							size="0.75em"
+							className="text-muted-foreground group-data-[checked]/switch:text-primary-foreground"
+						/>
+					)}
+				</SwitchThumb>
 			</SwitchRoot>
 			{label !== undefined && (
 				<label

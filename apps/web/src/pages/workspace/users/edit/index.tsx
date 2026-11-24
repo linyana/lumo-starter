@@ -54,7 +54,7 @@ export const EditUser = ({ user, closePanel, reload }: IPropsType) => {
 			description={user.email}
 			footer={
 				<>
-					<Button variant="outline" onClick={() => setOpen(false)}>
+					<Button variant="outline" disabled={loading} onClick={() => setOpen(false)}>
 						Cancel
 					</Button>
 					<Tooltip content="Nothing has changed yet." disabled={changed}>
@@ -97,6 +97,7 @@ export const EditUser = ({ user, closePanel, reload }: IPropsType) => {
 						multiple
 						variant="outline"
 						size="sm"
+						loading={loading}
 						disabled={ownRow}
 						items={ROLES.map((role) => ({ value: role, label: ROLE_META[role] }))}
 					/>

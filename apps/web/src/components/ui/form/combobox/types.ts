@@ -12,6 +12,7 @@ export type ComboboxProps = {
 	placeholder?: string;
 	size?: ComboboxInputProps['size'];
 	disabled?: boolean;
+	loading?: boolean;
 	name?: string;
 	empty?: ReactNode;
 	className?: string;

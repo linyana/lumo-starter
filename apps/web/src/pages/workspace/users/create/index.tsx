@@ -35,7 +35,7 @@ export const CreateUser = ({ onCreated }: IPropsType) => {
 			description="They sign in with this email and the password you set."
 			footer={
 				<>
-					<Button variant="outline" onClick={() => setOpen(false)}>
+					<Button variant="outline" disabled={loading} onClick={() => setOpen(false)}>
 						Cancel
 					</Button>
 					<Button loading={loading} onClick={form.submit}>
@@ -71,6 +71,7 @@ export const CreateUser = ({ onCreated }: IPropsType) => {
 						multiple
 						variant="outline"
 						size="sm"
+						loading={loading}
 						items={ROLES.map((role) => ({ value: role, label: ROLE_META[role] }))}
 					/>
 				</Field>

@@ -36,12 +36,7 @@ export const LoginPage = () => {
 		>
 			<Form className="gap-6" schema={loginSchema} onSubmit={submit.fetchData}>
 				<Field name="email">
-					<Input
-						type="email"
-						autoComplete="username"
-						placeholder="Email"
-						aria-label="Email"
-					/>
+					<Input type="email" autoComplete="username" placeholder="Email" aria-label="Email" />
 				</Field>
 
 				<Field name="password">

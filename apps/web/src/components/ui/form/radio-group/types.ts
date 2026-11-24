@@ -7,6 +7,7 @@ type RadioGroupRootPicked<Value> = Pick<
 	'value' | 'defaultValue' | 'disabled' | 'name' | 'required'
 > & {
 	onChange?: RadioGroupRootProps<Value>['onValueChange'];
+	loading?: boolean;
 };
 
 export type RadioOption<Value extends string = string> = {

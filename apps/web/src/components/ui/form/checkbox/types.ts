@@ -6,6 +6,7 @@ type CheckboxRootPicked = Pick<CheckboxRootProps, 'disabled' | 'name' | 'require
 	value?: boolean;
 	defaultValue?: boolean;
 	onChange?: (value: boolean) => void;
+	loading?: boolean;
 };
 
 export type CheckboxSlots = 'root' | 'box' | 'indicator' | 'label';

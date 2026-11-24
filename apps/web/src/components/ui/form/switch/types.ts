@@ -6,6 +6,7 @@ type SwitchRootPicked = Pick<SwitchRootProps, 'disabled' | 'name' | 'required'> 
 	value?: boolean;
 	defaultValue?: boolean;
 	onChange?: (value: boolean) => void;
+	loading?: boolean;
 };
 
 export type SwitchSlots = 'root' | 'track' | 'thumb' | 'label';

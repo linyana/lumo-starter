@@ -52,6 +52,8 @@ export const fieldShell = ({ hover = 'border' }: { hover?: 'border' | 'tint' } =
 		hover === 'border' ? shellEdge : shellFocus,
 		'disabled:cursor-not-allowed disabled:opacity-50',
 		'data-disabled:cursor-not-allowed data-disabled:opacity-50',
+		'data-loading:cursor-progress',
+		'data-loading:disabled:opacity-100 data-loading:data-disabled:opacity-100',
 	);
 
 export const toggleBox = cn(
@@ -62,6 +64,8 @@ export const toggleBox = cn(
 	'data-checked:border-primary',
 	'data-checked:focus-visible:border-(--shell-focus)',
 	'data-disabled:cursor-not-allowed data-disabled:opacity-50',
+	'data-loading:cursor-progress',
+	'data-loading:data-disabled:opacity-100',
 );
 
 export const toggleMark = cn(
