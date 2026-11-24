@@ -16,6 +16,8 @@ import {
 } from './parts';
 import type { SelectProps } from './types';
 
+export type { SelectOption, SelectProps, SelectSlots } from './types';
+
 export const Select = <Value extends string>({
 	options,
 	value,

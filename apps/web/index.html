@@ -8,14 +8,18 @@
 		<title>Lumo Starter</title>
 		<!--
 			Applies the remembered theme before the first paint, so a dark reload never flashes light.
-			The key and the shape are `hooks/use-global`: change them there and here together.
+			The key, the shape and the default are `hooks/use-global`: change them there and here together.
 		-->
 		<script>
 			try {
 				const persisted = JSON.parse(localStorage.getItem('lumo') ?? 'null');
-				if (persisted?.state?.theme === 'dark') {
-					document.documentElement.classList.add('dark');
-				}
+				const remembered = persisted?.state?.theme;
+				const theme = remembered === 'light' || remembered === 'dark' ? remembered : 'system';
+				const dark =
+					theme === 'dark' ||
+					(theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+				document.documentElement.classList.toggle('dark', dark);
+				document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
 			} catch {
 				// Storage can be unavailable; the theme provider applies the default once it mounts.
 			}

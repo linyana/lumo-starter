@@ -1,11 +1,10 @@
 import { Moon, Sun } from 'lucide-react';
 import { Button } from '@/components';
-import { useGlobal } from '@/hooks';
+import { useTheme } from '../use-theme';
 
 export const ThemeToggle = () => {
-	const theme = useGlobal((state) => state.theme);
-	const set = useGlobal((state) => state.actions.set);
-	const dark = theme === 'dark';
+	const { resolved, setTheme } = useTheme();
+	const dark = resolved === 'dark';
 
 	return (
 		<Button
@@ -15,7 +14,7 @@ export const ThemeToggle = () => {
 			aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
 			aria-pressed={dark}
 			icon={dark ? <Sun /> : <Moon />}
-			onClick={() => set({ theme: dark ? 'light' : 'dark' })}
+			onClick={() => setTheme(dark ? 'light' : 'dark')}
 		/>
 	);
 };

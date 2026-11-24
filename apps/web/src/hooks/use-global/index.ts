@@ -1,18 +1,27 @@
 import { create } from 'zustand';
 import { persist, type PersistOptions } from 'zustand/middleware';
-import type { GlobalState, GlobalStore } from './types';
+import { isTheme, type GlobalState, type GlobalStore, type Theme } from './types';
 
-export type { GlobalActions, GlobalState, GlobalStore, Theme } from './types';
+export * from './types';
+
+export const defaultTheme: Theme = 'system';
 
 const initial: GlobalState = {
-	theme: 'light',
+	theme: defaultTheme,
 	collapsed: false,
 };
 
-const stored = ({ theme, collapsed }: Partial<GlobalState>): GlobalState => ({
-	theme: theme === 'dark' ? 'dark' : initial.theme,
-	collapsed: typeof collapsed === 'boolean' ? collapsed : initial.collapsed,
-});
+const asRecord = (value: unknown): Record<string, unknown> =>
+	typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : {};
+
+const stored = (state: unknown): GlobalState => {
+	const persisted = asRecord(state);
+
+	return {
+		theme: isTheme(persisted.theme) ? persisted.theme : initial.theme,
+		collapsed: typeof persisted.collapsed === 'boolean' ? persisted.collapsed : initial.collapsed,
+	};
+};
 
 export const useGlobal = create<GlobalStore>()(
 	persist(
@@ -29,7 +38,7 @@ export const useGlobal = create<GlobalStore>()(
 			partialize: stored,
 			merge: (persisted, current) => ({
 				...current,
-				...stored(persisted as Partial<GlobalState>),
+				...stored(persisted),
 			}),
 		} satisfies PersistOptions<GlobalStore, GlobalState>,
 	),

@@ -1,17 +1,18 @@
 import { useLayoutEffect, type ReactNode } from 'react';
-import { useGlobal } from '@/hooks';
+import { useTheme } from './use-theme';
 
 export { ThemeToggle } from './theme-toggle';
+export { useTheme } from './use-theme';
 
 type IPropsType = { children: ReactNode };
 
 export const ThemeProvider = ({ children }: IPropsType) => {
-	const theme = useGlobal((state) => state.theme);
+	const { resolved } = useTheme();
 
 	useLayoutEffect(() => {
-		document.documentElement.classList.toggle('dark', theme === 'dark');
-		document.documentElement.style.colorScheme = theme;
-	}, [theme]);
+		document.documentElement.classList.toggle('dark', resolved === 'dark');
+		document.documentElement.style.colorScheme = resolved;
+	}, [resolved]);
 
 	return children;
 };

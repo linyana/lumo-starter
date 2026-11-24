@@ -1,9 +1,14 @@
 import { nanoid } from 'nanoid';
 import { useId, useState } from 'react';
-import { SettingsGroupList, SettingsGroupRoot, SettingsGroupRow, SettingsGroupTitle } from './parts';
+import {
+	SettingsGroupList,
+	SettingsGroupRoot,
+	SettingsGroupRow,
+	SettingsGroupTitle,
+} from './parts';
 import type { SettingsGroupProps } from './types';
 
-export type { SettingsGroupItem, SettingsGroupProps } from './types';
+export type { SettingsGroupItem, SettingsGroupProps, SettingsGroupWidth } from './types';
 
 export const SettingsGroup = ({ title, items, className }: SettingsGroupProps) => {
 	const titleId = useId();
@@ -14,7 +19,7 @@ export const SettingsGroup = ({ title, items, className }: SettingsGroupProps) =
 	return (
 		<SettingsGroupRoot
 			aria-labelledby={title !== undefined ? titleId : undefined}
-			className="text-"
+			className={className}
 		>
 			{title !== undefined && <SettingsGroupTitle id={titleId}>{title}</SettingsGroupTitle>}
 			<SettingsGroupList>

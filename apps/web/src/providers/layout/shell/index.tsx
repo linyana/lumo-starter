@@ -4,7 +4,6 @@ import { Outlet, useLocation, useNavigate } from 'react-router';
 import { Avatar, Button, Menu, Spinner } from '@/components';
 import { useGlobal } from '@/hooks';
 import { useAuth } from '@/providers/auth';
-import { ThemeToggle } from '@/providers/theme';
 import { Layout, type LayoutNavEntry } from '../frame';
 
 type IPropsType = {
@@ -104,11 +103,6 @@ export const AppShell = ({ nav }: IPropsType) => {
 						}
 					/>
 				) : null
-			}
-			brandActions={
-				<>
-					<ThemeToggle />
-				</>
 			}
 		>
 			<Layout.Content>
