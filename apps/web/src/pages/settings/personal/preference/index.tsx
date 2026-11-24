@@ -22,18 +22,18 @@ const sizeOptions: SelectOption<number>[] = PAGE_SIZE_OPTIONS.map((size) => ({
 
 export const PreferenceSetting = () => {
 	const { theme, setTheme } = useTheme();
-	const { content, save } = useSetting();
+	const { settings, update } = useSetting();
 	const form = useForm();
 
-	const saver = useHttp({ endpoint: save, successMessage: 'Preference saved', form });
+	const autosave = useHttp({ endpoint: update, successMessage: 'Preference saved', form });
 
 	return (
 		<Page variant="settings" title="Preference">
 			<Form
 				form={form}
 				schema={userSettingContentSchema}
-				initial={content}
-				save={saver}
+				initial={settings}
+				autosave={autosave}
 				commitOn="change"
 			>
 				<SettingsGroup

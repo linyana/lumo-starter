@@ -18,9 +18,8 @@ import { useHttp } from '@/hooks';
 import { FullPageLoader, useAuth } from '@/providers/auth';
 
 type SettingContextValue = {
-	content: UserSettingContent;
-	/** A plain endpoint: rejects when the server keeps the stored content. */
-	save: (input: UpdateUserSettingInput) => Promise<UserSettingContent>;
+	settings: UserSettingContent;
+	update: (input: UpdateUserSettingInput) => Promise<UserSettingContent>;
 };
 
 const SettingContext = createContext<SettingContextValue | null>(null);
@@ -33,8 +32,7 @@ export const SettingProvider = ({ children }: { children: ReactNode }) => {
 	const [setting, setSetting] = useState<UserSetting>(EMPTY);
 	const [ready, setReady] = useState(false);
 
-	const opener = useHttp({ endpoint: settingsApi.mine, toastError: false });
-	const { fetchData: open } = opener;
+	const { fetchData: load } = useHttp({ endpoint: settingsApi.mine, toastError: false });
 
 	useEffect(() => {
 		if (status !== 'authenticated') {
@@ -45,9 +43,7 @@ export const SettingProvider = ({ children }: { children: ReactNode }) => {
 
 		let live = true;
 
-		// Rendering the app before the stored content arrives would mount every
-		// list with the defaults, so the children wait for this one request.
-		void open().then((result) => {
+		void load().then((result) => {
 			if (!live) return;
 			if (result?.ok === true) setSetting(result.data);
 			setReady(true);
@@ -56,17 +52,20 @@ export const SettingProvider = ({ children }: { children: ReactNode }) => {
 		return () => {
 			live = false;
 		};
-	}, [status, open]);
+	}, [status, load]);
 
-	const save = useCallback(async (input: UpdateUserSettingInput): Promise<UserSettingContent> => {
-		const next = await settingsApi.update(input);
-		setSetting(next);
-		return next.content;
-	}, []);
+	const update = useCallback(
+		async (input: UpdateUserSettingInput): Promise<UserSettingContent> => {
+			const next = await settingsApi.update(input);
+			setSetting(next);
+			return next.content;
+		},
+		[],
+	);
 
 	const value = useMemo<SettingContextValue>(
-		() => ({ content: setting.content, save }),
-		[setting.content, save],
+		() => ({ settings: setting.content, update }),
+		[setting.content, update],
 	);
 
 	if (status === 'authenticated' && !ready) return <FullPageLoader />;

@@ -7,7 +7,7 @@ export const ProfileSetting = () => {
 	const { user, updateProfile } = useAuth();
 	const form = useForm();
 
-	const save = useHttp({ endpoint: updateProfile, successMessage: 'Profile saved', form });
+	const autosave = useHttp({ endpoint: updateProfile, successMessage: 'Profile saved', form });
 
 	if (user === null) return null;
 
@@ -17,7 +17,7 @@ export const ProfileSetting = () => {
 				form={form}
 				schema={updateProfileSchema}
 				initial={{ username: user.username, email: user.email, name: user.name }}
-				save={save}
+				autosave={autosave}
 			>
 				<SettingsGroup
 					title="Account"

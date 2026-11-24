@@ -6,8 +6,8 @@ import { CreateUser } from './create';
 import { UserList } from './list';
 
 export const UsersPage = () => {
-	const { content } = useSetting();
-	const list = useQuery({ fetcher: usersApi.list, pageSize: content.pageSize });
+	const { settings } = useSetting();
+	const list = useQuery({ fetcher: usersApi.list, pageSize: settings.pageSize });
 
 	return (
 		<div className="space-y-3">

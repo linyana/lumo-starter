@@ -22,7 +22,7 @@ export const Form = <Input, Values extends Record<string, unknown> = Record<stri
 	form,
 	schema,
 	initial,
-	save,
+	autosave,
 	commitOn,
 	onSubmit,
 	onChange,
@@ -41,7 +41,7 @@ export const Form = <Input, Values extends Record<string, unknown> = Record<stri
 		form: instance,
 		schema,
 		initial: initial ?? NO_VALUES,
-		save,
+		autosave,
 		commitOn,
 	});
 

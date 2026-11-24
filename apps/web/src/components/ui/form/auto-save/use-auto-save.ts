@@ -11,13 +11,13 @@ type Send = (patch: Partial<FormValues>) => Promise<AutoSaveAck | null>;
 /**
  * Saves a form field by field: the edit ends on blur or Enter (or on change, for a control whose
  * options are final states) and sends that field alone, only when it differs from what the server
- * last confirmed. A form without a save handle gets no wiring, so its fields behave as before.
+ * last confirmed. A form without an autosave handle gets no wiring, so its fields behave as before.
  */
 export const useAutoSave = <TValues extends FormValues>({
 	form,
 	schema,
 	initial,
-	save,
+	autosave,
 	commitOn = 'leave',
 }: AutoSaveOptions<TValues>): FieldWiring => {
 	const queue = useRef<Promise<unknown>>(Promise.resolve());
@@ -25,10 +25,10 @@ export const useAutoSave = <TValues extends FormValues>({
 	const [pending, setPending] = useState<string | null>(null);
 	const [failed, setFailed] = useState<readonly string[]>([]);
 
-	if (save === undefined) return NO_WIRING;
+	if (autosave === undefined) return NO_WIRING;
 
-	const send = save.fetchData as Send;
-	const loading = save.loading;
+	const send = autosave.fetchData as Send;
+	const loading = autosave.loading;
 
 	const forget = ({ names }: { names: string[] }): void => {
 		const errors = { ...form.errors };

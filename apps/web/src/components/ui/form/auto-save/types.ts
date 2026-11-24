@@ -21,7 +21,7 @@ export type AutoSaveOptions<TValues extends FormValues> = {
 	form: FormInstance;
 	schema?: ZodType;
 	initial: TValues;
-	save?: AutoSaveHandle;
+	autosave?: AutoSaveHandle;
 	/**
 	 * What ends an edit. `leave` waits for blur or Enter, which an input needs: half a typed
 	 * address is not a value. A control whose options are final states submits on `change`.
