@@ -22,7 +22,7 @@ const sizeOptions: SelectOption<string>[] = PAGE_SIZE_OPTIONS.map((size) => ({
 
 export const PreferenceSetting = () => {
 	const { theme, setTheme } = useTheme();
-	const { content, save, saving } = useSetting();
+	const { content, save, saving, failed } = useSetting();
 
 	return (
 		<Page variant="settings" title="Preference">
@@ -53,6 +53,7 @@ export const PreferenceSetting = () => {
 								options={sizeOptions}
 								value={String(content.pageSize)}
 								loading={saving}
+								invalid={failed('pageSize')}
 								onChange={(next) => {
 									if (next !== null) void save({ pageSize: Number(next) });
 								}}

@@ -7,7 +7,7 @@ export const ProfileSetting = () => {
 	const { user, updateProfile } = useAuth();
 	const form = useForm();
 
-	const { saved, blur, enter, busy } = useAutoSave({
+	const { saved, blur, enter, busy, failed } = useAutoSave({
 		form,
 		schema: updateProfileSchema,
 		initial: {
@@ -44,6 +44,7 @@ export const ProfileSetting = () => {
 										autoCapitalize="none"
 										spellCheck={false}
 										loading={busy('username')}
+										invalid={failed('username')}
 										onBlur={blur('username')}
 										onKeyDown={enter('username')}
 									/>
@@ -60,6 +61,7 @@ export const ProfileSetting = () => {
 										type="email"
 										autoComplete="email"
 										loading={busy('email')}
+										invalid={failed('email')}
 										onBlur={blur('email')}
 										onKeyDown={enter('email')}
 									/>
@@ -75,6 +77,7 @@ export const ProfileSetting = () => {
 									<Input
 										autoComplete="name"
 										loading={busy('name')}
+										invalid={failed('name')}
 										onBlur={blur('name')}
 										onKeyDown={enter('name')}
 									/>

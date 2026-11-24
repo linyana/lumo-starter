@@ -20,6 +20,7 @@ import { FullPageLoader, useAuth } from '@/providers/auth';
 type SettingContextValue = {
 	content: UserSettingContent;
 	saving: boolean;
+	failed: (key: keyof UserSettingContent) => boolean;
 	save: (input: UpdateUserSettingInput) => Promise<void>;
 };
 
@@ -32,6 +33,7 @@ export const SettingProvider = ({ children }: { children: ReactNode }) => {
 
 	const [setting, setSetting] = useState<UserSetting>(EMPTY);
 	const [ready, setReady] = useState(false);
+	const [failed, setFailed] = useState<keyof UserSettingContent | null>(null);
 
 	const opener = useHttp({ endpoint: settingsApi.mine, toastError: false });
 	const saver = useHttp({ endpoint: settingsApi.update, successMessage: 'Preference saved' });
@@ -64,14 +66,31 @@ export const SettingProvider = ({ children }: { children: ReactNode }) => {
 	const save = useCallback(
 		async (input: UpdateUserSettingInput): Promise<void> => {
 			const result = await persist(input);
-			if (result?.ok === true) setSetting(result.data);
+			if (result === null) return;
+
+			if (result.ok) {
+				setSetting(result.data);
+				// The red answers the value the server last refused, so only the save that replaces
+				// that verdict may clear it.
+				setFailed((current) =>
+					current !== null && Object.hasOwn(input, current) ? null : current,
+				);
+				return;
+			}
+
+			setFailed((Object.keys(input) as (keyof UserSettingContent)[])[0] ?? null);
 		},
 		[persist],
 	);
 
 	const value = useMemo<SettingContextValue>(
-		() => ({ content: setting.content, saving, save }),
-		[setting.content, saving, save],
+		() => ({
+			content: setting.content,
+			saving,
+			failed: (key) => failed === key,
+			save,
+		}),
+		[setting.content, saving, failed, save],
 	);
 
 	if (status === 'authenticated' && !ready) return <FullPageLoader />;

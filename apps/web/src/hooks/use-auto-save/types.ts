@@ -15,4 +15,5 @@ export type AutoSaveResult<TValues extends FormValues> = {
 	blur: (name: keyof TValues & string) => () => void;
 	enter: (name: keyof TValues & string) => (event: KeyboardEvent<HTMLInputElement>) => void;
 	busy: (name: keyof TValues & string) => boolean;
+	failed: (name: keyof TValues & string) => boolean;
 };

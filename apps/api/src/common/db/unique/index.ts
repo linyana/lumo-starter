@@ -1,3 +1,4 @@
+import type { FieldError } from '@lumo/shared';
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { AppException } from '../../errors/app.exception.js';
 import type { PrismaService } from '../prisma.service.js';
@@ -30,5 +31,10 @@ export const assertUserFieldFree = async ({
 		where: whereFor({ field, value }),
 		select: { id: true },
 	});
-	if (taken) throw new AppException({ code: 'CONFLICT', message: MESSAGE[field] });
+	if (!taken) return;
+
+	// The path is what lets a form put the message on the field that lost the race
+	// instead of raising a toast over the whole page.
+	const details: FieldError[] = [{ path: field, message: MESSAGE[field] }];
+	throw new AppException({ code: 'CONFLICT', message: MESSAGE[field], details });
 };

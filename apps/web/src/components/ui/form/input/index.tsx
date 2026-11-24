@@ -33,6 +33,7 @@ export type InputProps = Omit<ComponentProps<typeof BaseInput>, 'className' | 's
 		clearable?: boolean;
 		clearLabel?: string;
 		loading?: boolean;
+		invalid?: boolean;
 	};
 
 type ChangeEvent = Parameters<NonNullable<InputProps['onChange']>>[0];
@@ -44,6 +45,7 @@ export function Input({
 	clearable = false,
 	clearLabel = 'Clear',
 	loading = false,
+	invalid = false,
 	value,
 	defaultValue,
 	disabled,
@@ -94,6 +96,7 @@ export function Input({
 				readOnly={readOnly}
 				data-loading={loading ? '' : undefined}
 				aria-busy={loading || undefined}
+				aria-invalid={invalid || undefined}
 				onChange={handleChange}
 				className={cn(
 					inputVariants({ size }),

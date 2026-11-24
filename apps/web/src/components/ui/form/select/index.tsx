@@ -29,6 +29,7 @@ export const Select = <Value extends string>({
 	size = 'md',
 	disabled = false,
 	loading = false,
+	invalid = false,
 	name,
 	id,
 	required = false,
@@ -62,6 +63,7 @@ export const Select = <Value extends string>({
 					className={classNames?.trigger}
 					aria-label={ariaLabel}
 					aria-busy={loading || undefined}
+					aria-invalid={invalid || undefined}
 					data-loading={loading ? '' : undefined}
 				>
 					<SelectValue placeholder={placeholder} className={classNames?.value} />

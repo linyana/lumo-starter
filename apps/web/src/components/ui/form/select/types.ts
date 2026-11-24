@@ -21,6 +21,7 @@ export type SelectProps<Value extends string = string> = {
 	size?: SelectTriggerProps['size'];
 	disabled?: boolean;
 	loading?: boolean;
+	invalid?: boolean;
 	name?: string;
 	id?: string;
 	required?: boolean;
