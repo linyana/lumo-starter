@@ -51,7 +51,7 @@ export const Combobox = ({
 				readOnly={loading || undefined}
 			/>
 			{loading ? (
-				<ControlSpinner className="absolute inset-y-0 end-0.5 text-muted-foreground" />
+				<ControlSpinner className="absolute inset-y-0 inset-e-0.5 text-muted-foreground" />
 			) : (
 				<>
 					<ComboboxTrigger />

@@ -103,7 +103,7 @@ export function Input({
 				{...props}
 			/>
 			{loading ? (
-				<ControlSpinner className="absolute inset-y-0 end-2 text-muted-foreground" />
+				<ControlSpinner className="absolute inset-y-0 inset-e-2 text-muted-foreground" />
 			) : (
 				offered && (
 					<Clear

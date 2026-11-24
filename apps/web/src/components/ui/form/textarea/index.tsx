@@ -74,7 +74,7 @@ export function Textarea({
 			className={cn(
 				'relative',
 				fieldText[size],
-				'has-[[data-slot=textarea-clear]]:[&_textarea]:pe-8',
+				'has-data-[slot=textarea-clear]:[&_textarea]:pe-8',
 				'has-data-[slot=control-spinner]:[&_textarea]:pe-8',
 				className,
 				classNames?.root,
@@ -98,14 +98,14 @@ export function Textarea({
 				}
 			/>
 			{loading ? (
-				<ControlSpinner className="absolute top-2 end-2 text-muted-foreground" />
+				<ControlSpinner className="absolute top-2 inset-e-2 text-muted-foreground" />
 			) : (
 				offered && (
 					<Clear
 						data-slot="textarea-clear"
 						label={clearLabel}
 						onClick={handleClear}
-						className={cn('absolute top-1.5 end-1.5', classNames?.clear)}
+						className={cn('absolute top-1.5 inset-e-1.5', classNames?.clear)}
 					/>
 				)
 			)}
