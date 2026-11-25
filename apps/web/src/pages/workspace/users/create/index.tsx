@@ -1,8 +1,8 @@
-import { createUserSchema, ROLE_META, ROLES, type Role } from '@lumo/shared';
+import { createUserSchema } from '@lumo/shared';
 import { useState } from 'react';
 import { usersApi } from '@/api';
 import { Button, Dialog, Field, Form, Input, ToggleGroup, useForm } from '@/components';
-import { useHttp } from '@/hooks';
+import { useHttp, useRoles } from '@/hooks';
 
 type IPropsType = {
 	onCreated: () => void;
@@ -11,6 +11,7 @@ type IPropsType = {
 export const CreateUser = ({ onCreated }: IPropsType) => {
 	const [open, setOpen] = useState(false);
 	const form = useForm();
+	const { roles, loading: rolesLoading } = useRoles();
 
 	const { loading, fetchData } = useHttp({
 		form,
@@ -75,12 +76,12 @@ export const CreateUser = ({ onCreated }: IPropsType) => {
 				</Field>
 
 				<Field name="roles" label="Roles" description="At least one.">
-					<ToggleGroup<Role>
+					<ToggleGroup<string>
 						multiple
 						variant="outline"
 						size="sm"
-						loading={loading}
-						items={ROLES.map((role) => ({ value: role, label: ROLE_META[role] }))}
+						loading={loading || rolesLoading}
+						items={roles.map((role) => ({ value: role.key, label: role.name }))}
 					/>
 				</Field>
 			</Form>

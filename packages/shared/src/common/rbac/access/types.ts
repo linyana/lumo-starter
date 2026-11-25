@@ -1,14 +1,14 @@
 import type { Permission } from '../permission';
-import type { Role } from '../role';
+import type { RoleRef } from '../role';
 
 export type AccessGrant = {
-	readonly roles: readonly Role[];
+	readonly roles: readonly RoleRef[];
 	readonly permissions: readonly Permission[];
 };
 
 export type AccessCondition = {
 	permission?: Permission | readonly Permission[];
-	role?: Role | readonly Role[];
+	role?: string | readonly string[];
 	when?: (grant: AccessGrant) => boolean;
 };
 

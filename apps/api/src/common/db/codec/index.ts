@@ -1,4 +1,5 @@
-import { roleSchema, type Role } from '@lumo/shared';
+import { permissionSchema, type Permission } from '@lumo/shared';
 
-export const decodeRoles = (roles: readonly string[]): Role[] =>
-	roles.map((role) => roleSchema.parse(role));
+/** Keeps a permission key that no longer exists in the code catalog from flowing out as a `string`. */
+export const decodePermissions = (keys: readonly string[]): Permission[] =>
+	[...new Set(keys)].map((key) => permissionSchema.parse(key));

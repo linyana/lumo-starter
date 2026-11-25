@@ -1,11 +1,21 @@
-import { LayoutDashboard, Settings, SlidersHorizontal, UserRound, Users } from 'lucide-react';
+import {
+	LayoutDashboard,
+	Settings,
+	ScrollText,
+	ShieldCheck,
+	SlidersHorizontal,
+	UserRound,
+	Users,
+} from 'lucide-react';
 import { Navigate } from 'react-router';
 import {
+	AuditPage,
 	DashboardPage,
 	LoginPage,
 	PreferenceSetting,
 	ProfileSetting,
 	RegisterPage,
+	RolesPage,
 	UsersPage,
 } from '@/pages';
 import type { AppRoute } from '@/providers/routes';
@@ -24,6 +34,20 @@ export const routes: AppRoute[] = [
 		page: UsersPage,
 		access: { permission: 'user:read' },
 		nav: { group: 'Workspace', label: 'Users', icon: Users },
+	},
+	{
+		path: 'roles',
+		layout: 'shell',
+		page: RolesPage,
+		access: { permission: 'role:read' },
+		nav: { group: 'Workspace', label: 'Roles', icon: ShieldCheck },
+	},
+	{
+		path: 'audit',
+		layout: 'shell',
+		page: AuditPage,
+		access: { permission: 'audit:read' },
+		nav: { group: 'Workspace', label: 'Audit log', icon: ScrollText },
 	},
 	{
 		path: 'settings',

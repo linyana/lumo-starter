@@ -1,13 +1,11 @@
 import { z } from 'zod';
-import { permissionSchema } from '../../../common/rbac/permission';
-import { roleSchema } from '../../../common/rbac/role';
+import { roleRefSchema } from '../../../common/rbac/role';
 
 export const userSchema = z.object({
 	id: z.string(),
 	email: z.string(),
 	name: z.string(),
 	username: z.string(),
-	roles: z.array(roleSchema),
-	permissions: z.array(permissionSchema),
+	roles: z.array(roleRefSchema),
 	createdAt: z.iso.datetime(),
 });

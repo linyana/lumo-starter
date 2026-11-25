@@ -4,18 +4,21 @@ import {
 	loginSchema,
 	patchProfileSchema,
 	registerSchema,
+	switchWorkspaceSchema,
+	type AuthResult,
 	type LoginInput,
 	type PatchProfileInput,
 	type RegisterInput,
+	type SwitchWorkspaceInput,
 } from '@lumo/shared';
 import type { NodeResponse } from '@nestjs/platform-node';
-import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
+import { CurrentActor } from '../../common/decorators/current-user.decorator.js';
 import { Public } from '../../common/decorators/public.decorator.js';
 import { SkipEnvelope } from '../../common/decorators/skip-envelope.decorator.js';
 import { AppException } from '../../common/errors/app.exception.js';
 import { ZodBody } from '../../common/pipes/zod-validation.pipe.js';
 import { ApiZodBody } from '../../common/swagger/zod-openapi/index.js';
-import type { AuthUser } from '../../common/types/index.js';
+import type { AuthActor } from '../../common/types/index.js';
 import { AuthService } from './auth.service.js';
 import { REFRESH_COOKIE, clearRefreshCookie, setRefreshCookie } from './refresh-cookie/index.js';
 import type { IssuedTokens } from './token.service.js';
@@ -34,7 +37,7 @@ export class AuthController {
 	) {
 		const result = await this.auth.register(input);
 		this.attachRefreshCookie({ res, tokens: result.tokens });
-		return { accessToken: result.tokens.accessToken, user: result.user };
+		return this.toWireResult(result);
 	}
 
 	@Public()
@@ -47,7 +50,7 @@ export class AuthController {
 	) {
 		const result = await this.auth.login(input);
 		this.attachRefreshCookie({ res, tokens: result.tokens });
-		return { accessToken: result.tokens.accessToken, user: result.user };
+		return this.toWireResult(result);
 	}
 
 	@Public()
@@ -61,7 +64,23 @@ export class AuthController {
 
 		const result = await this.auth.refresh(raw);
 		this.attachRefreshCookie({ res, tokens: result.tokens });
-		return { accessToken: result.tokens.accessToken, user: result.user };
+		return this.toWireResult(result);
+	}
+
+	@Post('switch-workspace')
+	@HttpCode(HttpStatus.OK)
+	@ApiZodBody(switchWorkspaceSchema)
+	async switchWorkspace(
+		@CurrentActor() actor: AuthActor,
+		@ZodBody(switchWorkspaceSchema) input: SwitchWorkspaceInput,
+		@Res({ passthrough: true }) res: NodeResponse,
+	) {
+		const result = await this.auth.switchWorkspace({
+			userId: actor.id,
+			workspaceId: input.workspaceId,
+		});
+		this.attachRefreshCookie({ res, tokens: result.tokens });
+		return this.toWireResult(result);
 	}
 
 	@Public()
@@ -77,17 +96,27 @@ export class AuthController {
 	}
 
 	@Get('me')
-	async me(@CurrentUser() user: AuthUser) {
-		return { user: await this.auth.me(user.id) };
+	async me(@CurrentActor() actor: AuthActor) {
+		return this.auth.session({ userId: actor.id, workspaceId: actor.workspaceId });
 	}
 
 	@Patch('me')
 	@ApiZodBody(patchProfileSchema)
 	async updateMe(
-		@CurrentUser() user: AuthUser,
+		@CurrentActor() actor: AuthActor,
 		@ZodBody(patchProfileSchema) input: PatchProfileInput,
 	) {
-		return { user: await this.auth.updateProfile({ userId: user.id, input }) };
+		return {
+			user: await this.auth.updateProfile({
+				userId: actor.id,
+				workspaceId: actor.workspaceId,
+				input,
+			}),
+		};
+	}
+
+	private toWireResult({ accessToken, user, permissions, workspace, workspaces }: AuthResult) {
+		return { accessToken, user, permissions, workspace, workspaces };
 	}
 
 	private attachRefreshCookie({ res, tokens }: { res: NodeResponse; tokens: IssuedTokens }): void {

@@ -17,10 +17,10 @@ model User {
   username     String   @unique @db.VarChar(32)
   name         String   @db.VarChar(80)
   passwordHash String
-  roles        String[] @default(["MEMBER"])
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  memberships   Membership[]
   refreshTokens RefreshToken[]
   settings      Setting[]
 
@@ -28,8 +28,113 @@ model User {
   @@map("users")
 }
 
+model Workspace {
+  id        String   @id @default(uuid()) @db.Uuid
+  slug      String   @unique @db.VarChar(32)
+  name      String   @db.VarChar(80)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships   Membership[]
+  roles         Role[]
+  refreshTokens RefreshToken[]
+
+  @@map("workspaces")
+}
+
+model Membership {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @db.Uuid
+  workspaceId String   @db.Uuid
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  assignments RoleAssignment[]
+
+  @@unique([userId, workspaceId])
+  @@index([workspaceId])
+  @@map("memberships")
+}
+
+/// The action catalog. Rows are synced from `PERMISSIONS` in @lumo/shared; nothing writes them by hand.
+model Permission {
+  key         String @id @db.VarChar(64)
+  description String @db.VarChar(160)
+
+  roles RolePermission[]
+
+  @@map("permissions")
+}
+
+/// `system` roles belong to the code (`SYSTEM_ROLES` + `SYSTEM_ROLE_PERMISSIONS`) and are read-only;
+/// the rest belong to one workspace and are edited by its admins.
+model Role {
+  id          String   @id @default(uuid()) @db.Uuid
+  key         String   @db.VarChar(32)
+  name        String   @db.VarChar(64)
+  system      Boolean  @default(false)
+  workspaceId String?  @db.Uuid
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace   Workspace?       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  permissions RolePermission[]
+  assignments RoleAssignment[]
+
+  @@unique([workspaceId, key])
+  @@map("roles")
+}
+
+model RolePermission {
+  roleId        String @db.Uuid
+  permissionKey String @db.VarChar(64)
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionKey], references: [key], onDelete: Cascade)
+
+  @@id([roleId, permissionKey])
+  @@index([permissionKey])
+  @@map("role_permissions")
+}
+
+/// Holds a role. The workspace it applies to is the membership's workspace.
+model RoleAssignment {
+  membershipId String   @db.Uuid
+  roleId       String   @db.Uuid
+  createdAt    DateTime @default(now())
+
+  membership Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([membershipId, roleId])
+  @@index([roleId])
+  @@map("role_assignments")
+}
+
+/// Append-only: nothing updates or deletes a row here, and the actor is stored by value so the record
+/// still reads correctly after the account is gone.
+model AuditEvent {
+  id           String   @id @default(uuid()) @db.Uuid
+  workspaceId  String   @db.Uuid
+  actorUserId  String?  @db.Uuid
+  actorEmail   String?  @db.VarChar(254)
+  action       String   @db.VarChar(48)
+  targetType   String   @db.VarChar(32)
+  targetId     String   @db.Uuid
+  before       Json?
+  after        Json?
+  createdAt    DateTime @default(now())
+
+  @@index([workspaceId, createdAt(sort: Desc)])
+  @@index([targetType, targetId])
+  @@index([actorUserId])
+  @@map("audit_events")
+}
+
 model Setting {
-  id String @id @default(uuid()) @db.Uuid
+  id      String @id @default(uuid()) @db.Uuid
   type    String @db.VarChar(32)
   ownerId String @db.Uuid
   content Json   @default("{}")
@@ -44,16 +149,19 @@ model Setting {
 }
 
 model RefreshToken {
-  id         String    @id @default(uuid()) @db.Uuid
-  tokenHash  String    @unique
-  userId     String    @db.Uuid
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  expiresAt  DateTime
-  revokedAt  DateTime?
-  replacedBy String?   @db.Uuid
-  createdAt  DateTime  @default(now())
+  id          String    @id @default(uuid()) @db.Uuid
+  tokenHash   String    @unique
+  userId      String    @db.Uuid
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspaceId String    @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  replacedBy  String?   @db.Uuid
+  createdAt   DateTime  @default(now())
 
   @@index([userId])
+  @@index([workspaceId])
   @@index([expiresAt])
   @@map("refresh_tokens")
 }

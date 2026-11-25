@@ -1,11 +1,4 @@
-import {
-	ROLE_META,
-	ROLES,
-	updateUserSchema,
-	type Role,
-	type UpdateUserInput,
-	type User,
-} from '@lumo/shared';
+import { updateUserSchema, type UpdateUserInput, type User } from '@lumo/shared';
 import { useState } from 'react';
 import { usersApi } from '@/api';
 import {
@@ -19,7 +12,7 @@ import {
 	useChanged,
 	useForm,
 } from '@/components';
-import { useHttp } from '@/hooks';
+import { useHttp, useRoles } from '@/hooks';
 import { useAuth } from '@/providers/auth';
 
 type IPropsType = {
@@ -31,9 +24,10 @@ type IPropsType = {
 export const EditUser = ({ user, closePanel, reload }: IPropsType) => {
 	const [open, setOpen] = useState(true);
 	const form = useForm();
-	const { user: currentUser } = useAuth();
+	const { user: currentUser, refresh } = useAuth();
 	const ownRow = user.id === currentUser?.id;
 	const changed = useChanged({ form });
+	const { roles, loading: rolesLoading } = useRoles();
 
 	const { fetchData, loading } = useHttp({
 		form,
@@ -42,6 +36,10 @@ export const EditUser = ({ user, closePanel, reload }: IPropsType) => {
 		onSuccess: () => {
 			setOpen(false);
 			reload();
+
+			// A role change to yourself takes effect on the API at once; re-read the session so this tab
+			// stops offering actions the API would now refuse.
+			if (ownRow) void refresh();
 		},
 	});
 
@@ -73,7 +71,12 @@ export const EditUser = ({ user, closePanel, reload }: IPropsType) => {
 			<Form
 				form={form}
 				schema={updateUserSchema}
-				initial={{ email: user.email, username: user.username, name: user.name, roles: user.roles }}
+				initial={{
+					email: user.email,
+					username: user.username,
+					name: user.name,
+					roles: user.roles.map((role) => role.key),
+				}}
 				onSubmit={(values) => {
 					if (!changed) return;
 
@@ -99,15 +102,18 @@ export const EditUser = ({ user, closePanel, reload }: IPropsType) => {
 				<Field
 					name="roles"
 					label="Roles"
-					description={ownRow ? 'You cannot change your own roles.' : 'At least one.'}
+					description={
+						ownRow
+							? 'Your own roles. Dropping Owner fails while you are the last one.'
+							: 'At least one.'
+					}
 				>
-					<ToggleGroup<Role>
+					<ToggleGroup<string>
 						multiple
 						variant="outline"
 						size="sm"
-						loading={loading}
-						disabled={ownRow}
-						items={ROLES.map((role) => ({ value: role, label: ROLE_META[role] }))}
+						loading={loading || rolesLoading}
+						items={roles.map((role) => ({ value: role.key, label: role.name }))}
 					/>
 				</Field>
 			</Form>

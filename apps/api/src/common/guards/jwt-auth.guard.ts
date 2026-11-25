@@ -3,15 +3,15 @@ import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import type { NodeRequest } from '@nestjs/platform-node';
-import { decodeRoles } from '../db/codec/index.js';
+import { AuthorizationService } from '../../modules/authorization/authorization.service.js';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator.js';
 import { AppException } from '../errors/app.exception.js';
-import type { AuthenticatedRequest, AuthUser } from '../types/index.js';
+import type { AuthenticatedRequest } from '../types/index.js';
 
+/** `sub` is the user, `wid` is the workspace this token acts inside. No roles: they live in the database. */
 export type AccessTokenPayload = {
 	sub: string;
-	email: string;
-	roles: string[];
+	wid: string;
 };
 
 const bearerToken = (request: NodeRequest): string | undefined => {
@@ -27,6 +27,7 @@ export class JwtAuthGuard implements CanActivate {
 		private readonly reflector: Reflector,
 		private readonly jwt: JwtService,
 		private readonly config: ConfigService,
+		private readonly authorization: AuthorizationService,
 	) {}
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -40,18 +41,11 @@ export class JwtAuthGuard implements CanActivate {
 		const token = bearerToken(request);
 		if (!token) throw new AppException('UNAUTHORIZED');
 
+		let payload: AccessTokenPayload;
 		try {
-			const payload = await this.jwt.verifyAsync<AccessTokenPayload>(token, {
+			payload = await this.jwt.verifyAsync<AccessTokenPayload>(token, {
 				secret: this.config.getOrThrow<string>('JWT_ACCESS_SECRET'),
 			});
-
-			const user: AuthUser = {
-				id: payload.sub,
-				email: payload.email,
-				roles: decodeRoles(payload.roles),
-			};
-			request.user = user;
-			return true;
 		} catch (error) {
 			const expired = error instanceof Error && error.name === 'TokenExpiredError';
 			throw new AppException({
@@ -61,5 +55,19 @@ export class JwtAuthGuard implements CanActivate {
 					: 'Invalid token, please sign in again',
 			});
 		}
+
+		const actor = await this.authorization.resolveActor({
+			userId: payload.sub,
+			workspaceId: payload.wid,
+		});
+
+		if (!actor)
+			throw new AppException({
+				code: 'UNAUTHORIZED',
+				message: 'You no longer have access to that workspace',
+			});
+
+		request.actor = actor;
+		return true;
 	}
 }

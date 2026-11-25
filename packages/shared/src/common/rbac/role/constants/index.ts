@@ -1,16 +1,19 @@
-import { PERMISSIONS, type Permission } from '../../permission';
-import type { Role } from '../types';
+import type { Permission } from '../../permission';
+import { PERMISSIONS } from '../../permission';
+import type { SystemRole } from '../types';
 
-export const ROLES = ['OWNER', 'ADMIN', 'MEMBER'] as const;
+/**
+ * Roles that belong to the code: one row per key is seeded into `roles` with `system = true`, and the
+ * API refuses to edit or delete them. Everything else is a workspace's own role, created at runtime.
+ */
+export const SYSTEM_ROLES = ['OWNER', 'MEMBER'] as const;
 
-export const ROLE_META = {
+export const SYSTEM_ROLE_META = {
 	OWNER: 'Owner',
-	ADMIN: 'Admin',
 	MEMBER: 'Member',
-} satisfies Record<Role, string>;
+} satisfies Record<SystemRole, string>;
 
-export const ROLE_PERMISSIONS = {
+export const SYSTEM_ROLE_PERMISSIONS = {
 	OWNER: PERMISSIONS,
-	ADMIN: ['user:read', 'user:write'],
 	MEMBER: ['user:read'],
-} satisfies Record<Role, readonly Permission[]>;
+} satisfies Record<SystemRole, readonly Permission[]>;

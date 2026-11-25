@@ -1,4 +1,4 @@
-import { ROLE_META, type ListUsersQuery, type Role, type User } from '@lumo/shared';
+import type { ListUsersQuery, RoleRef, User } from '@lumo/shared';
 import { Pencil, Trash2 } from 'lucide-react';
 import { useState, type ReactElement } from 'react';
 import { Badge, Field, Form, Input, Table, type TableColumn } from '@/components';
@@ -18,11 +18,13 @@ const renderOverlay = ({ panel, closePanel, reload }: OverlayArgs): ReactElement
 	}
 };
 
-const ROLE_VARIANT: Record<Role, 'default' | 'info' | 'secondary'> = {
+const ROLE_VARIANT: Record<string, 'default' | 'info' | 'secondary'> = {
 	OWNER: 'default',
-	ADMIN: 'info',
 	MEMBER: 'secondary',
 };
+
+const variantOf = (role: RoleRef): 'default' | 'info' | 'secondary' =>
+	ROLE_VARIANT[role.key] ?? 'secondary';
 
 export const UserList = ({ list }: IPropsType) => {
 	const [panel, setPanel] = useState<Panel | null>(null);
@@ -54,8 +56,8 @@ export const UserList = ({ list }: IPropsType) => {
 			cell: (row) => (
 				<div className="flex flex-wrap gap-1">
 					{row.roles.map((role) => (
-						<Badge key={role} variant={ROLE_VARIANT[role]}>
-							{ROLE_META[role]}
+						<Badge key={role.key} variant={variantOf(role)}>
+							{role.name}
 						</Badge>
 					))}
 				</div>

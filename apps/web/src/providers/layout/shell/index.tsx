@@ -1,4 +1,11 @@
-import { Bell, CircleUserRound, CreditCard, EllipsisVertical, LogOut } from 'lucide-react';
+import {
+	Bell,
+	ChevronsUpDown,
+	CircleUserRound,
+	CreditCard,
+	EllipsisVertical,
+	LogOut,
+} from 'lucide-react';
 import { useRef, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 import { Avatar, Button, Menu, Spinner } from '@/components';
@@ -23,10 +30,41 @@ const keysByHref = (entries: LayoutNavEntry[]): Map<string, string> =>
 export const AppShell = ({ nav }: IPropsType) => {
 	const navigate = useNavigate();
 	const location = useLocation();
-	const { user, logout } = useAuth();
+	const { user, workspace, workspaces, switchWorkspace, logout } = useAuth();
 	const { collapsed, actions } = useGlobal();
 	const [loggingOut, setLoggingOut] = useState(false);
 	const logoutStarted = useRef(false);
+
+	const brand =
+		workspace === null ? (
+			'Lumo Starter'
+		) : workspaces.length > 1 ? (
+			<Menu
+				side="bottom"
+				align="start"
+				className="min-w-56"
+				trigger={
+					<Button
+						variant="ghost"
+						size="sm"
+						className="-ms-2 max-w-full"
+						aria-label="Switch workspace"
+					>
+						<span className="truncate">{workspace.name}</span>
+						<ChevronsUpDown className="size-3.5 shrink-0 text-muted-foreground" />
+					</Button>
+				}
+				items={workspaces.map((entry) => ({
+					label: entry.name,
+					disabled: entry.id === workspace.id,
+					onClick: () => {
+						void switchWorkspace(entry.id);
+					},
+				}))}
+			/>
+		) : (
+			<span className="truncate">{workspace.name}</span>
+		);
 
 	const handleLogout = async () => {
 		if (logoutStarted.current) return;
@@ -41,7 +79,7 @@ export const AppShell = ({ nav }: IPropsType) => {
 			nav={nav}
 			selectedKey={keysByHref(nav).get(location.pathname)}
 			logo={<img src="/logo.svg" alt="" className="size-5 shrink-0" />}
-			title="Lumo Starter"
+			title={brand}
 			collapsible
 			collapsed={collapsed}
 			onCollapsedChange={(next) => actions.set({ collapsed: next })}

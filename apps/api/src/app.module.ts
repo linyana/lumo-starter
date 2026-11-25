@@ -12,8 +12,11 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard.js';
 import { PermissionsGuard } from './common/guards/permissions.guard.js';
 import { DelayInterceptor } from './common/interceptors/delay.interceptor.js';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor.js';
+import { AuditModule } from './modules/audit/audit.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
+import { AuthorizationModule } from './modules/authorization/authorization.module.js';
 import { HealthModule } from './modules/health/health.module.js';
+import { RolesModule } from './modules/roles/roles.module.js';
 import { SettingsModule } from './modules/settings/settings.module.js';
 import { UsersModule } from './modules/users/users.module.js';
 
@@ -44,8 +47,11 @@ import { UsersModule } from './modules/users/users.module.js';
 		JwtModule.register({ global: true }),
 
 		PrismaModule,
+		AuthorizationModule,
+		AuditModule,
 		AuthModule,
 		UsersModule,
+		RolesModule,
 		SettingsModule,
 		HealthModule,
 	],

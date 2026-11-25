@@ -1,9 +1,9 @@
-import { PERMISSION_META, ROLE_META } from '@lumo/shared';
+import { PERMISSION_META } from '@lumo/shared';
 import { Badge, Card } from '@/components';
 import { useAuth } from '@/providers/auth';
 
 export const DashboardPage = () => {
-	const { user } = useAuth();
+	const { user, workspace, permissions } = useAuth();
 	if (!user) return null;
 
 	return (
@@ -15,23 +15,35 @@ export const DashboardPage = () => {
 
 			<div className="grid gap-4 md:grid-cols-2">
 				<Card
+					title="Workspace"
+					description="Roles and permissions below are the ones you hold here."
+				>
+					{workspace && (
+						<div className="flex items-center justify-between text-sm">
+							<span className="font-medium">{workspace.name}</span>
+							<span className="font-mono text-xs text-muted-foreground">{workspace.slug}</span>
+						</div>
+					)}
+				</Card>
+
+				<Card
 					title="Roles"
-					description="Stored as text, validated against @lumo/shared."
+					description="Assigned here, resolved from the database on every request."
 					classNames={{ content: 'flex flex-wrap gap-2' }}
 				>
 					{user.roles.map((role) => (
-						<Badge key={role} variant="secondary">
-							{ROLE_META[role]}
+						<Badge key={role.key} variant="secondary">
+							{role.name}
 						</Badge>
 					))}
 				</Card>
 
 				<Card
 					title="Permissions"
-					description="Expanded from the shared role table — the API guard reads the same map."
+					description="What your roles grant in this workspace, as the API resolved them."
 					classNames={{ content: 'flex flex-col gap-2' }}
 				>
-					{user.permissions.map((permission) => (
+					{permissions.map((permission) => (
 						<div key={permission} className="flex items-center justify-between text-sm">
 							<span className="font-mono text-xs">{permission}</span>
 							<span className="text-muted-foreground">{PERMISSION_META[permission]}</span>

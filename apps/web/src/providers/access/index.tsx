@@ -1,7 +1,7 @@
-import { grantFor, type AccessGrant } from '@lumo/shared';
+import { grantOf, type AccessGrant } from '@lumo/shared';
 import { createContext, useContext, type ReactNode } from 'react';
 
-const AccessContext = createContext<AccessGrant>(grantFor());
+const AccessContext = createContext<AccessGrant>(grantOf());
 
 type IPropsType = {
 	grant: AccessGrant;

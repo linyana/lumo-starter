@@ -1,13 +1,29 @@
-import { permissionsOf, type Role } from '../../role';
+import type { Permission } from '../../permission';
+import type { RoleRef } from '../../role';
 import type { AccessCondition, AccessGrant, WithAccess } from '../types';
 
 const listOf = <T extends string>(value: T | readonly T[]): readonly T[] =>
 	typeof value === 'string' ? [value as T] : value;
 
-export const grantFor = (roles: readonly Role[] = []): AccessGrant => ({
-	roles,
-	permissions: permissionsOf(roles),
-});
+/**
+ * A grant is assembled where the answer is known — the API resolves roles and permissions from the
+ * database — and is never derived on the client from a role name.
+ */
+export const grantOf = ({
+	roles = [],
+	permissions = [],
+}: {
+	roles?: readonly RoleRef[];
+	permissions?: readonly Permission[];
+} = {}): AccessGrant => ({ roles, permissions });
+
+export const hasPermission = ({
+	permissions,
+	required,
+}: {
+	permissions: readonly Permission[];
+	required: Permission | readonly Permission[];
+}): boolean => listOf(required).every((permission) => permissions.includes(permission));
 
 const holdsPermission = ({
 	grant,
@@ -16,8 +32,7 @@ const holdsPermission = ({
 	grant: AccessGrant;
 	required: AccessCondition['permission'];
 }): boolean =>
-	required === undefined ||
-	listOf(required).every((permission) => grant.permissions.includes(permission));
+	required === undefined || hasPermission({ permissions: grant.permissions, required });
 
 const holdsRole = ({
 	grant,
@@ -25,7 +40,9 @@ const holdsRole = ({
 }: {
 	grant: AccessGrant;
 	wanted: AccessCondition['role'];
-}): boolean => wanted === undefined || listOf(wanted).some((role) => grant.roles.includes(role));
+}): boolean =>
+	wanted === undefined ||
+	listOf(wanted).some((key) => grant.roles.some((role) => role.key === key));
 
 const permits = ({
 	condition,

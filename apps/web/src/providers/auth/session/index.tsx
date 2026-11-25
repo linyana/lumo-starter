@@ -1,12 +1,15 @@
 import {
 	filterAccess,
-	grantFor,
+	grantOf,
+	type AuthResult,
+	type Permission,
 	type LoginInput,
 	type PatchProfileInput,
-	type Permission,
 	type RegisterInput,
+	type Session,
 	type User,
 	type WithAccess,
+	type Workspace,
 } from '@lumo/shared';
 import {
 	createContext,
@@ -25,20 +28,36 @@ type AuthStatus = 'loading' | 'anonymous' | 'authenticated' | 'unreachable';
 
 type AuthContextValue = {
 	user: User | null;
+	workspace: Workspace | null;
+	workspaces: Workspace[];
+	permissions: Permission[];
 	status: AuthStatus;
 	login: (input: LoginInput) => Promise<void>;
 	register: (input: RegisterInput) => Promise<void>;
 	updateProfile: (input: PatchProfileInput) => Promise<User>;
+	switchWorkspace: (workspaceId: string) => Promise<void>;
 	logout: () => Promise<void>;
 	refresh: () => Promise<void>;
 	can: (permission: Permission) => boolean;
 	filter: <T extends WithAccess>(items: readonly T[]) => T[];
 };
 
+const sessionOf = ({
+	user,
+	permissions,
+	workspace,
+	workspaces,
+}: AuthResult | Session): Session => ({
+	user,
+	permissions,
+	workspace,
+	workspaces,
+});
+
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-	const [user, setUser] = useState<User | null>(null);
+	const [session, setSession] = useState<Session | null>(null);
 	const [status, setStatus] = useState<AuthStatus>('loading');
 
 	const refresh = useCallback(async () => {
@@ -47,7 +66,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		const outcome = await refreshSession();
 
 		if (outcome.status === 'refreshed') {
-			setUser(outcome.result.user);
+			setSession(sessionOf(outcome.result));
 			setStatus('authenticated');
 		} else {
 			setStatus(outcome.status === 'expired' ? 'anonymous' : 'unreachable');
@@ -60,14 +79,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 	useEffect(() => {
 		onUnauthorized(() => {
-			setUser(null);
+			setSession(null);
 			setStatus('anonymous');
 		});
 	}, []);
 
-	const adopt = useCallback((result: { accessToken: string; user: User }) => {
+	const adopt = useCallback((result: AuthResult) => {
 		setAccessToken(result.accessToken);
-		setUser(result.user);
+		setSession(sessionOf(result));
 		setStatus('authenticated');
 	}, []);
 
@@ -87,21 +106,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 	const updateProfile = useCallback(async (input: PatchProfileInput): Promise<User> => {
 		const next = await authApi.updateProfile(input);
-		setUser(next);
+		setSession((current) => (current ? { ...current, user: next } : current));
 		return next;
 	}, []);
+
+	const switchWorkspace = useCallback(
+		async (workspaceId: string) => {
+			adopt(await authApi.switchWorkspace({ workspaceId }));
+		},
+		[adopt],
+	);
 
 	const logout = useCallback(async () => {
 		try {
 			await authApi.logout();
 		} finally {
 			setAccessToken(null);
-			setUser(null);
+			setSession(null);
 			setStatus('anonymous');
 		}
 	}, []);
 
-	const grant = useMemo(() => grantFor(user?.roles ?? []), [user]);
+	const user = session?.user ?? null;
+	const permissions = useMemo(() => session?.permissions ?? [], [session]);
+	const workspace = session?.workspace ?? null;
+	const workspaces = useMemo(() => session?.workspaces ?? [], [session]);
+
+	const grant = useMemo(
+		() => grantOf({ roles: user?.roles ?? [], permissions: session?.permissions ?? [] }),
+		[user, session],
+	);
 
 	const can = useCallback(
 		(permission: Permission) => grant.permissions.includes(permission),
@@ -114,8 +148,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	);
 
 	const value = useMemo<AuthContextValue>(
-		() => ({ user, status, login, register, updateProfile, logout, refresh, can, filter }),
-		[user, status, login, register, updateProfile, logout, refresh, can, filter],
+		() => ({
+			user,
+			workspace,
+			workspaces,
+			permissions,
+			status,
+			login,
+			register,
+			updateProfile,
+			switchWorkspace,
+			logout,
+			refresh,
+			can,
+			filter,
+		}),
+		[
+			user,
+			workspace,
+			workspaces,
+			permissions,
+			status,
+			login,
+			register,
+			updateProfile,
+			switchWorkspace,
+			logout,
+			refresh,
+			can,
+			filter,
+		],
 	);
 
 	return (
