@@ -33,16 +33,16 @@ export const RegisterPage = () => {
 			}
 		>
 			<Form schema={registerSchema} onSubmit={submit.fetchData}>
-				<Field name="email" label="Email">
-					<Input type="email" autoComplete="email" />
-				</Field>
-
 				<Field
 					name="username"
 					label="Username"
 					description="3–32 characters: lowercase letters, numbers and underscores."
 				>
 					<Input autoComplete="username" autoCapitalize="none" spellCheck={false} />
+				</Field>
+
+				<Field name="email" label="Email">
+					<Input type="email" autoComplete="email" />
 				</Field>
 
 				<Field

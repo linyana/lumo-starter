@@ -51,16 +51,16 @@ export const CreateMember = ({ onCreated }: IPropsType) => {
 				initial={{ roles: ['MEMBER'] }}
 				onSubmit={fetchData}
 			>
-				<Field name="email" label="Email">
-					<Input type="email" autoComplete="off" />
-				</Field>
-
 				<Field
 					name="username"
 					label="Username"
 					description="3–32 characters: lowercase letters, numbers and underscores."
 				>
 					<Input autoComplete="off" autoCapitalize="none" spellCheck={false} />
+				</Field>
+
+				<Field name="email" label="Email">
+					<Input type="email" autoComplete="off" />
 				</Field>
 
 				<Field
