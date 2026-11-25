@@ -23,7 +23,7 @@ const keysByHref = (entries: LayoutNavEntry[]): Map<string, string> =>
 export const AppShell = ({ nav }: IPropsType) => {
 	const navigate = useNavigate();
 	const location = useLocation();
-	const { account, logout } = useAuth();
+	const { user, logout } = useAuth();
 	const { collapsed, actions } = useGlobal();
 	const [loggingOut, setLoggingOut] = useState(false);
 	const logoutStarted = useRef(false);
@@ -47,7 +47,7 @@ export const AppShell = ({ nav }: IPropsType) => {
 			onCollapsedChange={(next) => actions.set({ collapsed: next })}
 			resetScrollKey={location.pathname}
 			footer={
-				account ? (
+				user ? (
 					<Menu
 						side="right"
 						className="min-w-64"
@@ -56,10 +56,10 @@ export const AppShell = ({ nav }: IPropsType) => {
 								type: 'content',
 								content: (
 									<div className="flex items-center gap-3 px-3 py-2">
-										<Avatar alt={account.name} shape="square" />
+										<Avatar alt={user.name} shape="square" />
 										<div className="flex flex-col items-start">
-											<p className="text-sm font-medium">{account.name}</p>
-											<p className="text-xs text-muted-foreground">{account.email}</p>
+											<p className="text-sm font-medium">{user.name}</p>
+											<p className="text-xs text-muted-foreground">{user.email}</p>
 										</div>
 									</div>
 								),
@@ -91,10 +91,10 @@ export const AppShell = ({ nav }: IPropsType) => {
 							>
 								<div className="flex items-center justify-between">
 									<div className="flex items-center gap-3">
-										<Avatar alt={account.name} shape="square" className="bg-gray-200" />
+										<Avatar alt={user.name} shape="square" className="bg-gray-200" />
 										<div className="flex flex-col items-start">
-											<p className="text-sm font-medium">{account.name}</p>
-											<p className="text-xs text-muted-foreground">{account.email}</p>
+											<p className="text-sm font-medium">{user.name}</p>
+											<p className="text-xs text-muted-foreground">{user.email}</p>
 										</div>
 									</div>
 									<EllipsisVertical className="group-data-compact:hidden" />

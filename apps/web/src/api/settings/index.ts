@@ -1,12 +1,12 @@
-import type { UpdateAccountSettingInput, AccountSetting } from '@lumo/shared';
+import type { UpdateUserSettingInput, UserSetting } from '@lumo/shared';
 import { api } from '@/lib';
 
-const mine = (): Promise<AccountSetting> =>
-	api.get<{ setting: AccountSetting }>({ url: '/settings/me' }).then((payload) => payload.setting);
+const mine = (): Promise<UserSetting> =>
+	api.get<{ setting: UserSetting }>({ url: '/settings/me' }).then((payload) => payload.setting);
 
-const update = (input: UpdateAccountSettingInput): Promise<AccountSetting> =>
+const update = (input: UpdateUserSettingInput): Promise<UserSetting> =>
 	api
-		.patch<{ setting: AccountSetting }>({ url: '/settings/me', body: input })
+		.patch<{ setting: UserSetting }>({ url: '/settings/me', body: input })
 		.then((payload) => payload.setting);
 
 export const settingsApi = { mine, update };

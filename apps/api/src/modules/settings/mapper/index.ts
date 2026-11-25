@@ -1,20 +1,20 @@
 import {
-	accountSettingContentDefaults,
-	accountSettingContentSchema,
-	type AccountSetting,
-	type AccountSettingContent,
+	userSettingContentDefaults,
+	userSettingContentSchema,
+	type UserSetting,
+	type UserSettingContent,
 } from '@lumo/shared';
 import type { Setting as SettingRow } from '../../../generated/prisma/client.js';
 
-export const storedContent = (content: unknown): Partial<AccountSettingContent> => {
-	const parsed = accountSettingContentSchema.partial().safeParse(content);
+export const storedContent = (content: unknown): Partial<UserSettingContent> => {
+	const parsed = userSettingContentSchema.partial().safeParse(content);
 	return parsed.success ? parsed.data : {};
 };
 
-export const toWireAccountSetting = (
+export const toWireUserSetting = (
 	row: Pick<SettingRow, 'content' | 'updatedAt'> | null,
-): AccountSetting => ({
-	type: 'account',
-	content: { ...accountSettingContentDefaults, ...storedContent(row?.content) },
+): UserSetting => ({
+	type: 'user',
+	content: { ...userSettingContentDefaults, ...storedContent(row?.content) },
 	updatedAt: row?.updatedAt.toISOString() ?? null,
 });

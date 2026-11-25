@@ -11,7 +11,7 @@ if (!connectionString) throw new Error('DATABASE_URL is not set — copy .env.ex
 
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
 
-const SEED_ACCOUNTS = [
+const SEED_USERS = [
 	{
 		email: 'owner@lumo.dev',
 		username: 'olivia',
@@ -36,9 +36,9 @@ const SEED_ACCOUNTS = [
 ];
 
 async function main(): Promise<void> {
-	for (const seed of SEED_ACCOUNTS) {
+	for (const seed of SEED_USERS) {
 		const passwordHash = await argon2.hash(seed.password);
-		await prisma.account.upsert({
+		await prisma.user.upsert({
 			where: { email: seed.email },
 			update: { username: seed.username, name: seed.name, roles: seed.roles, passwordHash },
 			create: {

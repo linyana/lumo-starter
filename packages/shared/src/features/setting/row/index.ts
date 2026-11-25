@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { accountSettingContentSchema } from '../content';
+import { userSettingContentSchema } from '../content';
 
-export const accountSettingSchema = z.object({
-	type: z.literal('account'),
-	content: accountSettingContentSchema,
+export const userSettingSchema = z.object({
+	type: z.literal('user'),
+	content: userSettingContentSchema,
 	updatedAt: z.iso.datetime().nullable(),
 });

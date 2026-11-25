@@ -1,3 +1,3 @@
-import { accountSettingContentSchema } from '../content';
+import { userSettingContentSchema } from '../content';
 
-export const updateAccountSettingSchema = accountSettingContentSchema.partial();
+export const updateUserSettingSchema = userSettingContentSchema.partial();

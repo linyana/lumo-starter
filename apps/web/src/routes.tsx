@@ -6,7 +6,7 @@ import {
 	PreferenceSetting,
 	ProfileSetting,
 	RegisterPage,
-	AccountsPage,
+	UsersPage,
 } from '@/pages';
 import type { AppRoute } from '@/providers/routes';
 
@@ -19,11 +19,11 @@ export const routes: AppRoute[] = [
 		nav: { group: 'Workspace', label: 'Overview', icon: LayoutDashboard },
 	},
 	{
-		path: 'accounts',
+		path: 'users',
 		layout: 'shell',
-		page: AccountsPage,
-		access: { permission: 'account:read' },
-		nav: { group: 'Workspace', label: 'Accounts', icon: Users },
+		page: UsersPage,
+		access: { permission: 'user:read' },
+		nav: { group: 'Workspace', label: 'Users', icon: Users },
 	},
 	{
 		path: 'settings',

@@ -4,19 +4,19 @@ import { useHttp } from '@/hooks';
 import { useAuth } from '@/providers/auth';
 
 export const ProfileSetting = () => {
-	const { account, updateProfile } = useAuth();
+	const { user, updateProfile } = useAuth();
 	const form = useForm();
 
 	const autosave = useHttp({ endpoint: updateProfile, successMessage: 'Profile saved', form });
 
-	if (account === null) return null;
+	if (user === null) return null;
 
 	return (
 		<Page variant="settings" title="Profile">
 			<Form
 				form={form}
 				schema={updateProfileSchema}
-				initial={{ username: account.username, email: account.email, name: account.name }}
+				initial={{ username: user.username, email: user.email, name: user.name }}
 				autosave={autosave}
 			>
 				<SettingsGroup
@@ -26,7 +26,7 @@ export const ProfileSetting = () => {
 							title: 'Avatar',
 							description: 'Drawn from your display name. It cannot be changed.',
 							width: 'auto',
-							content: <Avatar alt={account.name} size="lg" />,
+							content: <Avatar alt={user.name} size="lg" />,
 						},
 						{
 							title: 'Username',

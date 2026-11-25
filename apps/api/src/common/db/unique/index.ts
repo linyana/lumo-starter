@@ -3,9 +3,9 @@ import type { Prisma } from '../../../generated/prisma/client.js';
 import { AppException } from '../../errors/app.exception.js';
 import type { PrismaService } from '../prisma.service.js';
 
-type UniqueAccountField = 'email' | 'username';
+type UniqueUserField = 'email' | 'username';
 
-const MESSAGE: Record<UniqueAccountField, string> = {
+const MESSAGE: Record<UniqueUserField, string> = {
 	email: 'That email is already registered',
 	username: 'That username is taken',
 };
@@ -14,20 +14,20 @@ const whereFor = ({
 	field,
 	value,
 }: {
-	field: UniqueAccountField;
+	field: UniqueUserField;
 	value: string;
-}): Prisma.AccountWhereUniqueInput => (field === 'email' ? { email: value } : { username: value });
+}): Prisma.UserWhereUniqueInput => (field === 'email' ? { email: value } : { username: value });
 
-export const assertAccountFieldFree = async ({
+export const assertUserFieldFree = async ({
 	prisma,
 	field,
 	value,
 }: {
 	prisma: PrismaService;
-	field: UniqueAccountField;
+	field: UniqueUserField;
 	value: string;
 }): Promise<void> => {
-	const taken = await prisma.account.findUnique({
+	const taken = await prisma.user.findUnique({
 		where: whereFor({ field, value }),
 		select: { id: true },
 	});

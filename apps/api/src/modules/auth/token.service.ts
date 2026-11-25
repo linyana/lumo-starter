@@ -22,7 +22,7 @@ export type IssuedTokens = {
 type RefreshWriter = {
 	refreshToken: {
 		create(args: {
-			data: { tokenHash: string; accountId: string; expiresAt: Date };
+			data: { tokenHash: string; userId: string; expiresAt: Date };
 		}): Promise<{ id: string }>;
 	};
 };
@@ -45,16 +45,16 @@ export class TokenService {
 
 	async issue(claims: AccessClaims): Promise<IssuedTokens> {
 		const accessToken = await this.signAccess(claims);
-		const refresh = await this.createRefresh({ accountId: claims.sub, writer: this.prisma });
+		const refresh = await this.createRefresh({ userId: claims.sub, writer: this.prisma });
 		return { accessToken, refreshToken: refresh.refreshToken, refreshExpiresAt: refresh.expiresAt };
 	}
 
 	async rotate(
 		rawToken: string,
-	): Promise<{ account: { id: string; email: string; roles: Role[] }; tokens: IssuedTokens }> {
+	): Promise<{ user: { id: string; email: string; roles: Role[] }; tokens: IssuedTokens }> {
 		const existing = await this.prisma.refreshToken.findUnique({
 			where: { tokenHash: hashToken(rawToken) },
-			include: { account: true },
+			include: { user: true },
 		});
 
 		if (!existing)
@@ -77,7 +77,7 @@ export class TokenService {
 
 			if (!lostResponse) {
 				await this.prisma.refreshToken.updateMany({
-					where: { accountId: existing.accountId, revokedAt: null },
+					where: { userId: existing.userId, revokedAt: null },
 					data: { revokedAt: new Date() },
 				});
 				throw new AppException({
@@ -93,15 +93,15 @@ export class TokenService {
 				message: 'Your session expired, please sign in again',
 			});
 
-		const roles = existing.account.roles.map((role) => roleSchema.parse(role));
+		const roles = existing.user.roles.map((role) => roleSchema.parse(role));
 		const claims: AccessClaims = {
-			sub: existing.account.id,
-			email: existing.account.email,
+			sub: existing.user.id,
+			email: existing.user.email,
 			roles,
 		};
 
 		const tokens = await this.prisma.$transaction(async (tx) => {
-			const created = await this.createRefresh({ accountId: existing.accountId, writer: tx });
+			const created = await this.createRefresh({ userId: existing.userId, writer: tx });
 			await tx.refreshToken.update({
 				where: { id: existing.id },
 				data: { revokedAt: existing.revokedAt ?? new Date(), replacedBy: created.id },
@@ -114,7 +114,7 @@ export class TokenService {
 			};
 		});
 
-		return { account: { id: claims.sub, email: claims.email, roles }, tokens };
+		return { user: { id: claims.sub, email: claims.email, roles }, tokens };
 	}
 
 	async revoke(rawToken: string): Promise<void> {
@@ -135,16 +135,16 @@ export class TokenService {
 	}
 
 	private async createRefresh({
-		accountId,
+		userId,
 		writer,
 	}: {
-		accountId: string;
+		userId: string;
 		writer: RefreshWriter;
 	}): Promise<{ id: string; refreshToken: string; expiresAt: Date }> {
 		const refreshToken = randomBytes(48).toString('base64url');
 		const expiresAt = new Date(Date.now() + this.refreshTtlMs());
 		const created = await writer.refreshToken.create({
-			data: { tokenHash: hashToken(refreshToken), accountId, expiresAt },
+			data: { tokenHash: hashToken(refreshToken), userId, expiresAt },
 		});
 		return { id: created.id, refreshToken, expiresAt };
 	}

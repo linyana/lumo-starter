@@ -1,10 +1,4 @@
-import type {
-	AuthResult,
-	LoginInput,
-	PatchProfileInput,
-	RegisterInput,
-	Account,
-} from '@lumo/shared';
+import type { AuthResult, LoginInput, PatchProfileInput, RegisterInput, User } from '@lumo/shared';
 import { api } from '@/lib';
 
 const login = (input: LoginInput): Promise<AuthResult> =>
@@ -13,13 +7,11 @@ const login = (input: LoginInput): Promise<AuthResult> =>
 const register = (input: RegisterInput): Promise<AuthResult> =>
 	api.post<AuthResult>({ url: '/auth/register', body: input });
 
-const me = (): Promise<Account> =>
-	api.get<{ account: Account }>({ url: '/auth/me' }).then((payload) => payload.account);
+const me = (): Promise<User> =>
+	api.get<{ user: User }>({ url: '/auth/me' }).then((payload) => payload.user);
 
-const updateProfile = (input: PatchProfileInput): Promise<Account> =>
-	api
-		.patch<{ account: Account }>({ url: '/auth/me', body: input })
-		.then((payload) => payload.account);
+const updateProfile = (input: PatchProfileInput): Promise<User> =>
+	api.patch<{ user: User }>({ url: '/auth/me', body: input }).then((payload) => payload.user);
 
 const logout = (): Promise<void> => api.send({ method: 'post', url: '/auth/logout' });
 

@@ -11,6 +11,6 @@ export const ROLE_META = {
 
 export const ROLE_PERMISSIONS = {
 	OWNER: PERMISSIONS,
-	ADMIN: ['account:read', 'account:write'],
-	MEMBER: ['account:read'],
+	ADMIN: ['user:read', 'user:write'],
+	MEMBER: ['user:read'],
 } satisfies Record<Role, readonly Permission[]>;

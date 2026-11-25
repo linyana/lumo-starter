@@ -1,49 +1,45 @@
-import { accountSettingContentDefaults, accountSettingContentSchema } from '@lumo/shared';
+import { userSettingContentDefaults, userSettingContentSchema } from '@lumo/shared';
 import { Injectable } from '@nestjs/common';
-import type {
-	UpdateAccountSettingInput,
-	AccountSetting,
-	AccountSettingContent,
-} from '@lumo/shared';
+import type { UpdateUserSettingInput, UserSetting, UserSettingContent } from '@lumo/shared';
 import type { Prisma } from '../../generated/prisma/client.js';
 import { PrismaService } from '../../common/db/prisma.service.js';
-import { storedContent, toWireAccountSetting } from './mapper/index.js';
+import { storedContent, toWireUserSetting } from './mapper/index.js';
 
-const scopeOf = (accountId: string): Prisma.SettingWhereUniqueInput => ({
-	type_ownerId: { type: 'account', ownerId: accountId },
+const scopeOf = (userId: string): Prisma.SettingWhereUniqueInput => ({
+	type_ownerId: { type: 'user', ownerId: userId },
 });
 
 @Injectable()
 export class SettingsService {
 	constructor(private readonly prisma: PrismaService) {}
 
-	async mine(accountId: string): Promise<AccountSetting> {
-		const row = await this.prisma.setting.findUnique({ where: scopeOf(accountId) });
-		return toWireAccountSetting(row);
+	async mine(userId: string): Promise<UserSetting> {
+		const row = await this.prisma.setting.findUnique({ where: scopeOf(userId) });
+		return toWireUserSetting(row);
 	}
 
 	async updateMine({
-		accountId,
+		userId,
 		input,
 	}: {
-		accountId: string;
-		input: UpdateAccountSettingInput;
-	}): Promise<AccountSetting> {
-		const where = scopeOf(accountId);
+		userId: string;
+		input: UpdateUserSettingInput;
+	}): Promise<UserSetting> {
+		const where = scopeOf(userId);
 
 		const current = await this.prisma.setting.findUnique({ where });
-		const content: AccountSettingContent = accountSettingContentSchema.parse({
-			...accountSettingContentDefaults,
+		const content: UserSettingContent = userSettingContentSchema.parse({
+			...userSettingContentDefaults,
 			...storedContent(current?.content),
 			...input,
 		});
 
 		const row = await this.prisma.setting.upsert({
 			where,
-			create: { type: 'account', ownerId: accountId, content },
+			create: { type: 'user', ownerId: userId, content },
 			update: { content },
 		});
 
-		return toWireAccountSetting(row);
+		return toWireUserSetting(row);
 	}
 }

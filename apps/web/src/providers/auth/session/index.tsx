@@ -5,7 +5,7 @@ import {
 	type PatchProfileInput,
 	type Permission,
 	type RegisterInput,
-	type Account,
+	type User,
 	type WithAccess,
 } from '@lumo/shared';
 import {
@@ -24,11 +24,11 @@ import { AccessProvider } from '@/providers/access';
 type AuthStatus = 'loading' | 'anonymous' | 'authenticated' | 'unreachable';
 
 type AuthContextValue = {
-	account: Account | null;
+	user: User | null;
 	status: AuthStatus;
 	login: (input: LoginInput) => Promise<void>;
 	register: (input: RegisterInput) => Promise<void>;
-	updateProfile: (input: PatchProfileInput) => Promise<Account>;
+	updateProfile: (input: PatchProfileInput) => Promise<User>;
 	logout: () => Promise<void>;
 	refresh: () => Promise<void>;
 	can: (permission: Permission) => boolean;
@@ -38,7 +38,7 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-	const [account, setAccount] = useState<Account | null>(null);
+	const [user, setUser] = useState<User | null>(null);
 	const [status, setStatus] = useState<AuthStatus>('loading');
 
 	const refresh = useCallback(async () => {
@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		const outcome = await refreshSession();
 
 		if (outcome.status === 'refreshed') {
-			setAccount(outcome.result.account);
+			setUser(outcome.result.user);
 			setStatus('authenticated');
 		} else {
 			setStatus(outcome.status === 'expired' ? 'anonymous' : 'unreachable');
@@ -60,14 +60,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 	useEffect(() => {
 		onUnauthorized(() => {
-			setAccount(null);
+			setUser(null);
 			setStatus('anonymous');
 		});
 	}, []);
 
-	const adopt = useCallback((result: { accessToken: string; account: Account }) => {
+	const adopt = useCallback((result: { accessToken: string; user: User }) => {
 		setAccessToken(result.accessToken);
-		setAccount(result.account);
+		setUser(result.user);
 		setStatus('authenticated');
 	}, []);
 
@@ -85,9 +85,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		[adopt],
 	);
 
-	const updateProfile = useCallback(async (input: PatchProfileInput): Promise<Account> => {
+	const updateProfile = useCallback(async (input: PatchProfileInput): Promise<User> => {
 		const next = await authApi.updateProfile(input);
-		setAccount(next);
+		setUser(next);
 		return next;
 	}, []);
 
@@ -96,12 +96,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 			await authApi.logout();
 		} finally {
 			setAccessToken(null);
-			setAccount(null);
+			setUser(null);
 			setStatus('anonymous');
 		}
 	}, []);
 
-	const grant = useMemo(() => grantFor(account?.roles ?? []), [account]);
+	const grant = useMemo(() => grantFor(user?.roles ?? []), [user]);
 
 	const can = useCallback(
 		(permission: Permission) => grant.permissions.includes(permission),
@@ -114,8 +114,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	);
 
 	const value = useMemo<AuthContextValue>(
-		() => ({ account, status, login, register, updateProfile, logout, refresh, can, filter }),
-		[account, status, login, register, updateProfile, logout, refresh, can, filter],
+		() => ({ user, status, login, register, updateProfile, logout, refresh, can, filter }),
+		[user, status, login, register, updateProfile, logout, refresh, can, filter],
 	);
 
 	return (
