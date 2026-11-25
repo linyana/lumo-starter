@@ -2,7 +2,7 @@ import { createMemberSchema } from '@lumo/shared';
 import { useState } from 'react';
 import { membersApi } from '@/api';
 import { Button, Dialog, Field, Form, Input, ToggleGroup, useForm } from '@/components';
-import { useHttp, useRoles } from '@/hooks';
+import { useAssignableRoles, useHttp } from '@/hooks';
 
 type IPropsType = {
 	onCreated: () => void;
@@ -11,7 +11,8 @@ type IPropsType = {
 export const CreateMember = ({ onCreated }: IPropsType) => {
 	const [open, setOpen] = useState(false);
 	const form = useForm();
-	const { roles, loading: rolesLoading } = useRoles();
+	const { roles: assignable, loading: rolesLoading } = useAssignableRoles();
+	const chooseRoles = assignable.length > 1;
 
 	const { loading, fetchData } = useHttp({
 		form,
@@ -45,12 +46,7 @@ export const CreateMember = ({ onCreated }: IPropsType) => {
 				</>
 			}
 		>
-			<Form
-				form={form}
-				schema={createMemberSchema}
-				initial={{ roles: ['MEMBER'] }}
-				onSubmit={fetchData}
-			>
+			<Form form={form} schema={createMemberSchema} onSubmit={fetchData}>
 				<Field
 					name="username"
 					label="Username"
@@ -71,15 +67,32 @@ export const CreateMember = ({ onCreated }: IPropsType) => {
 					<Input type="password" autoComplete="new-password" />
 				</Field>
 
-				<Field name="roles" label="Roles" description="At least one.">
-					<ToggleGroup<string>
-						multiple
-						variant="outline"
-						size="sm"
-						loading={loading || rolesLoading}
-						items={roles.map((role) => ({ value: role.key, label: role.name }))}
-					/>
-				</Field>
+				{chooseRoles ? (
+					<Field
+						name="roles"
+						label="Roles"
+						description="Leave empty to start them on the base role."
+					>
+						<ToggleGroup<string>
+							multiple
+							variant="outline"
+							size="sm"
+							loading={loading || rolesLoading}
+							items={assignable.map((role) => ({ value: role.key, label: role.name }))}
+						/>
+					</Field>
+				) : (
+					<div className="flex flex-col gap-1">
+						<p className="text-sm font-medium">Roles</p>
+						<p className="text-sm text-muted-foreground">
+							{rolesLoading
+								? 'Loading the roles you may assign…'
+								: assignable.length === 0
+									? 'You cannot assign a role here. Ask an owner to add this person.'
+									: `${assignable[0]?.name ?? 'Member'} — you cannot choose roles, so this member joins on the base role.`}
+						</p>
+					</div>
+				)}
 			</Form>
 		</Dialog>
 	);

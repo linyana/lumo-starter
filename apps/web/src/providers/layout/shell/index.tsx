@@ -1,10 +1,4 @@
-import {
-	ChevronsUpDown,
-	CircleUserRound,
-	EllipsisVertical,
-	LogOut,
-	SlidersHorizontal,
-} from 'lucide-react';
+import { ChevronsUpDown, CircleUserRound, EllipsisVertical, LogOut } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router';
 import { Avatar, Button, Menu, Spinner } from '@/components';

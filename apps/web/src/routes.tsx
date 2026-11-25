@@ -5,6 +5,7 @@ import {
 	LoginPage,
 	MembersPage,
 	RegisterPage,
+	RoleFormPage,
 	RolesPage,
 	SettingsPage,
 } from '@/pages';
@@ -61,6 +62,18 @@ export const routes: AppRoute[] = [
 		layout: 'shell',
 		page: RolesPage,
 		access: { permission: 'role:read' },
+	},
+	{
+		path: 'settings/roles/new',
+		layout: 'shell',
+		page: RoleFormPage,
+		access: { permission: 'role:write' },
+	},
+	{
+		path: 'settings/roles/:id',
+		layout: 'shell',
+		page: RoleFormPage,
+		access: { permission: 'role:write' },
 	},
 	{
 		path: 'settings/audit',

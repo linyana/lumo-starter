@@ -2,7 +2,10 @@ import type { ReactNode } from 'react';
 import type { SlotClassNames } from '@/components/types';
 import type { CheckboxRootProps } from './parts';
 
-type CheckboxRootPicked = Pick<CheckboxRootProps, 'disabled' | 'name' | 'required'> & {
+type CheckboxRootPicked = Pick<
+	CheckboxRootProps,
+	'disabled' | 'name' | 'required' | 'indeterminate'
+> & {
 	value?: boolean;
 	defaultValue?: boolean;
 	onChange?: (value: boolean) => void;

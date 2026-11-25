@@ -1,16 +1,18 @@
 import { PERMISSION_META, type Role } from '@lumo/shared';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router';
 import { rolesApi } from '@/api';
 import { Badge, Button, Card, Spinner } from '@/components';
 import { useHttp } from '@/hooks';
-import { Can } from '@/providers/auth';
+import { workspaceHref } from '@/lib';
+import { Can, useAuth } from '@/providers/auth';
 import { DeleteRole } from './delete';
-import { RoleEditor } from './editor';
 
-type Panel = { kind: 'create' } | { kind: 'edit'; role: Role } | { kind: 'delete'; role: Role };
+type Panel = { kind: 'delete'; role: Role };
 
 export const RolesPage = () => {
+	const { workspace } = useAuth();
 	const [panel, setPanel] = useState<Panel | null>(null);
 	const { data, initial, fetchData } = useHttp({ endpoint: rolesApi.list });
 
@@ -23,6 +25,8 @@ export const RolesPage = () => {
 	const reload = () => {
 		void fetchData();
 	};
+	const href = (path: string): string =>
+		workspace === null ? '/' : workspaceHref({ slug: workspace.slug, path });
 
 	return (
 		<div className="space-y-3">
@@ -39,7 +43,8 @@ export const RolesPage = () => {
 						variant="default"
 						size="sm"
 						icon={<Plus />}
-						onClick={() => setPanel({ kind: 'create' })}
+						nativeButton={false}
+						render={<Link to={href('settings/roles/new')} />}
 					>
 						New role
 					</Button>
@@ -76,7 +81,8 @@ export const RolesPage = () => {
 												size="icon-sm"
 												aria-label={`Edit ${role.name}`}
 												icon={<Pencil />}
-												onClick={() => setPanel({ kind: 'edit', role })}
+												nativeButton={false}
+												render={<Link to={href(`settings/roles/${role.id}`)} />}
 											/>
 											<Button
 												variant="ghost"
@@ -89,27 +95,28 @@ export const RolesPage = () => {
 									</Can>
 								)
 							}
-							classNames={{ content: 'flex flex-wrap gap-1' }}
+							classNames={{ content: 'flex flex-col gap-2' }}
 						>
-							{role.permissions.map((permission) => (
-								<Badge key={permission} variant="secondary">
-									{PERMISSION_META[permission]}
-								</Badge>
-							))}
+							{role.description !== '' && (
+								<p className="text-sm text-muted-foreground">{role.description}</p>
+							)}
+							<div className="flex flex-wrap gap-1">
+								{role.permissions.map((permission) => (
+									<Badge key={permission} variant="secondary">
+										{PERMISSION_META[permission]}
+									</Badge>
+								))}
+							</div>
 						</Card>
 					))}
 				</div>
 			)}
 
-			{panel?.kind === 'create' && (
-				<RoleEditor role={null} closePanel={closePanel} reload={reload} />
-			)}
-			{panel?.kind === 'edit' && (
-				<RoleEditor role={panel.role} closePanel={closePanel} reload={reload} />
-			)}
 			{panel?.kind === 'delete' && (
 				<DeleteRole role={panel.role} closePanel={closePanel} reload={reload} />
 			)}
 		</div>
 	);
 };
+
+export { RoleFormPage } from './form';

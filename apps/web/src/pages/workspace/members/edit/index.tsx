@@ -12,7 +12,7 @@ import {
 	useChanged,
 	useForm,
 } from '@/components';
-import { useHttp, useRoles } from '@/hooks';
+import { useAssignableRoles, useHttp } from '@/hooks';
 import { useAuth } from '@/providers/auth';
 
 type IPropsType = {
@@ -27,7 +27,8 @@ export const EditMember = ({ member, closePanel, reload }: IPropsType) => {
 	const { user: currentUser, refresh } = useAuth();
 	const ownRow = member.id === currentUser?.id;
 	const changed = useChanged({ form });
-	const { roles, loading: rolesLoading } = useRoles();
+	const { roles: assignable, loading: rolesLoading } = useAssignableRoles();
+	const chooseRoles = assignable.length > 1;
 
 	const { fetchData, loading } = useHttp({
 		form,
@@ -72,7 +73,7 @@ export const EditMember = ({ member, closePanel, reload }: IPropsType) => {
 				initial={{
 					email: member.email,
 					username: member.username,
-					roles: member.roles.map((role) => role.key),
+					...(chooseRoles ? { roles: member.roles.map((role) => role.key) } : {}),
 				}}
 				onSubmit={(values) => {
 					if (!changed) return;
@@ -92,23 +93,34 @@ export const EditMember = ({ member, closePanel, reload }: IPropsType) => {
 					<Input autoComplete="off" autoCapitalize="none" spellCheck={false} />
 				</Field>
 
-				<Field
-					name="roles"
-					label="Roles"
-					description={
-						ownRow
-							? 'Your own roles. Dropping Owner fails while you are the last one.'
-							: 'At least one.'
-					}
-				>
-					<ToggleGroup<string>
-						multiple
-						variant="outline"
-						size="sm"
-						loading={loading || rolesLoading}
-						items={roles.map((role) => ({ value: role.key, label: role.name }))}
-					/>
-				</Field>
+				{chooseRoles ? (
+					<Field
+						name="roles"
+						label="Roles"
+						description={
+							ownRow
+								? 'Your own roles. Dropping Owner fails while you are the last one.'
+								: 'Only the roles you hold are offered.'
+						}
+					>
+						<ToggleGroup<string>
+							multiple
+							variant="outline"
+							size="sm"
+							loading={loading || rolesLoading}
+							items={assignable.map((role) => ({ value: role.key, label: role.name }))}
+						/>
+					</Field>
+				) : (
+					<div className="flex flex-col gap-1">
+						<p className="text-sm font-medium">Roles</p>
+						<p className="text-sm text-muted-foreground">
+							{rolesLoading
+								? 'Loading the roles you may assign…'
+								: `${member.roles.map((role) => role.name).join(', ')} — you cannot change roles you cannot read.`}
+						</p>
+					</div>
+				)}
 			</Form>
 		</Dialog>
 	);

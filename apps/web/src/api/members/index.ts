@@ -3,6 +3,7 @@ import type {
 	ListMembersQuery,
 	Member,
 	Paginated,
+	RoleRef,
 	UpdateMemberInput,
 } from '@lumo/shared';
 import { api } from '@/lib';
@@ -18,9 +19,14 @@ const update = ({ id, input }: { id: string; input: UpdateMemberInput }): Promis
 		.patch<{ member: Member }>({ url: `/members/${id}`, body: input })
 		.then((payload) => payload.member);
 
+const assignableRoles = (): Promise<RoleRef[]> =>
+	api
+		.get<{ roles: RoleRef[] }>({ url: '/members/assignable-roles' })
+		.then((payload) => payload.roles);
+
 const remove = (id: string): Promise<void> => api.send({ method: 'delete', url: `/members/${id}` });
 
 const removeMany = (ids: string[]): Promise<void> =>
 	api.send({ method: 'post', url: '/members/batch-delete', body: { ids } });
 
-export const membersApi = { list, create, update, remove, removeMany };
+export const membersApi = { list, create, update, remove, removeMany, assignableRoles };
