@@ -35,7 +35,7 @@ export const MemberList = ({ list }: IPropsType) => {
 			key: 'username',
 			header: 'Username',
 			sortKey: 'username',
-			cell: (row) => <span className="font-mono font-medium">@{row.username}</span>,
+			cell: (row) => <span className="font-medium">{row.username}</span>,
 		},
 		{
 			key: 'email',
@@ -69,7 +69,7 @@ export const MemberList = ({ list }: IPropsType) => {
 					columns={columns}
 					list={list}
 					pagination={{ items: 'member' }}
-					rowLabel={(item) => `@${item.username}`}
+					rowLabel={(item) => item.username}
 					selectionActions={() => [
 						{
 							label: 'Delete',

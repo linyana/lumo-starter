@@ -102,7 +102,7 @@ export const AppShell = ({ nav }: IPropsType) => {
 									<div className="flex items-center gap-3 px-3 py-2">
 										<Avatar alt={user.username} shape="square" />
 										<div className="flex flex-col items-start">
-											<p className="text-sm font-medium">@{user.username}</p>
+											<p className="text-sm font-medium">{user.username}</p>
 											<p className="text-xs text-muted-foreground">{user.email}</p>
 										</div>
 									</div>
@@ -137,7 +137,7 @@ export const AppShell = ({ nav }: IPropsType) => {
 									<div className="flex items-center gap-3">
 										<Avatar alt={user.username} shape="square" className="bg-gray-200" />
 										<div className="flex flex-col items-start">
-											<p className="text-sm font-medium">@{user.username}</p>
+											<p className="text-sm font-medium">{user.username}</p>
 											<p className="text-xs text-muted-foreground">{user.email}</p>
 										</div>
 									</div>

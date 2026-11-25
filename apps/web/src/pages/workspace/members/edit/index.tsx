@@ -48,7 +48,7 @@ export const EditMember = ({ member, closePanel, reload }: IPropsType) => {
 			open={open}
 			onOpenChange={setOpen}
 			onClosed={closePanel}
-			title={`Edit @${member.username}`}
+			title={`Edit ${member.username}`}
 			description={member.email}
 			footer={
 				<>

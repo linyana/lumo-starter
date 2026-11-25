@@ -15,8 +15,8 @@ export const DeleteMembers = ({ members, closePanel, reload }: IPropsType) => {
 	const [open, setOpen] = useState(true);
 	const { user: currentUser, logout } = useAuth();
 	const only = members.length === 1 ? members[0] : undefined;
-	const who = only?.email ?? members.map(({ username }) => `@${username}`).join(', ');
-	const label = only === undefined ? `${members.length} members` : `@${only.username}`;
+	const who = only?.email ?? members.map(({ username }) => username).join(', ');
+	const label = only === undefined ? `${members.length} members` : only.username;
 	const self = members.some(({ id }) => id === currentUser?.id);
 
 	const { fetchData, loading } = useHttp({

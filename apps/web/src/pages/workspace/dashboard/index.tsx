@@ -9,7 +9,7 @@ export const DashboardPage = () => {
 	return (
 		<div className="space-y-3">
 			<div>
-				<h1 className="text-xl font-semibold">Welcome, @{user.username}</h1>
+				<h1 className="text-xl font-semibold">Welcome, {user.username}</h1>
 				<p className="text-sm text-muted-foreground">{user.email}</p>
 			</div>
 
