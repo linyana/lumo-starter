@@ -11,7 +11,6 @@ const SECTIONS = [
 
 type Section = (typeof SECTIONS)[number]['key'];
 
-/** Yours, not a workspace's: it opens over whatever page you are on and never changes the URL. */
 export const AccountDialog = ({
 	open,
 	onOpenChange,

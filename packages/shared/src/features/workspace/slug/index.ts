@@ -1,9 +1,5 @@
 import { z } from 'zod';
 
-/**
- * Segments the router already owns. A workspace that took one would be unreachable: `/login` would
- * open a workspace list instead of the sign-in form. Add a row here before adding a top-level route.
- */
 export const WORKSPACE_SLUG_RESERVED = [
 	'account',
 	'api',

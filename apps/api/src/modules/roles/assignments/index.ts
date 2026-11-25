@@ -10,10 +10,6 @@ export type ResolvedRole = {
 	permissions: { permissionKey: string }[];
 };
 
-/**
- * Turns wire role keys into this workspace's roles. A key resolves when it is a system role or one of
- * the workspace's own — anything else is a validation failure rather than a silent no-op.
- */
 export const rolesByKey = async ({
 	client,
 	workspaceId,
@@ -39,7 +35,6 @@ export const rolesByKey = async ({
 	return rows;
 };
 
-/** The role a system feature (registration, the last-owner check) is written against. */
 export const roleByKey = async ({
 	client,
 	workspaceId,
@@ -60,7 +55,6 @@ export const roleByKey = async ({
 	return role;
 };
 
-/** Assignments are a set, so a member's roles are written by replacing them, never by patching them. */
 export const replaceAssignments = async ({
 	client,
 	membershipId,
@@ -79,12 +73,6 @@ export const replaceAssignments = async ({
 	});
 };
 
-/**
- * Serialises every change that could remove an owner. Counting owners and then writing is a
- * read-then-write: two concurrent demotions each see the other owner and both commit, leaving a
- * workspace nobody can administer. Taking the workspace row first makes the second one wait and then
- * see the truth. Postgres only — the `FOR UPDATE` is why.
- */
 export const lockWorkspace = async ({
 	client,
 	workspaceId,
@@ -95,10 +83,6 @@ export const lockWorkspace = async ({
 	await client.$queryRaw`SELECT "id" FROM "workspaces" WHERE "id" = ${workspaceId}::uuid FOR UPDATE`;
 };
 
-/**
- * How many members still hold the system OWNER role in this workspace, optionally ignoring one of
- * them. This is the cardinality constraint that keeps a workspace reachable: at least one owner.
- */
 export const ownersLeft = async ({
 	client,
 	workspaceId,

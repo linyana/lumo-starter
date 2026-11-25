@@ -23,6 +23,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
 	async onModuleInit(): Promise<void> {
 		await this.$connect();
+		await this.$queryRaw`SELECT 1`;
 		this.logger.log('Connected to PostgreSQL');
 	}
 

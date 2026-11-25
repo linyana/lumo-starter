@@ -34,7 +34,6 @@ const snapshot = (role: {
 	permissions: decodePermissions(role.permissions.map((row) => row.permissionKey)),
 });
 
-/** `Auditor` → `auditor`; a name with nothing slug-able falls back to a stable prefix. */
 const slugOf = (name: string): string => {
 	const slug = name
 		.normalize('NFKD')
@@ -157,7 +156,6 @@ export class RolesService {
 		});
 	}
 
-	/** System roles belong to the code; the only thing that may edit them is `syncAuthorizationCatalog`. */
 	private async editable({ workspaceId, id }: { workspaceId: string; id: string }) {
 		const role = await this.prisma.role.findFirst({
 			where: ownedHere({ id, workspaceId }),

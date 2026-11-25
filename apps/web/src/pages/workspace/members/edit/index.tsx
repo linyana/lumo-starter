@@ -37,8 +37,6 @@ export const EditMember = ({ member, closePanel, reload }: IPropsType) => {
 			setOpen(false);
 			reload();
 
-			// A role change to yourself takes effect on the API at once; re-read the session so this tab
-			// stops offering actions the API would now refuse.
 			if (ownRow) void refresh();
 		},
 	});

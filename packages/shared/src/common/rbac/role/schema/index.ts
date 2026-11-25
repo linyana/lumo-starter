@@ -3,7 +3,6 @@ import { SYSTEM_ROLES } from '../constants';
 
 export const systemRoleSchema = z.enum(SYSTEM_ROLES);
 
-/** `OWNER` for a system role, a slug for a workspace's own role. Both columns are VarChar(32). */
 export const roleKeySchema = z
 	.string()
 	.trim()

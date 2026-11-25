@@ -14,10 +14,6 @@ type IPropsType = {
 	disabled?: boolean;
 };
 
-/**
- * One control for the whole permission set: `Field` wires a single child, so the groups have to merge
- * their toggles back into one array themselves rather than each owning the field.
- */
 export const PermissionMatrix = ({ defaultValue, onChange, disabled }: IPropsType) => {
 	const [value, setValue] = useState<Permission[]>(defaultValue ?? []);
 

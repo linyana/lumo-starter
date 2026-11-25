@@ -18,7 +18,6 @@ type Snapshot = { user?: string; roles?: string[]; name?: string; permissions?: 
 const snapshotOf = (value: unknown): Snapshot | null =>
 	typeof value === 'object' && value !== null ? (value as Snapshot) : null;
 
-/** The one line that says what actually changed, so the payload itself never has to be read. */
 const summaryOf = (event: AuditEvent): string => {
 	const before = snapshotOf(event.before);
 	const after = snapshotOf(event.after);

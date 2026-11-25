@@ -4,10 +4,6 @@ import { Button } from '@/components';
 import { workspaceHref } from '@/lib';
 import { FullPageLoader, useAuth } from '@/providers/auth';
 
-/**
- * Holds the tree back until the URL's slug and the session agree. The API resolves permissions from
- * the session's workspace, so rendering a page while they disagree would show the wrong workspace's data.
- */
 export const WorkspaceScope = () => {
 	const { slug } = useParams();
 	const { workspace, workspaces, switchWorkspace } = useAuth();

@@ -11,16 +11,8 @@ const keysOf = (roles: readonly { key: string }[]): string[] =>
 
 type GuardClient = Pick<Prisma.TransactionClient, 'membership' | '$queryRaw'>;
 
-/**
- * The two rules that decide whether a privilege change is allowed. Neither is RBAC itself: the first is
- * ARBAC's *can-assign* range, the second is RBAC2's cardinality constraint.
- */
 @Injectable()
 export class AssignmentGuard {
-	/**
-	 * ARBAC can-assign: an actor may only hand out permissions it already holds. Without this, a role
-	 * with `member:write` and nothing else could still mint an owner.
-	 */
 	assertCanGrantPermissions({
 		actor,
 		permissions,
@@ -39,11 +31,6 @@ export class AssignmentGuard {
 		});
 	}
 
-	/**
-	 * Checks a whole assignment write **inside the caller's transaction**, because the cardinality rule
-	 * has to lock before it counts (see `lockWorkspace`). Order matters: dropping the last owner is
-	 * answered by the cardinality rule before the range rule gets a chance to say something less useful.
-	 */
 	async assertCanAssign({
 		actor,
 		membership,

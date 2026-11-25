@@ -6,7 +6,6 @@ import { PrismaService } from '../../common/db/prisma.service.js';
 import { ACCESS_TOKEN_TTL, REFRESH_TOKEN_TTL_DAYS } from '../../common/config/runtime/index.js';
 import { AppException } from '../../common/errors/app.exception.js';
 
-/** `sub` is the user, `wid` is the workspace the token acts inside. Authorization is not in here. */
 export type AccessClaims = {
 	sub: string;
 	wid: string;

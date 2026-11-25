@@ -9,18 +9,10 @@ type AuditWriter = Pick<Prisma.TransactionClient, 'auditEvent'>;
 
 const DEFAULT_LIMIT = 50;
 
-/**
- * Writes and reads the audit log. Rows are appended, never changed: a correction is a new row, so the
- * history of who could do what stays readable after the account or the role is gone.
- */
 @Injectable()
 export class AuditService {
 	constructor(private readonly prisma: PrismaService) {}
 
-	/**
-	 * `client` is the caller's transaction whenever there is one — an audit row that survives a failed
-	 * change, or a change with no row, would both be lies.
-	 */
 	async record({
 		actor,
 		action,

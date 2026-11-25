@@ -29,7 +29,6 @@ model User {
 
 model Workspace {
   id        String   @id @default(uuid()) @db.Uuid
-  /// The only part of a workspace that appears in a URL, and the only one nothing may rewrite.
   slug      String   @unique @db.VarChar(32)
   name      String   @db.VarChar(80)
   createdAt DateTime @default(now())
@@ -58,7 +57,6 @@ model Membership {
   @@map("memberships")
 }
 
-/// The action catalog. Rows are synced from `PERMISSIONS` in @lumo/shared; nothing writes them by hand.
 model Permission {
   key         String @id @db.VarChar(64)
   description String @db.VarChar(160)
@@ -68,8 +66,6 @@ model Permission {
   @@map("permissions")
 }
 
-/// `system` roles belong to the code (`SYSTEM_ROLES` + `SYSTEM_ROLE_PERMISSIONS`) and are read-only;
-/// the rest belong to one workspace and are edited by its admins.
 model Role {
   id          String   @id @default(uuid()) @db.Uuid
   key         String   @db.VarChar(32)
@@ -99,7 +95,6 @@ model RolePermission {
   @@map("role_permissions")
 }
 
-/// Holds a role. The workspace it applies to is the membership's workspace.
 model RoleAssignment {
   membershipId String   @db.Uuid
   roleId       String   @db.Uuid
@@ -113,8 +108,6 @@ model RoleAssignment {
   @@map("role_assignments")
 }
 
-/// Append-only: nothing updates or deletes a row here, and the actor is stored by value so the record
-/// still reads correctly after the account is gone.
 model AuditEvent {
   id           String   @id @default(uuid()) @db.Uuid
   workspaceId  String   @db.Uuid

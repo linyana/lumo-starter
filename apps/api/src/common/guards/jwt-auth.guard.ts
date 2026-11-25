@@ -8,7 +8,6 @@ import { IS_PUBLIC_KEY } from '../decorators/public.decorator.js';
 import { AppException } from '../errors/app.exception.js';
 import type { AuthenticatedRequest } from '../types/index.js';
 
-/** `sub` is the user, `wid` is the workspace this token acts inside. No roles: they live in the database. */
 export type AccessTokenPayload = {
 	sub: string;
 	wid: string;

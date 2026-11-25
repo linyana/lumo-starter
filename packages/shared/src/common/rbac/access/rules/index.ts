@@ -5,10 +5,6 @@ import type { AccessCondition, AccessGrant, WithAccess } from '../types';
 const listOf = <T extends string>(value: T | readonly T[]): readonly T[] =>
 	typeof value === 'string' ? [value as T] : value;
 
-/**
- * A grant is assembled where the answer is known — the API resolves roles and permissions from the
- * database — and is never derived on the client from a role name.
- */
 export const grantOf = ({
 	roles = [],
 	permissions = [],

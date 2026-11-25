@@ -204,7 +204,6 @@ const shellRoutes = routes.filter((route): route is ShellRoute => route.layout =
 const bareRoutes = routes.filter((route) => route.layout === 'bare');
 const navRoutes = shellRoutes.filter((route): route is NavRoute => route.nav !== undefined);
 
-/** `/` has no workspace to name, so it hands the browser the one the session already chose. */
 const WorkspaceEntry = () => {
 	const { workspace } = useAuth();
 	if (workspace === null) return null;

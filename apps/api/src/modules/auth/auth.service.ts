@@ -180,7 +180,6 @@ export class AuthService {
 		return session.user;
 	}
 
-	/** A workspace URL is what people share, so it is checked before the row is created rather than after a unique violation. */
 	private async assertWorkspaceSlugFree(slug: string): Promise<void> {
 		const taken = await this.prisma.workspace.findUnique({
 			where: { slug },

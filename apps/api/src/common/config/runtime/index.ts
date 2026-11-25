@@ -10,7 +10,9 @@ export const THROTTLE = { ttl: 60_000, limit: 120 } as const;
 
 export const DB_POOL = {
 	max: 10,
-	connectionTimeoutMillis: 5_000,
+	min: 2,
+	keepAlive: true,
+	connectionTimeoutMillis: 10_000,
 	idleTimeoutMillis: 30_000,
 } as const;
 

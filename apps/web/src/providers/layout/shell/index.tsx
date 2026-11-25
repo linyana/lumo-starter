@@ -59,7 +59,6 @@ export const AppShell = ({ nav }: IPropsType) => {
 					label: entry.name,
 					disabled: entry.id === workspace.id,
 					onClick: () => {
-						// The URL names the workspace, so switching has to move the URL with it.
 						void switchWorkspace(entry.id).then(() => {
 							navigate(`/${entry.slug}/overview`);
 						});

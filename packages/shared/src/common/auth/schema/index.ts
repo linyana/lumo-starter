@@ -26,10 +26,6 @@ export const switchWorkspaceSchema = z.object({
 	workspaceId: z.uuid({ error: 'Not a valid workspace id' }),
 });
 
-/**
- * What a signed-in client holds: who it is, what it may do here, and which workspaces it can reach.
- * `permissions` is resolved by the API from roles — a client never expands a role name into actions.
- */
 export const sessionSchema = z.object({
 	user: memberSchema,
 	permissions: z.array(permissionSchema),

@@ -34,11 +34,6 @@ const grantFrom = (roles: readonly AssignedRole[]): AccessGrant => ({
 	),
 });
 
-/**
- * The single place that answers "what may this actor do here". Guards check route permissions with it,
- * services check invariants with it, and the session payload is built from it — nothing anywhere else
- * expands a role into a set of actions.
- */
 @Injectable()
 export class AuthorizationService {
 	constructor(private readonly prisma: PrismaService) {}
