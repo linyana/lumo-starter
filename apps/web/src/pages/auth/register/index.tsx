@@ -17,7 +17,7 @@ export const RegisterPage = () => {
 	return (
 		<AuthLayout
 			title="Create account"
-			description="You get a workspace of your own. Its URL is what you share with the people you invite."
+			description="You get a workspace of your own. Its handle is what you share with the people you invite."
 			footer={
 				<>
 					Already have an account?{' '}
@@ -47,7 +47,7 @@ export const RegisterPage = () => {
 
 				<Field
 					name="workspaceSlug"
-					label="Workspace URL"
+					label="Workspace handle"
 					description="Lowercase letters, numbers and hyphens. This cannot be changed later."
 				>
 					<Input autoComplete="off" autoCapitalize="none" spellCheck={false} placeholder="acme" />
