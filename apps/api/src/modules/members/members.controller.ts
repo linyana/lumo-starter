@@ -34,6 +34,12 @@ export class MembersController {
 		return this.members.list({ query, workspaceId: actor.workspaceId });
 	}
 
+	@Get('assignable-roles')
+	@RequirePermissions('member:write')
+	async assignableRoles(@CurrentActor() actor: AuthActor) {
+		return { roles: await this.members.assignableRoles({ actor }) };
+	}
+
 	@Get(':id')
 	@RequirePermissions('member:read')
 	async get(@ZodParams(memberParamsSchema) { id }: MemberParams, @CurrentActor() actor: AuthActor) {

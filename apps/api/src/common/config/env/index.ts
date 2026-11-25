@@ -4,6 +4,7 @@ export const envSchema = z.object({
 	DATABASE_URL: z.string().min(1),
 	JWT_ACCESS_SECRET: z.string().min(32),
 	API_DELAY_MS: z.coerce.number().int().min(0).default(0),
+	SYNC_PERMISSION_CATALOG: z.enum(['on', 'off']).default('on'),
 });
 
 export type Env = z.infer<typeof envSchema>;

@@ -5,5 +5,5 @@ import { roleKeyListSchema } from '../../../common/rbac/role';
 export const updateMemberSchema = z.object({
 	email: emailSchema,
 	username: usernameSchema,
-	roles: roleKeyListSchema,
+	roles: roleKeyListSchema.optional(),
 });

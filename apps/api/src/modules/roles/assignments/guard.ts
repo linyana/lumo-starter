@@ -10,9 +10,31 @@ const keysOf = (roles: readonly { key: string }[]): string[] =>
 	roles.map((role) => role.key).sort();
 
 type GuardClient = Pick<Prisma.TransactionClient, 'membership' | '$queryRaw'>;
+type GrantClient = Pick<Prisma.TransactionClient, 'roleAssignment'>;
+
+const uncovered = ({
+	actor,
+	permissions,
+}: {
+	actor: AuthActor;
+	permissions: readonly Permission[];
+}): Permission[] => {
+	const held = new Set(actor.permissions);
+	return [...new Set(permissions)].filter((permission) => !held.has(permission));
+};
 
 @Injectable()
 export class AssignmentGuard {
+	covers({
+		actor,
+		permissions,
+	}: {
+		actor: AuthActor;
+		permissions: readonly Permission[];
+	}): boolean {
+		return uncovered({ actor, permissions }).length === 0;
+	}
+
 	assertCanGrantPermissions({
 		actor,
 		permissions,
@@ -20,8 +42,7 @@ export class AssignmentGuard {
 		actor: AuthActor;
 		permissions: readonly Permission[];
 	}): void {
-		const held = new Set(actor.permissions);
-		const missing = permissions.filter((permission) => !held.has(permission));
+		const missing = uncovered({ actor, permissions });
 
 		if (missing.length === 0) return;
 
@@ -31,6 +52,44 @@ export class AssignmentGuard {
 		});
 	}
 
+	assertCanManage({
+		actor,
+		permissions,
+		target,
+	}: {
+		actor: AuthActor;
+		permissions: readonly Permission[];
+		target: string;
+	}): void {
+		const missing = uncovered({ actor, permissions });
+
+		if (missing.length === 0) return;
+
+		throw new AppException({
+			code: 'FORBIDDEN',
+			message: `You cannot manage ${target} because it carries permissions you do not hold: ${missing.join(', ')}`,
+		});
+	}
+
+	async permissionsOf({
+		client,
+		membershipId,
+	}: {
+		client: GrantClient;
+		membershipId: string;
+	}): Promise<Permission[]> {
+		const assignments = await client.roleAssignment.findMany({
+			where: { membershipId },
+			select: { role: { select: { permissions: { select: { permissionKey: true } } } } },
+		});
+
+		return decodePermissions(
+			assignments.flatMap((assignment) =>
+				assignment.role.permissions.map((row) => row.permissionKey),
+			),
+		);
+	}
+
 	async assertCanAssign({
 		actor,
 		membership,
@@ -38,10 +97,12 @@ export class AssignmentGuard {
 		client,
 	}: {
 		actor: AuthActor;
-		membership: { id: string; roles: readonly RoleRef[] };
+		membership: { id: string; roles: readonly RoleRef[]; permissions: readonly Permission[] };
 		next: readonly ResolvedRole[];
 		client: GuardClient;
 	}): Promise<void> {
+		this.assertCanManage({ actor, permissions: membership.permissions, target: 'that member' });
+
 		const losing = keysOf(membership.roles).includes('OWNER') && !keysOf(next).includes('OWNER');
 
 		if (losing) {

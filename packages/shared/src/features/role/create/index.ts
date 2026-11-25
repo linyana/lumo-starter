@@ -1,11 +1,13 @@
 import { z } from 'zod';
-import { nameSchema } from '../../../common/field';
+import { DESCRIPTION_MAX, nameSchema } from '../../../common/field';
 import { permissionListSchema } from '../../../common/rbac/permission';
-import { memberEditorRule } from '../rule';
 
-export const createRoleSchema = z
-	.object({
-		name: nameSchema,
-		permissions: permissionListSchema,
-	})
-	.refine(memberEditorRule.holds, memberEditorRule.error);
+export const createRoleSchema = z.object({
+	name: nameSchema,
+	description: z
+		.string()
+		.trim()
+		.max(DESCRIPTION_MAX, { error: `Description must be at most ${DESCRIPTION_MAX} characters` })
+		.default(''),
+	permissions: permissionListSchema,
+});

@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import type {
-	CreateMemberInput,
-	ListMembersQuery,
-	Member as WireMember,
-	Paginated,
-	UpdateMemberInput,
+import {
+	BASE_ROLE_KEY,
+	SYSTEM_ROLE_META,
+	type CreateMemberInput,
+	type ListMembersQuery,
+	type Member as WireMember,
+	type Paginated,
+	type RoleRef,
+	type UpdateMemberInput,
 } from '@lumo/shared';
 import argon2 from 'argon2';
 import type { Prisma } from '../../generated/prisma/client.js';
@@ -91,6 +94,26 @@ export class MembersService {
 		return toWireMemberRow(membership);
 	}
 
+	async assignableRoles({ actor }: { actor: AuthActor }): Promise<RoleRef[]> {
+		const rows = await this.prisma.role.findMany({
+			where: { OR: [{ system: true }, { workspaceId: actor.workspaceId }] },
+			orderBy: [{ system: 'desc' }, { key: 'asc' }],
+			select: { key: true, name: true, permissions: { select: { permissionKey: true } } },
+		});
+
+		const canRead = canReadRoles(actor);
+
+		return rows
+			.filter((role) => canRead || role.key === BASE_ROLE_KEY)
+			.filter((role) =>
+				this.guard.covers({
+					actor,
+					permissions: decodePermissions(role.permissions.map((row) => row.permissionKey)),
+				}),
+			)
+			.map(toRoleRef);
+	}
+
 	async create({
 		actor,
 		input,
@@ -104,7 +127,7 @@ export class MembersService {
 		const roles = await rolesByKey({
 			client: this.prisma,
 			workspaceId: actor.workspaceId,
-			keys: input.roles,
+			keys: this.assignableKeys({ actor, roles: input.roles }),
 		});
 
 		this.guard.assertCanGrantPermissions({
@@ -185,23 +208,42 @@ export class MembersService {
 			});
 			const held = toWireMemberRow(fresh).roles;
 
-			const next = await rolesByKey({
-				client: tx,
-				workspaceId: actor.workspaceId,
-				keys: input.roles,
-			});
+			const next =
+				input.roles === undefined
+					? null
+					: await rolesByKey({
+							client: tx,
+							workspaceId: actor.workspaceId,
+							keys: this.assignableKeys({ actor, roles: input.roles }),
+						});
 
-			await this.guard.assertCanAssign({
-				actor,
-				membership: { id: membership.id, roles: held },
-				next,
-				client: tx,
-			});
+			if (next !== null) {
+				await this.guard.assertCanAssign({
+					actor,
+					membership: {
+						id: membership.id,
+						roles: held,
+						permissions: await this.guard.permissionsOf({
+							client: tx,
+							membershipId: membership.id,
+						}),
+					},
+					next,
+					client: tx,
+				});
+			}
 
 			await tx.user.update({
 				where: { id },
 				data: { email: input.email, username: input.username },
 			});
+
+			if (next === null) {
+				return tx.membership.findUniqueOrThrow({
+					where: { id: membership.id },
+					select: membershipSelect,
+				});
+			}
 
 			await replaceAssignments({
 				client: tx,
@@ -249,11 +291,29 @@ export class MembersService {
 					id: true,
 					userId: true,
 					user: { select: { email: true } },
-					assignments: { select: { role: { select: { key: true } } } },
+					assignments: {
+						select: {
+							role: {
+								select: { key: true, permissions: { select: { permissionKey: true } } },
+							},
+						},
+					},
 				},
 			});
 
 			if (memberships.length !== userIds.length) throw new AppException('NOT_FOUND');
+
+			for (const membership of memberships) {
+				this.guard.assertCanManage({
+					actor,
+					permissions: decodePermissions(
+						membership.assignments.flatMap((assignment) =>
+							assignment.role.permissions.map((row) => row.permissionKey),
+						),
+					),
+					target: 'those members',
+				});
+			}
 
 			const owners = memberships.filter((membership) =>
 				membership.assignments.some((assignment) => assignment.role.key === 'OWNER'),
@@ -293,4 +353,26 @@ export class MembersService {
 			}
 		});
 	}
+
+	private assignableKeys({
+		actor,
+		roles,
+	}: {
+		actor: AuthActor;
+		roles?: readonly string[];
+	}): string[] {
+		const keys = roles === undefined || roles.length === 0 ? [BASE_ROLE_KEY] : [...roles];
+
+		if (canReadRoles(actor)) return keys;
+
+		const beyond = keys.filter((key) => key !== BASE_ROLE_KEY);
+		if (beyond.length === 0) return keys;
+
+		throw new AppException({
+			code: 'FORBIDDEN',
+			message: `You cannot assign ${beyond.join(', ')}: you cannot read the role list, so only ${SYSTEM_ROLE_META[BASE_ROLE_KEY]} can be handed out`,
+		});
+	}
 }
+
+const canReadRoles = (actor: AuthActor): boolean => actor.permissions.includes('role:read');

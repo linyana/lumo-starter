@@ -1,6 +1,7 @@
 import { Controller, Get, Patch } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { updateUserSettingSchema, type UpdateUserSettingInput } from '@lumo/shared';
+import { AuthenticatedOnly } from '../../common/decorators/authenticated-only.decorator.js';
 import { CurrentActor } from '../../common/decorators/current-user.decorator.js';
 import { ZodBody } from '../../common/pipes/zod-validation.pipe.js';
 import { ApiZodBody } from '../../common/swagger/zod-openapi/index.js';
@@ -12,11 +13,13 @@ import { SettingsService } from './settings.service.js';
 export class SettingsController {
 	constructor(private readonly settings: SettingsService) {}
 
+	@AuthenticatedOnly()
 	@Get('me')
 	async mine(@CurrentActor() actor: AuthActor) {
 		return { setting: await this.settings.mine(actor.id) };
 	}
 
+	@AuthenticatedOnly()
 	@Patch('me')
 	@ApiZodBody(updateUserSettingSchema)
 	async updateMine(

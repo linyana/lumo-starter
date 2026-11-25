@@ -27,6 +27,12 @@ export class RolesController {
 		return { roles: await this.roles.list({ workspaceId: actor.workspaceId }) };
 	}
 
+	@Get(':id')
+	@RequirePermissions('role:read')
+	async get(@CurrentActor() actor: AuthActor, @ZodParams(roleParamsSchema) { id }: RoleParams) {
+		return { role: await this.roles.findById({ workspaceId: actor.workspaceId, id }) };
+	}
+
 	@Post()
 	@RequirePermissions('role:write')
 	@ApiZodBody(createRoleSchema)

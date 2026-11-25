@@ -89,19 +89,21 @@ account popover, with its own nav on the left, and the URL stays wherever it was
 
 Root scripts fan out through Turborepo.
 
-| Command                               | What it does                                                       |
-| ------------------------------------- | ------------------------------------------------------------------ |
-| `pnpm dev`                            | shared (watch) + api (nest watch) + web (vite)                     |
-| `pnpm build`                          | shared → api → web, in dependency order                            |
-| `pnpm check`                          | format:check + lint + typecheck                                    |
-| `pnpm format` / `format:check`        | oxfmt                                                              |
-| `pnpm db:up` / `db:down` / `db:reset` | Docker Compose                                                     |
-| `pnpm db:migrate`                     | `prisma migrate dev`                                               |
-| `pnpm db:generate`                    | regenerate the Prisma client after a schema edit                   |
-| `pnpm db:seed`                        | sync the permission catalog + system roles, then the demo accounts |
-| `pnpm db:studio`                      | Prisma Studio                                                      |
+| Command                               | What it does                                                   |
+| ------------------------------------- | -------------------------------------------------------------- |
+| `pnpm dev`                            | shared (watch) + api (nest watch) + web (vite)                 |
+| `pnpm build`                          | shared → api → web, in dependency order                        |
+| `pnpm check`                          | format:check + lint + typecheck + test                         |
+| `pnpm test` / `test:watch`            | vitest over the guards, the catalog codec and the shared rules |
+| `pnpm format` / `format:check`        | oxfmt                                                          |
+| `pnpm db:up` / `db:down` / `db:reset` | Docker Compose                                                 |
+| `pnpm db:migrate`                     | `prisma migrate dev`                                           |
+| `pnpm db:generate`                    | regenerate the Prisma client after a schema edit               |
+| `pnpm db:catalog`                     | sync the permission catalog + system roles, nothing else       |
+| `pnpm db:seed`                        | the same sync, then the demo accounts                          |
+| `pnpm db:studio`                      | Prisma Studio                                                  |
 
-CI runs `pnpm check` and then `pnpm build`.
+CI runs `pnpm check` (which includes the test suite) and then `pnpm build`.
 
 ---
 
@@ -144,8 +146,9 @@ Native labels live beside the constants: `SYSTEM_ROLE_META` (system role → lab
 `satisfies Record<…>`, so adding a permission fails compilation until it has a label and a group.
 
 Nothing expands a role into actions on the client. The API resolves the grant and hands the session
-its `permissions` array; the client only reads it. A key that is no longer in the catalog throws on
-the way out of `apps/api/src/common/db/codec/index.ts` instead of leaking as `string`.
+its `permissions` array; the client only reads it. A key that is no longer in the catalog is dropped
+on the way out of `apps/api/src/common/db/codec/index.ts` with a warning naming it — a stale row must
+not turn every request of one actor into a 500.
 
 ---
 
@@ -164,6 +167,7 @@ session = { accessToken, user, permissions, workspace, workspaces }
           // permissions = what this actor may do in `workspace`; the token carries only sub + wid
 
 GET    /api/members           ?page&pageSize&search&sort&order      (member:read)
+GET    /api/members/assignable-roles                                (member:write)
 GET    /api/members/:id                                              (member:read)
 POST   /api/members           { email, username, password, roles? }  (member:write)
 PATCH  /api/members/:id       { email, username, roles }             (member:write)
@@ -171,18 +175,25 @@ DELETE /api/members/:id                                              (member:del
 POST   /api/members/batch-delete   { ids }                           (member:delete)
 
 GET    /api/roles                                                    (role:read)
-POST   /api/roles             { name, permissions }                  (role:write)
-PATCH  /api/roles/:id         { name, permissions }                  (role:write, this workspace's own)
+GET    /api/roles/:id                                                (role:read)
+POST   /api/roles             { name, description?, permissions }     (role:write)
+                                                                     /lumo/settings/roles/new is the page
+PATCH  /api/roles/:id         { name, description?, permissions }     (role:write, this workspace's own)
 DELETE /api/roles/:id                                                (role:write, its own again)
 
 GET    /api/audit             ?limit&action&targetId                 (audit:read)
 ```
+
+The bracket is the route's declared access rule, and it is the same value the guard reads: a route
+with none of the three decorators is refused at boot. A permission in that bracket is **added to the
+privilege check** below — holding `member:write` does not mean you may edit every member.
 
 Every `/api/members` route reads and writes **memberships of the workspace in the access token**,
 never the `users` table alone: a row is a person _in this workspace_, so the list is that workspace's
 people, `roles` on a row are `{ key, name }` pairs assigned here, and `DELETE` removes the membership
 rather than the global identity. A `roles` array in a create/update body is a list of **keys**,
 resolved against the system roles and the workspace's own; an unknown key is a `VALIDATION_FAILED`.
+Omit it on `POST` to start the member on the base role; omit it on `PATCH` to leave the roles alone.
 
 ```
 GET    /api/settings/me       → { setting: { type, content, updatedAt } }   (any signed-in user)
@@ -292,8 +303,9 @@ own it.
 
 **Add a permission** — append to `PERMISSIONS`, then fix the compiler errors in `PERMISSION_META` and
 `PERMISSION_RESOURCE_META`, and give it to the system roles that should have it in
-`SYSTEM_ROLE_PERMISSIONS`. Run `pnpm db:seed`: it syncs the catalog into `permissions` and rewrites
-each system role's `role_permissions` from the code. Guards, nav and buttons follow.
+`SYSTEM_ROLE_PERMISSIONS`. The catalog syncs itself on the next API boot; `pnpm db:catalog` does the
+same thing by hand, for a deploy that would rather not write from the app. Guards, nav and buttons
+follow.
 
 **Add a role** — two shapes, picked deliberately:
 
@@ -373,15 +385,18 @@ the action to take.
   the same component taken apart. All of it is linted, formatted and edited like the rest of `src`.
 - **The AI skill** is landed locally, not committed: it goes to `.agents/skills/lumo-ui`
   (`bunx skills`), and `bunx skills update` refreshes it.
-- **`.env` holds only `DATABASE_URL` and `JWT_ACCESS_SECRET`** — everything else is a constant in
-  `apps/api/src/common/config/runtime/index.ts` (port, log level, token lifetimes, throttling). The
-  exception is `API_DELAY_MS`, a test knob rather than config: it holds every response back so
-  spinners and empty states are visible, `@SkipDelay()` opts a route out, and production ignores it.
+- **`.env` holds only `DATABASE_URL`, `JWT_ACCESS_SECRET` and `SYNC_PERMISSION_CATALOG`** — everything
+  else is a constant in `apps/api/src/common/config/runtime/index.ts` (port, log level, token
+  lifetimes, throttling). The exception is `API_DELAY_MS`, a test knob rather than config: it holds
+  every response back so spinners and empty states are visible, `@SkipDelay()` opts a route out, and
+  production ignores it. `SYNC_PERMISSION_CATALOG=off` is the escape hatch for a deployment that
+  would rather run `pnpm db:catalog` itself than let the app write the catalog on boot.
 - **Cookies are host-only**, `Secure` outside development. Subdomain deployments edit
   `refresh-cookie/index.ts` deliberately (§5).
 - **Permissions are code, roles are rows** — `PERMISSIONS` is the only place an action is defined and
-  `pnpm db:seed` copies it into the `permissions` table; roles exist in the database because a
-  workspace may invent them at runtime. Never write a permission row by hand.
+  `syncAuthorizationCatalog` copies it into the `permissions` table on boot (or on `pnpm db:catalog`);
+  roles exist in the database because a workspace may invent them at runtime. Never write a
+  permission row by hand.
 - **System roles cannot be edited through the API** — `system = true` rows belong to
   `SYSTEM_ROLE_PERMISSIONS`; `PATCH`/`DELETE` answer `FORBIDDEN`. A partial unique index plus a CHECK
   constraint in the init migration keep "system means no workspace" true even if a bug tries.
@@ -390,11 +405,23 @@ the action to take.
   display name: a person is `username` plus `email`, and `users` has no `name` column to grow back.
 - **Roles live on `role_assignments`, not on `users`** — the same person can be OWNER in one workspace
   and MEMBER in another, so nothing may read a role from the user row.
-- **A role that may edit members must also read roles** — `features/role/rule` refuses the pair
-  otherwise, because the member editor loads the roles it assigns from `GET /roles`.
-- **You cannot grant what you do not hold** — `AssignmentGuard` refuses a permission that is not in
-  your own grant, on assignments and on role edits alike. Widening a role you hold yourself is the
-  same check, so it fails the same way.
+- **Roles are offered, not listed** — the member editor asks `GET /members/assignable-roles` (gated by
+  `member:write`), which answers with the roles this actor actually covers. So editing members no
+  longer needs `role:read`, and a role that may edit members does not have to read the role catalog.
+- **A role-blind actor can still invite** — an empty `roles` on `POST /api/members` falls back to the
+  base role (`BASE_ROLE_KEY`, i.e. `MEMBER`), and an actor without `role:read` may name nothing else.
+- **A route with no access rule does not open, it crashes** — `PermissionsGuard` refuses a handler
+  that carries none of `@Public`, `@AuthenticatedOnly` or `@RequirePermissions`, and
+  `RouteAccessAudit` reads the controller tree on boot and refuses to start when it finds one. Deny by
+  default is the whole point: the next controller someone adds either names a permission or says out
+  loud that any signed-in actor may reach it.
+- **Privileges only move down** — `AssignmentGuard` holds both sides of a change: you cannot **grant**
+  a permission you do not hold, and you cannot **touch a subject** (a member, a role) carrying one you
+  do not hold. Only the first check is the obvious one; without the second, a manager with
+  `member:write` could strip an owner's roles or delete a role richer than their own.
+- **A role is assigned inside the workspace that owns it** — `replaceAssignments` is the single choke
+  point and re-reads the membership's `workspaceId` before writing, since `role_assignments` itself
+  carries only two ids and a foreign key cannot say "system, or this workspace".
 - **The audit log is append-only** — no update path, no delete path, and `before`/`after` hold the
   snapshot rather than a pointer to a row that may since have changed.
 - **Settings are user-scoped on purpose** — `settings` keys on `(type, ownerId)`. A workspace-level

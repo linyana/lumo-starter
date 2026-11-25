@@ -27,12 +27,16 @@ const ownedHere = ({
 const snapshot = (role: {
 	key: string;
 	name: string;
+	description: string | null;
 	permissions: { permissionKey: string }[];
 }): Record<string, unknown> => ({
 	key: role.key,
 	name: role.name,
+	description: role.description ?? '',
 	permissions: decodePermissions(role.permissions.map((row) => row.permissionKey)),
 });
+
+const nullable = (value: string): string | null => (value.trim() === '' ? null : value);
 
 const slugOf = (name: string): string => {
 	const slug = name
@@ -63,6 +67,17 @@ export class RolesService {
 		return rows.map(toWireRole);
 	}
 
+	async findById({ workspaceId, id }: { workspaceId: string; id: string }): Promise<WireRole> {
+		const row = await this.prisma.role.findFirst({
+			where: ownedHere({ id, workspaceId }),
+			select: roleWireSelect,
+		});
+
+		if (!row) throw new AppException('NOT_FOUND');
+
+		return toWireRole(row);
+	}
+
 	async create({ actor, input }: { actor: AuthActor; input: CreateRoleInput }): Promise<WireRole> {
 		this.guard.assertCanGrantPermissions({ actor, permissions: input.permissions });
 
@@ -73,6 +88,7 @@ export class RolesService {
 				data: {
 					key,
 					name: input.name,
+					description: nullable(input.description),
 					system: false,
 					workspaceId: actor.workspaceId,
 					permissions: {
@@ -107,6 +123,11 @@ export class RolesService {
 		input: UpdateRoleInput;
 	}): Promise<WireRole> {
 		const existing = await this.editable({ workspaceId: actor.workspaceId, id });
+		this.guard.assertCanManage({
+			actor,
+			permissions: decodePermissions(existing.permissions.map((row) => row.permissionKey)),
+			target: 'that role',
+		});
 		this.guard.assertCanGrantPermissions({ actor, permissions: input.permissions });
 
 		const row = await this.prisma.$transaction(async (tx) => {
@@ -116,6 +137,7 @@ export class RolesService {
 				where: { id: existing.id },
 				data: {
 					name: input.name,
+					description: nullable(input.description),
 					permissions: {
 						createMany: { data: input.permissions.map((permissionKey) => ({ permissionKey })) },
 					},
@@ -141,6 +163,11 @@ export class RolesService {
 
 	async remove({ actor, id }: { actor: AuthActor; id: string }): Promise<void> {
 		const existing = await this.editable({ workspaceId: actor.workspaceId, id });
+		this.guard.assertCanManage({
+			actor,
+			permissions: decodePermissions(existing.permissions.map((row) => row.permissionKey)),
+			target: 'that role',
+		});
 
 		await this.prisma.$transaction(async (tx) => {
 			await tx.role.delete({ where: { id: existing.id } });
@@ -163,6 +190,7 @@ export class RolesService {
 				id: true,
 				key: true,
 				name: true,
+				description: true,
 				system: true,
 				permissions: { select: { permissionKey: true } },
 			},

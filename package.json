@@ -14,7 +14,9 @@
 		"build": "turbo run build",
 		"lint": "turbo run lint",
 		"typecheck": "turbo run typecheck",
-		"check": "pnpm format:check && pnpm lint && pnpm typecheck",
+		"check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test",
+		"test": "vitest run",
+		"test:watch": "vitest",
 		"format": "oxfmt",
 		"format:check": "oxfmt --check",
 		"db:up": "docker compose up -d --wait postgres",
@@ -23,6 +25,7 @@
 		"db:migrate": "pnpm --filter @lumo/api db:migrate",
 		"db:generate": "pnpm --filter @lumo/api db:generate",
 		"db:seed": "pnpm --filter @lumo/api db:seed",
+		"db:catalog": "pnpm --filter @lumo/api db:catalog",
 		"db:studio": "pnpm --filter @lumo/api db:studio"
 	},
 	"devDependencies": {
@@ -30,6 +33,7 @@
 		"oxfmt": "^0.76.0",
 		"oxlint": "^1.91.0",
 		"turbo": "^2.11.10",
-		"typescript": "catalog:"
+		"typescript": "catalog:",
+		"vitest": "^5.1.1"
 	}
 }

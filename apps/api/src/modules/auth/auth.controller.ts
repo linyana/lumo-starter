@@ -12,6 +12,7 @@ import {
 	type SwitchWorkspaceInput,
 } from '@lumo/shared';
 import type { NodeResponse } from '@nestjs/platform-node';
+import { AuthenticatedOnly } from '../../common/decorators/authenticated-only.decorator.js';
 import { CurrentActor } from '../../common/decorators/current-user.decorator.js';
 import { Public } from '../../common/decorators/public.decorator.js';
 import { SkipEnvelope } from '../../common/decorators/skip-envelope.decorator.js';
@@ -67,6 +68,7 @@ export class AuthController {
 		return this.toWireResult(result);
 	}
 
+	@AuthenticatedOnly()
 	@Post('switch-workspace')
 	@HttpCode(HttpStatus.OK)
 	@ApiZodBody(switchWorkspaceSchema)
@@ -95,11 +97,13 @@ export class AuthController {
 		clearRefreshCookie(res);
 	}
 
+	@AuthenticatedOnly()
 	@Get('me')
 	async me(@CurrentActor() actor: AuthActor) {
 		return this.auth.session({ userId: actor.id, workspaceId: actor.workspaceId });
 	}
 
+	@AuthenticatedOnly()
 	@Patch('me')
 	@ApiZodBody(patchProfileSchema)
 	async updateMe(

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, DiscoveryModule } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { LoggerModule } from 'nestjs-pino';
@@ -10,6 +10,7 @@ import { PrismaModule } from './common/db/prisma.module.js';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter.js';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard.js';
 import { PermissionsGuard } from './common/guards/permissions.guard.js';
+import { RouteAccessAudit } from './common/guards/route-access.audit.js';
 import { DelayInterceptor } from './common/interceptors/delay.interceptor.js';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor.js';
 import { AuditModule } from './modules/audit/audit.module.js';
@@ -46,6 +47,7 @@ import { MembersModule } from './modules/members/members.module.js';
 
 		JwtModule.register({ global: true }),
 
+		DiscoveryModule,
 		PrismaModule,
 		AuthorizationModule,
 		AuditModule,
@@ -59,6 +61,7 @@ import { MembersModule } from './modules/members/members.module.js';
 		{ provide: APP_GUARD, useClass: ThrottlerGuard },
 		{ provide: APP_GUARD, useClass: JwtAuthGuard },
 		{ provide: APP_GUARD, useClass: PermissionsGuard },
+		RouteAccessAudit,
 		{ provide: APP_FILTER, useClass: AllExceptionsFilter },
 		{ provide: APP_INTERCEPTOR, useClass: DelayInterceptor },
 		{ provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },

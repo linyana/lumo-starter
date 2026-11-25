@@ -6,5 +6,5 @@ export const createMemberSchema = z.object({
 	email: emailSchema,
 	username: usernameSchema,
 	password: passwordSchema,
-	roles: roleKeyListSchema.default(['MEMBER']),
+	roles: roleKeyListSchema.optional(),
 });

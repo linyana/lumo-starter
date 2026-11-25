@@ -15,11 +15,12 @@ export const roleWireSelect = {
 	id: true,
 	key: true,
 	name: true,
+	description: true,
 	system: true,
 	permissions: { select: { permissionKey: true } },
 } as const satisfies Prisma.RoleSelect;
 
-export type RoleWireRow = Pick<RoleRow, 'id' | 'key' | 'name' | 'system'> & {
+export type RoleWireRow = Pick<RoleRow, 'id' | 'key' | 'name' | 'description' | 'system'> & {
 	permissions: { permissionKey: string }[];
 };
 
@@ -32,6 +33,7 @@ export const toWireRole = (row: RoleWireRow): WireRole => {
 		id: row.id,
 		key: row.key,
 		name: row.name,
+		description: row.description ?? '',
 		system: row.system,
 		permissions,
 	};
