@@ -10,12 +10,8 @@
 		"useDefineForClassFields": true,
 		"noEmit": true,
 		"types": ["vite/client", "node"],
-		// No `baseUrl` — removed in TypeScript 7. Since TS 4.1 `paths` resolves
-		// relative to this file on its own.
 		"paths": {
 			"@/*": ["./src/*"],
-			// Mirrors the Vite alias: TypeScript reads the shared source too, so
-			// editor and typecheck agree with what the bundler actually compiles.
 			"@lumo/shared": ["../../packages/shared/src/index.ts"]
 		}
 	},

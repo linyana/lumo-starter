@@ -50,8 +50,6 @@ export function FieldError({ match, className, style, children, ...props }: Fiel
 		});
 	}, [nudge, preset]);
 
-	// The box clips itself while opening and closing, so its own height says nothing about how tall
-	// the message is. The line inside is never constrained, and its height is what the box reaches.
 	const [height, setHeight] = useState<number>();
 	const watcher = useRef<ResizeObserver | null>(null);
 
@@ -62,8 +60,6 @@ export function FieldError({ match, className, style, children, ...props }: Fiel
 
 		const take = () => {
 			const tall = Math.ceil(node.getBoundingClientRect().height);
-			// A box that has not been laid out, because an ancestor is still hidden, reads as zero and
-			// would clip the message for good once it is shown.
 			if (tall > 0) setHeight(tall);
 		};
 

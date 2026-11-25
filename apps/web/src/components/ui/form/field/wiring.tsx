@@ -19,12 +19,6 @@ export const useFieldWiring = (name: string | undefined): Record<string, unknown
 	return name === undefined ? NO_WIRING : (wiring[name] ?? NO_WIRING);
 };
 
-/**
- * A control written in the page keeps what it declares: own values replace the wired ones, and
- * own handlers run after them — replacing a handler instead of adding to it would drop the
- * behaviour the wiring exists for, silently. `onChange` is left out: the field composes that one,
- * because the value has to land in the form before either handler reads it.
- */
 export const mergeWiring = ({
 	wiring,
 	own,

@@ -29,11 +29,8 @@ export type DialogProps = Omit<DialogRootProps, 'children'> &
 		description?: ReactNode;
 		children?: ReactNode;
 		footer?: ReactNode;
-		/** Render the dimmed page behind the popup. @default true */
 		backdrop?: boolean;
-		/** Render the × button in the corner. @default true */
 		closeButton?: boolean;
-		/** Accessible label for the × button. @default 'Close' */
 		closeLabel?: string;
 		className?: string;
 		classNames?: SlotClassNames<DialogSlots>;

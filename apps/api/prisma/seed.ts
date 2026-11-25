@@ -11,11 +11,7 @@ if (!connectionString) throw new Error('DATABASE_URL is not set — copy .env.ex
 
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
 
-/**
- * Three accounts, one per role, so the permission matrix is testable from the
- * UI without editing SQL. Passwords are dev-only and printed below.
- */
-const SEED_USERS = [
+const SEED_ACCOUNTS = [
 	{
 		email: 'owner@lumo.dev',
 		username: 'olivia',
@@ -40,9 +36,9 @@ const SEED_USERS = [
 ];
 
 async function main(): Promise<void> {
-	for (const seed of SEED_USERS) {
+	for (const seed of SEED_ACCOUNTS) {
 		const passwordHash = await argon2.hash(seed.password);
-		await prisma.user.upsert({
+		await prisma.account.upsert({
 			where: { email: seed.email },
 			update: { username: seed.username, name: seed.name, roles: seed.roles, passwordHash },
 			create: {

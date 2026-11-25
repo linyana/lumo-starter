@@ -1,7 +1,5 @@
 {
 	"$schema": "./node_modules/oxlint/configuration_schema.json",
-	// Generated and vendored code, kept in sync by hand with `ignorePatterns` in
-	// `.oxfmtrc.json`: the linter and the formatter skip the same files.
 	"ignorePatterns": [
 		"**/node_modules/",
 		"**/dist/",
@@ -13,7 +11,6 @@
 		"pnpm-lock.yaml",
 		"apps/api/prisma/migrations/",
 		"apps/api/src/generated/",
-		// Committed agent skill.
 		".agents/"
 	],
 	"rules": {
@@ -22,9 +19,6 @@
 	},
 	"overrides": [
 		{
-			// Only outside the API: Nest's `emitDecoratorMetadata` turns a
-			// constructor parameter's class into a *value* import, so `import type`
-			// there would erase the very reference dependency injection needs.
 			"files": ["apps/web/**/*.{ts,tsx}", "packages/**/*.ts"],
 			"rules": {
 				"typescript/consistent-type-imports": [
@@ -38,9 +32,6 @@
 			"env": { "node": true }
 		},
 		{
-			// The shared package runs in the browser and in Node, so it may name neither
-			// runtime: no `node:*`, no DOM. A rule nothing executes is not a rule, so the
-			// constraint lives here rather than in AGENTS.md.
 			"files": ["packages/**/*.ts"],
 			"rules": {
 				"no-restricted-globals": [

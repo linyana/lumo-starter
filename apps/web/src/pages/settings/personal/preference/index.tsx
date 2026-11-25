@@ -1,4 +1,4 @@
-import { PAGE_SIZE_OPTIONS, userSettingContentSchema } from '@lumo/shared';
+import { PAGE_SIZE_OPTIONS, accountSettingContentSchema } from '@lumo/shared';
 import { Field, Form, Page, Select, SettingsGroup, useForm, type SelectOption } from '@/components';
 import { themes, useHttp, type Theme } from '@/hooks';
 import { useSetting } from '@/providers/setting';
@@ -31,7 +31,7 @@ export const PreferenceSetting = () => {
 		<Page variant="settings" title="Preference">
 			<Form
 				form={form}
-				schema={userSettingContentSchema}
+				schema={accountSettingContentSchema}
 				initial={settings}
 				autosave={autosave}
 				commitOn="change"

@@ -8,11 +8,6 @@ const NO_WIRING: FieldWiring = {};
 
 type Send = (patch: Partial<FormValues>) => Promise<AutoSaveAck | null>;
 
-/**
- * Saves a form field by field: the edit ends on blur or Enter (or on change, for a control whose
- * options are final states) and sends that field alone, only when it differs from what the server
- * last confirmed. A form without an autosave handle gets no wiring, so its fields behave as before.
- */
 export const useAutoSave = <TValues extends FormValues>({
 	form,
 	schema,
@@ -63,7 +58,6 @@ export const useAutoSave = <TValues extends FormValues>({
 		}
 
 		if (checked.value === saved[name]) {
-			// Nothing is sent, so nothing will answer this field.
 			forget({ names: [name] });
 			pass(name);
 			return;
@@ -72,15 +66,9 @@ export const useAutoSave = <TValues extends FormValues>({
 		const patch = { [name]: checked.value } as Partial<FormValues>;
 
 		setPending(name);
-		// What is on screen is the last verdict on this field, and the request is what replaces
-		// it. A retry that withdraws the message first reports a fix the server has not made yet.
-		// Saves land in the order the user made them; one failure must not stop
-		// the ones queued behind it.
 		queue.current = queue.current
 			.then(() => send(patch))
 			.then((result) => {
-				// A superseded request resolves null: its verdict belongs to a value the
-				// field no longer holds.
 				if (result === null) return;
 
 				if (!result.ok) {
@@ -88,10 +76,8 @@ export const useAutoSave = <TValues extends FormValues>({
 					return;
 				}
 
-				// The confirmed values are the ones this field is now measured against.
 				setSaved((previous) => ({ ...previous, ...(result.data as Partial<TValues>) }));
 
-				// Answers the value that was sent, not the one typed while it was in flight.
 				const answered = check(name);
 				if (!answered.ok || answered.value !== checked.value) return;
 
@@ -114,15 +100,11 @@ export const useAutoSave = <TValues extends FormValues>({
 	const busy = (name: keyof TValues & string): boolean => loading && pending === name;
 	const rejected = (name: keyof TValues & string): boolean => failed.includes(name);
 
-	// Field writes the typed value before it runs these, so a change-mode commit reads what the
-	// control just reported rather than the value it held before.
 	const handler = (name: keyof TValues & string): Record<string, unknown> =>
 		commitOn === 'change'
 			? { onChange: () => commit(name) }
 			: { onBlur: blur(name), onKeyDown: enter(name) };
 
-	// Every field the form starts with is autosaved; the control inside <Field name="..."> picks
-	// these up, so a page declares what the field holds and not how it persists.
 	return Object.fromEntries(
 		Object.keys(initial).map((name) => [
 			name,

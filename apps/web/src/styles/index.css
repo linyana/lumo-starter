@@ -1,22 +1,10 @@
 @import '@fontsource-variable/inter';
 @import 'tailwindcss';
 
-/* @lumo/theme and @lumo/palette are merged into this file by the shadcn CLI. */
-
 @custom-variant dark (&:where(.dark, .dark *));
 
-/*
- * One name for a control that failed: the attribute the field writes on the box around it, which is
- * the only one this library produces, and the two a control can carry itself — Base UI's
- * `Field.Control`, or a form that is not ours. `aria-invalid="false"` is the state that says it did
- * not, so the value is matched as well as the name: an attribute selector alone takes any value.
- */
 @custom-variant failed (&:is([data-invalid], [aria-invalid='true']), :is(.group[data-invalid], .group[aria-invalid='true']) &);
 
-/*
- * The moment a control is held down. Three conditions make it — the pointer is down, the control is
- * enabled, and no popup is open, so a trigger does not move under the pointer that just opened it.
- */
 @custom-variant pressed (&:active:not([data-disabled]):not([data-popup-open]));
 
 @theme inline {

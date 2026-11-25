@@ -4,14 +4,14 @@ import type {
 	LoginInput,
 	PatchProfileInput,
 	RegisterInput,
-	User as WireUser,
+	Account as WireAccount,
 } from '@lumo/shared';
 import argon2 from 'argon2';
 import { decodeRoles } from '../../common/db/codec/index.js';
 import { PrismaService } from '../../common/db/prisma.service.js';
-import { assertUserFieldFree } from '../../common/db/unique/index.js';
+import { assertAccountFieldFree } from '../../common/db/unique/index.js';
 import { AppException } from '../../common/errors/app.exception.js';
-import { toWireUser } from '../users/mapper/index.js';
+import { toWireAccount } from '../accounts/mapper/index.js';
 import { TokenService, type IssuedTokens } from './token.service.js';
 
 type AuthenticatedResult = AuthResult & { tokens: IssuedTokens };
@@ -24,35 +24,35 @@ export class AuthService {
 	) {}
 
 	async register(input: RegisterInput): Promise<AuthenticatedResult> {
-		await assertUserFieldFree({ prisma: this.prisma, field: 'email', value: input.email });
-		await assertUserFieldFree({ prisma: this.prisma, field: 'username', value: input.username });
+		await assertAccountFieldFree({ prisma: this.prisma, field: 'email', value: input.email });
+		await assertAccountFieldFree({ prisma: this.prisma, field: 'username', value: input.username });
 
 		const passwordHash = await argon2.hash(input.password);
 
-		const isFirstUser = (await this.prisma.user.count()) === 0;
+		const isFirstAccount = (await this.prisma.account.count()) === 0;
 
-		const row = await this.prisma.user.create({
+		const row = await this.prisma.account.create({
 			data: {
 				email: input.email,
 				username: input.username,
 				name: input.name,
 				passwordHash,
-				roles: isFirstUser ? ['OWNER'] : ['MEMBER'],
+				roles: isFirstAccount ? ['OWNER'] : ['MEMBER'],
 			},
 		});
 
-		const user = toWireUser(row);
+		const account = toWireAccount(row);
 		const tokens = await this.tokens.issue({
 			sub: row.id,
 			email: row.email,
 			roles: decodeRoles(row.roles),
 		});
 
-		return { accessToken: tokens.accessToken, user, tokens };
+		return { accessToken: tokens.accessToken, account, tokens };
 	}
 
 	async login(input: LoginInput): Promise<AuthenticatedResult> {
-		const row = await this.prisma.user.findUnique({ where: { email: input.email } });
+		const row = await this.prisma.account.findUnique({ where: { email: input.email } });
 
 		if (!row)
 			throw new AppException({ code: 'UNAUTHORIZED', message: 'Incorrect email or password' });
@@ -61,56 +61,60 @@ export class AuthService {
 		if (!valid)
 			throw new AppException({ code: 'UNAUTHORIZED', message: 'Incorrect email or password' });
 
-		const user = toWireUser(row);
+		const account = toWireAccount(row);
 		const tokens = await this.tokens.issue({
 			sub: row.id,
 			email: row.email,
 			roles: decodeRoles(row.roles),
 		});
 
-		return { accessToken: tokens.accessToken, user, tokens };
+		return { accessToken: tokens.accessToken, account, tokens };
 	}
 
-	async refresh(rawToken: string): Promise<{ user: WireUser; tokens: IssuedTokens }> {
-		const { user, tokens } = await this.tokens.rotate(rawToken);
-		const row = await this.prisma.user.findUnique({ where: { id: user.id } });
+	async refresh(rawToken: string): Promise<{ account: WireAccount; tokens: IssuedTokens }> {
+		const { account, tokens } = await this.tokens.rotate(rawToken);
+		const row = await this.prisma.account.findUnique({ where: { id: account.id } });
 		if (!row)
 			throw new AppException({ code: 'UNAUTHORIZED', message: 'Your account no longer exists' });
 
-		return { user: toWireUser(row), tokens };
+		return { account: toWireAccount(row), tokens };
 	}
 
 	async logout(rawToken: string): Promise<void> {
 		await this.tokens.revoke(rawToken);
 	}
 
-	async me(userId: string): Promise<WireUser> {
-		const row = await this.prisma.user.findUnique({ where: { id: userId } });
+	async me(accountId: string): Promise<WireAccount> {
+		const row = await this.prisma.account.findUnique({ where: { id: accountId } });
 		if (!row) throw new AppException('NOT_FOUND');
-		return toWireUser(row);
+		return toWireAccount(row);
 	}
 
 	async updateProfile({
-		userId,
+		accountId,
 		input,
 	}: {
-		userId: string;
+		accountId: string;
 		input: PatchProfileInput;
-	}): Promise<WireUser> {
-		const row = await this.prisma.user.findUnique({ where: { id: userId } });
+	}): Promise<WireAccount> {
+		const row = await this.prisma.account.findUnique({ where: { id: accountId } });
 		if (!row) throw new AppException('NOT_FOUND');
 
 		if (input.email !== undefined && input.email !== row.email)
-			await assertUserFieldFree({ prisma: this.prisma, field: 'email', value: input.email });
+			await assertAccountFieldFree({ prisma: this.prisma, field: 'email', value: input.email });
 
 		if (input.username !== undefined && input.username !== row.username)
-			await assertUserFieldFree({ prisma: this.prisma, field: 'username', value: input.username });
+			await assertAccountFieldFree({
+				prisma: this.prisma,
+				field: 'username',
+				value: input.username,
+			});
 
-		const updated = await this.prisma.user.update({
-			where: { id: userId },
+		const updated = await this.prisma.account.update({
+			where: { id: accountId },
 			data: { username: input.username, email: input.email, name: input.name },
 		});
 
-		return toWireUser(updated);
+		return toWireAccount(updated);
 	}
 }

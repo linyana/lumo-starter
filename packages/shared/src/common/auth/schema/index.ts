@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { emailSchema, nameSchema, passwordSchema, usernameSchema } from '../../field';
-import { userSchema } from '../../../features/user';
+import { accountSchema } from '../../../features/account';
 
 export const registerSchema = z
 	.object({
@@ -22,5 +22,5 @@ export const loginSchema = z.object({
 
 export const authResultSchema = z.object({
 	accessToken: z.string(),
-	user: userSchema,
+	account: accountSchema,
 });

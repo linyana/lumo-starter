@@ -9,13 +9,13 @@ import {
 	type RegisterInput,
 } from '@lumo/shared';
 import type { NodeResponse } from '@nestjs/platform-node';
-import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
+import { CurrentAccount } from '../../common/decorators/current-account.decorator.js';
 import { Public } from '../../common/decorators/public.decorator.js';
 import { SkipEnvelope } from '../../common/decorators/skip-envelope.decorator.js';
 import { AppException } from '../../common/errors/app.exception.js';
 import { ZodBody } from '../../common/pipes/zod-validation.pipe.js';
 import { ApiZodBody } from '../../common/swagger/zod-openapi/index.js';
-import type { AuthUser } from '../../common/types/index.js';
+import type { AuthAccount } from '../../common/types/index.js';
 import { AuthService } from './auth.service.js';
 import { REFRESH_COOKIE, clearRefreshCookie, setRefreshCookie } from './refresh-cookie/index.js';
 import type { IssuedTokens } from './token.service.js';
@@ -34,7 +34,7 @@ export class AuthController {
 	) {
 		const result = await this.auth.register(input);
 		this.attachRefreshCookie({ res, tokens: result.tokens });
-		return { accessToken: result.tokens.accessToken, user: result.user };
+		return { accessToken: result.tokens.accessToken, account: result.account };
 	}
 
 	@Public()
@@ -47,7 +47,7 @@ export class AuthController {
 	) {
 		const result = await this.auth.login(input);
 		this.attachRefreshCookie({ res, tokens: result.tokens });
-		return { accessToken: result.tokens.accessToken, user: result.user };
+		return { accessToken: result.tokens.accessToken, account: result.account };
 	}
 
 	@Public()
@@ -61,7 +61,7 @@ export class AuthController {
 
 		const result = await this.auth.refresh(raw);
 		this.attachRefreshCookie({ res, tokens: result.tokens });
-		return { accessToken: result.tokens.accessToken, user: result.user };
+		return { accessToken: result.tokens.accessToken, account: result.account };
 	}
 
 	@Public()
@@ -77,17 +77,17 @@ export class AuthController {
 	}
 
 	@Get('me')
-	async me(@CurrentUser() user: AuthUser) {
-		return { user: await this.auth.me(user.id) };
+	async me(@CurrentAccount() account: AuthAccount) {
+		return { account: await this.auth.me(account.id) };
 	}
 
 	@Patch('me')
 	@ApiZodBody(patchProfileSchema)
 	async updateMe(
-		@CurrentUser() user: AuthUser,
+		@CurrentAccount() account: AuthAccount,
 		@ZodBody(patchProfileSchema) input: PatchProfileInput,
 	) {
-		return { user: await this.auth.updateProfile({ userId: user.id, input }) };
+		return { account: await this.auth.updateProfile({ accountId: account.id, input }) };
 	}
 
 	private attachRefreshCookie({ res, tokens }: { res: NodeResponse; tokens: IssuedTokens }): void {

@@ -20,7 +20,6 @@ export const activeRow = cn(
 	'data-active:active:after:opacity-(--state-layer-pressed-opacity)',
 );
 
-/** A row whose subtree holds the selection: emphasis without the fill, so the child keeps the only one. */
 export const trailRow = cn('data-trail:font-medium data-trail:text-accent-foreground');
 
 export const navButtonVariants = tv({

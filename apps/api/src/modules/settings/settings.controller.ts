@@ -1,10 +1,10 @@
 import { Controller, Get, Patch } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { updateUserSettingSchema, type UpdateUserSettingInput } from '@lumo/shared';
-import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
+import { updateAccountSettingSchema, type UpdateAccountSettingInput } from '@lumo/shared';
+import { CurrentAccount } from '../../common/decorators/current-account.decorator.js';
 import { ZodBody } from '../../common/pipes/zod-validation.pipe.js';
 import { ApiZodBody } from '../../common/swagger/zod-openapi/index.js';
-import type { AuthUser } from '../../common/types/index.js';
+import type { AuthAccount } from '../../common/types/index.js';
 import { SettingsService } from './settings.service.js';
 
 @ApiTags('settings')
@@ -13,16 +13,16 @@ export class SettingsController {
 	constructor(private readonly settings: SettingsService) {}
 
 	@Get('me')
-	async mine(@CurrentUser() user: AuthUser) {
-		return { setting: await this.settings.mine(user.id) };
+	async mine(@CurrentAccount() account: AuthAccount) {
+		return { setting: await this.settings.mine(account.id) };
 	}
 
 	@Patch('me')
-	@ApiZodBody(updateUserSettingSchema)
+	@ApiZodBody(updateAccountSettingSchema)
 	async updateMine(
-		@CurrentUser() user: AuthUser,
-		@ZodBody(updateUserSettingSchema) input: UpdateUserSettingInput,
+		@CurrentAccount() account: AuthAccount,
+		@ZodBody(updateAccountSettingSchema) input: UpdateAccountSettingInput,
 	) {
-		return { setting: await this.settings.updateMine({ userId: user.id, input }) };
+		return { setting: await this.settings.updateMine({ accountId: account.id, input }) };
 	}
 }

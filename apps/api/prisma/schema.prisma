@@ -1,14 +1,8 @@
-// Prisma 7: the connection URL lives in prisma.config.ts, not in the schema.
-// The generator emits plain TypeScript into src/generated/prisma, and
-// `moduleFormat = "cjs"` makes it use `__dirname` instead of `import.meta.url`
-// so Nest's CommonJS build can require it.
 generator client {
   provider        = "prisma-client"
   output          = "../src/generated/prisma"
   runtime         = "nodejs"
   previewFeatures = ["postgresqlExtensions"]
-  // The API is ESM (Nest 12 is ESM-only), so the generated client must use
-  // `import.meta.url` rather than `__dirname`.
   moduleFormat    = "esm"
 }
 
@@ -17,14 +11,12 @@ datasource db {
   extensions = [pg_trgm]
 }
 
-model User {
+model Account {
   id           String   @id @default(uuid()) @db.Uuid
   email        String   @unique @db.VarChar(254)
   username     String   @unique @db.VarChar(32)
   name         String   @db.VarChar(80)
   passwordHash String
-  // Stored as text on purpose: valid values are enforced by the shared zod
-  // constants, and adding a role must not require a database migration.
   roles        String[] @default(["MEMBER"])
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -33,13 +25,11 @@ model User {
   settings      Setting[]
 
   @@index([email(ops: raw("gin_trgm_ops")), username(ops: raw("gin_trgm_ops")), name(ops: raw("gin_trgm_ops"))], type: Gin)
-  @@map("users")
+  @@map("accounts")
 }
 
 model Setting {
-  id String @id @default(uuid()) @db.Uuid
-  // Rows are scoped by type, so the same table can later hold a site-wide row
-  // alongside the per-user ones; every row today is type "user".
+  id      String @id @default(uuid()) @db.Uuid
   type    String @db.VarChar(32)
   ownerId String @db.Uuid
   content Json   @default("{}")
@@ -47,7 +37,7 @@ model Setting {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner Account @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   @@unique([type, ownerId])
   @@map("settings")
@@ -56,14 +46,14 @@ model Setting {
 model RefreshToken {
   id         String    @id @default(uuid()) @db.Uuid
   tokenHash  String    @unique
-  userId     String    @db.Uuid
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountId  String    @db.Uuid
+  account    Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
   expiresAt  DateTime
   revokedAt  DateTime?
   replacedBy String?   @db.Uuid
   createdAt  DateTime  @default(now())
 
-  @@index([userId])
+  @@index([accountId])
   @@index([expiresAt])
   @@map("refresh_tokens")
 }

@@ -6,7 +6,7 @@ import type { NodeRequest } from '@nestjs/platform-node';
 import { decodeRoles } from '../db/codec/index.js';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator.js';
 import { AppException } from '../errors/app.exception.js';
-import type { AuthenticatedRequest, AuthUser } from '../types/index.js';
+import type { AuthenticatedRequest, AuthAccount } from '../types/index.js';
 
 export type AccessTokenPayload = {
 	sub: string;
@@ -45,12 +45,12 @@ export class JwtAuthGuard implements CanActivate {
 				secret: this.config.getOrThrow<string>('JWT_ACCESS_SECRET'),
 			});
 
-			const user: AuthUser = {
+			const account: AuthAccount = {
 				id: payload.sub,
 				email: payload.email,
 				roles: decodeRoles(payload.roles),
 			};
-			request.user = user;
+			request.account = account;
 			return true;
 		} catch (error) {
 			const expired = error instanceof Error && error.name === 'TokenExpiredError';

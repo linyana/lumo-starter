@@ -7,5 +7,4 @@ export const updateProfileSchema = z.object({
 	name: nameSchema,
 });
 
-// The form validates the whole profile; the wire only carries what changed.
 export const patchProfileSchema = updateProfileSchema.partial();

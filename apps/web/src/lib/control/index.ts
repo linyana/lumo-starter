@@ -8,7 +8,6 @@ export const stateLayer = cn(
 	'active:not-data-disabled:after:opacity-(--state-layer-pressed-opacity)',
 );
 
-/** Consumers must list `translate` and `scale` in their own transition property list. */
 export const pressable = cn(
 	'pressed:translate-y-(--press-offset)',
 	'pressed:scale-(--press-scale)',
@@ -18,10 +17,6 @@ export const pressable = cn(
 
 export const iconSlot = '[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg]:size-[1em]';
 
-/**
- * A field's typography belongs to its root, not to the control: the control inherits the font through
- * preflight's `font: inherit`, and overlays beside it (spinner, clear) size themselves in `em`.
- */
 export const fieldText = {
 	sm: 'text-sm',
 	md: 'text-sm',
@@ -52,7 +47,6 @@ const shellEdge = cn(
 	shellFocus,
 );
 
-/** `hover: 'tint'` keeps the resting border and lets the caller answer in fill. */
 export const fieldShell = ({ hover = 'border' }: { hover?: 'border' | 'tint' } = {}) =>
 	cn(
 		'w-full min-w-0 rounded-md border border-input bg-background text-foreground',

@@ -6,10 +6,6 @@
 		<meta name="color-scheme" content="light dark" />
 		<link rel="icon" type="image/svg+xml" href="/logo.svg" />
 		<title>Lumo Starter</title>
-		<!--
-			Applies the remembered theme before the first paint, so a dark reload never flashes light.
-			The key, the shape and the default are `hooks/use-global`: change them there and here together.
-		-->
 		<script>
 			try {
 				const persisted = JSON.parse(localStorage.getItem('lumo') ?? 'null');
@@ -20,9 +16,7 @@
 					(theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 				document.documentElement.classList.toggle('dark', dark);
 				document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
-			} catch {
-				// Storage can be unavailable; the theme provider applies the default once it mounts.
-			}
+			} catch {}
 		</script>
 	</head>
 	<body>

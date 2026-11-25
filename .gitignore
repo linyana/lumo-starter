@@ -1,8 +1,6 @@
-# dependencies
 node_modules/
 .pnpm-store/
 
-# build
 dist/
 build/
 out/
@@ -10,32 +8,26 @@ out/
 .vite/
 *.tsbuildinfo
 
-# env
 .env
 .env.*
 !.env.example
 
-# generated
 apps/api/src/generated/
 apps/api/prisma/migrations/dev.db*
 
-# test
 coverage/
 playwright-report/
 test-results/
 
-# logs
 *.log
 npm-debug.log*
 pnpm-debug.log*
 
-# editors / os
 .DS_Store
 Thumbs.db
 .idea/
 *.swp
 
-# agent skills (installed locally with `bunx skills`, not committed)
 .claude/
 .agents/skills/
 skills-lock.json

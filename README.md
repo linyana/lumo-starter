@@ -30,13 +30,13 @@ Open <http://localhost:5173>. API docs live at <http://localhost:3000/docs> in d
 
 ### Seeded accounts
 
-| Email             | Password     | Role   | Can                                         |
-| ----------------- | ------------ | ------ | ------------------------------------------- |
-| `owner@lumo.dev`  | `Owner1234`  | OWNER  | everything (admin role management, deletes) |
-| `admin@lumo.dev`  | `Admin1234`  | ADMIN  | `user:read`, `user:write` — no deletes      |
-| `member@lumo.dev` | `Member1234` | MEMBER | `user:read` only                            |
+| Email             | Password     | Role   | Can                                          |
+| ----------------- | ------------ | ------ | -------------------------------------------- |
+| `owner@lumo.dev`  | `Owner1234`  | OWNER  | everything (admin role management, deletes)  |
+| `admin@lumo.dev`  | `Admin1234`  | ADMIN  | `account:read`, `account:write` — no deletes |
+| `member@lumo.dev` | `Member1234` | MEMBER | `account:read` only                          |
 
-Sign in as each one and watch the Users page change: a row's delete action and the route's `access`
+Sign in as each one and watch the Accounts page change: a row's delete action and the route's `access`
 block are answered by the same grant the API guard evaluates, expanded from one `ROLE_PERMISSIONS`
 table.
 
@@ -71,7 +71,7 @@ packages/shared/src/
   index.ts                  the one barrel; consumers never import below it
   features/                 the business: one folder per feature (product, order…)
     setting/                stored preferences: content schema, wire row, patch input
-    user/                   the wire shape, update input, list query
+    account/                the wire shape, update input, list query
   common/                   everything cross-cutting
     auth/                   register & login schemas, the sign-in response
     field/                  email / password / name: rules + the sentence each shows
@@ -106,22 +106,22 @@ Database columns holding a role are plain `String[]`, decoded at the edge by
 ## API contract
 
 ```
-POST   /api/auth/register     { email, username, name, password, confirmPassword } → { user }
-POST   /api/auth/login        { email, password } → { accessToken, user } + Set-Cookie refresh
-POST   /api/auth/refresh      (cookie) → { accessToken, user }  — rotates the token
+POST   /api/auth/register     { email, username, name, password, confirmPassword } → { account }
+POST   /api/auth/login        { email, password } → { accessToken, account } + Set-Cookie refresh
+POST   /api/auth/refresh      (cookie) → { accessToken, account }  — rotates the token
 POST   /api/auth/logout       (cookie) → 204, clears the cookie
-GET    /api/auth/me           → { user }
-PATCH  /api/auth/me           { username?, email?, name? } → { user }   (the signed-in user)
+GET    /api/auth/me           → { account }
+PATCH  /api/auth/me           { username?, email?, name? } → { account }   (the signed-in account)
 
-GET    /api/users             ?page&pageSize&search&sort&order      (user:read)
-GET    /api/users/:id                                                (user:read)
-POST   /api/users             { email, username, name, password, roles? } (user:write)
-PATCH  /api/users/:id         { email, username, name, roles }       (user:write)
-DELETE /api/users/:id                                                (user:delete)
-POST   /api/users/batch-delete   { ids }                             (user:delete)
+GET    /api/accounts                ?page&pageSize&search&sort&order   (account:read)
+GET    /api/accounts/:id                                             (account:read)
+POST   /api/accounts                { email, username, name, password, roles? } (account:write)
+PATCH  /api/accounts/:id            { email, username, name, roles }  (account:write)
+DELETE /api/accounts/:id                                             (account:delete)
+POST   /api/accounts/batch-delete   { ids }                          (account:delete)
 
-GET    /api/settings/me       → { setting: { type, content, updatedAt } }   (any signed-in user)
-PATCH  /api/settings/me       { pageSize? } → { setting }                (any signed-in user)
+GET    /api/settings/me       → { setting: { type, content, updatedAt } }   (any signed-in account)
+PATCH  /api/settings/me       { pageSize? } → { setting }                (any signed-in account)
 
 GET    /api/health            terminus probe (not enveloped)
 ```
@@ -138,7 +138,7 @@ Success: `{ "data": … }`. Failure: `{ "error": { code, message, details? } }` 
   memory by the client (`src/lib/http/client.ts`). Never `localStorage`, never a cookie.
 - **Refresh token** — opaque random string in an `httpOnly` cookie scoped to `Path=/api/auth`,
   stored server-side only as a SHA-256 hash, rotated on every use.
-- **Reuse detection** — presenting an already-rotated token revokes every live session for that user
+- **Reuse detection** — presenting an already-rotated token revokes every live session for that account
   and answers `UNAUTHORIZED` with a message saying so. The exception is a token rotated seconds ago:
   a reload aborts the response carrying its successor, so inside `REUSE_GRACE_MS` (30 s) it rotates
   again instead of killing the family. Logout and theft leave `replacedBy` empty, so they stay final.
@@ -146,7 +146,7 @@ Success: `{ "data": … }`. Failure: `{ "error": { code, message, details? } }` 
   on. The cookie is `SameSite=Lax` and same-origin in dev via the Vite proxy.
 - **Client refresh** — `refreshSession()` is single-flight: ten parallel 401s produce one refresh.
   Its outcome keeps _expired_ (the server rejected the cookie) apart from _unavailable_ (the server
-  did not answer), so a failed check at boot shows a retry screen instead of signing the user out.
+  did not answer), so a failed check at boot shows a retry screen instead of signing them out.
 
 Deploy the SPA and the API on the same origin behind a reverse proxy (`/api` → api). Cross-site
 cookies would require `SameSite=None; Secure` and a CSRF token, which this starter deliberately
@@ -188,7 +188,7 @@ URL — and hold the result with `useHttp`, or `useQuery`, which is `useHttp` pl
 the address bar and the filters, for a screen that shows a list. The filters are the `<Field name>`s
 inside `<Form form={list.form} initial={list.opened} onChange={list.write} settle={300}>`, so no
 screen names a `value` or a setter either. Give a table the same object and its `sortKey`-ed columns
-become sortable titles; nothing else has to be wired. A settings page that saves as the user leaves
+become sortable titles; nothing else has to be wired. A settings page that saves as you leave
 a field holds its fields with `useAutoSave({ form, schema, initial, endpoint })`: it validates the
 field being left, sends that field alone when it differs from the last confirmed value, and returns
 `blur`, `enter`, `busy` and `failed` for the control.
@@ -239,10 +239,10 @@ the action to take.
 │   │   ├── prisma/{schema.prisma, seed.ts}
 │   │   ├── prisma.config.ts             # Prisma 7 connection config
 │   │   ├── src/common/                  # pipes, filters, guards, swagger, db
-│   │   └── src/modules/{auth,users,health}
+│   │   └── src/modules/{auth,accounts,health}
 │   └── web
 │       ├── src/routes.tsx               # the route table: page, access, audience, nav
-│       ├── src/api/{auth,users}         # every call the client makes, one folder per resource
+│       ├── src/api/{auth,accounts}       # every call the client makes, one folder per resource
 │       ├── src/pages/{auth,workspace}   # screens, one folder each, grouped by domain
 │       ├── src/providers/auth          # the session and the guards a route asks for
 │       ├── src/providers/access        # the grant a gated row is filtered by

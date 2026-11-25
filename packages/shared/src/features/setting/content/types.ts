@@ -1,4 +1,4 @@
 import type { z } from 'zod';
-import type { userSettingContentSchema } from './index';
+import type { accountSettingContentSchema } from './index';
 
-export type UserSettingContent = z.infer<typeof userSettingContentSchema>;
+export type AccountSettingContent = z.infer<typeof accountSettingContentSchema>;

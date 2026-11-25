@@ -56,9 +56,7 @@ export type FormSubmissionProps<Input> = {
 	form?: FormInstance;
 	schema?: ZodType<Input>;
 	initial?: FormValues;
-	/** A `useHttp` result: with one, every field of `initial` saves itself as its edit ends. */
 	autosave?: AutoSaveHandle;
-	/** What ends an edit. `change` suits a control whose options are final states. */
 	commitOn?: 'leave' | 'change';
 	onSubmit?: (values: Input) => void | Promise<unknown>;
 	onChange?: (values: FormValues) => void;

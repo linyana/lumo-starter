@@ -8,7 +8,6 @@
 	"trailingComma": "all",
 	"endOfLine": "lf",
 	"arrowParens": "always",
-	// Reordering a package.json is not a formatting decision this repo makes.
 	"sortPackageJson": false,
 	"ignorePatterns": [
 		"**/node_modules/",

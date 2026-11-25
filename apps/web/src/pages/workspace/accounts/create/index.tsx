@@ -1,0 +1,89 @@
+import { createAccountSchema, ROLE_META, ROLES, type Role } from '@lumo/shared';
+import { useState } from 'react';
+import { accountsApi } from '@/api';
+import { Button, Dialog, Field, Form, Input, ToggleGroup, useForm } from '@/components';
+import { useHttp } from '@/hooks';
+
+type IPropsType = {
+	onCreated: () => void;
+};
+
+export const CreateAccount = ({ onCreated }: IPropsType) => {
+	const [open, setOpen] = useState(false);
+	const form = useForm();
+
+	const { loading, fetchData } = useHttp({
+		form,
+		endpoint: accountsApi.create,
+		successMessage: 'Account created',
+		onSuccess: () => {
+			setOpen(false);
+			onCreated();
+		},
+	});
+
+	return (
+		<Dialog
+			open={open}
+			onOpenChange={setOpen}
+			trigger={
+				<Button variant="default" size="sm">
+					Create
+				</Button>
+			}
+			title="New account"
+			description="They sign in with this email and the password you set."
+			footer={
+				<>
+					<Button variant="outline" disabled={loading} onClick={() => setOpen(false)}>
+						Cancel
+					</Button>
+					<Button loading={loading} onClick={form.submit}>
+						Create account
+					</Button>
+				</>
+			}
+		>
+			<Form
+				form={form}
+				schema={createAccountSchema}
+				initial={{ roles: ['MEMBER'] }}
+				onSubmit={fetchData}
+			>
+				<Field name="email" label="Email">
+					<Input type="email" autoComplete="off" />
+				</Field>
+
+				<Field
+					name="username"
+					label="Username"
+					description="3–32 characters: lowercase letters, numbers and underscores."
+				>
+					<Input autoComplete="off" autoCapitalize="none" spellCheck={false} />
+				</Field>
+
+				<Field name="name" label="Display name">
+					<Input autoComplete="off" />
+				</Field>
+
+				<Field
+					name="password"
+					label="Initial password"
+					description="At least 8 characters, mixing letters and numbers."
+				>
+					<Input type="password" autoComplete="new-password" />
+				</Field>
+
+				<Field name="roles" label="Roles" description="At least one.">
+					<ToggleGroup<Role>
+						multiple
+						variant="outline"
+						size="sm"
+						loading={loading}
+						items={ROLES.map((role) => ({ value: role, label: ROLE_META[role] }))}
+					/>
+				</Field>
+			</Form>
+		</Dialog>
+	);
+};

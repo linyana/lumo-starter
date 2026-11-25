@@ -38,7 +38,6 @@ export type AlertDialogProps = Omit<AlertDialogRootProps, 'children'> &
 		destructive?: boolean;
 		confirmCloses?: boolean;
 		pending?: boolean;
-		/** Render the dimmed page behind the popup. @default true */
 		backdrop?: boolean;
 		className?: string;
 		classNames?: SlotClassNames<AlertDialogSlots>;

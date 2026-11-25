@@ -15,7 +15,7 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor.
 import { AuthModule } from './modules/auth/auth.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { SettingsModule } from './modules/settings/settings.module.js';
-import { UsersModule } from './modules/users/users.module.js';
+import { AccountsModule } from './modules/accounts/accounts.module.js';
 
 @Module({
 	imports: [
@@ -45,7 +45,7 @@ import { UsersModule } from './modules/users/users.module.js';
 
 		PrismaModule,
 		AuthModule,
-		UsersModule,
+		AccountsModule,
 		SettingsModule,
 		HealthModule,
 	],

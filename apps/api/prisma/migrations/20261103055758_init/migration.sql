@@ -1,21 +1,35 @@
--- CreateTable
-CREATE TABLE "users" (
+CREATE SCHEMA IF NOT EXISTS "public";
+
+CREATE EXTENSION IF NOT EXISTS "pg_trgm";
+
+CREATE TABLE "accounts" (
     "id" UUID NOT NULL,
     "email" VARCHAR(254) NOT NULL,
+    "username" VARCHAR(32) NOT NULL,
     "name" VARCHAR(80) NOT NULL,
     "passwordHash" TEXT NOT NULL,
     "roles" TEXT[] DEFAULT ARRAY['MEMBER']::TEXT[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "users_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "accounts_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
+CREATE TABLE "settings" (
+    "id" UUID NOT NULL,
+    "type" VARCHAR(32) NOT NULL,
+    "ownerId" UUID NOT NULL,
+    "content" JSONB NOT NULL DEFAULT '{}',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "settings_pkey" PRIMARY KEY ("id")
+);
+
 CREATE TABLE "refresh_tokens" (
     "id" UUID NOT NULL,
     "tokenHash" TEXT NOT NULL,
-    "userId" UUID NOT NULL,
+    "accountId" UUID NOT NULL,
     "expiresAt" TIMESTAMP(3) NOT NULL,
     "revokedAt" TIMESTAMP(3),
     "replacedBy" UUID,
@@ -24,17 +38,21 @@ CREATE TABLE "refresh_tokens" (
     CONSTRAINT "refresh_tokens_pkey" PRIMARY KEY ("id")
 );
 
--- CreateIndex
-CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
+CREATE UNIQUE INDEX "accounts_email_key" ON "accounts"("email");
 
--- CreateIndex
+CREATE UNIQUE INDEX "accounts_username_key" ON "accounts"("username");
+
+CREATE INDEX "accounts_email_username_name_idx" ON "accounts" USING GIN ("email" gin_trgm_ops, "username" gin_trgm_ops, "name" gin_trgm_ops);
+
+CREATE UNIQUE INDEX "settings_type_ownerId_key" ON "settings"("type", "ownerId");
+
 CREATE UNIQUE INDEX "refresh_tokens_tokenHash_key" ON "refresh_tokens"("tokenHash");
 
--- CreateIndex
-CREATE INDEX "refresh_tokens_userId_idx" ON "refresh_tokens"("userId");
+CREATE INDEX "refresh_tokens_accountId_idx" ON "refresh_tokens"("accountId");
 
--- CreateIndex
 CREATE INDEX "refresh_tokens_expiresAt_idx" ON "refresh_tokens"("expiresAt");
 
--- AddForeignKey
-ALTER TABLE "refresh_tokens" ADD CONSTRAINT "refresh_tokens_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "settings" ADD CONSTRAINT "settings_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "accounts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE "refresh_tokens" ADD CONSTRAINT "refresh_tokens_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "accounts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+

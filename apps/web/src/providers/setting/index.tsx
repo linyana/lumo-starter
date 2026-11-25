@@ -1,8 +1,8 @@
 import {
-	userSettingContentDefaults,
-	type UpdateUserSettingInput,
-	type UserSetting,
-	type UserSettingContent,
+	accountSettingContentDefaults,
+	type UpdateAccountSettingInput,
+	type AccountSetting,
+	type AccountSettingContent,
 } from '@lumo/shared';
 import {
 	createContext,
@@ -18,18 +18,22 @@ import { useHttp } from '@/hooks';
 import { FullPageLoader, useAuth } from '@/providers/auth';
 
 type SettingContextValue = {
-	settings: UserSettingContent;
-	update: (input: UpdateUserSettingInput) => Promise<UserSettingContent>;
+	settings: AccountSettingContent;
+	update: (input: UpdateAccountSettingInput) => Promise<AccountSettingContent>;
 };
 
 const SettingContext = createContext<SettingContextValue | null>(null);
 
-const EMPTY: UserSetting = { type: 'user', content: userSettingContentDefaults, updatedAt: null };
+const EMPTY: AccountSetting = {
+	type: 'account',
+	content: accountSettingContentDefaults,
+	updatedAt: null,
+};
 
 export const SettingProvider = ({ children }: { children: ReactNode }) => {
 	const { status } = useAuth();
 
-	const [setting, setSetting] = useState<UserSetting>(EMPTY);
+	const [setting, setSetting] = useState<AccountSetting>(EMPTY);
 	const [ready, setReady] = useState(false);
 
 	const { fetchData: load } = useHttp({ endpoint: settingsApi.mine, toastError: false });
@@ -55,7 +59,7 @@ export const SettingProvider = ({ children }: { children: ReactNode }) => {
 	}, [status, load]);
 
 	const update = useCallback(
-		async (input: UpdateUserSettingInput): Promise<UserSettingContent> => {
+		async (input: UpdateAccountSettingInput): Promise<AccountSettingContent> => {
 			const next = await settingsApi.update(input);
 			setSetting(next);
 			return next.content;

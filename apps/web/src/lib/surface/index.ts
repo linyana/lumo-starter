@@ -18,10 +18,6 @@ export const panel = cn(
 	'data-nested-dialog-open:pointer-events-none data-nested-dialog-open:scale-95 data-nested-dialog-open:opacity-0',
 );
 
-/*
- * The gutter is reserved on both edges as well as in general: a scrollbar that comes and goes must
- * not change the width of what it scrolls, and a centred popup must stay centred either way.
- */
 export const scrollArea = cn(
 	'min-h-0 overflow-y-auto overscroll-contain [scrollbar-gutter:stable]',
 );
@@ -35,11 +31,6 @@ export const modalContent = cn('relative flex min-h-0 flex-1 flex-col gap-4 px-6
 
 export const modalHeader = 'flex shrink-0 flex-col';
 
-/*
- * The body is as tall as its content until the popup is capped, so its last child sits right on the
- * scroll edge. Without room below it, the 1px a pressed control translates by is enough to summon a
- * scrollbar.
- */
 export const modalBody = cn(scrollArea, 'flex-1 pb-1');
 
 export const modalFooter = 'flex shrink-0 justify-end gap-2';

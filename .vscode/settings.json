@@ -2,8 +2,6 @@
 	"js/ts.tsdk.path": "node_modules/typescript/lib",
 	"js/ts.tsdk.promptToUseWorkspaceVersion": true,
 
-	// Formatting is oxfmt's job (`pnpm format`), never ESLint's: oxlint has no formatter,
-	// so the ESLint extension has nothing to write into the buffer.
 	"editor.formatOnSave": true,
 	"eslint.format.enable": false,
 	"prettier.enable": false,

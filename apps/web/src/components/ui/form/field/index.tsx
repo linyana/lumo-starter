@@ -48,7 +48,6 @@ const wire = ({
 	return cloneElement(child, {
 		...(value === undefined ? {} : { defaultValue: value }),
 		...merged,
-		// The form is written first: a wired handler asks the form what the field now holds.
 		onChange: (...args: unknown[]) => {
 			form.set({ name, value: valueOf(args[0]) });
 			for (const change of changes) change(...args);

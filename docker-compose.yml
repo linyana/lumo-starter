@@ -18,7 +18,5 @@ services:
       timeout: 5s
       retries: 10
 
-# Add a service here (redis, minio, …) when you need one — see "Known gaps" in
-# docs/ARCHITECTURE.md for what this starter deliberately ships without.
 volumes:
   pgdata:
