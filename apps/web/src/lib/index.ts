@@ -3,6 +3,7 @@ export * from './form';
 export * from './http';
 export * from './measure';
 export * from './motion';
+export * from './paths';
 export * from './surface';
 export * from './toast';
 export * from './utils';

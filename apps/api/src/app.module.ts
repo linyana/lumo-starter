@@ -18,7 +18,7 @@ import { AuthorizationModule } from './modules/authorization/authorization.modul
 import { HealthModule } from './modules/health/health.module.js';
 import { RolesModule } from './modules/roles/roles.module.js';
 import { SettingsModule } from './modules/settings/settings.module.js';
-import { UsersModule } from './modules/users/users.module.js';
+import { MembersModule } from './modules/members/members.module.js';
 
 @Module({
 	imports: [
@@ -50,7 +50,7 @@ import { UsersModule } from './modules/users/users.module.js';
 		AuthorizationModule,
 		AuditModule,
 		AuthModule,
-		UsersModule,
+		MembersModule,
 		RolesModule,
 		SettingsModule,
 		HealthModule,

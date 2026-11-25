@@ -19,7 +19,7 @@ type GuardClient = Pick<Prisma.TransactionClient, 'membership' | '$queryRaw'>;
 export class AssignmentGuard {
 	/**
 	 * ARBAC can-assign: an actor may only hand out permissions it already holds. Without this, a role
-	 * with `user:write` and nothing else could still mint an owner.
+	 * with `member:write` and nothing else could still mint an owner.
 	 */
 	assertCanGrantPermissions({
 		actor,

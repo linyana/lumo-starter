@@ -15,7 +15,6 @@ model User {
   id           String   @id @default(uuid()) @db.Uuid
   email        String   @unique @db.VarChar(254)
   username     String   @unique @db.VarChar(32)
-  name         String   @db.VarChar(80)
   passwordHash String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -24,12 +23,13 @@ model User {
   refreshTokens RefreshToken[]
   settings      Setting[]
 
-  @@index([email(ops: raw("gin_trgm_ops")), username(ops: raw("gin_trgm_ops")), name(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([email(ops: raw("gin_trgm_ops")), username(ops: raw("gin_trgm_ops"))], type: Gin)
   @@map("users")
 }
 
 model Workspace {
   id        String   @id @default(uuid()) @db.Uuid
+  /// The only part of a workspace that appears in a URL, and the only one nothing may rewrite.
   slug      String   @unique @db.VarChar(32)
   name      String   @db.VarChar(80)
   createdAt DateTime @default(now())

@@ -30,23 +30,58 @@ Open <http://localhost:5173>. API docs live at <http://localhost:3000/docs> in d
 
 ### Seeded accounts
 
-All three are members of the seeded `lumo` workspace, one role each.
+All are members of the seeded `lumo` workspace, one role each.
 
 | Email             | Password     | Role in `lumo` | Can                                   |
 | ----------------- | ------------ | -------------- | ------------------------------------- |
 | `owner@lumo.dev`  | `Owner1234`  | OWNER          | everything: members, roles, deletions |
-| `member@lumo.dev` | `Member1234` | MEMBER         | `user:read` only                      |
+| `member@lumo.dev` | `Member1234` | MEMBER         | `member:read` only                    |
 
-Sign in as each one and watch the Users page change: a row's delete action and the route's `access`
-block read the same grant the API guard evaluates, and that grant comes from the database — the roles
-on `role_assignments`, expanded through `role_permissions`.
+Sign in as each one and watch Settings → Administration change: a row's delete action and the route's
+`access` block read the same grant the API guard evaluates, and that grant comes from the database —
+the roles on `role_assignments`, expanded through `role_permissions`.
 
 `OWNER` and `MEMBER` are the two roles the code ships. Everything between them is a workspace's own
 business: create a role on the Roles screen, tick the permissions it should carry, and assign it —
 that is the shape a real product needs anyway, because no starter can guess a customer's job titles.
 
 A role is held per workspace, so the same person can be an OWNER in one and a MEMBER in another.
-Registering a new account creates a workspace of its own and makes that account its OWNER.
+Registering a new account asks for a workspace URL, creates that workspace, and makes the account its
+OWNER.
+
+---
+
+## Where things live
+
+A workspace answers at `/<slug>/*`. The slug is the one part of a workspace nothing may rewrite: it is
+chosen at registration, validated against `WORKSPACE_SLUG_RESERVED`, and no endpoint touches it again.
+
+```
+/lumo/overview              the workspace's dashboard
+/lumo/settings              Administration: one card per admin surface you may open
+/lumo/settings/members      the people in this workspace
+/lumo/settings/roles
+/lumo/settings/audit
+/login  /register           bare pages, outside any workspace
+```
+
+Your own settings are not in that list on purpose: profile and preference open as one dialog from the
+account popover, with its own nav on the left, and the URL stays wherever it was.
+
+- **`Settings` is the administration door.** Members, roles and the audit log are grouped under
+  _Administration_ rather than sitting in the primary rail beside product screens. Each child route
+  carries its own `access`, so a person with only `member:read` sees exactly one row and never meets a
+  gate they were not meant to pass.
+- **Personal settings are not pages, and not routes.** Profile and preference are one dialog with a
+  nav of its own, opened from the account popover at the bottom of the rail: it belongs to the user,
+  not to a workspace, so switching a workspace must not move it and a link must not point at it.
+- **The URL names the workspace.** `WorkspaceScope` holds the tree back until `/:slug` and the
+  session's workspace agree: a slug of yours that is not the current one goes through
+  `/api/auth/switch-workspace` and a fresh token pair, and a slug that is not yours renders
+  "No workspace at /…" instead of another workspace's data.
+- **One reserved-word list.** `WORKSPACE_SLUG_RESERVED` in `features/workspace/slug` holds every
+  top-level segment the app claims (`login`, `register`, `account`, `api`, `docs`, …). Add a top-level
+  route, add its first segment there in the same commit.
 
 ---
 
@@ -80,8 +115,8 @@ packages/shared/src/
   features/                 the business: one folder per feature (product, order…)
     role/                   a role's wire shape, create/update, and the rules a role must satisfy
     setting/                stored preferences: content schema, wire row, patch input
-    user/                   the wire shape, update input, list query
-    workspace/              the workspace a session is acting inside
+    member/                 a person in a workspace: wire shape, create/update input, list query
+    workspace/              the workspace a session is acting inside, and the URL it answers at
   common/                   everything cross-cutting
     auth/                   register & login schemas, the sign-in response, the session
     field/                  email / password / name: rules + the sentence each shows
@@ -117,23 +152,23 @@ the way out of `apps/api/src/common/db/codec/index.ts` instead of leaking as `st
 ## API contract
 
 ```
-POST   /api/auth/register     { email, username, name, password, confirmPassword } → session
+POST   /api/auth/register     { email, username, workspaceSlug, password, confirmPassword } → session
 POST   /api/auth/login        { email, password } → session + Set-Cookie refresh
 POST   /api/auth/refresh      (cookie) → session — rotates the token, keeps the workspace
 POST   /api/auth/logout       (cookie) → 204, clears the cookie
 POST   /api/auth/switch-workspace { workspaceId } → session + Set-Cookie refresh
 GET    /api/auth/me           → session
-PATCH  /api/auth/me           { username?, email?, name? } → { user }   (the signed-in user)
+PATCH  /api/auth/me           { username?, email? } → { user }   (the signed-in user)
 
 session = { accessToken, user, permissions, workspace, workspaces }
           // permissions = what this actor may do in `workspace`; the token carries only sub + wid
 
-GET    /api/users             ?page&pageSize&search&sort&order      (user:read)
-GET    /api/users/:id                                                (user:read)
-POST   /api/users             { email, username, name, password, roles? } (user:write)
-PATCH  /api/users/:id         { email, username, name, roles }       (user:write)
-DELETE /api/users/:id                                                (user:delete)
-POST   /api/users/batch-delete   { ids }                             (user:delete)
+GET    /api/members           ?page&pageSize&search&sort&order      (member:read)
+GET    /api/members/:id                                              (member:read)
+POST   /api/members           { email, username, password, roles? }  (member:write)
+PATCH  /api/members/:id       { email, username, roles }             (member:write)
+DELETE /api/members/:id                                              (member:delete)
+POST   /api/members/batch-delete   { ids }                           (member:delete)
 
 GET    /api/roles                                                    (role:read)
 POST   /api/roles             { name, permissions }                  (role:write)
@@ -143,11 +178,11 @@ DELETE /api/roles/:id                                                (role:write
 GET    /api/audit             ?limit&action&targetId                 (audit:read)
 ```
 
-Every `/api/users` route reads and writes **memberships of the workspace in the access token**, never
-the `users` table alone: the list is the people in this workspace, `roles` on a row are `{ key, name }`
-pairs assigned here, and `DELETE` removes the membership rather than the global identity. A `roles`
-array in a create/update body is a list of **keys**, resolved against the system roles and the
-workspace's own; an unknown key is a `VALIDATION_FAILED`.
+Every `/api/members` route reads and writes **memberships of the workspace in the access token**,
+never the `users` table alone: a row is a person _in this workspace_, so the list is that workspace's
+people, `roles` on a row are `{ key, name }` pairs assigned here, and `DELETE` removes the membership
+rather than the global identity. A `roles` array in a create/update body is a list of **keys**,
+resolved against the system roles and the workspace's own; an unknown key is a `VALIDATION_FAILED`.
 
 ```
 GET    /api/settings/me       → { setting: { type, content, updatedAt } }   (any signed-in user)
@@ -295,8 +330,9 @@ with `@RequirePermissions(...)`.
 
 **Add a screen** — add `apps/web/src/pages/<domain>/<screen>/index.tsx`, one line in that domain's
 `index.ts`, and a row in the table in `apps/web/src/routes.tsx` (`layout`, then `access` for a
-gated page or `audience` for a bare one, and an optional `nav`); `providers/routes` wraps it in the
-guards and `providers/layout` draws its nav row. Call the API through
+gated page or `audience` for a bare one, and an optional `nav`); `providers/routes` puts every shell
+row under `/:slug`, wraps it in the guards, and builds its nav row with the same slug. Call the API
+through
 `apps/web/src/api/<resource>/index.ts` — written with the typed `api` helper, so no screen names a
 URL — and hold the result with `useHttp`, or `useQuery`, which is `useHttp` plus the page, the order,
 the address bar and the filters, for a screen that shows a list. The filters are the `<Field name>`s
@@ -349,6 +385,9 @@ the action to take.
 - **System roles cannot be edited through the API** — `system = true` rows belong to
   `SYSTEM_ROLE_PERMISSIONS`; `PATCH`/`DELETE` answer `FORBIDDEN`. A partial unique index plus a CHECK
   constraint in the init migration keep "system means no workspace" true even if a bug tries.
+- **`users` is the row, `members` is the surface** — `/api/members` lists memberships, so a member's
+  `id` is the user id while the assignment and the audit target are the membership's. There is no
+  display name: a person is `username` plus `email`, and `users` has no `name` column to grow back.
 - **Roles live on `role_assignments`, not on `users`** — the same person can be OWNER in one workspace
   and MEMBER in another, so nothing may read a role from the user row.
 - **A role that may edit members must also read roles** — `features/role/rule` refuses the pair
@@ -373,14 +412,15 @@ the action to take.
 │   │   ├── prisma/{schema.prisma, seed.ts}
 │   │   ├── prisma.config.ts             # Prisma 7 connection config
 │   │   ├── src/common/                  # pipes, filters, guards, swagger, db
-│   │   └── src/modules/{audit,auth,authorization,roles,users,workspaces,health}
+│   │   └── src/modules/{audit,auth,authorization,members,roles,workspaces,health}
 │   └── web
 │       ├── src/routes.tsx               # the route table: page, access, audience, nav
-│       ├── src/api/{audit,auth,roles,users} # every call the client makes, one folder per resource
-│       ├── src/pages/{auth,workspace}   # screens, one folder each, grouped by domain
+│       ├── src/api/{audit,auth,members,roles,settings} # every call the client makes, one folder per resource
+│       ├── src/pages/{auth,settings,account,workspace} # screens, one folder each, grouped by domain
 │       ├── src/providers/auth          # the session (user + workspace) and the guards a route asks for
 │       ├── src/providers/access        # the grant a gated row is filtered by
 │       ├── src/providers/routes        # the table turned into route objects, plus the rail rows
+│       │                                # and the `/:slug` scope every workspace route hangs off
 │       ├── src/providers/layout/{frame,shell,auth} # the rail block, the shell on it, the auth column
 │       ├── src/hooks/{use-http,use-query,use-roles,use-global} # one request, a list, the assignable roles, the store
 │       ├── src/lib/{http,form,toast,…}  # transport and the small shared modules

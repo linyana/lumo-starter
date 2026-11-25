@@ -19,14 +19,12 @@ const SEED_USERS = [
 	{
 		email: 'owner@lumo.dev',
 		username: 'olivia',
-		name: 'Olivia Owner',
 		roles: ['OWNER'],
 		password: 'Owner1234',
 	},
 	{
 		email: 'member@lumo.dev',
 		username: 'mia',
-		name: 'Mia Member',
 		roles: ['MEMBER'],
 		password: 'Member1234',
 	},
@@ -45,11 +43,10 @@ async function main(): Promise<void> {
 		const passwordHash = await argon2.hash(seed.password);
 		const user = await prisma.user.upsert({
 			where: { email: seed.email },
-			update: { username: seed.username, name: seed.name, passwordHash },
+			update: { username: seed.username, passwordHash },
 			create: {
 				email: seed.email,
 				username: seed.username,
-				name: seed.name,
 				passwordHash,
 			},
 		});

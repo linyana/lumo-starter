@@ -17,7 +17,7 @@ export const RegisterPage = () => {
 	return (
 		<AuthLayout
 			title="Create account"
-			description="The first account becomes the owner; later ones join as members."
+			description="You get a workspace of your own. Its URL is what you share with the people you invite."
 			footer={
 				<>
 					Already have an account?{' '}
@@ -37,16 +37,20 @@ export const RegisterPage = () => {
 					<Input type="email" autoComplete="email" />
 				</Field>
 
-				<Field name="name" label="Display name">
-					<Input autoComplete="name" />
-				</Field>
-
 				<Field
 					name="username"
 					label="Username"
 					description="3–32 characters: lowercase letters, numbers and underscores."
 				>
 					<Input autoComplete="username" autoCapitalize="none" spellCheck={false} />
+				</Field>
+
+				<Field
+					name="workspaceSlug"
+					label="Workspace URL"
+					description="Lowercase letters, numbers and hyphens. This cannot be changed later."
+				>
+					<Input autoComplete="off" autoCapitalize="none" spellCheck={false} placeholder="acme" />
 				</Field>
 
 				<Field

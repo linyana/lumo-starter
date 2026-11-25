@@ -15,5 +15,5 @@ export const SYSTEM_ROLE_META = {
 
 export const SYSTEM_ROLE_PERMISSIONS = {
 	OWNER: PERMISSIONS,
-	MEMBER: ['user:read'],
+	MEMBER: ['member:read'],
 } satisfies Record<SystemRole, readonly Permission[]>;

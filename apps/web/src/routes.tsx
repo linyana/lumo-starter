@@ -1,82 +1,72 @@
-import {
-	LayoutDashboard,
-	Settings,
-	ScrollText,
-	ShieldCheck,
-	SlidersHorizontal,
-	UserRound,
-	Users,
-} from 'lucide-react';
-import { Navigate } from 'react-router';
+import { LayoutDashboard, ScrollText, Settings, ShieldCheck, Users } from 'lucide-react';
 import {
 	AuditPage,
 	DashboardPage,
 	LoginPage,
-	PreferenceSetting,
-	ProfileSetting,
+	MembersPage,
 	RegisterPage,
 	RolesPage,
-	UsersPage,
+	SettingsPage,
 } from '@/pages';
 import type { AppRoute } from '@/providers/routes';
 
-const SettingsIndex = () => <Navigate to="/settings/profile" replace />;
-
 export const routes: AppRoute[] = [
 	{
+		path: 'overview',
 		layout: 'shell',
 		page: DashboardPage,
-		nav: { group: 'Workspace', label: 'Overview', icon: LayoutDashboard },
-	},
-	{
-		path: 'users',
-		layout: 'shell',
-		page: UsersPage,
-		access: { permission: 'user:read' },
-		nav: { group: 'Workspace', label: 'Users', icon: Users },
-	},
-	{
-		path: 'roles',
-		layout: 'shell',
-		page: RolesPage,
-		access: { permission: 'role:read' },
-		nav: { group: 'Workspace', label: 'Roles', icon: ShieldCheck },
-	},
-	{
-		path: 'audit',
-		layout: 'shell',
-		page: AuditPage,
-		access: { permission: 'audit:read' },
-		nav: { group: 'Workspace', label: 'Audit log', icon: ScrollText },
+		nav: { label: 'Overview', icon: LayoutDashboard },
 	},
 	{
 		path: 'settings',
 		layout: 'shell',
-		page: SettingsIndex,
+		page: SettingsPage,
 		nav: {
 			label: 'Settings',
 			separator: true,
 			icon: Settings,
 			children: [
 				{
-					group: 'Personal',
-					label: 'Preference',
-					path: 'settings/preference',
-					icon: SlidersHorizontal,
+					group: 'Administration',
+					label: 'Members',
+					path: 'settings/members',
+					icon: Users,
+					access: { permission: 'member:read' },
 				},
-				{ group: 'Personal', label: 'Profile', path: 'settings/profile', icon: UserRound },
+				{
+					group: 'Administration',
+					label: 'Roles',
+					path: 'settings/roles',
+					icon: ShieldCheck,
+					access: { permission: 'role:read' },
+				},
+				{
+					group: 'Administration',
+					label: 'Audit log',
+					path: 'settings/audit',
+					icon: ScrollText,
+					access: { permission: 'audit:read' },
+				},
 			],
 		},
 	},
 	{
-		path: 'settings/profile',
+		path: 'settings/members',
 		layout: 'shell',
-		page: ProfileSetting,
+		page: MembersPage,
+		access: { permission: 'member:read' },
 	},
 	{
-		path: 'settings/preference',
+		path: 'settings/roles',
 		layout: 'shell',
-		page: PreferenceSetting,
+		page: RolesPage,
+		access: { permission: 'role:read' },
+	},
+	{
+		path: 'settings/audit',
+		layout: 'shell',
+		page: AuditPage,
+		access: { permission: 'audit:read' },
 	},
 	{ path: 'login', layout: 'bare', page: LoginPage, audience: 'anonymous' },
 	{ path: 'register', layout: 'bare', page: RegisterPage, audience: 'anonymous' },

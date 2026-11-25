@@ -1,14 +1,14 @@
 import { z } from 'zod';
-import { emailSchema, nameSchema, passwordSchema, usernameSchema } from '../../field';
+import { emailSchema, passwordSchema, usernameSchema } from '../../field';
 import { permissionSchema } from '../../rbac/permission';
-import { userSchema } from '../../../features/user';
-import { workspaceSchema } from '../../../features/workspace';
+import { memberSchema } from '../../../features/member';
+import { workspaceSchema, workspaceSlugSchema } from '../../../features/workspace';
 
 export const registerSchema = z
 	.object({
 		email: emailSchema,
 		username: usernameSchema,
-		name: nameSchema,
+		workspaceSlug: workspaceSlugSchema,
 		password: passwordSchema,
 		confirmPassword: z.string({ error: 'Password is required' }),
 	})
@@ -31,7 +31,7 @@ export const switchWorkspaceSchema = z.object({
  * `permissions` is resolved by the API from roles — a client never expands a role name into actions.
  */
 export const sessionSchema = z.object({
-	user: userSchema,
+	user: memberSchema,
 	permissions: z.array(permissionSchema),
 	workspace: workspaceSchema,
 	workspaces: z.array(workspaceSchema),

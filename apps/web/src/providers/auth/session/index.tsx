@@ -4,10 +4,10 @@ import {
 	type AuthResult,
 	type Permission,
 	type LoginInput,
+	type Member,
 	type PatchProfileInput,
 	type RegisterInput,
 	type Session,
-	type User,
 	type WithAccess,
 	type Workspace,
 } from '@lumo/shared';
@@ -27,14 +27,14 @@ import { AccessProvider } from '@/providers/access';
 type AuthStatus = 'loading' | 'anonymous' | 'authenticated' | 'unreachable';
 
 type AuthContextValue = {
-	user: User | null;
+	user: Member | null;
 	workspace: Workspace | null;
 	workspaces: Workspace[];
 	permissions: Permission[];
 	status: AuthStatus;
 	login: (input: LoginInput) => Promise<void>;
 	register: (input: RegisterInput) => Promise<void>;
-	updateProfile: (input: PatchProfileInput) => Promise<User>;
+	updateProfile: (input: PatchProfileInput) => Promise<Member>;
 	switchWorkspace: (workspaceId: string) => Promise<void>;
 	logout: () => Promise<void>;
 	refresh: () => Promise<void>;
@@ -104,7 +104,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		[adopt],
 	);
 
-	const updateProfile = useCallback(async (input: PatchProfileInput): Promise<User> => {
+	const updateProfile = useCallback(async (input: PatchProfileInput): Promise<Member> => {
 		const next = await authApi.updateProfile(input);
 		setSession((current) => (current ? { ...current, user: next } : current));
 		return next;

@@ -15,7 +15,7 @@ const roleWithPermissions = {
 
 const actorSelect = {
 	id: true,
-	user: { select: { id: true, email: true, username: true, name: true, createdAt: true } },
+	user: { select: { id: true, email: true, username: true, createdAt: true } },
 	assignments: { select: { role: { select: roleWithPermissions } } },
 } as const satisfies Prisma.MembershipSelect;
 

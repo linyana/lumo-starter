@@ -19,9 +19,11 @@ export type NavEntry = {
 	separator?: boolean;
 };
 
-type Layout = { layout: 'shell' } | { layout: 'bare'; audience: RouteAudience };
+type ShellLayout = { layout: 'shell' };
 
-export type AppRoute = Layout & {
+type BareLayout = { layout: 'bare'; audience: RouteAudience };
+
+export type AppRoute = (ShellLayout | BareLayout) & {
 	path?: string;
 	page: ComponentType;
 	access?: AccessCondition;

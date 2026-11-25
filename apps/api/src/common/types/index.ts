@@ -9,7 +9,6 @@ export type AuthActor = {
 	id: string;
 	email: string;
 	username: string;
-	name: string;
 	createdAt: Date;
 	workspaceId: string;
 	membershipId: string;

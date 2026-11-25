@@ -1,15 +1,15 @@
 import {
-	Bell,
 	ChevronsUpDown,
 	CircleUserRound,
-	CreditCard,
 	EllipsisVertical,
 	LogOut,
+	SlidersHorizontal,
 } from 'lucide-react';
 import { useRef, useState } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router';
 import { Avatar, Button, Menu, Spinner } from '@/components';
 import { useGlobal } from '@/hooks';
+import { AccountDialog } from '@/pages/account';
 import { useAuth } from '@/providers/auth';
 import { Layout, type LayoutNavEntry } from '../frame';
 
@@ -33,6 +33,7 @@ export const AppShell = ({ nav }: IPropsType) => {
 	const { user, workspace, workspaces, switchWorkspace, logout } = useAuth();
 	const { collapsed, actions } = useGlobal();
 	const [loggingOut, setLoggingOut] = useState(false);
+	const [accountOpen, setAccountOpen] = useState(false);
 	const logoutStarted = useRef(false);
 
 	const brand =
@@ -58,12 +59,17 @@ export const AppShell = ({ nav }: IPropsType) => {
 					label: entry.name,
 					disabled: entry.id === workspace.id,
 					onClick: () => {
-						void switchWorkspace(entry.id);
+						// The URL names the workspace, so switching has to move the URL with it.
+						void switchWorkspace(entry.id).then(() => {
+							navigate(`/${entry.slug}/overview`);
+						});
 					},
 				}))}
 			/>
 		) : (
-			<span className="truncate">{workspace.name}</span>
+			<Link to={`/${workspace.slug}/overview`} className="truncate">
+				{workspace.name}
+			</Link>
 		);
 
 	const handleLogout = async () => {
@@ -94,9 +100,9 @@ export const AppShell = ({ nav }: IPropsType) => {
 								type: 'content',
 								content: (
 									<div className="flex items-center gap-3 px-3 py-2">
-										<Avatar alt={user.name} shape="square" />
+										<Avatar alt={user.username} shape="square" />
 										<div className="flex flex-col items-start">
-											<p className="text-sm font-medium">{user.name}</p>
+											<p className="text-sm font-medium">@{user.username}</p>
 											<p className="text-xs text-muted-foreground">{user.email}</p>
 										</div>
 									</div>
@@ -105,11 +111,11 @@ export const AppShell = ({ nav }: IPropsType) => {
 							{
 								label: 'Account',
 								icon: <CircleUserRound />,
-								disabled: true,
 								separatorBefore: true,
+								onClick: () => {
+									setAccountOpen(true);
+								},
 							},
-							{ label: 'Billing', icon: <CreditCard />, disabled: true },
-							{ label: 'Notifications', icon: <Bell />, disabled: true },
 							{
 								label: loggingOut ? 'Logging out…' : 'Log out',
 								icon: loggingOut ? <Spinner size={1} label="Logging out" /> : <LogOut />,
@@ -129,9 +135,9 @@ export const AppShell = ({ nav }: IPropsType) => {
 							>
 								<div className="flex items-center justify-between">
 									<div className="flex items-center gap-3">
-										<Avatar alt={user.name} shape="square" className="bg-gray-200" />
+										<Avatar alt={user.username} shape="square" className="bg-gray-200" />
 										<div className="flex flex-col items-start">
-											<p className="text-sm font-medium">{user.name}</p>
+											<p className="text-sm font-medium">@{user.username}</p>
 											<p className="text-xs text-muted-foreground">{user.email}</p>
 										</div>
 									</div>
@@ -146,6 +152,7 @@ export const AppShell = ({ nav }: IPropsType) => {
 			<Layout.Content>
 				<Outlet />
 			</Layout.Content>
+			<AccountDialog open={accountOpen} onOpenChange={setAccountOpen} />
 		</Layout>
 	);
 };

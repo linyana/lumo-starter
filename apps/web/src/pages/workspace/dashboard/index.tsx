@@ -9,7 +9,7 @@ export const DashboardPage = () => {
 	return (
 		<div className="space-y-3">
 			<div>
-				<h1 className="text-xl font-semibold">Welcome, {user.name}</h1>
+				<h1 className="text-xl font-semibold">Welcome, @{user.username}</h1>
 				<p className="text-sm text-muted-foreground">{user.email}</p>
 			</div>
 
@@ -21,7 +21,7 @@ export const DashboardPage = () => {
 					{workspace && (
 						<div className="flex items-center justify-between text-sm">
 							<span className="font-medium">{workspace.name}</span>
-							<span className="font-mono text-xs text-muted-foreground">{workspace.slug}</span>
+							<span className="font-mono text-xs text-muted-foreground">/{workspace.slug}</span>
 						</div>
 					)}
 				</Card>

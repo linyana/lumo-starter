@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type {
 	AuthResult,
+	FieldError,
 	LoginInput,
 	PatchProfileInput,
 	RegisterInput,
@@ -12,7 +13,7 @@ import { assertUserFieldFree } from '../../common/db/unique/index.js';
 import { AppException } from '../../common/errors/app.exception.js';
 import { AuthorizationService } from '../authorization/authorization.service.js';
 import { replaceAssignments, roleByKey } from '../roles/assignments/index.js';
-import { toWireUser } from '../users/mapper/index.js';
+import { toWireMember } from '../members/mapper/index.js';
 import { workspaceWireSelect, toWireWorkspace } from '../workspaces/mapper/index.js';
 import { TokenService, type IssuedTokens } from './token.service.js';
 
@@ -29,6 +30,7 @@ export class AuthService {
 	async register(input: RegisterInput): Promise<AuthenticatedResult> {
 		await assertUserFieldFree({ prisma: this.prisma, field: 'email', value: input.email });
 		await assertUserFieldFree({ prisma: this.prisma, field: 'username', value: input.username });
+		await this.assertWorkspaceSlugFree(input.workspaceSlug);
 
 		const passwordHash = await argon2.hash(input.password);
 
@@ -37,13 +39,12 @@ export class AuthService {
 				data: {
 					email: input.email,
 					username: input.username,
-					name: input.name,
 					passwordHash,
 				},
 			});
 
 			const workspace = await tx.workspace.create({
-				data: { slug: input.username, name: input.username },
+				data: { slug: input.workspaceSlug, name: input.workspaceSlug },
 			});
 
 			const membership = await tx.membership.create({
@@ -145,7 +146,7 @@ export class AuthService {
 		if (!workspace) throw new AppException('NOT_FOUND');
 
 		return {
-			user: toWireUser({ row: actor, roles: actor.roles }),
+			user: toWireMember({ row: actor, roles: actor.roles }),
 			permissions: actor.permissions,
 			workspace: toWireWorkspace(workspace),
 			workspaces: memberships.map((membership) => toWireWorkspace(membership.workspace)),
@@ -172,11 +173,24 @@ export class AuthService {
 
 		await this.prisma.user.update({
 			where: { id: userId },
-			data: { username: input.username, email: input.email, name: input.name },
+			data: { username: input.username, email: input.email },
 		});
 
 		const session = await this.session({ userId, workspaceId });
 		return session.user;
+	}
+
+	/** A workspace URL is what people share, so it is checked before the row is created rather than after a unique violation. */
+	private async assertWorkspaceSlugFree(slug: string): Promise<void> {
+		const taken = await this.prisma.workspace.findUnique({
+			where: { slug },
+			select: { id: true },
+		});
+		if (!taken) return;
+
+		const message = 'That workspace URL is taken';
+		const details: FieldError[] = [{ path: 'workspaceSlug', message }];
+		throw new AppException({ code: 'CONFLICT', message, details });
 	}
 
 	private async authenticate({

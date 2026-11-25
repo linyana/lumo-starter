@@ -1,5 +1,12 @@
 import { useMemo } from 'react';
-import { createBrowserRouter, Link, NavLink, useLocation, type RouteObject } from 'react-router';
+import {
+	createBrowserRouter,
+	Link,
+	Navigate,
+	NavLink,
+	useLocation,
+	type RouteObject,
+} from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import { RedirectIfAuthenticated, RequireAccess, RequireAuth, useAuth } from '@/providers/auth';
 import {
@@ -11,7 +18,9 @@ import {
 	type LayoutNavSubGroup,
 } from '@/providers/layout';
 import { routes } from '@/routes';
+import { workspaceHref } from '@/lib';
 import type { AppRoute, NavChild, NavEntry } from './types';
+import { WorkspaceScope } from './workspace-guard';
 
 export type { AppRoute, NavChild, NavEntry, RouteAudience } from './types';
 
@@ -21,8 +30,9 @@ type NavRoute = ShellRoute & { nav: NavEntry };
 
 type AccessFilter = <T extends { access?: NavChild['access'] }>(items: readonly T[]) => T[];
 
+type Href = (path?: string) => string;
+
 const keyFor = (route: AppRoute): string => route.path ?? 'index';
-const hrefFor = (path?: string): string => (path ? `/${path}` : '/');
 
 const linkFor = ({
 	key,
@@ -81,24 +91,36 @@ const hasHref = ({ entries, href }: { entries: LayoutNavSubEntry[]; href: string
 			: entry.href === href || hasHref({ entries: entry.children ?? [], href }),
 	);
 
-const childFor = (child: NavChild): LayoutNavItem =>
-	linkFor({ key: child.path, label: child.label, icon: child.icon, href: hrefFor(child.path) });
+const childFor = ({ child, href }: { child: NavChild; href: Href }): LayoutNavItem =>
+	linkFor({ key: child.path, label: child.label, icon: child.icon, href: href(child.path) });
 
-const childrenFor = (children: readonly NavChild[]): LayoutNavSubEntry[] =>
-	grouped({ items: children, groupOf: (child) => child.group, toItem: childFor });
+const childrenFor = ({
+	children,
+	href,
+}: {
+	children: readonly NavChild[];
+	href: Href;
+}): LayoutNavSubEntry[] =>
+	grouped({
+		items: children,
+		groupOf: (child) => child.group,
+		toItem: (child) => childFor({ child, href }),
+	});
 
 const itemFor = ({
 	route,
 	children,
+	href,
 	pathname,
 }: {
 	route: NavRoute;
 	children: LayoutNavSubEntry[];
+	href: Href;
 	pathname: string;
 }): LayoutNavItem => {
-	const href = hrefFor(route.path);
+	const own = href(route.path);
 	return {
-		...linkFor({ key: keyFor(route), label: route.nav.label, icon: route.nav.icon, href }),
+		...linkFor({ key: keyFor(route), label: route.nav.label, icon: route.nav.icon, href: own }),
 		children: children.length === 0 ? undefined : children,
 		defaultOpen: hasHref({ entries: children, href: pathname }) || undefined,
 	};
@@ -109,14 +131,16 @@ const navSeparator: LayoutNavSeparator = { type: 'separator' };
 const navFor = ({
 	navRoutes,
 	pathname,
+	href,
 	filter,
 }: {
 	navRoutes: NavRoute[];
 	pathname: string;
+	href: Href;
 	filter: AccessFilter;
 }): LayoutNavEntry[] => {
 	const childrenOf = (route: NavRoute): LayoutNavSubEntry[] =>
-		childrenFor(filter(route.nav.children ?? []));
+		childrenFor({ children: filter(route.nav.children ?? []), href });
 
 	const visible = navRoutes.filter(
 		(route) => route.nav.children === undefined || childrenOf(route).length > 0,
@@ -134,7 +158,7 @@ const navFor = ({
 		...grouped({
 			items: section,
 			groupOf: (route) => route.nav.group,
-			toItem: (route) => itemFor({ route, pathname, children: childrenOf(route) }),
+			toItem: (route) => itemFor({ route, pathname, href, children: childrenOf(route) }),
 		}),
 	]);
 };
@@ -152,13 +176,17 @@ const NotFoundPage = () => (
 
 const elementFor = (route: AppRoute) => {
 	const Page = route.page;
-	const page = route.access ? (
+	return route.access ? (
 		<RequireAccess access={route.access}>
 			<Page />
 		</RequireAccess>
 	) : (
 		<Page />
 	);
+};
+
+const guardedElementFor = (route: AppRoute) => {
+	const page = elementFor(route);
 
 	if (route.layout === 'shell') return page;
 	if (route.audience === 'anonymous')
@@ -169,19 +197,35 @@ const elementFor = (route: AppRoute) => {
 
 const routeObjectFor = (route: AppRoute): RouteObject =>
 	route.path === undefined
-		? { index: true, element: elementFor(route) }
-		: { path: route.path, element: elementFor(route) };
+		? { index: true, element: guardedElementFor(route) }
+		: { path: route.path, element: guardedElementFor(route) };
 
 const shellRoutes = routes.filter((route): route is ShellRoute => route.layout === 'shell');
 const bareRoutes = routes.filter((route) => route.layout === 'bare');
 const navRoutes = shellRoutes.filter((route): route is NavRoute => route.nav !== undefined);
 
+/** `/` has no workspace to name, so it hands the browser the one the session already chose. */
+const WorkspaceEntry = () => {
+	const { workspace } = useAuth();
+	if (workspace === null) return null;
+
+	return <Navigate to={workspaceHref({ slug: workspace.slug, path: 'overview' })} replace />;
+};
+
 const AuthorizedShell = () => {
-	const { filter } = useAuth();
+	const { workspace, filter } = useAuth();
 	const { pathname } = useLocation();
+
+	const current = workspace?.slug ?? '';
 	const nav = useMemo(
-		() => navFor({ navRoutes: filter(navRoutes), pathname, filter }),
-		[filter, pathname],
+		() =>
+			navFor({
+				navRoutes: filter(navRoutes),
+				pathname,
+				href: (path) => workspaceHref({ slug: current, path }),
+				filter,
+			}),
+		[current, filter, pathname],
 	);
 
 	return <AppShell nav={nav} />;
@@ -194,7 +238,22 @@ const shell = (
 );
 
 const router = createBrowserRouter([
-	{ element: shell, children: shellRoutes.map(routeObjectFor) },
+	{
+		element: shell,
+		children: [
+			{ index: true, element: <WorkspaceEntry /> },
+			{
+				path: ':slug',
+				element: <WorkspaceScope />,
+				children: [
+					{ index: true, element: <Navigate to="overview" replace /> },
+					...shellRoutes.flatMap((route): RouteObject[] =>
+						route.path === undefined ? [] : [{ path: route.path, element: elementFor(route) }],
+					),
+				],
+			},
+		],
+	},
 	...bareRoutes.map(routeObjectFor),
 	{ path: '*', element: <NotFoundPage /> },
 ]);
