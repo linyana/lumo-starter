@@ -1,6 +1,3 @@
--- CreateSchema
-CREATE SCHEMA IF NOT EXISTS "public";
-
 -- CreateExtension
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 
@@ -9,7 +6,6 @@ CREATE TABLE "users" (
     "id" UUID NOT NULL,
     "email" VARCHAR(254) NOT NULL,
     "username" VARCHAR(32) NOT NULL,
-    "name" VARCHAR(80) NOT NULL,
     "passwordHash" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -51,7 +47,8 @@ CREATE TABLE "permissions" (
 CREATE TABLE "roles" (
     "id" UUID NOT NULL,
     "key" VARCHAR(32) NOT NULL,
-    "name" VARCHAR(64) NOT NULL,
+    "name" VARCHAR(80) NOT NULL,
+    "description" VARCHAR(255),
     "system" BOOLEAN NOT NULL DEFAULT false,
     "workspaceId" UUID,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -75,6 +72,22 @@ CREATE TABLE "role_assignments" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "role_assignments_pkey" PRIMARY KEY ("membershipId","roleId")
+);
+
+-- CreateTable
+CREATE TABLE "audit_events" (
+    "id" UUID NOT NULL,
+    "workspaceId" UUID NOT NULL,
+    "actorUserId" UUID,
+    "actorEmail" VARCHAR(254),
+    "action" VARCHAR(48) NOT NULL,
+    "targetType" VARCHAR(32) NOT NULL,
+    "targetId" UUID NOT NULL,
+    "before" JSONB,
+    "after" JSONB,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "audit_events_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -110,7 +123,7 @@ CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 CREATE UNIQUE INDEX "users_username_key" ON "users"("username");
 
 -- CreateIndex
-CREATE INDEX "users_email_username_name_idx" ON "users" USING GIN ("email" gin_trgm_ops, "username" gin_trgm_ops, "name" gin_trgm_ops);
+CREATE INDEX "users_email_username_idx" ON "users" USING GIN ("email" gin_trgm_ops, "username" gin_trgm_ops);
 
 -- CreateIndex
 CREATE UNIQUE INDEX "workspaces_slug_key" ON "workspaces"("slug");
@@ -129,6 +142,15 @@ CREATE INDEX "role_permissions_permissionKey_idx" ON "role_permissions"("permiss
 
 -- CreateIndex
 CREATE INDEX "role_assignments_roleId_idx" ON "role_assignments"("roleId");
+
+-- CreateIndex
+CREATE INDEX "audit_events_workspaceId_createdAt_idx" ON "audit_events"("workspaceId", "createdAt" DESC);
+
+-- CreateIndex
+CREATE INDEX "audit_events_targetType_targetId_idx" ON "audit_events"("targetType", "targetId");
+
+-- CreateIndex
+CREATE INDEX "audit_events_actorUserId_idx" ON "audit_events"("actorUserId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "settings_type_ownerId_key" ON "settings"("type", "ownerId");
@@ -174,7 +196,6 @@ ALTER TABLE "refresh_tokens" ADD CONSTRAINT "refresh_tokens_userId_fkey" FOREIGN
 
 -- AddForeignKey
 ALTER TABLE "refresh_tokens" ADD CONSTRAINT "refresh_tokens_workspaceId_fkey" FOREIGN KEY ("workspaceId") REFERENCES "workspaces"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
 
 -- The composite unique above cannot police system roles: their `workspaceId` is NULL, and Postgres
 -- treats NULLs in a unique index as distinct. This partial index is what makes `key` unique among them.
