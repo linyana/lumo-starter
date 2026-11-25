@@ -9,7 +9,17 @@ import {
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { rolesApi } from '@/api';
-import { Button, Field, Form, Input, Spinner, useChanged, useForm, useWatch } from '@/components';
+import {
+	Button,
+	Field,
+	Form,
+	Input,
+	Page,
+	Spinner,
+	useChanged,
+	useForm,
+	useWatch,
+} from '@/components';
 import { useHttp } from '@/hooks';
 import { workspaceHref } from '@/lib';
 import { useAuth } from '@/providers/auth';
@@ -101,32 +111,24 @@ export const RoleFormPage = () => {
 		);
 
 	return (
-		<div className="space-y-3">
-			<div className="flex flex-wrap items-start justify-between gap-3">
-				<div className="min-w-0 space-y-1">
-					<Link
-						to={listHref}
-						className="text-xs text-muted-foreground underline-offset-4 hover:underline"
-					>
-						Roles
-					</Link>
-					<h1 className="text-xl font-semibold">
-						{role === null ? 'Add role' : `Edit ${role.name}`}
-					</h1>
-					<p className="text-sm text-muted-foreground">
-						A role is a named set of permissions. Changes reach everyone holding it on their next
-						request.
-					</p>
-				</div>
-
-				<div className="flex items-center gap-2">
+		<Page
+			width="narrow"
+			breadcrumb={
+				<Link to={listHref} className="underline-offset-4 hover:underline">
+					Roles
+				</Link>
+			}
+			title={role === null ? 'Add role' : `Edit ${role.name}`}
+			description="A role is a named set of permissions. Changes reach everyone holding it on their next request."
+			actions={
+				<>
 					<Button variant="outline" disabled={saving} onClick={() => navigate(listHref)}>
 						Cancel
 					</Button>
 					{save}
-				</div>
-			</div>
-
+				</>
+			}
+		>
 			<Form
 				form={form}
 				schema={editing ? updateRoleSchema : createRoleSchema}
@@ -200,6 +202,6 @@ export const RoleFormPage = () => {
 					reload={() => navigate(listHref)}
 				/>
 			)}
-		</div>
+		</Page>
 	);
 };
