@@ -18,9 +18,9 @@ export const panel = cn(
 	'data-nested-dialog-open:pointer-events-none data-nested-dialog-open:scale-95 data-nested-dialog-open:opacity-0',
 );
 
-export const scrollArea = cn(
-	'min-h-0 overflow-y-auto overscroll-contain [scrollbar-gutter:stable]',
-);
+export const scrollArea = cn('min-h-0 overflow-y-auto overscroll-contain');
+
+export const scrollAreaStable = cn(scrollArea, '[scrollbar-gutter:stable]');
 
 export const modalViewport = cn(
 	'fixed inset-0 z-50 grid place-items-center-safe overflow-y-auto p-4',
@@ -31,7 +31,7 @@ export const modalContent = cn('relative flex min-h-0 flex-1 flex-col gap-4 px-6
 
 export const modalHeader = 'flex shrink-0 flex-col';
 
-export const modalBody = cn(scrollArea, 'flex-1 pb-1');
+export const modalBody = cn(scrollAreaStable, 'flex-1 pb-1');
 
 export const modalFooter = 'flex shrink-0 justify-end gap-2';
 
