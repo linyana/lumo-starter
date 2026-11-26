@@ -1,5 +1,6 @@
 export * from '@/components/ui/display/card/parts/action';
 export * from '@/components/ui/display/card/parts/card-size';
+export * from '@/components/ui/display/card/parts/card-surface';
 export * from '@/components/ui/display/card/parts/content';
 export * from '@/components/ui/display/card/parts/description';
 export * from '@/components/ui/display/card/parts/footer';

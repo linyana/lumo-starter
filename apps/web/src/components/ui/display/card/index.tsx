@@ -17,7 +17,7 @@ export const Card = ({
 	footer,
 	children,
 	size = 'md',
-	bordered = false,
+	surface = 'gray',
 	hoverable = false,
 	className,
 	classNames,
@@ -27,7 +27,7 @@ export const Card = ({
 	return (
 		<CardRoot
 			size={size}
-			bordered={bordered}
+			surface={surface}
 			hoverable={hoverable}
 			className={cn(className, classNames?.root)}
 		>

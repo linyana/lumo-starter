@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import type { SlotClassNames } from '@/components/types';
-import type { CardSize } from './parts';
+import type { CardSize, CardSurface } from './parts';
 
 export type CardSlots =
 	| 'root'
@@ -18,7 +18,7 @@ export type CardProps = {
 	footer?: ReactNode;
 	children?: ReactNode;
 	size?: CardSize;
-	bordered?: boolean;
+	surface?: CardSurface;
 	hoverable?: boolean;
 	className?: string;
 	classNames?: SlotClassNames<CardSlots>;

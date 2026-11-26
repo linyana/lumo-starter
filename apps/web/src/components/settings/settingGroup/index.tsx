@@ -10,7 +10,12 @@ import type { SettingsGroupProps } from './types';
 
 export type { SettingsGroupItem, SettingsGroupProps, SettingsGroupWidth } from './types';
 
-export const SettingsGroup = ({ title, items, className }: SettingsGroupProps) => {
+export const SettingsGroup = ({
+	title,
+	items,
+	surface = 'white',
+	className,
+}: SettingsGroupProps) => {
 	const titleId = useId();
 	const [rowKeyPrefix] = useState(() => nanoid());
 
@@ -22,7 +27,7 @@ export const SettingsGroup = ({ title, items, className }: SettingsGroupProps) =
 			className={className}
 		>
 			{title !== undefined && <SettingsGroupTitle id={titleId}>{title}</SettingsGroupTitle>}
-			<SettingsGroupList>
+			<SettingsGroupList surface={surface}>
 				{items.map((item, index) => (
 					<SettingsGroupRow key={`${rowKeyPrefix}-${index}`} {...item} />
 				))}

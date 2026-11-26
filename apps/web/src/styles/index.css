@@ -37,6 +37,7 @@
 	--color-warning: var(--warning);
 	--color-info: var(--info);
 	--color-border: var(--border);
+	--color-border-soft: var(--border-soft);
 	--color-input: var(--input);
 	--shadow-surface: var(--shadow-surface);
 	--shadow-lifted: var(--shadow-lifted);
@@ -149,6 +150,9 @@
 	--destructive-foreground: oklch(0.985 0 0);
 	--destructive-soft: rgb(255 163 158);
 	--border: oklch(0.922 0 0);
+	/* One step weaker than `--border`, for edges that only tidy up an already
+	   visible lightness gap. */
+	--border-soft: oklch(0.972 0 0);
 	--input: oklch(0.922 0 0);
 	--ring: oklch(0.708 0 0);
 }
@@ -186,6 +190,7 @@
 	--destructive: rgb(243 78 82);
 	--destructive-foreground: oklch(0.985 0 0);
 	--border: oklch(1 0 0 / 10%);
+	--border-soft: oklch(1 0 0 / 2.5%);
 	--input: oklch(1 0 0 / 15%);
 	--ring: oklch(0.556 0 0);
 }
