@@ -24,25 +24,21 @@ export const routes: AppRoute[] = [
 		page: SettingsPage,
 		nav: {
 			label: 'Settings',
-			separator: true,
 			icon: Settings,
 			children: [
 				{
-					group: 'Administration',
 					label: 'Members',
 					path: 'settings/members',
 					icon: Users,
 					access: { permission: 'member:read' },
 				},
 				{
-					group: 'Administration',
 					label: 'Roles',
 					path: 'settings/roles',
 					icon: ShieldCheck,
 					access: { permission: 'role:read' },
 				},
 				{
-					group: 'Administration',
 					label: 'Audit log',
 					path: 'settings/audit',
 					icon: ScrollText,

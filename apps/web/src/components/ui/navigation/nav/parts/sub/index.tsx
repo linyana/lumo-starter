@@ -102,7 +102,7 @@ export function NavSub({
 						disabled={disabled}
 						className={cn('group', className)}
 					>
-						<CollapsibleIcon />
+						<CollapsibleIcon className="ms-auto" />
 					</NavRow>
 				}
 			/>
