@@ -1,5 +1,13 @@
 import type { ComponentProps, ReactNode } from 'react';
-import type { ToastProviderRoot } from './parts';
+import type { ToastProviderRoot, ToastToasterProps } from './parts';
+
+export type ToastPosition =
+	| 'top-left'
+	| 'top-center'
+	| 'top-right'
+	| 'bottom-left'
+	| 'bottom-center'
+	| 'bottom-right';
 
 type ToastProviderRootProps = Pick<
 	ComponentProps<typeof ToastProviderRoot>,
@@ -8,4 +16,5 @@ type ToastProviderRootProps = Pick<
 
 export type ToastProviderProps = ToastProviderRootProps & {
 	children: ReactNode;
+	toaster?: Omit<ToastToasterProps, 'children'>;
 };

@@ -116,9 +116,9 @@
 	--duration-overlay: 350ms;
 	--duration-modal: 250ms;
 	--duration-modal-exit: 100ms;
-	--success: oklch(0.627 0.194 149.214);
-	--warning: oklch(0.666 0.179 58.318);
-	--info: oklch(0.546 0.245 262.881);
+	--success: oklch(0.696 0.17 162.48);
+	--warning: oklch(0.705 0.213 47.604);
+	--info: oklch(0.685 0.169 237.323);
 	--input-strong: oklch(0.78 0 0);
 	--overlay: oklch(0 0 0 / 50%);
 	--shadow-surface:
@@ -130,6 +130,7 @@
 		0 40px 80px rgb(0 0 0 / 6%), 0 20px 40px rgb(0 0 0 / 5%), 0 10px 20px rgb(0 0 0 / 4%),
 		0 5px 10px rgb(0 0 0 / 3%), 0 2px 4px rgb(0 0 0 / 2%);
 	--radius: 0.625rem;
+	--skeleton-highlight: color-mix(in oklab, var(--foreground) 5%, transparent);
 	--background: oklch(1 0 0);
 	--foreground: oklch(0.145 0 0);
 	--card: oklch(1 0 0);
@@ -155,9 +156,9 @@
 .dark {
 	--layout-background: color-mix(in srgb, var(--background) 75%, black);
 	--layout-content: var(--background);
-	--success: oklch(0.723 0.219 149.579);
-	--warning: oklch(0.769 0.188 70.08);
-	--info: oklch(0.623 0.214 259.815);
+	--success: oklch(0.765 0.177 163.223);
+	--warning: oklch(0.75 0.183 55.934);
+	--info: oklch(0.746 0.16 232.661);
 	--input-strong: oklch(1 0 0 / 30%);
 	--overlay: oklch(0 0 0 / 65%);
 	--shadow-surface:
@@ -187,6 +188,47 @@
 	--border: oklch(1 0 0 / 10%);
 	--input: oklch(1 0 0 / 15%);
 	--ring: oklch(0.556 0 0);
+}
+
+@utility skeleton-shimmer {
+	position: relative;
+	overflow: hidden;
+	&::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		transform: translateX(-100%);
+		background: linear-gradient(90deg, transparent, var(--skeleton-highlight), transparent);
+		animation: skeleton-shimmer 1.6s ease-in-out infinite;
+	}
+}
+
+@keyframes skeleton-shimmer {
+	to {
+		transform: translateX(100%);
+	}
+}
+
+@keyframes toast-progress {
+	from {
+		transform: scaleX(1);
+	}
+	to {
+		transform: scaleX(0);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.skeleton-shimmer::after {
+		animation: none;
+	}
+	[data-slot='toast-progress-indicator'] {
+		animation: none;
+	}
+}
+
+[dir='rtl'] .skeleton-shimmer::after {
+	animation-direction: reverse;
 }
 
 @layer base {

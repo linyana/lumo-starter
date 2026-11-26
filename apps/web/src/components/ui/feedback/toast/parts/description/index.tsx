@@ -13,7 +13,7 @@ export function ToastDescription({ className, ...props }: ToastDescriptionProps)
 	return (
 		<BaseToast.Description
 			data-slot="toast-description"
-			className={cn('text-xs text-muted-foreground', className)}
+			className={cn('text-sm text-muted-foreground [grid-area:description]', className)}
 			{...props}
 		/>
 	);

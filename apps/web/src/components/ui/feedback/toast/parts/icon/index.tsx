@@ -1,21 +1,21 @@
-import { CircleCheck, CircleX, Info, TriangleAlert } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Spinner } from '@/components/ui/feedback/spinner';
 import { cn } from '@/lib/utils';
 import { useToastItem } from '../context';
+import { ToastGlyph } from './glyphs';
 
 function glyphOf(type: string | undefined): ReactNode {
 	switch (type) {
 		case 'success':
-			return <CircleCheck />;
+			return <ToastGlyph name="success" />;
 		case 'error':
-			return <CircleX />;
+			return <ToastGlyph name="error" />;
 		case 'warning':
-			return <TriangleAlert />;
+			return <ToastGlyph name="warning" />;
 		case 'info':
-			return <Info />;
+			return <ToastGlyph name="info" />;
 		case 'loading':
-			return <Spinner className="size-4" label={null} />;
+			return <Spinner size="1.25rem" label={null} />;
 		default:
 			return null;
 	}
@@ -46,8 +46,8 @@ export function ToastIcon({ type, icon, className }: ToastIconProps) {
 		<span
 			data-slot="toast-icon"
 			className={cn(
-				'mt-0.5 flex size-4 shrink-0 items-center justify-center',
-				'[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg]:size-4',
+				'flex shrink-0 items-center [grid-area:icon]',
+				"has-[>svg]:h-lh [&>svg:not([class*='size-'])]:size-5",
 				toneOf(resolved),
 				className,
 			)}

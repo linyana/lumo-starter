@@ -6,12 +6,12 @@ import {
 } from './parts';
 import type { ToastProviderProps } from './types';
 
-export type { ToastProviderProps } from '@/components/ui/feedback/toast/types';
+export type { ToastPosition, ToastProviderProps } from '@/components/ui/feedback/toast/types';
 
-export const ToastProvider = ({ children, ...props }: ToastProviderProps) => (
+export const ToastProvider = ({ children, toaster, ...props }: ToastProviderProps) => (
 	<ToastProviderRoot {...props}>
 		{children}
-		<ToastToaster />
+		<ToastToaster {...toaster} />
 	</ToastProviderRoot>
 );
 

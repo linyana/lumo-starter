@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 
 const closeClasses = cn(
 	buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
-	'-my-1 size-7 text-muted-foreground',
+	'-my-1 -me-1 size-7 self-start text-muted-foreground [grid-area:close]',
 );
 
 const closeGlyph = <X />;
@@ -23,7 +23,7 @@ export function ToastClose({ className, children = closeGlyph, ...props }: Toast
 	return (
 		<BaseToast.Close
 			data-slot="toast-close"
-			aria-label="ToastClose"
+			aria-label="Dismiss"
 			className={cn(closeClasses, className)}
 			{...props}
 		>

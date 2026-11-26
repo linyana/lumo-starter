@@ -1,13 +1,29 @@
 import type { ComponentProps } from 'react';
 import { cn } from '@/lib/utils';
 
-export type SkeletonProps = ComponentProps<'div'>;
+export type SkeletonEffect = 'shimmer' | 'pulse' | 'none';
 
-export function Skeleton({ className, ...props }: SkeletonProps) {
+export type SkeletonProps = ComponentProps<'div'> & {
+	effect?: SkeletonEffect;
+};
+
+const effectClasses: Record<SkeletonEffect, string> = {
+	shimmer: 'skeleton-shimmer',
+	pulse: 'motion-safe:animate-pulse',
+	none: '',
+};
+
+export function Skeleton({ effect = 'shimmer', className, ...props }: SkeletonProps) {
 	return (
 		<div
 			data-slot="skeleton"
-			className={cn('animate-pulse rounded-md bg-muted motion-reduce:animate-none', className)}
+			data-effect={effect}
+			aria-hidden="true"
+			className={cn(
+				'relative block shrink-0 overflow-hidden rounded-md bg-muted/70',
+				effectClasses[effect],
+				className,
+			)}
 			{...props}
 		/>
 	);

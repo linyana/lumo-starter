@@ -10,7 +10,10 @@ export function ToastTitle({ className, ...props }: ToastTitleProps) {
 	return (
 		<BaseToast.Title
 			data-slot="toast-title"
-			className={cn('text-sm font-medium', className)}
+			className={cn(
+				'flex w-full items-center gap-2 text-sm font-semibold [grid-area:title]',
+				className,
+			)}
 			{...props}
 		/>
 	);

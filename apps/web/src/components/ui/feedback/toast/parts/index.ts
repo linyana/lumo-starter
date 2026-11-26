@@ -1,4 +1,5 @@
 export * from '@/components/ui/feedback/toast/parts/action';
+export * from '@/components/ui/feedback/toast/parts/actions';
 export * from '@/components/ui/feedback/toast/parts/close';
 export * from '@/components/ui/feedback/toast/parts/content';
 export * from '@/components/ui/feedback/toast/parts/context';
@@ -6,6 +7,7 @@ export * from '@/components/ui/feedback/toast/parts/description';
 export * from '@/components/ui/feedback/toast/parts/icon';
 export * from '@/components/ui/feedback/toast/parts/manager';
 export * from '@/components/ui/feedback/toast/parts/portal';
+export * from '@/components/ui/feedback/toast/parts/progress';
 export * from '@/components/ui/feedback/toast/parts/provider';
 export * from '@/components/ui/feedback/toast/parts/root';
 export * from '@/components/ui/feedback/toast/parts/title';
