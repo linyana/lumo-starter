@@ -5,14 +5,19 @@ import pg from 'pg';
 import { DB_POOL, DB_TRANSACTION } from '../config/runtime/index.js';
 import { PrismaClient } from '../../generated/prisma/client.js';
 
+const logger = new Logger('PrismaService');
+
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
-	private readonly logger = new Logger(PrismaService.name);
-
 	constructor(config: ConfigService) {
 		const pool = new pg.Pool({
 			connectionString: config.getOrThrow<string>('DATABASE_URL'),
 			...DB_POOL,
+		});
+
+		// An idle client dying (database restart, network blip) is otherwise silent.
+		pool.on('error', (err: Error) => {
+			logger.warn(`Database client error: ${err.message}`);
 		});
 
 		super({
@@ -24,7 +29,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 	async onModuleInit(): Promise<void> {
 		await this.$connect();
 		await this.$queryRaw`SELECT 1`;
-		this.logger.log('Connected to PostgreSQL');
+		logger.log('Connected to PostgreSQL');
 	}
 
 	async onModuleDestroy(): Promise<void> {

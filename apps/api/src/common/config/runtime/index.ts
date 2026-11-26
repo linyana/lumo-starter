@@ -12,8 +12,13 @@ export const DB_POOL = {
 	max: 10,
 	min: 2,
 	keepAlive: true,
-	connectionTimeoutMillis: 10_000,
+	connectionTimeoutMillis: 3_000,
 	idleTimeoutMillis: 30_000,
+	// Server-side cap on a single statement.
+	statement_timeout: 10_000,
+	// Client-side backstop, above statement_timeout so a live server wins first;
+	// it is what aborts queries on a half-open socket, where the server can never answer.
+	query_timeout: 12_000,
 } as const;
 
 export const DB_TRANSACTION = { maxWait: 5_000, timeout: 10_000 } as const;
