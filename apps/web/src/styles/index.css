@@ -98,8 +98,8 @@
 }
 
 :root {
-	--layout-background: rgb(239 239 240);
-	--layout-content: rgb(249 249 250);
+	--layout-background: rgb(239 239 239);
+	--layout-content: rgb(248 248 248);
 	--state-layer-hover-opacity: 0.06;
 	--state-layer-pressed-opacity: 0.14;
 	--state-layer-fill-hover-opacity: 0.16;
