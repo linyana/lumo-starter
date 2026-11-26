@@ -54,7 +54,7 @@ export const tableDensity = {
 
 export const tableVariants = tv({
 	base: [
-		'min-w-0 w-full overflow-auto text-sm',
+		'min-w-0 w-full overflow-x-auto overflow-y-hidden text-sm',
 		'[&>table:has(>tfoot)>tbody>tr:last-child>*]:after:hidden',
 	],
 	variants: {
@@ -128,6 +128,7 @@ export function TableRoot({
 					onScroll={(event) => syncScroll(event.currentTarget)}
 					className={cn(
 						tableVariants({ size, variant }),
+						scroll?.y !== undefined && 'overflow-y-auto',
 						layout === 'fixed' && '[&>table]:table-fixed',
 						className,
 					)}

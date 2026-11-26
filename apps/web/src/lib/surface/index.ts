@@ -10,10 +10,10 @@ export const backdrop = cn(
 export const panel = cn(
 	'relative isolate flex max-h-[calc(100dvh-2rem)] w-full max-w-md min-h-0 flex-col',
 	'rounded-xl border bg-popover text-popover-foreground shadow-overlay',
-	'transform-gpu transition-[scale,opacity] duration-(--duration-modal) ease-(--ease-spring)',
-	'data-starting-style:scale-95 data-starting-style:opacity-0',
-	'starting:scale-95 starting:opacity-0',
-	'data-ending-style:scale-95 data-ending-style:opacity-0',
+	'transition-opacity duration-(--duration-modal) ease-(--ease-overlay)',
+	'data-starting-style:opacity-0',
+	'starting:opacity-0',
+	'data-ending-style:opacity-0',
 	'data-ending-style:duration-(--duration-modal-exit) data-ending-style:ease-out',
 	'data-nested-dialog-open:pointer-events-none data-nested-dialog-open:scale-95 data-nested-dialog-open:opacity-0',
 );
