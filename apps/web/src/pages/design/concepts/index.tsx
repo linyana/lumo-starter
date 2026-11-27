@@ -32,8 +32,8 @@ const axisValues: Record<string, readonly string[]> = {
 
 const axisExample: Record<string, string> = {
 	size: 'controlHeight.md → h-(--control-h-md)',
-	emphasis: 'bg-(--tone-solid) · bg-(--tone)/10 · border-(--tone-border)',
-	color: '[--tone:var(--success)]',
+	emphasis: 'bg-(--intent-solid) · bg-(--intent)/10 · border-(--intent-border)',
+	color: '[--intent:var(--success)]',
 	strength: '--destructive-soft',
 	state: 'data-loading',
 };
@@ -68,10 +68,10 @@ const ColorTable = () => (
 		<thead className="text-xs text-muted-foreground">
 			<tr>
 				<th className="py-1.5 pe-4 font-medium">color</th>
-				<th className="py-1.5 pe-4 font-medium">--tone</th>
-				<th className="py-1.5 pe-4 font-medium">--tone-solid</th>
-				<th className="py-1.5 pe-4 font-medium">--tone-on</th>
-				<th className="py-1.5 font-medium">--tone-border</th>
+				<th className="py-1.5 pe-4 font-medium">--intent</th>
+				<th className="py-1.5 pe-4 font-medium">--intent-solid</th>
+				<th className="py-1.5 pe-4 font-medium">--intent-on</th>
+				<th className="py-1.5 font-medium">--intent-border</th>
 			</tr>
 		</thead>
 		<tbody>

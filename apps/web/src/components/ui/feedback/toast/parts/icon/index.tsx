@@ -21,7 +21,7 @@ function glyphOf(type: string | undefined): ReactNode {
 	}
 }
 
-function toneOf(type: string | undefined) {
+function colorOf(type: string | undefined) {
 	if (type === 'success') return 'text-success';
 	if (type === 'error') return 'text-destructive';
 	if (type === 'warning') return 'text-warning';
@@ -48,7 +48,7 @@ export function ToastIcon({ type, icon, className }: ToastIconProps) {
 			className={cn(
 				'flex shrink-0 items-center [grid-area:icon]',
 				"has-[>svg]:h-lh [&>svg:not([class*='size-'])]:size-5",
-				toneOf(resolved),
+				colorOf(resolved),
 				className,
 			)}
 		>

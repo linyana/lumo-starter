@@ -112,7 +112,7 @@ export const entries: SpecimenEntry[] = [
 	{
 		name: 'Badge',
 		path: 'components/ui/display/badge',
-		note: 'The whole grid is derived from the component: one row per tone, one column per emphasis.',
+		note: 'The whole grid is derived from the component: one row per color, one column per emphasis.',
 		variants: badgeVariants.variants,
 		rowAxis: 'color',
 		colAxis: 'variant',

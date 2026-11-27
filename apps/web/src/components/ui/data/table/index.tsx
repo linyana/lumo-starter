@@ -206,7 +206,7 @@ const SelectionBar = <Row,>({ rows, actions, onClear, className }: SelectionBarP
 					const look = {
 						variant: glyphOnly ? ('ghost' as const) : ('outline' as const),
 						size: glyphOnly ? ('icon-sm' as const) : ('sm' as const),
-						tone: destructive ? ('destructive' as const) : ('default' as const),
+						color: destructive ? ('destructive' as const) : ('neutral' as const),
 						icon,
 						...button,
 					};
