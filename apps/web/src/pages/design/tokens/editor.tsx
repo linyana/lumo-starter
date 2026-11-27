@@ -1,4 +1,11 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import {
+	createContext,
+	useCallback,
+	useContext,
+	useMemo,
+	useSyncExternalStore,
+	type ReactNode,
+} from 'react';
 import { useTheme } from '@/providers/theme';
 import { editTargetOf, tokenNamed, valueOf } from './model';
 
@@ -19,6 +26,37 @@ export type TokenEditor = {
 const unsafe = /[{};]/;
 const empty: TokenOverrides = { light: {}, dark: {} };
 
+let store: TokenOverrides = empty;
+const listeners = new Set<() => void>();
+
+const subscribe = (listener: () => void): (() => void) => {
+	listeners.add(listener);
+	return () => listeners.delete(listener);
+};
+
+const getSnapshot = (): TokenOverrides => store;
+
+const emit = (): void => {
+	for (const listener of listeners) listener();
+};
+
+const write = ({ name, value, theme }: { name: string; value: string; theme: Theme }): void => {
+	const trimmed = value.trim();
+	if (unsafe.test(trimmed)) return;
+
+	const map = { ...store[theme] };
+	if (trimmed === '') delete map[name];
+	else map[name] = trimmed;
+
+	store = { ...store, [theme]: map };
+	emit();
+};
+
+const clear = (): void => {
+	store = empty;
+	emit();
+};
+
 const block = (map: Record<string, string>): string =>
 	Object.entries(map)
 		.map(([name, value]) => `${name}: ${value};`)
@@ -34,24 +72,12 @@ const TokenEditorContext = createContext<TokenEditor | null>(null);
 
 export const TokenEditorProvider = ({ children }: { children: ReactNode }) => {
 	const { resolved } = useTheme();
-	const [overrides, setOverrides] = useState<TokenOverrides>(empty);
+	const overrides = useSyncExternalStore(subscribe, getSnapshot);
 
 	const set = useCallback(
-		({ name, value }: { name: string; value: string }) => {
-			const trimmed = value.trim();
-			if (unsafe.test(trimmed)) return;
-
-			setOverrides((current) => {
-				const map = { ...current[resolved] };
-				if (trimmed === '') delete map[name];
-				else map[name] = trimmed;
-				return { ...current, [resolved]: map };
-			});
-		},
+		(input: { name: string; value: string }) => write({ ...input, theme: resolved }),
 		[resolved],
 	);
-
-	const reset = useCallback(() => setOverrides(empty), []);
 
 	const value = useMemo<TokenEditor>(() => {
 		const current = overrides[resolved];
@@ -61,7 +87,7 @@ export const TokenEditorProvider = ({ children }: { children: ReactNode }) => {
 			overrides,
 			count: Object.keys(overrides.light).length + Object.keys(overrides.dark).length,
 			set,
-			reset,
+			reset: clear,
 			overridden: (name) => current[editTargetOf(name)] !== undefined,
 			valueOf: (name) => {
 				const target = editTargetOf(name);
@@ -72,7 +98,7 @@ export const TokenEditorProvider = ({ children }: { children: ReactNode }) => {
 				return token === undefined ? '' : valueOf({ token, theme: resolved });
 			},
 		};
-	}, [overrides, reset, resolved, set]);
+	}, [overrides, resolved, set]);
 
 	return (
 		<TokenEditorContext.Provider value={value}>
