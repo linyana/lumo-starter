@@ -2,6 +2,10 @@ import { LayoutDashboard, ScrollText, Settings, ShieldCheck, Users } from 'lucid
 import {
 	AuditPage,
 	DashboardPage,
+	DesignComponentPage,
+	DesignComponentsPage,
+	DesignPlaygroundPage,
+	DesignTokensPage,
 	LoginPage,
 	MembersPage,
 	RegisterPage,
@@ -10,6 +14,25 @@ import {
 	SettingsPage,
 } from '@/pages';
 import type { AppRoute } from '@/providers/routes';
+
+const designRoutes: AppRoute[] = import.meta.env.DEV
+	? [
+			{ path: 'design', layout: 'bare', audience: 'public', page: DesignPlaygroundPage },
+			{ path: 'design/tokens', layout: 'bare', audience: 'public', page: DesignTokensPage },
+			{
+				path: 'design/components',
+				layout: 'bare',
+				audience: 'public',
+				page: DesignComponentsPage,
+			},
+			{
+				path: 'design/components/:name',
+				layout: 'bare',
+				audience: 'public',
+				page: DesignComponentPage,
+			},
+		]
+	: [];
 
 export const routes: AppRoute[] = [
 	{
@@ -79,4 +102,5 @@ export const routes: AppRoute[] = [
 	},
 	{ path: 'login', layout: 'bare', page: LoginPage, audience: 'anonymous' },
 	{ path: 'register', layout: 'bare', page: RegisterPage, audience: 'anonymous' },
+	...designRoutes,
 ];

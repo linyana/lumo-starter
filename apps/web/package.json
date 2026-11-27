@@ -8,7 +8,8 @@
 		"build": "tsc --noEmit && vite build",
 		"preview": "vite preview",
 		"typecheck": "tsc --noEmit",
-		"lint": "oxlint"
+		"lint": "oxlint",
+		"design:manifest": "node scripts/design-manifest.mts"
 	},
 	"dependencies": {
 		"@base-ui/react": "^1.9.0",

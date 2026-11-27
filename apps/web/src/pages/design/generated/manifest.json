@@ -1,0 +1,2237 @@
+{
+	"components": [
+		{
+			"name": "Pagination",
+			"category": "data",
+			"path": "components/ui/data/pagination",
+			"props": [
+				{
+					"name": "page",
+					"type": "number",
+					"optional": false
+				},
+				{
+					"name": "busy",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<PaginationSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "firstLast",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "items",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "jump",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "onPageChange",
+					"type": "((page: number) => void)",
+					"optional": true
+				},
+				{
+					"name": "onPageSizeChange",
+					"type": "((pageSize: number) => void)",
+					"optional": true
+				},
+				{
+					"name": "pageCount",
+					"type": "number",
+					"optional": true
+				},
+				{
+					"name": "pageSize",
+					"type": "number",
+					"optional": true
+				},
+				{
+					"name": "pageSizes",
+					"type": "readonly number[]",
+					"optional": true
+				},
+				{
+					"name": "range",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "siblings",
+					"type": "number",
+					"optional": true
+				},
+				{
+					"name": "size",
+					"type": "\"sm\" | \"md\" | \"lg\"",
+					"optional": true
+				},
+				{
+					"name": "total",
+					"type": "number",
+					"optional": true
+				}
+			],
+			"tokens": ["--duration-state", "--foreground", "--muted", "--muted-foreground", "--radius"],
+			"sharedTokens": [
+				"--accent",
+				"--accent-foreground",
+				"--background",
+				"--border",
+				"--card",
+				"--destructive",
+				"--destructive-soft",
+				"--duration-press",
+				"--duration-state",
+				"--duration-turn",
+				"--ease-overlay",
+				"--ease-spring",
+				"--foreground",
+				"--input",
+				"--input-strong",
+				"--muted",
+				"--muted-foreground",
+				"--primary",
+				"--radius"
+			]
+		},
+		{
+			"name": "Steps",
+			"category": "data",
+			"path": "components/ui/data/steps",
+			"props": [
+				{
+					"name": "items",
+					"type": "StepItem[]",
+					"optional": false
+				},
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<StepsSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "current",
+					"type": "number",
+					"optional": true
+				},
+				{
+					"name": "orientation",
+					"type": "StepsOrientation",
+					"optional": true
+				},
+				{
+					"name": "size",
+					"type": "StepsSize",
+					"optional": true
+				},
+				{
+					"name": "variant",
+					"type": "StepsVariant",
+					"optional": true
+				}
+			],
+			"tokens": [
+				"--background",
+				"--border",
+				"--destructive",
+				"--destructive-foreground",
+				"--duration-state",
+				"--ease-spring",
+				"--muted",
+				"--muted-foreground",
+				"--primary",
+				"--primary-foreground",
+				"--radius",
+				"--spacing",
+				"--steps-indicator"
+			],
+			"sharedTokens": [
+				"--accent",
+				"--accent-foreground",
+				"--background",
+				"--border",
+				"--card",
+				"--destructive",
+				"--destructive-soft",
+				"--duration-press",
+				"--duration-state",
+				"--duration-turn",
+				"--ease-overlay",
+				"--ease-spring",
+				"--foreground",
+				"--input",
+				"--input-strong",
+				"--muted",
+				"--muted-foreground",
+				"--primary",
+				"--radius"
+			]
+		},
+		{
+			"name": "Table",
+			"category": "data",
+			"path": "components/ui/data/table",
+			"props": [],
+			"tokens": [
+				"--background",
+				"--border",
+				"--card",
+				"--card-foreground",
+				"--cell-max-w",
+				"--cell-px",
+				"--color-border",
+				"--destructive",
+				"--duration-state",
+				"--foreground",
+				"--layout-content",
+				"--muted",
+				"--muted-foreground",
+				"--radius",
+				"--spacing",
+				"--table-depth",
+				"--table-fixed-offset",
+				"--table-surface"
+			],
+			"sharedTokens": [
+				"--accent",
+				"--accent-foreground",
+				"--background",
+				"--border",
+				"--card",
+				"--destructive",
+				"--destructive-soft",
+				"--duration-press",
+				"--duration-state",
+				"--duration-turn",
+				"--ease-overlay",
+				"--ease-spring",
+				"--foreground",
+				"--input",
+				"--input-strong",
+				"--muted",
+				"--muted-foreground",
+				"--primary",
+				"--radius"
+			]
+		},
+		{
+			"name": "Accordion",
+			"category": "display",
+			"path": "components/ui/display/accordion",
+			"props": [
+				{
+					"name": "items",
+					"type": "AccordionItem[]",
+					"optional": false
+				},
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<AccordionSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "defaultValue",
+					"type": "string[]",
+					"optional": true
+				},
+				{
+					"name": "multiple",
+					"type": "boolean",
+					"optional": true
+				}
+			],
+			"tokens": ["--border", "--radius"],
+			"sharedTokens": [
+				"--accent",
+				"--accent-foreground",
+				"--background",
+				"--border",
+				"--card",
+				"--destructive",
+				"--destructive-soft",
+				"--duration-press",
+				"--duration-state",
+				"--duration-turn",
+				"--ease-overlay",
+				"--ease-spring",
+				"--foreground",
+				"--input",
+				"--input-strong",
+				"--muted",
+				"--muted-foreground",
+				"--primary",
+				"--radius"
+			]
+		},
+		{
+			"name": "Avatar",
+			"category": "display",
+			"path": "components/ui/display/avatar",
+			"props": [
+				{
+					"name": "alt",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<AvatarSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "fallback",
+					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "shape",
+					"type": "AvatarShape",
+					"optional": true
+				},
+				{
+					"name": "size",
+					"type": "AvatarSize",
+					"optional": true
+				},
+				{
+					"name": "src",
+					"type": "string",
+					"optional": true
+				}
+			],
+			"tokens": ["--background", "--duration-state", "--muted", "--muted-foreground", "--radius"],
+			"sharedTokens": [
+				"--accent",
+				"--accent-foreground",
+				"--background",
+				"--border",
+				"--card",
+				"--destructive",
+				"--destructive-soft",
+				"--duration-press",
+				"--duration-state",
+				"--duration-turn",
+				"--ease-overlay",
+				"--ease-spring",
+				"--foreground",
+				"--input",
+				"--input-strong",
+				"--muted",
+				"--muted-foreground",
+				"--primary",
+				"--radius"
+			]
+		},
+		{
+			"name": "Badge",
+			"category": "display",
+			"path": "components/ui/display/badge",
+			"props": [],
+			"tokens": [
+				"--border",
+				"--destructive",
+				"--foreground",
+				"--info",
+				"--primary",
+				"--primary-foreground",
+				"--radius",
+				"--secondary",
+				"--secondary-foreground",
+				"--success",
+				"--warning"
+			],
+			"sharedTokens": [
+				"--accent",
+				"--accent-foreground",
+				"--background",
+				"--border",
+				"--card",
+				"--destructive",
+				"--destructive-soft",
+				"--duration-press",
+				"--duration-state",
+				"--duration-turn",
+				"--ease-overlay",
+				"--ease-spring",
+				"--foreground",
+				"--input",
+				"--input-strong",
+				"--muted",
+				"--muted-foreground",
+				"--primary",
+				"--radius"
+			]
+		},
+		{
+			"name": "Card",
+			"category": "display",
+			"path": "components/ui/display/card",
+			"props": [
+				{
+					"name": "action",
+					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "children",
+					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<CardSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "description",
+					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "footer",
+					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "hoverable",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "size",
+					"type": "CardSize",
+					"optional": true
+				},
+				{
+					"name": "surface",
+					"type": "CardSurface",
+					"optional": true
+				},
+				{
+					"name": "title",
+					"type": "ReactNode",
+					"optional": true
+				}
+			],
+			"tokens": [
+				"--border",
+				"--border-soft",
+				"--card",
+				"--card-foreground",
+				"--duration-state",
+				"--foreground",
+				"--muted",
+				"--muted-foreground",
+				"--radius"
+			],
+			"sharedTokens": []
+		},
+		{
+			"name": "Collapsible",
+			"category": "display",
+			"path": "components/ui/display/collapsible",
+			"props": [
+				{
+					"name": "children",
+					"type": "ReactNode",
+					"optional": false
+				},
+				{
+					"name": "title",
+					"type": "ReactNode",
+					"optional": false
+				},
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<CollapsibleSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "defaultOpen",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "disabled",
+					"type": "boolean",
+					"optional": true
+				}
+			],
+			"tokens": ["--radius"],
+			"sharedTokens": [
+				"--accent",
+				"--accent-foreground",
+				"--background",
+				"--border",
+				"--card",
+				"--destructive",
+				"--destructive-soft",
+				"--duration-press",
+				"--duration-state",
+				"--duration-turn",
+				"--ease-overlay",
+				"--ease-spring",
+				"--foreground",
+				"--input",
+				"--input-strong",
+				"--muted",
+				"--muted-foreground",
+				"--primary",
+				"--radius"
+			]
+		},
+		{
+			"name": "Icons",
+			"category": "display",
+			"path": "components/ui/display/icons",
+			"props": [
+				{
+					"name": "name",
+					"type": "\"circle-check\" | \"circle-exclamation\" | \"circle-x\"",
+					"optional": false
+				}
+			],
+			"tokens": [],
+			"sharedTokens": []
+		},
+		{
+			"name": "ScrollArea",
+			"category": "display",
+			"path": "components/ui/display/scroll-area",
+			"props": [
+				{
+					"name": "children",
+					"type": "ReactNode",
+					"optional": false
+				},
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<ScrollAreaSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "height",
+					"type": "string | number",
+					"optional": true
+				},
+				{
+					"name": "orientation",
+					"type": "ScrollAreaOrientation",
+					"optional": true
+				}
+			],
+			"tokens": ["--duration-state", "--muted", "--muted-foreground", "--radius", "--ring"],
+			"sharedTokens": []
+		},
+		{
+			"name": "Separator",
+			"category": "display",
+			"path": "components/ui/display/separator",
+			"props": [],
+			"tokens": ["--border"],
+			"sharedTokens": []
+		},
+		{
+			"name": "Transition",
+			"category": "display",
+			"path": "components/ui/display/transition",
+			"props": [
+				{
+					"name": "children",
+					"type": "ReactNode",
+					"optional": false
+				},
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "height",
+					"type": "number",
+					"optional": true
+				}
+			],
+			"tokens": [],
+			"sharedTokens": []
+		},
+		{
+			"name": "Progress",
+			"category": "feedback",
+			"path": "components/ui/feedback/progress",
+			"props": [
+				{
+					"name": "value",
+					"type": "number | null",
+					"optional": false
+				},
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<ProgressSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "label",
+					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "max",
+					"type": "number",
+					"optional": true
+				}
+			],
+			"tokens": [
+				"--animate-progress-sweep",
+				"--duration-overlay",
+				"--ease-overlay",
+				"--muted",
+				"--muted-foreground",
+				"--primary",
+				"--radius"
+			],
+			"sharedTokens": []
+		},
+		{
+			"name": "Skeleton",
+			"category": "feedback",
+			"path": "components/ui/feedback/skeleton",
+			"props": [
+				{
+					"name": "effect",
+					"type": "SkeletonEffect",
+					"optional": true
+				}
+			],
+			"tokens": ["--muted", "--radius"],
+			"sharedTokens": []
+		},
+		{
+			"name": "Spinner",
+			"category": "feedback",
+			"path": "components/ui/feedback/spinner",
+			"props": [
+				{
+					"name": "caption",
+					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "captionDelay",
+					"type": "number",
+					"optional": true
+				},
+				{
+					"name": "label",
+					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "size",
+					"type": "string | number",
+					"optional": true
+				}
+			],
+			"tokens": ["--duration", "--radius"],
+			"sharedTokens": []
+		},
+		{
+			"name": "Toast",
+			"category": "feedback",
+			"path": "components/ui/feedback/toast",
+			"props": [
+				{
+					"name": "children",
+					"type": "ReactNode",
+					"optional": false
+				},
+				{
+					"name": "toaster",
+					"type": "Omit<ToastToasterProps, \"children\">",
+					"optional": true
+				}
+			],
+			"tokens": [
+				"--destructive",
+				"--duration-overlay",
+				"--duration-state",
+				"--ease-overlay",
+				"--gap",
+				"--height",
+				"--info",
+				"--muted",
+				"--muted-foreground",
+				"--offset-y",
+				"--peek",
+				"--popover",
+				"--popover-foreground",
+				"--primary",
+				"--radius",
+				"--scale",
+				"--shadow-lifted",
+				"--shrink",
+				"--success",
+				"--toast-frontmost-height",
+				"--toast-height",
+				"--toast-index",
+				"--toast-offset-y",
+				"--toast-swipe-movement-x",
+				"--toast-swipe-movement-y",
+				"--warning"
+			],
+			"sharedTokens": []
+		},
+		{
+			"name": "Button",
+			"category": "form",
+			"path": "components/ui/form/button",
+			"props": [
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "icon",
+					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "loading",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "loadingIcon",
+					"type": "ReactNode",
+					"optional": true
+				}
+			],
+			"tokens": [
+				"--background",
+				"--destructive",
+				"--destructive-foreground",
+				"--duration-state",
+				"--ease-spring",
+				"--primary",
+				"--primary-foreground",
+				"--radius",
+				"--secondary",
+				"--secondary-foreground",
+				"--state-layer-fill-hover-opacity",
+				"--state-layer-fill-pressed-opacity"
+			],
+			"sharedTokens": [
+				"--accent",
+				"--accent-foreground",
+				"--background",
+				"--border",
+				"--card",
+				"--destructive",
+				"--destructive-soft",
+				"--duration-press",
+				"--duration-state",
+				"--duration-turn",
+				"--ease-overlay",
+				"--ease-spring",
+				"--foreground",
+				"--input",
+				"--input-strong",
+				"--muted",
+				"--muted-foreground",
+				"--primary",
+				"--radius"
+			]
+		},
+		{
+			"name": "Checkbox",
+			"category": "form",
+			"path": "components/ui/form/checkbox",
+			"props": [
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<CheckboxSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "defaultValue",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "id",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "label",
+					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "loading",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "onChange",
+					"type": "((value: boolean) => void)",
+					"optional": true
+				},
+				{
+					"name": "value",
+					"type": "boolean",
+					"optional": true
+				}
+			],
+			"tokens": ["--primary", "--primary-foreground", "--radius"],
+			"sharedTokens": [
+				"--accent",
+				"--accent-foreground",
+				"--background",
+				"--border",
+				"--card",
+				"--destructive",
+				"--destructive-soft",
+				"--duration-press",
+				"--duration-state",
+				"--duration-turn",
+				"--ease-overlay",
+				"--ease-spring",
+				"--foreground",
+				"--input",
+				"--input-strong",
+				"--muted",
+				"--muted-foreground",
+				"--primary",
+				"--radius"
+			]
+		},
+		{
+			"name": "Clear",
+			"category": "form",
+			"path": "components/ui/form/clear",
+			"props": [
+				{
+					"name": "children",
+					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "label",
+					"type": "string",
+					"optional": true
+				}
+			],
+			"tokens": [],
+			"sharedTokens": [
+				"--accent",
+				"--accent-foreground",
+				"--background",
+				"--border",
+				"--card",
+				"--destructive",
+				"--destructive-soft",
+				"--duration-press",
+				"--duration-state",
+				"--duration-turn",
+				"--ease-overlay",
+				"--ease-spring",
+				"--foreground",
+				"--input",
+				"--input-strong",
+				"--muted",
+				"--muted-foreground",
+				"--primary",
+				"--radius"
+			]
+		},
+		{
+			"name": "Combobox",
+			"category": "form",
+			"path": "components/ui/form/combobox",
+			"props": [
+				{
+					"name": "items",
+					"type": "string[]",
+					"optional": false
+				},
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<ComboboxSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "defaultValue",
+					"type": "string | null",
+					"optional": true
+				},
+				{
+					"name": "disabled",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "empty",
+					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "loading",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "name",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "onChange",
+					"type": "((value: string | null) => void)",
+					"optional": true
+				},
+				{
+					"name": "placeholder",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "size",
+					"type": "\"sm\" | \"md\" | \"lg\"",
+					"optional": true
+				},
+				{
+					"name": "value",
+					"type": "string | null",
+					"optional": true
+				}
+			],
+			"tokens": [
+				"--duration-state",
+				"--foreground",
+				"--muted",
+				"--muted-foreground",
+				"--popover",
+				"--popover-foreground",
+				"--radius",
+				"--shadow-lifted"
+			],
+			"sharedTokens": [
+				"--accent",
+				"--accent-foreground",
+				"--background",
+				"--border",
+				"--card",
+				"--destructive",
+				"--destructive-soft",
+				"--duration-press",
+				"--duration-state",
+				"--duration-turn",
+				"--ease-overlay",
+				"--ease-spring",
+				"--foreground",
+				"--input",
+				"--input-strong",
+				"--muted",
+				"--muted-foreground",
+				"--primary",
+				"--radius"
+			]
+		},
+		{
+			"name": "Field",
+			"category": "form",
+			"path": "components/ui/form/field",
+			"props": [
+				{
+					"name": "children",
+					"type": "ReactNode",
+					"optional": false
+				},
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<FieldSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "description",
+					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "error",
+					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "label",
+					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "required",
+					"type": "boolean",
+					"optional": true
+				}
+			],
+			"tokens": [
+				"--destructive",
+				"--duration-state",
+				"--duration-turn",
+				"--ease-overlay",
+				"--foreground",
+				"--muted",
+				"--muted-foreground",
+				"--radius"
+			],
+			"sharedTokens": []
+		},
+		{
+			"name": "Fieldset",
+			"category": "form",
+			"path": "components/ui/form/fieldset",
+			"props": [
+				{
+					"name": "children",
+					"type": "ReactNode",
+					"optional": false
+				},
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<FieldsetSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "legend",
+					"type": "ReactNode",
+					"optional": true
+				}
+			],
+			"tokens": [],
+			"sharedTokens": []
+		},
+		{
+			"name": "Form",
+			"category": "form",
+			"path": "components/ui/form/form",
+			"props": [
+				{
+					"name": "children",
+					"type": "ReactNode",
+					"optional": false
+				},
+				{
+					"name": "autosave",
+					"type": "AutoSaveHandle",
+					"optional": true
+				},
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "commitOn",
+					"type": "\"leave\" | \"change\"",
+					"optional": true
+				},
+				{
+					"name": "form",
+					"type": "FormInstance",
+					"optional": true
+				},
+				{
+					"name": "initial",
+					"type": "FormValues",
+					"optional": true
+				},
+				{
+					"name": "onChange",
+					"type": "((values: FormValues) => void)",
+					"optional": true
+				},
+				{
+					"name": "onSubmit",
+					"type": "((values: Input) => void | Promise<unknown>)",
+					"optional": true
+				},
+				{
+					"name": "ref",
+					"type": "Ref<HTMLFormElement>",
+					"optional": true,
+					"description": "Allows getting a ref to the component instance.\nOnce the component unmounts, React will set `ref.current` to `null`\n(or call the ref with `null` if you passed a callback ref)."
+				},
+				{
+					"name": "schema",
+					"type": "ZodType<Input, unknown, $ZodTypeInternals<Input, unknown>>",
+					"optional": true
+				},
+				{
+					"name": "settle",
+					"type": "number",
+					"optional": true
+				}
+			],
+			"tokens": [],
+			"sharedTokens": []
+		},
+		{
+			"name": "Input",
+			"category": "form",
+			"path": "components/ui/form/input",
+			"props": [
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<InputSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "clearable",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "clearLabel",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "invalid",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "loading",
+					"type": "boolean",
+					"optional": true
+				}
+			],
+			"tokens": ["--foreground", "--muted", "--muted-foreground"],
+			"sharedTokens": [
+				"--accent",
+				"--accent-foreground",
+				"--background",
+				"--border",
+				"--card",
+				"--destructive",
+				"--destructive-soft",
+				"--duration-press",
+				"--duration-state",
+				"--duration-turn",
+				"--ease-overlay",
+				"--ease-spring",
+				"--foreground",
+				"--input",
+				"--input-strong",
+				"--muted",
+				"--muted-foreground",
+				"--primary",
+				"--radius"
+			]
+		},
+		{
+			"name": "Loading",
+			"category": "form",
+			"path": "components/ui/form/loading",
+			"props": [
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "size",
+					"type": "string | number",
+					"optional": true
+				}
+			],
+			"tokens": [],
+			"sharedTokens": []
+		},
+		{
+			"name": "RadioGroup",
+			"category": "form",
+			"path": "components/ui/form/radio-group",
+			"props": [
+				{
+					"name": "options",
+					"type": "RadioOption<Value>[]",
+					"optional": false
+				},
+				{
+					"name": "aria-label",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<RadioGroupSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "loading",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "onChange",
+					"type": "((value: Value, eventDetails: { reason: \"none\"; event: Event; cancel: () => void; allowPropagation: () => void; isCanceled: boolean; isPropagationAllowed: boolean; trigger: Element | undefined; }) => void)",
+					"optional": true
+				}
+			],
+			"tokens": ["--primary", "--radius"],
+			"sharedTokens": [
+				"--accent",
+				"--accent-foreground",
+				"--background",
+				"--border",
+				"--card",
+				"--destructive",
+				"--destructive-soft",
+				"--duration-press",
+				"--duration-state",
+				"--duration-turn",
+				"--ease-overlay",
+				"--ease-spring",
+				"--foreground",
+				"--input",
+				"--input-strong",
+				"--muted",
+				"--muted-foreground",
+				"--primary",
+				"--radius"
+			]
+		},
+		{
+			"name": "Select",
+			"category": "form",
+			"path": "components/ui/form/select",
+			"props": [
+				{
+					"name": "options",
+					"type": "SelectOption<Value>[]",
+					"optional": false
+				},
+				{
+					"name": "ariaLabel",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<SelectSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "clearable",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "clearLabel",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "defaultValue",
+					"type": "Value | null",
+					"optional": true
+				},
+				{
+					"name": "disabled",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "id",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "invalid",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "loading",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "name",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "onChange",
+					"type": "((value: Value | null) => void)",
+					"optional": true
+				},
+				{
+					"name": "placeholder",
+					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "required",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "size",
+					"type": "\"sm\" | \"md\" | \"lg\"",
+					"optional": true
+				},
+				{
+					"name": "value",
+					"type": "Value | null",
+					"optional": true
+				}
+			],
+			"tokens": [
+				"--accent",
+				"--duration-turn",
+				"--ease-overlay",
+				"--muted",
+				"--muted-foreground",
+				"--popover",
+				"--popover-foreground",
+				"--radius",
+				"--shadow-lifted"
+			],
+			"sharedTokens": [
+				"--accent",
+				"--accent-foreground",
+				"--background",
+				"--border",
+				"--card",
+				"--destructive",
+				"--destructive-soft",
+				"--duration-press",
+				"--duration-state",
+				"--duration-turn",
+				"--ease-overlay",
+				"--ease-spring",
+				"--foreground",
+				"--input",
+				"--input-strong",
+				"--muted",
+				"--muted-foreground",
+				"--primary",
+				"--radius"
+			]
+		},
+		{
+			"name": "Slider",
+			"category": "form",
+			"path": "components/ui/form/slider",
+			"props": [
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<SliderSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "label",
+					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "loading",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "onChange",
+					"type": "((value: number | readonly number[], eventDetails: SliderRootChangeEventDetails) => void)",
+					"optional": true
+				}
+			],
+			"tokens": [
+				"--background",
+				"--duration-state",
+				"--ease-spring",
+				"--input",
+				"--input-strong",
+				"--muted",
+				"--muted-foreground",
+				"--primary",
+				"--radius"
+			],
+			"sharedTokens": []
+		},
+		{
+			"name": "Switch",
+			"category": "form",
+			"path": "components/ui/form/switch",
+			"props": [
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<SwitchSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "defaultValue",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "id",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "label",
+					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "loading",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "onChange",
+					"type": "((value: boolean) => void)",
+					"optional": true
+				},
+				{
+					"name": "value",
+					"type": "boolean",
+					"optional": true
+				}
+			],
+			"tokens": [
+				"--background",
+				"--duration-state",
+				"--ease-spring",
+				"--input",
+				"--input-strong",
+				"--muted",
+				"--muted-foreground",
+				"--primary",
+				"--primary-foreground",
+				"--radius"
+			],
+			"sharedTokens": []
+		},
+		{
+			"name": "Textarea",
+			"category": "form",
+			"path": "components/ui/form/textarea",
+			"props": [
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<TextareaSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "clearable",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "clearLabel",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "loading",
+					"type": "boolean",
+					"optional": true
+				}
+			],
+			"tokens": ["--muted", "--muted-foreground"],
+			"sharedTokens": [
+				"--accent",
+				"--accent-foreground",
+				"--background",
+				"--border",
+				"--card",
+				"--destructive",
+				"--destructive-soft",
+				"--duration-press",
+				"--duration-state",
+				"--duration-turn",
+				"--ease-overlay",
+				"--ease-spring",
+				"--foreground",
+				"--input",
+				"--input-strong",
+				"--muted",
+				"--muted-foreground",
+				"--primary",
+				"--radius"
+			]
+		},
+		{
+			"name": "Toggle",
+			"category": "form",
+			"path": "components/ui/form/toggle",
+			"props": [
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "loading",
+					"type": "boolean",
+					"optional": true
+				}
+			],
+			"tokens": ["--background", "--duration-state", "--ease-spring", "--radius"],
+			"sharedTokens": [
+				"--accent",
+				"--accent-foreground",
+				"--background",
+				"--border",
+				"--card",
+				"--destructive",
+				"--destructive-soft",
+				"--duration-press",
+				"--duration-state",
+				"--duration-turn",
+				"--ease-overlay",
+				"--ease-spring",
+				"--foreground",
+				"--input",
+				"--input-strong",
+				"--muted",
+				"--muted-foreground",
+				"--primary",
+				"--radius"
+			]
+		},
+		{
+			"name": "ToggleGroup",
+			"category": "form",
+			"path": "components/ui/form/toggle-group",
+			"props": [
+				{
+					"name": "items",
+					"type": "ToggleGroupItem<Value>[]",
+					"optional": false
+				},
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<ToggleGroupSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "loading",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "onChange",
+					"type": "((groupValue: Value[], eventDetails: { reason: \"none\"; event: Event; cancel: () => void; allowPropagation: () => void; isCanceled: boolean; isPropagationAllowed: boolean; trigger: Element | undefined; }) => void)",
+					"optional": true
+				},
+				{
+					"name": "size",
+					"type": "ToggleSize",
+					"optional": true
+				},
+				{
+					"name": "variant",
+					"type": "ToggleVariant",
+					"optional": true
+				}
+			],
+			"tokens": ["--muted", "--muted-foreground"],
+			"sharedTokens": []
+		},
+		{
+			"name": "Nav",
+			"category": "navigation",
+			"path": "components/ui/navigation/nav",
+			"props": [
+				{
+					"name": "children",
+					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<NavSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "compact",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "items",
+					"type": "NavEntry[]",
+					"optional": true
+				},
+				{
+					"name": "onSelect",
+					"type": "((key: string) => void)",
+					"optional": true
+				},
+				{
+					"name": "selectedKey",
+					"type": "string",
+					"optional": true
+				}
+			],
+			"tokens": [
+				"--accent",
+				"--accent-foreground",
+				"--background",
+				"--border",
+				"--duration-state",
+				"--foreground",
+				"--muted",
+				"--muted-foreground",
+				"--radius"
+			],
+			"sharedTokens": [
+				"--accent",
+				"--accent-foreground",
+				"--background",
+				"--border",
+				"--card",
+				"--destructive",
+				"--destructive-soft",
+				"--duration-press",
+				"--duration-state",
+				"--duration-turn",
+				"--ease-overlay",
+				"--ease-spring",
+				"--foreground",
+				"--input",
+				"--input-strong",
+				"--muted",
+				"--muted-foreground",
+				"--primary",
+				"--radius"
+			]
+		},
+		{
+			"name": "Tabs",
+			"category": "navigation",
+			"path": "components/ui/navigation/tabs",
+			"props": [
+				{
+					"name": "items",
+					"type": "TabItem[]",
+					"optional": false
+				},
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<TabsSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "defaultValue",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "onChange",
+					"type": "((value: string) => void)",
+					"optional": true
+				},
+				{
+					"name": "size",
+					"type": "TabsSize",
+					"optional": true
+				},
+				{
+					"name": "value",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "variant",
+					"type": "TabsVariant",
+					"optional": true
+				}
+			],
+			"tokens": [
+				"--blur-inactive",
+				"--border",
+				"--card",
+				"--duration-overlay",
+				"--duration-state",
+				"--ease-overlay",
+				"--foreground",
+				"--muted",
+				"--muted-foreground",
+				"--primary",
+				"--radius",
+				"--secondary",
+				"--secondary-foreground"
+			],
+			"sharedTokens": [
+				"--accent",
+				"--accent-foreground",
+				"--background",
+				"--border",
+				"--card",
+				"--destructive",
+				"--destructive-soft",
+				"--duration-press",
+				"--duration-state",
+				"--duration-turn",
+				"--ease-overlay",
+				"--ease-spring",
+				"--foreground",
+				"--input",
+				"--input-strong",
+				"--muted",
+				"--muted-foreground",
+				"--primary",
+				"--radius"
+			]
+		},
+		{
+			"name": "ActionBar",
+			"category": "overlay",
+			"path": "components/ui/overlay/action-bar",
+			"props": [],
+			"tokens": ["--shadow-lifted"],
+			"sharedTokens": []
+		},
+		{
+			"name": "AlertDialog",
+			"category": "overlay",
+			"path": "components/ui/overlay/alert-dialog",
+			"props": [
+				{
+					"name": "title",
+					"type": "ReactNode",
+					"optional": false
+				},
+				{
+					"name": "backdrop",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "cancelLabel",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "children",
+					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<AlertDialogSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "confirmCloses",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "confirmLabel",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "description",
+					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "destructive",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "onClosed",
+					"type": "(() => void)",
+					"optional": true
+				},
+				{
+					"name": "onConfirm",
+					"type": "(() => void)",
+					"optional": true
+				},
+				{
+					"name": "pending",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "trigger",
+					"type": "ReactElement<unknown, string | JSXElementConstructor<any>>",
+					"optional": true
+				}
+			],
+			"tokens": [],
+			"sharedTokens": []
+		},
+		{
+			"name": "ContextMenu",
+			"category": "overlay",
+			"path": "components/ui/overlay/context-menu",
+			"props": [
+				{
+					"name": "anchor",
+					"type": "ContextMenuAnchor",
+					"optional": false
+				},
+				{
+					"name": "items",
+					"type": "MenuEntry[]",
+					"optional": false
+				},
+				{
+					"name": "onClose",
+					"type": "() => void",
+					"optional": false
+				},
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<MenuSlots, string>>",
+					"optional": true
+				}
+			],
+			"tokens": [],
+			"sharedTokens": []
+		},
+		{
+			"name": "Dialog",
+			"category": "overlay",
+			"path": "components/ui/overlay/dialog",
+			"props": [
+				{
+					"name": "title",
+					"type": "ReactNode",
+					"optional": false
+				},
+				{
+					"name": "backdrop",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "children",
+					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<DialogSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "closeButton",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "closeLabel",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "description",
+					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "footer",
+					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "onClosed",
+					"type": "(() => void)",
+					"optional": true
+				},
+				{
+					"name": "trigger",
+					"type": "ReactElement<unknown, string | JSXElementConstructor<any>>",
+					"optional": true
+				}
+			],
+			"tokens": [],
+			"sharedTokens": []
+		},
+		{
+			"name": "Drawer",
+			"category": "overlay",
+			"path": "components/ui/overlay/drawer",
+			"props": [
+				{
+					"name": "title",
+					"type": "ReactNode",
+					"optional": false
+				},
+				{
+					"name": "trigger",
+					"type": "ReactElement<unknown, string | JSXElementConstructor<any>>",
+					"optional": false
+				},
+				{
+					"name": "children",
+					"type": "ReactNode | ((parts: DrawerParts) => ReactNode)",
+					"optional": true
+				},
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<DrawerSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "data-slot",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "description",
+					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "footer",
+					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "side",
+					"type": "DrawerSide",
+					"optional": true
+				}
+			],
+			"tokens": [
+				"--background",
+				"--drawer-snap-point-offset",
+				"--drawer-swipe-movement-x",
+				"--drawer-swipe-movement-y",
+				"--duration-overlay",
+				"--ease-overlay",
+				"--foreground",
+				"--overlay",
+				"--popover",
+				"--popover-foreground",
+				"--radius",
+				"--shadow-overlay"
+			],
+			"sharedTokens": []
+		},
+		{
+			"name": "HoverCard",
+			"category": "overlay",
+			"path": "components/ui/overlay/hover-card",
+			"props": [
+				{
+					"name": "children",
+					"type": "ReactElement<unknown, string | JSXElementConstructor<any>>",
+					"optional": false
+				},
+				{
+					"name": "content",
+					"type": "ReactNode",
+					"optional": false
+				},
+				{
+					"name": "arrow",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<HoverCardSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "delay",
+					"type": "number",
+					"optional": true
+				}
+			],
+			"tokens": ["--border", "--popover", "--popover-foreground", "--radius", "--shadow-lifted"],
+			"sharedTokens": []
+		},
+		{
+			"name": "Menu",
+			"category": "overlay",
+			"path": "components/ui/overlay/menu",
+			"props": [
+				{
+					"name": "items",
+					"type": "MenuEntry[]",
+					"optional": false
+				},
+				{
+					"name": "trigger",
+					"type": "ReactElement<unknown, string | JSXElementConstructor<any>>",
+					"optional": false
+				},
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<MenuSlots, string>>",
+					"optional": true
+				}
+			],
+			"tokens": ["--popover", "--popover-foreground", "--radius", "--shadow-lifted"],
+			"sharedTokens": [
+				"--accent",
+				"--accent-foreground",
+				"--background",
+				"--border",
+				"--card",
+				"--destructive",
+				"--destructive-soft",
+				"--duration-press",
+				"--duration-state",
+				"--duration-turn",
+				"--ease-overlay",
+				"--ease-spring",
+				"--foreground",
+				"--input",
+				"--input-strong",
+				"--muted",
+				"--muted-foreground",
+				"--primary",
+				"--radius"
+			]
+		},
+		{
+			"name": "Popover",
+			"category": "overlay",
+			"path": "components/ui/overlay/popover",
+			"props": [
+				{
+					"name": "children",
+					"type": "ReactNode",
+					"optional": false
+				},
+				{
+					"name": "trigger",
+					"type": "ReactElement<unknown, string | JSXElementConstructor<any>>",
+					"optional": false
+				},
+				{
+					"name": "anchor",
+					"type": "PopoverAnchor",
+					"optional": true
+				},
+				{
+					"name": "arrow",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<PopoverSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "sideOffset",
+					"type": "number",
+					"optional": true
+				}
+			],
+			"tokens": ["--border", "--popover", "--popover-foreground", "--radius", "--shadow-lifted"],
+			"sharedTokens": []
+		},
+		{
+			"name": "Tooltip",
+			"category": "overlay",
+			"path": "components/ui/overlay/tooltip",
+			"props": [
+				{
+					"name": "children",
+					"type": "ReactElement<unknown, string | JSXElementConstructor<any>>",
+					"optional": false
+				},
+				{
+					"name": "content",
+					"type": "ReactNode",
+					"optional": false
+				},
+				{
+					"name": "arrow",
+					"type": "boolean",
+					"optional": true
+				},
+				{
+					"name": "className",
+					"type": "string",
+					"optional": true
+				},
+				{
+					"name": "classNames",
+					"type": "Partial<Record<TooltipSlots, string>>",
+					"optional": true
+				},
+				{
+					"name": "delay",
+					"type": "number",
+					"optional": true
+				},
+				{
+					"name": "disabled",
+					"type": "boolean",
+					"optional": true
+				}
+			],
+			"tokens": ["--primary", "--primary-foreground", "--radius", "--shadow-lifted"],
+			"sharedTokens": []
+		}
+	]
+}
