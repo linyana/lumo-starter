@@ -26,7 +26,7 @@ const stackClasses = cn(
 	'[transition:transform_var(--duration-overlay)_var(--ease-overlay),opacity_var(--duration-overlay),height_var(--duration-state)]',
 );
 
-const surfaceClasses = 'rounded-xl border bg-popover text-sm text-popover-foreground shadow-lifted';
+const surfaceClasses = 'rounded-xl border bg-popover text-sm text-popover-foreground shadow-lg';
 
 const stackTopClasses = cn(
 	'top-0 origin-top',

@@ -177,8 +177,8 @@ const propsOf = (entry: { dir: string }): PropDoc[] => {
 	return [];
 };
 
-const controlFile = join(root, 'src/lib/control/index.ts');
-const controlTokens = tokensOf([controlFile]);
+const controlDir = join(root, 'src/lib/control');
+const controlTokens = tokensOf(filesUnder(controlDir));
 
 const manifest: { components: ComponentDoc[] } = {
 	components: entries.map((entry) => {

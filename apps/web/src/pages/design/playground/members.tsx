@@ -18,6 +18,7 @@ import {
 	Textarea,
 	Tooltip,
 } from '@/components';
+import type { Color } from '@/lib/control';
 
 const roles = [
 	{ value: 'owner', label: 'Owner' },
@@ -46,7 +47,11 @@ const members: Member[] = [
 	{ name: 'Wei Zhang', email: 'wei@lumo.dev', role: 'Member', status: 'Active' },
 ];
 
-const statusVariant = { Active: 'success', Invited: 'info', Suspended: 'warning' } as const;
+const statusColor: Record<string, Color> = {
+	Active: 'success',
+	Invited: 'info',
+	Suspended: 'warning',
+};
 
 const Overview = () => (
 	<div className="grid gap-3 lg:grid-cols-3">
@@ -54,7 +59,11 @@ const Overview = () => (
 			className="lg:col-span-2"
 			title="Everyone"
 			description="Sorted by last activity."
-			action={<Badge variant="outline">{members.length} shown</Badge>}
+			action={
+				<Badge variant="outline" color="neutral">
+					{members.length} shown
+				</Badge>
+			}
 		>
 			<div className="flex flex-col">
 				{members.map((member) => (
@@ -68,7 +77,9 @@ const Overview = () => (
 							<p className="truncate text-xs text-muted-foreground">{member.email}</p>
 						</div>
 						<Badge variant="secondary">{member.role}</Badge>
-						<Badge variant={statusVariant[member.status]}>{member.status}</Badge>
+						<Badge variant="soft" color={statusColor[member.status]}>
+							{member.status}
+						</Badge>
 						<Tooltip content="Open member settings" side="bottom">
 							<Button variant="ghost" size="sm">
 								Manage
@@ -104,7 +115,7 @@ const Overview = () => (
 				</p>
 				<Button
 					variant="outline"
-					tone="destructive"
+					color="destructive"
 					size="sm"
 					className="mt-2 w-full"
 					icon={<Trash2 />}
@@ -197,7 +208,7 @@ const Settings = () => (
 						value: 'delete',
 						title: 'Delete workspace',
 						content: (
-							<Button variant="ghost" tone="destructive" size="sm" icon={<Trash2 />}>
+							<Button variant="ghost" color="destructive" size="sm" icon={<Trash2 />}>
 								Delete this workspace
 							</Button>
 						),

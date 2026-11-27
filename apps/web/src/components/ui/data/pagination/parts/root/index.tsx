@@ -1,7 +1,7 @@
 import { clampPage, PAGE_SIZE_DEFAULT, pageCountOf } from '@lumo/shared';
 import { useMemo, type ComponentProps } from 'react';
 import { tv, type VariantProps } from 'tailwind-variants';
-import { iconSlot } from '@/lib/control';
+import { controlHeight, iconSlot } from '@/lib/control';
 import { cn } from '@/lib/utils';
 import { PaginationContext } from '../context';
 import { defaultLocale } from '../default-locale';
@@ -26,9 +26,9 @@ export const paginationItemVariants = tv({
 	],
 	variants: {
 		size: {
-			sm: 'h-8 min-w-8 px-2 text-sm',
-			md: 'h-9 min-w-9 px-2.5 text-sm',
-			lg: 'h-10 min-w-10 px-3 text-base',
+			sm: `${controlHeight.sm} min-w-(--control-h-sm) px-2 text-sm`,
+			md: `${controlHeight.md} min-w-(--control-h-md) px-2.5 text-sm`,
+			lg: `${controlHeight.lg} min-w-(--control-h-lg) px-3 text-base`,
 		},
 	},
 	defaultVariants: {

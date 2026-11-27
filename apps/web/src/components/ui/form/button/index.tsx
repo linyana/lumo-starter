@@ -1,9 +1,22 @@
 import { Button as BaseButton } from '@base-ui/react/button';
 import type { ComponentProps, ReactNode } from 'react';
-import { tv, type VariantProps } from 'tailwind-variants';
+import { tv } from 'tailwind-variants';
 import { Spinner } from '@/components/ui/feedback/spinner';
-import { iconSlot, pressable, stateLayer } from '@/lib/control';
+import {
+	controlBox,
+	controlMinHeight,
+	fieldText,
+	iconSlot,
+	pressable,
+	stateLayer,
+} from '@/lib/control';
 import { cn } from '@/lib/utils';
+
+const LOOK = {
+	primary: { variant: 'default', color: 'neutral' },
+	default: { variant: 'default', color: 'neutral' },
+	destructive: { variant: 'default', color: 'destructive' },
+} as const;
 
 export const buttonVariants = tv({
 	base: [
@@ -32,15 +45,19 @@ export const buttonVariants = tv({
 			link: 'text-primary underline-offset-4 hover:underline after:hidden',
 		},
 		size: {
-			sm: 'min-h-8 gap-1.5 px-3 text-sm has-data-[icon=start]:ps-2 has-data-[icon=end]:pe-2',
-			md: 'min-h-9 px-4 text-sm has-data-[icon=start]:ps-3 has-data-[icon=end]:pe-3',
-			lg: 'min-h-10 px-6 text-base has-data-[icon=start]:ps-5 has-data-[icon=end]:pe-5',
-			'icon-sm': 'size-8 text-sm',
-			'icon-md': 'size-9 text-sm',
-			'icon-lg': 'size-10 text-base',
+			default: `${controlMinHeight.md} px-4 ${fieldText.md} has-data-[icon=start]:ps-3 has-data-[icon=end]:pe-3`,
+			md: `${controlMinHeight.md} px-4 ${fieldText.md} has-data-[icon=start]:ps-3 has-data-[icon=end]:pe-3`,
+			xs: `${controlMinHeight.xs} gap-1 px-2 ${fieldText.xs} has-data-[icon=start]:ps-1.5 has-data-[icon=end]:pe-1.5`,
+			sm: `${controlMinHeight.sm} gap-1.5 px-3 ${fieldText.sm} has-data-[icon=start]:ps-2 has-data-[icon=end]:pe-2`,
+			lg: `${controlMinHeight.lg} px-6 ${fieldText.lg} has-data-[icon=start]:ps-5 has-data-[icon=end]:pe-5`,
+			icon: `${controlBox.md} ${fieldText.md}`,
+			'icon-md': `${controlBox.md} ${fieldText.md}`,
+			'icon-xs': `${controlBox.xs} ${fieldText.xs}`,
+			'icon-sm': `${controlBox.sm} ${fieldText.sm}`,
+			'icon-lg': `${controlBox.lg} ${fieldText.lg}`,
 		},
-		tone: {
-			default: '',
+		color: {
+			neutral: '',
 			destructive: '',
 		},
 	},
@@ -53,35 +70,57 @@ export const buttonVariants = tv({
 			],
 		},
 		{
-			tone: 'destructive',
+			color: 'destructive',
 			variant: 'default',
 			class: 'bg-destructive text-destructive-foreground',
 		},
-		{ tone: 'destructive', variant: 'secondary', class: 'bg-destructive/10 text-destructive' },
-		{ tone: 'destructive', variant: 'outline', class: 'border-destructive text-destructive' },
-		{ tone: 'destructive', variant: 'ghost', class: 'text-destructive' },
-		{ tone: 'destructive', variant: 'link', class: 'text-destructive' },
+		{
+			color: 'destructive',
+			variant: 'secondary',
+			class: 'bg-destructive/10 text-destructive',
+		},
+		{ color: 'destructive', variant: 'outline', class: 'border-destructive text-destructive' },
+		{ color: 'destructive', variant: 'ghost', class: 'text-destructive' },
+		{ color: 'destructive', variant: 'link', class: 'text-destructive' },
 	],
 	defaultVariants: {
 		variant: 'default',
 		size: 'md',
-		tone: 'default',
+		color: 'neutral',
 	},
 });
 
-export type ButtonProps = Omit<ComponentProps<typeof BaseButton>, 'className'> &
-	VariantProps<typeof buttonVariants> & {
-		className?: string;
-		icon?: ReactNode;
-		loadingIcon?: ReactNode;
-		loading?: boolean;
-	};
+export type ButtonProps = Omit<ComponentProps<typeof BaseButton>, 'className'> & {
+	className?: string;
+	icon?: ReactNode;
+	loadingIcon?: ReactNode;
+	loading?: boolean;
+	variant?: 'primary' | 'default' | 'secondary' | 'outline' | 'ghost' | 'link' | 'destructive';
+	size?:
+		| 'default'
+		| 'xs'
+		| 'sm'
+		| 'md'
+		| 'lg'
+		| 'icon'
+		| 'icon-xs'
+		| 'icon-sm'
+		| 'icon-md'
+		| 'icon-lg';
+	color?: 'neutral' | 'destructive';
+};
+
+export type ButtonVariant = NonNullable<ButtonProps['variant']>;
+export type ButtonSize = NonNullable<ButtonProps['size']>;
+export type ButtonColor = NonNullable<ButtonProps['color']>;
+
+type VariantKey = keyof typeof buttonVariants.variants.variant;
 
 export function Button({
 	className,
-	variant = 'default',
+	variant = 'primary',
 	size = 'md',
-	tone = 'default',
+	color = 'neutral',
 	icon = null,
 	loadingIcon,
 	loading = false,
@@ -91,19 +130,23 @@ export function Button({
 	...props
 }: ButtonProps) {
 	const spinner = loadingIcon ?? <Spinner size={1} label={null} />;
+	const look: { variant: VariantKey; color: ButtonColor } | undefined =
+		LOOK[variant as keyof typeof LOOK];
+	const variantName: VariantKey = look === undefined ? (variant as VariantKey) : look.variant;
+	const colorName = look?.color ?? color;
 
 	return (
 		<BaseButton
 			data-slot="button"
 			type={type}
 			data-variant={variant}
-			data-tone={tone}
+			data-color={colorName}
 			data-size={size}
 			data-loading={loading ? '' : undefined}
 			aria-busy={loading || undefined}
 			disabled={disabled || loading}
 			focusableWhenDisabled={loading || undefined}
-			className={cn(buttonVariants({ variant, size, tone }), className)}
+			className={cn(buttonVariants({ variant: variantName, size, color: colorName }), className)}
 			{...props}
 		>
 			{icon ? (

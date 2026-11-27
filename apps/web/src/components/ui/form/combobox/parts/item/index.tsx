@@ -1,22 +1,22 @@
 import { Combobox as BaseCombobox } from '@base-ui/react/combobox';
 import type { ComponentProps } from 'react';
-import { row, rowDestructive, type RowTone } from '@/lib/control';
+import { row, rowDestructive, type RowVariant } from '@/lib/control';
 import { cn } from '@/lib/utils';
 
 export type ComboboxItemProps = Omit<ComponentProps<typeof BaseCombobox.Item>, 'className'> & {
 	className?: string;
-	tone?: RowTone;
+	variant?: RowVariant;
 };
 
-export function ComboboxItem({ className, tone = 'default', ...props }: ComboboxItemProps) {
+export function ComboboxItem({ className, variant = 'default', ...props }: ComboboxItemProps) {
 	return (
 		<BaseCombobox.Item
 			data-slot="combobox-item"
-			data-tone={tone}
+			data-variant={variant}
 			className={cn(
 				row,
 				'cursor-pointer pr-3',
-				tone === 'destructive' && rowDestructive,
+				variant === 'destructive' && rowDestructive,
 				className,
 			)}
 			{...props}

@@ -1,5 +1,16 @@
 import { type ReactNode } from 'react';
-import { Badge, Button, Card, Input, Select } from '@/components';
+import {
+	Badge,
+	badgeVariants,
+	Button,
+	buttonVariants,
+	Card,
+	Input,
+	inputVariants,
+	Select,
+} from '@/components';
+import { selectTriggerVariants } from '@/components/ui/form/select/parts/trigger';
+import type { UiState } from '@/lib/control';
 
 export type SpecimenCell = { label: string; props?: Record<string, unknown> };
 export type SpecimenRow = { label: string; props?: Record<string, unknown> };
@@ -8,10 +19,30 @@ export type SpecimenEntry = {
 	name: string;
 	path: string;
 	note?: string;
-	rows: SpecimenRow[];
-	cells: SpecimenCell[];
+	variants?: Record<string, Record<string, unknown>>;
+	rowAxis?: string;
+	colAxis?: string;
+	states?: { state: UiState; props: Record<string, unknown> }[];
+	rows?: SpecimenRow[];
+	cells?: SpecimenCell[];
 	render: (props: Record<string, unknown>) => ReactNode;
 };
+
+const axisRows = (entry: SpecimenEntry, axis: string | undefined): SpecimenRow[] => {
+	if (axis === undefined) return [];
+	const options = entry.variants?.[axis];
+	if (options === undefined) return [];
+	return Object.keys(options).map((value) => ({ label: value, props: { [axis]: value } }));
+};
+
+export const rowsOf = (entry: SpecimenEntry): SpecimenRow[] =>
+	entry.rows ?? axisRows(entry, entry.rowAxis);
+
+export const cellsOf = (entry: SpecimenEntry): SpecimenCell[] =>
+	entry.cells ?? [
+		...axisRows(entry, entry.colAxis).map((row) => ({ label: row.label, props: row.props })),
+		...(entry.states ?? []).map((item) => ({ label: item.state, props: item.props })),
+	];
 
 const roleOptions = [
 	{ value: 'owner', label: 'Owner' },
@@ -19,39 +50,35 @@ const roleOptions = [
 	{ value: 'member', label: 'Member' },
 ];
 
-const liveStates = 'hover / focus-visible / pressed are real interaction states — hover a cell.';
+const liveStates = 'hover / focus-visible are real interaction states — hover a cell to see them.';
 
 export const entries: SpecimenEntry[] = [
 	{
 		name: 'Button',
 		path: 'components/ui/form/button',
-		note: liveStates,
+		note: `${liveStates} Every cell is one of the sizes in the shared ladder.`,
+		variants: buttonVariants.variants,
+		colAxis: 'size',
+		states: [
+			{ state: 'disabled', props: { disabled: true } },
+			{ state: 'loading', props: { loading: true } },
+		],
 		rows: [
-			{ label: 'default', props: { variant: 'default' } },
+			{ label: 'primary', props: { variant: 'primary' } },
 			{ label: 'secondary', props: { variant: 'secondary' } },
 			{ label: 'outline', props: { variant: 'outline' } },
 			{ label: 'ghost', props: { variant: 'ghost' } },
 			{ label: 'link', props: { variant: 'link' } },
-			{ label: 'destructive', props: { variant: 'default', tone: 'destructive' } },
-		],
-		cells: [
-			{ label: 'md' },
-			{ label: 'sm', props: { size: 'sm' } },
-			{ label: 'lg', props: { size: 'lg' } },
-			{ label: 'disabled', props: { disabled: true } },
-			{ label: 'loading', props: { loading: true } },
+			{ label: 'destructive', props: { variant: 'destructive' } },
 		],
 		render: (props) => <Button {...(props as Parameters<typeof Button>[0])}>Button</Button>,
 	},
 	{
 		name: 'Input',
 		path: 'components/ui/form/input',
-		note: `${liveStates} Invalid state comes from aria-invalid and the \`failed\` variant.`,
-		rows: [
-			{ label: 'sm', props: { size: 'sm' } },
-			{ label: 'md', props: { size: 'md' } },
-			{ label: 'lg', props: { size: 'lg' } },
-		],
+		note: `${liveStates} Invalid comes from aria-invalid and the \`failed\` variant.`,
+		variants: inputVariants.variants,
+		rowAxis: 'size',
 		cells: [
 			{ label: 'default', props: { placeholder: 'Placeholder' } },
 			{ label: 'filled', props: { defaultValue: 'Rik Li', clearable: true } },
@@ -65,11 +92,8 @@ export const entries: SpecimenEntry[] = [
 		name: 'Select',
 		path: 'components/ui/form/select',
 		note: liveStates,
-		rows: [
-			{ label: 'sm', props: { size: 'sm' } },
-			{ label: 'md', props: { size: 'md' } },
-			{ label: 'lg', props: { size: 'lg' } },
-		],
+		variants: selectTriggerVariants.variants,
+		rowAxis: 'size',
 		cells: [
 			{ label: 'empty', props: { placeholder: 'Pick a role' } },
 			{ label: 'chosen', props: { defaultValue: 'admin', clearable: true } },
@@ -88,22 +112,16 @@ export const entries: SpecimenEntry[] = [
 	{
 		name: 'Badge',
 		path: 'components/ui/display/badge',
-		rows: [
-			{ label: 'default', props: { variant: 'default' } },
-			{ label: 'secondary', props: { variant: 'secondary' } },
-			{ label: 'outline', props: { variant: 'outline' } },
-			{ label: 'destructive', props: { variant: 'destructive' } },
-			{ label: 'success', props: { variant: 'success' } },
-			{ label: 'warning', props: { variant: 'warning' } },
-			{ label: 'info', props: { variant: 'info' } },
-		],
-		cells: [{ label: 'static' }],
+		note: 'The whole grid is derived from the component: one row per tone, one column per emphasis.',
+		variants: badgeVariants.variants,
+		rowAxis: 'color',
+		colAxis: 'variant',
 		render: (props) => <Badge {...(props as Parameters<typeof Badge>[0])}>Badge</Badge>,
 	},
 	{
 		name: 'Card',
 		path: 'components/ui/display/card',
-		note: 'surface follows the backdrop: gray on a gray page, white inside a white dialog or popover.',
+		note: 'Surface follows the backdrop: gray on a gray page, white inside a white dialog or popover.',
 		rows: [
 			{ label: 'gray', props: { surface: 'gray' } },
 			{ label: 'white', props: { surface: 'white' } },

@@ -18,7 +18,7 @@ export type TokenGroup = {
 type GroupSpec = Omit<TokenGroup, 'tokens'> & { match?: (name: string) => boolean };
 
 const COLOR_NAME =
-	/(^--layout-|foreground|background|border|input|ring|overlay|primary|secondary|muted|accent|destructive|success|warning|info|highlight|skeleton)/;
+	/(^--layout-|foreground|background|border|input|ring|overlay|primary|secondary|muted|accent|destructive|success|warning|info|highlight|skeleton|chart|sidebar)/;
 
 const GROUPS: GroupSpec[] = [
 	{
@@ -39,7 +39,7 @@ const GROUPS: GroupSpec[] = [
 		key: 'shadow',
 		label: 'Shadow',
 		swatch: false,
-		match: (name) => name.startsWith('--shadow-'),
+		match: (name) => name === '--shadow' || name.startsWith('--shadow-'),
 	},
 	{
 		key: 'motion',
@@ -52,9 +52,10 @@ const GROUPS: GroupSpec[] = [
 	{
 		key: 'interaction',
 		label: 'Interaction',
-		note: 'State layer opacities and press offsets; components use them for hover and pressed.',
+		note: 'The control size ladder, state layer opacities and press offsets: components use them for size, hover and pressed.',
 		swatch: false,
 		match: (name) =>
+			name.startsWith('--control-') ||
 			name.startsWith('--state-layer-') ||
 			name.startsWith('--press-') ||
 			name.startsWith('--shift-') ||
@@ -75,37 +76,69 @@ const FALLBACK: GroupSpec = { key: 'misc', label: 'Other', swatch: false };
 const specFor = (name: string): GroupSpec =>
 	GROUPS.find((spec) => spec.match?.(name) === true) ?? FALLBACK;
 
-const blockOf = (header: string): string => {
-	const start = styles.indexOf(`${header} {`);
-	if (start < 0) return '';
-
+const blocksOf = (header: string): string[] => {
+	const blocks: string[] = [];
 	let depth = 0;
-	for (let index = start + header.length; index < styles.length; index += 1) {
+	let index = 0;
+
+	while (index < styles.length) {
 		const char = styles[index];
-		if (char === '{') depth += 1;
+
+		if (char === '{') {
+			depth += 1;
+			index += 1;
+			continue;
+		}
+
 		if (char === '}') {
 			depth -= 1;
-			if (depth === 0) return styles.slice(start, index + 1);
+			index += 1;
+			continue;
 		}
+
+		if (depth === 0 && styles.startsWith(`${header} {`, index)) {
+			let inner = 0;
+			let end = styles.length;
+
+			for (let cursor = index + header.length; cursor < styles.length; cursor += 1) {
+				const nested = styles[cursor];
+				if (nested === '{') inner += 1;
+				if (nested === '}') {
+					inner -= 1;
+					if (inner === 0) {
+						end = cursor + 1;
+						break;
+					}
+				}
+			}
+
+			blocks.push(styles.slice(index, end));
+			index = end;
+			continue;
+		}
+
+		index += 1;
 	}
 
-	return '';
+	return blocks;
 };
 
-const declarationsIn = (block: string): Map<string, string> => {
+const declarationsIn = (blocks: string[]): Map<string, string> => {
 	const found = new Map<string, string>();
 
-	for (const [, name, value] of block.matchAll(/(--[\w-]+)\s*:\s*([^;]+);/g)) {
-		if (name === undefined || value === undefined) continue;
-		found.set(name, value.replace(/\s+/g, ' ').trim());
+	for (const block of blocks) {
+		for (const [, name, value] of block.matchAll(/(--[\w-]+)\s*:\s*([^;]+);/g)) {
+			if (name === undefined || value === undefined) continue;
+			found.set(name, value.replace(/\s+/g, ' ').trim());
+		}
 	}
 
 	return found;
 };
 
-const themeMap = declarationsIn(blockOf('@theme inline'));
-const rootMap = declarationsIn(blockOf(':root'));
-const darkMap = declarationsIn(blockOf('.dark'));
+const themeMap = declarationsIn(blocksOf('@theme inline'));
+const rootMap = declarationsIn(blocksOf(':root'));
+const darkMap = declarationsIn(blocksOf('.dark'));
 
 export const tokenGroups = (): TokenGroup[] => {
 	const names = [...new Set([...themeMap.keys(), ...rootMap.keys(), ...darkMap.keys()])].sort(

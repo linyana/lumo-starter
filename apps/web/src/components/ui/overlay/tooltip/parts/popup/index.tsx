@@ -11,7 +11,7 @@ export function TooltipPopup({ className, ...props }: TooltipPopupProps) {
 			data-slot="tooltip-popup"
 			className={cn(
 				'relative rounded-md bg-primary text-xs',
-				'text-primary-foreground shadow-lifted',
+				'text-primary-foreground shadow-lg',
 				'px-2.5 py-1',
 				'has-[>[data-slot=tooltip-viewport]]:p-0',
 				'max-w-xs',

@@ -1,7 +1,7 @@
 import { Toggle as BaseToggle, type ToggleProps as BaseToggleProps } from '@base-ui/react/toggle';
 import { tv, type VariantProps } from 'tailwind-variants';
 import { ControlLoading } from '@/components/ui/form/loading';
-import { iconSlot, pressable, stateLayer } from '@/lib/control';
+import { controlHeight, fieldText, iconSlot, pressable, stateLayer } from '@/lib/control';
 import { cn } from '@/lib/utils';
 
 export type ToggleVariant = 'ghost' | 'outline';
@@ -29,9 +29,9 @@ export const toggleVariants = tv({
 			outline: 'border bg-background',
 		},
 		size: {
-			sm: 'h-8 gap-1.5 px-3 text-sm',
-			md: 'h-9 px-4 text-sm',
-			lg: 'h-10 px-6 text-base',
+			sm: `${controlHeight.sm} gap-1.5 px-3 ${fieldText.sm}`,
+			md: `${controlHeight.md} px-4 ${fieldText.md}`,
+			lg: `${controlHeight.lg} px-6 ${fieldText.lg}`,
 			icon: 'size-8 text-sm',
 		},
 	},

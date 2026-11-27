@@ -38,7 +38,7 @@ export const MenuItems = ({ items, classNames }: MenuItemsProps) => {
 							disabled={item.disabled}
 							closeOnClick={item.closeOnClick}
 							onClick={item.onClick}
-							tone={item.destructive ? 'destructive' : 'default'}
+							variant={item.destructive ? 'destructive' : 'default'}
 							className={cn(classNames?.item, item.className)}
 						>
 							{item.icon && (

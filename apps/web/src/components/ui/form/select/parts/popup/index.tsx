@@ -13,7 +13,7 @@ export function SelectPopup({ className, ...props }: SelectPopupProps) {
 			data-slot="select-popup"
 			className={cn(
 				'relative flex max-h-(--available-height) min-w-(--anchor-width) flex-col',
-				'overflow-clip rounded-lg border bg-popover text-popover-foreground shadow-lifted',
+				'overflow-clip rounded-lg border bg-popover text-popover-foreground shadow-lg',
 				'outline-none',
 				popup,
 				className,

@@ -40,7 +40,7 @@ export const RolesPage = () => {
 
 				<Can access={{ permission: 'role:write' }}>
 					<Button
-						variant="default"
+						variant="primary"
 						size="sm"
 						icon={<Plus />}
 						nativeButton={false}
@@ -66,9 +66,13 @@ export const RolesPage = () => {
 								<span className="flex items-center gap-2">
 									<span className="font-mono text-xs">{role.key}</span>
 									{role.system ? (
-										<Badge variant="outline">From code</Badge>
+										<Badge variant="outline" color="neutral">
+											From code
+										</Badge>
 									) : (
-										<Badge variant="info">This workspace</Badge>
+										<Badge variant="soft" color="info">
+											This workspace
+										</Badge>
 									)}
 								</span>
 							}

@@ -1,16 +1,16 @@
 import { Combobox as BaseCombobox } from '@base-ui/react/combobox';
 import type { ComponentProps } from 'react';
 import { tv, type VariantProps } from 'tailwind-variants';
-import { fieldShell } from '@/lib/control';
+import { controlHeight, fieldShell } from '@/lib/control';
 import { cn } from '@/lib/utils';
 
 export const comboboxInputVariants = tv({
 	base: [fieldShell(), 'read-only:bg-muted', 'pe-9'],
 	variants: {
 		size: {
-			sm: 'h-8 ps-2.5',
-			md: 'h-9 ps-3',
-			lg: 'h-10 ps-3.5',
+			sm: `${controlHeight.sm} ps-2.5`,
+			md: `${controlHeight.md} ps-3`,
+			lg: `${controlHeight.lg} ps-3.5`,
 		},
 	},
 	defaultVariants: {

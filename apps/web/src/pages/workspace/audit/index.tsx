@@ -3,8 +3,9 @@ import { useEffect } from 'react';
 import { auditApi } from '@/api';
 import { Badge, Spinner } from '@/components';
 import { useHttp } from '@/hooks';
+import type { Color } from '@/lib/control';
 
-const VARIANT: Record<AuditAction, 'default' | 'info' | 'secondary' | 'destructive' | 'success'> = {
+const COLOR: Record<AuditAction, Color> = {
 	'member.added': 'success',
 	'member.roles_changed': 'info',
 	'member.removed': 'destructive',
@@ -72,7 +73,9 @@ export const AuditPage = () => {
 							key={event.id}
 							className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 text-sm"
 						>
-							<Badge variant={VARIANT[event.action]}>{AUDIT_ACTION_META[event.action]}</Badge>
+							<Badge variant="soft" color={COLOR[event.action]}>
+								{AUDIT_ACTION_META[event.action]}
+							</Badge>
 							<span className="font-medium">{event.actorEmail ?? 'system'}</span>
 							<span className="text-muted-foreground">{subjectOf(event)}</span>
 							<span className="font-mono text-xs">{summaryOf(event)}</span>

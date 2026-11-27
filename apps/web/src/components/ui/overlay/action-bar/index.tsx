@@ -32,7 +32,7 @@ export const ActionBar = ({ visible, children, className }: IPropsType) => {
 					<CardRoot
 						size="sm"
 						className={cn(
-							'pointer-events-auto w-full max-w-3xl flex-row flex-wrap items-center justify-between px-(--card-pad) shadow-lifted',
+							'pointer-events-auto w-full max-w-3xl flex-row flex-wrap items-center justify-between px-(--card-pad) shadow-lg',
 							className,
 						)}
 					>

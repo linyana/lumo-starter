@@ -1,39 +1,56 @@
 import type { ComponentProps } from 'react';
-import { tv, type VariantProps } from 'tailwind-variants';
-import { iconSlot } from '@/lib/control';
+import { tv } from 'tailwind-variants';
+import { colorVars, emphasis, iconSlot, type Color, type Emphasis } from '@/lib/control';
 import { cn } from '@/lib/utils';
+
+const LOOK = {
+	primary: { variant: 'solid', color: 'primary' },
+	default: { variant: 'solid', color: 'primary' },
+	secondary: { variant: 'solid', color: 'neutral' },
+	destructive: { variant: 'soft', color: 'destructive' },
+} as const;
 
 export const badgeVariants = tv({
 	base: [
 		'inline-flex shrink-0 items-center gap-1 align-middle whitespace-nowrap',
-		'rounded-md border border-transparent px-1.5 py-0.5',
+		'rounded-md px-1.5 py-0.5',
 		'text-xs leading-4 font-medium',
 		iconSlot,
 	],
 	variants: {
 		variant: {
-			default: 'bg-primary text-primary-foreground',
-			secondary: 'bg-secondary text-secondary-foreground',
-			outline: 'border-border text-foreground',
-			destructive: 'bg-destructive/10 text-destructive',
-			success: 'bg-success/10 text-success',
-			warning: 'bg-warning/10 text-warning',
-			info: 'bg-info/10 text-info',
+			solid: emphasis.solid,
+			soft: emphasis.soft,
+			outline: emphasis.outline,
+			ghost: emphasis.ghost,
+			link: emphasis.link,
 		},
+		color: colorVars,
 	},
 	defaultVariants: {
-		variant: 'default',
+		variant: 'solid',
+		color: 'primary',
 	},
 });
 
-export type BadgeProps = ComponentProps<'span'> & VariantProps<typeof badgeVariants>;
+export type BadgeProps = ComponentProps<'span'> & {
+	variant?: Emphasis | 'primary' | 'default' | 'secondary' | 'destructive';
+	color?: Color;
+};
 
-export function Badge({ className, variant = 'default', ...props }: BadgeProps) {
+export type BadgeVariant = NonNullable<BadgeProps['variant']>;
+
+export function Badge({ className, variant = 'primary', color, ...props }: BadgeProps) {
+	const look: { variant: Emphasis; color: Color } | undefined = LOOK[variant as keyof typeof LOOK];
+	const emphasisName = look === undefined ? (variant as Emphasis) : look.variant;
+	const colorName = color ?? look?.color ?? 'primary';
+
 	return (
 		<span
 			data-slot="badge"
 			data-variant={variant}
-			className={cn(badgeVariants({ variant }), className)}
+			data-color={colorName}
+			className={cn(badgeVariants({ variant: emphasisName, color: colorName }), className)}
 			{...props}
 		/>
 	);

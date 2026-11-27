@@ -39,7 +39,7 @@ export const AlertDialog = ({
 }: AlertDialogProps) => {
 	const confirm = (
 		<Button
-			tone={destructive ? 'destructive' : 'default'}
+			variant={destructive ? 'destructive' : 'primary'}
 			loading={pending}
 			disabled={pending}
 			onClick={onConfirm}

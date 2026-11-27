@@ -29,7 +29,7 @@ export const CreateMember = ({ onCreated }: IPropsType) => {
 			open={open}
 			onOpenChange={setOpen}
 			trigger={
-				<Button variant="default" size="sm">
+				<Button variant="primary" size="sm">
 					Add member
 				</Button>
 			}

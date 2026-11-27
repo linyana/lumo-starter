@@ -1,7 +1,7 @@
 import { Select as BaseSelect } from '@base-ui/react/select';
 import type { ComponentProps } from 'react';
 import { tv, type VariantProps } from 'tailwind-variants';
-import { fieldShell, iconSlot } from '@/lib/control';
+import { controlHeight, fieldShell, fieldText, iconSlot } from '@/lib/control';
 import { cn } from '@/lib/utils';
 
 export const selectTriggerVariants = tv({
@@ -14,9 +14,9 @@ export const selectTriggerVariants = tv({
 	],
 	variants: {
 		size: {
-			sm: 'h-8 px-2.5 text-sm',
-			md: 'h-9 px-3 text-sm',
-			lg: 'h-10 px-3.5 text-base',
+			sm: `${controlHeight.sm} px-2.5 ${fieldText.sm}`,
+			md: `${controlHeight.md} px-3 ${fieldText.md}`,
+			lg: `${controlHeight.lg} px-3.5 ${fieldText.lg}`,
 		},
 	},
 	defaultVariants: {

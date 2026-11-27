@@ -9,7 +9,7 @@ export const backdrop = cn(
 
 export const panel = cn(
 	'relative isolate flex max-h-[calc(100dvh-2rem)] w-full max-w-md min-h-0 flex-col',
-	'rounded-xl border bg-popover text-popover-foreground shadow-overlay',
+	'rounded-xl border bg-popover text-popover-foreground shadow-2xl',
 	'transition-opacity duration-(--duration-modal) ease-(--ease-overlay)',
 	'data-starting-style:opacity-0',
 	'starting:opacity-0',

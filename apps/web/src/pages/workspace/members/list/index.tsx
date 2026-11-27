@@ -3,6 +3,7 @@ import { Pencil, Trash2 } from 'lucide-react';
 import { useState, type ReactElement } from 'react';
 import { Badge, Field, Form, Input, Table, type TableColumn } from '@/components';
 import type { UseQueryResult } from '@/hooks';
+import type { Color } from '@/lib/control';
 import { DeleteMembers } from '../delete';
 import { EditMember } from '../edit';
 import type { MemberSortKey, OverlayArgs, Panel } from './types';
@@ -18,13 +19,12 @@ const renderOverlay = ({ panel, closePanel, reload }: OverlayArgs): ReactElement
 	}
 };
 
-const ROLE_VARIANT: Record<string, 'default' | 'info' | 'secondary'> = {
-	OWNER: 'default',
-	MEMBER: 'secondary',
+const ROLE_COLOR: Record<string, Color> = {
+	OWNER: 'primary',
+	MEMBER: 'neutral',
 };
 
-const variantOf = (role: RoleRef): 'default' | 'info' | 'secondary' =>
-	ROLE_VARIANT[role.key] ?? 'secondary';
+const colorOf = (role: RoleRef): Color => ROLE_COLOR[role.key] ?? 'neutral';
 
 export const MemberList = ({ list }: IPropsType) => {
 	const [panel, setPanel] = useState<Panel | null>(null);
@@ -50,7 +50,7 @@ export const MemberList = ({ list }: IPropsType) => {
 			cell: (row) => (
 				<div className="flex flex-wrap gap-1">
 					{row.roles.map((role) => (
-						<Badge key={role.key} variant={variantOf(role)}>
+						<Badge key={role.key} variant="solid" color={colorOf(role)}>
 							{role.name}
 						</Badge>
 					))}

@@ -10,7 +10,7 @@ export function HoverCardPopup({ className, ...props }: HoverCardPopupProps) {
 		<BasePreviewCard.Popup
 			data-slot="hover-card-popup"
 			className={cn(
-				'relative rounded-xl border bg-popover p-4 text-popover-foreground shadow-lifted',
+				'relative rounded-xl border bg-popover p-4 text-popover-foreground shadow-lg',
 				'has-[>[data-slot=hover-card-viewport]]:p-0',
 				'max-w-xs',
 				popup,

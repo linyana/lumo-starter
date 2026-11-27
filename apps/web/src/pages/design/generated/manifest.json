@@ -94,6 +94,7 @@
 				"--border",
 				"--card",
 				"--destructive",
+				"--destructive-foreground",
 				"--destructive-soft",
 				"--duration-press",
 				"--duration-state",
@@ -101,12 +102,21 @@
 				"--ease-overlay",
 				"--ease-spring",
 				"--foreground",
+				"--info",
+				"--info-foreground",
 				"--input",
 				"--input-strong",
 				"--muted",
 				"--muted-foreground",
 				"--primary",
-				"--radius"
+				"--primary-foreground",
+				"--radius",
+				"--secondary",
+				"--secondary-foreground",
+				"--success",
+				"--success-foreground",
+				"--warning",
+				"--warning-foreground"
 			]
 		},
 		{
@@ -172,6 +182,7 @@
 				"--border",
 				"--card",
 				"--destructive",
+				"--destructive-foreground",
 				"--destructive-soft",
 				"--duration-press",
 				"--duration-state",
@@ -179,12 +190,21 @@
 				"--ease-overlay",
 				"--ease-spring",
 				"--foreground",
+				"--info",
+				"--info-foreground",
 				"--input",
 				"--input-strong",
 				"--muted",
 				"--muted-foreground",
 				"--primary",
-				"--radius"
+				"--primary-foreground",
+				"--radius",
+				"--secondary",
+				"--secondary-foreground",
+				"--success",
+				"--success-foreground",
+				"--warning",
+				"--warning-foreground"
 			]
 		},
 		{
@@ -219,6 +239,7 @@
 				"--border",
 				"--card",
 				"--destructive",
+				"--destructive-foreground",
 				"--destructive-soft",
 				"--duration-press",
 				"--duration-state",
@@ -226,12 +247,21 @@
 				"--ease-overlay",
 				"--ease-spring",
 				"--foreground",
+				"--info",
+				"--info-foreground",
 				"--input",
 				"--input-strong",
 				"--muted",
 				"--muted-foreground",
 				"--primary",
-				"--radius"
+				"--primary-foreground",
+				"--radius",
+				"--secondary",
+				"--secondary-foreground",
+				"--success",
+				"--success-foreground",
+				"--warning",
+				"--warning-foreground"
 			]
 		},
 		{
@@ -273,6 +303,7 @@
 				"--border",
 				"--card",
 				"--destructive",
+				"--destructive-foreground",
 				"--destructive-soft",
 				"--duration-press",
 				"--duration-state",
@@ -280,12 +311,21 @@
 				"--ease-overlay",
 				"--ease-spring",
 				"--foreground",
+				"--info",
+				"--info-foreground",
 				"--input",
 				"--input-strong",
 				"--muted",
 				"--muted-foreground",
 				"--primary",
-				"--radius"
+				"--primary-foreground",
+				"--radius",
+				"--secondary",
+				"--secondary-foreground",
+				"--success",
+				"--success-foreground",
+				"--warning",
+				"--warning-foreground"
 			]
 		},
 		{
@@ -337,6 +377,7 @@
 				"--border",
 				"--card",
 				"--destructive",
+				"--destructive-foreground",
 				"--destructive-soft",
 				"--duration-press",
 				"--duration-state",
@@ -344,32 +385,40 @@
 				"--ease-overlay",
 				"--ease-spring",
 				"--foreground",
+				"--info",
+				"--info-foreground",
 				"--input",
 				"--input-strong",
 				"--muted",
 				"--muted-foreground",
-				"--primary",
-				"--radius"
-			]
-		},
-		{
-			"name": "Badge",
-			"category": "display",
-			"path": "components/ui/display/badge",
-			"props": [],
-			"tokens": [
-				"--border",
-				"--destructive",
-				"--foreground",
-				"--info",
 				"--primary",
 				"--primary-foreground",
 				"--radius",
 				"--secondary",
 				"--secondary-foreground",
 				"--success",
-				"--warning"
+				"--success-foreground",
+				"--warning",
+				"--warning-foreground"
+			]
+		},
+		{
+			"name": "Badge",
+			"category": "display",
+			"path": "components/ui/display/badge",
+			"props": [
+				{
+					"name": "color",
+					"type": "\"neutral\" | \"primary\" | \"success\" | \"warning\" | \"info\" | \"destructive\"",
+					"optional": true
+				},
+				{
+					"name": "variant",
+					"type": "\"link\" | \"primary\" | \"destructive\" | \"solid\" | \"soft\" | \"outline\" | \"ghost\" | \"default\" | \"secondary\"",
+					"optional": true
+				}
 			],
+			"tokens": ["--radius"],
 			"sharedTokens": [
 				"--accent",
 				"--accent-foreground",
@@ -377,6 +426,7 @@
 				"--border",
 				"--card",
 				"--destructive",
+				"--destructive-foreground",
 				"--destructive-soft",
 				"--duration-press",
 				"--duration-state",
@@ -384,12 +434,21 @@
 				"--ease-overlay",
 				"--ease-spring",
 				"--foreground",
+				"--info",
+				"--info-foreground",
 				"--input",
 				"--input-strong",
 				"--muted",
 				"--muted-foreground",
 				"--primary",
-				"--radius"
+				"--primary-foreground",
+				"--radius",
+				"--secondary",
+				"--secondary-foreground",
+				"--success",
+				"--success-foreground",
+				"--warning",
+				"--warning-foreground"
 			]
 		},
 		{
@@ -505,6 +564,7 @@
 				"--border",
 				"--card",
 				"--destructive",
+				"--destructive-foreground",
 				"--destructive-soft",
 				"--duration-press",
 				"--duration-state",
@@ -512,12 +572,21 @@
 				"--ease-overlay",
 				"--ease-spring",
 				"--foreground",
+				"--info",
+				"--info-foreground",
 				"--input",
 				"--input-strong",
 				"--muted",
 				"--muted-foreground",
 				"--primary",
-				"--radius"
+				"--primary-foreground",
+				"--radius",
+				"--secondary",
+				"--secondary-foreground",
+				"--success",
+				"--success-foreground",
+				"--warning",
+				"--warning-foreground"
 			]
 		},
 		{
@@ -718,7 +787,7 @@
 				"--primary",
 				"--radius",
 				"--scale",
-				"--shadow-lifted",
+				"--shadow-lg",
 				"--shrink",
 				"--success",
 				"--toast-frontmost-height",
@@ -742,6 +811,11 @@
 					"optional": true
 				},
 				{
+					"name": "color",
+					"type": "\"neutral\" | \"destructive\"",
+					"optional": true
+				},
+				{
 					"name": "icon",
 					"type": "ReactNode",
 					"optional": true
@@ -754,6 +828,16 @@
 				{
 					"name": "loadingIcon",
 					"type": "ReactNode",
+					"optional": true
+				},
+				{
+					"name": "size",
+					"type": "\"xs\" | \"sm\" | \"md\" | \"lg\" | \"icon\" | \"default\" | \"icon-xs\" | \"icon-sm\" | \"icon-md\" | \"icon-lg\"",
+					"optional": true
+				},
+				{
+					"name": "variant",
+					"type": "\"link\" | \"primary\" | \"destructive\" | \"outline\" | \"ghost\" | \"default\" | \"secondary\"",
 					"optional": true
 				}
 			],
@@ -778,6 +862,7 @@
 				"--border",
 				"--card",
 				"--destructive",
+				"--destructive-foreground",
 				"--destructive-soft",
 				"--duration-press",
 				"--duration-state",
@@ -785,12 +870,21 @@
 				"--ease-overlay",
 				"--ease-spring",
 				"--foreground",
+				"--info",
+				"--info-foreground",
 				"--input",
 				"--input-strong",
 				"--muted",
 				"--muted-foreground",
 				"--primary",
-				"--radius"
+				"--primary-foreground",
+				"--radius",
+				"--secondary",
+				"--secondary-foreground",
+				"--success",
+				"--success-foreground",
+				"--warning",
+				"--warning-foreground"
 			]
 		},
 		{
@@ -847,6 +941,7 @@
 				"--border",
 				"--card",
 				"--destructive",
+				"--destructive-foreground",
 				"--destructive-soft",
 				"--duration-press",
 				"--duration-state",
@@ -854,12 +949,21 @@
 				"--ease-overlay",
 				"--ease-spring",
 				"--foreground",
+				"--info",
+				"--info-foreground",
 				"--input",
 				"--input-strong",
 				"--muted",
 				"--muted-foreground",
 				"--primary",
-				"--radius"
+				"--primary-foreground",
+				"--radius",
+				"--secondary",
+				"--secondary-foreground",
+				"--success",
+				"--success-foreground",
+				"--warning",
+				"--warning-foreground"
 			]
 		},
 		{
@@ -886,6 +990,7 @@
 				"--border",
 				"--card",
 				"--destructive",
+				"--destructive-foreground",
 				"--destructive-soft",
 				"--duration-press",
 				"--duration-state",
@@ -893,12 +998,21 @@
 				"--ease-overlay",
 				"--ease-spring",
 				"--foreground",
+				"--info",
+				"--info-foreground",
 				"--input",
 				"--input-strong",
 				"--muted",
 				"--muted-foreground",
 				"--primary",
-				"--radius"
+				"--primary-foreground",
+				"--radius",
+				"--secondary",
+				"--secondary-foreground",
+				"--success",
+				"--success-foreground",
+				"--warning",
+				"--warning-foreground"
 			]
 		},
 		{
@@ -975,7 +1089,7 @@
 				"--popover",
 				"--popover-foreground",
 				"--radius",
-				"--shadow-lifted"
+				"--shadow-lg"
 			],
 			"sharedTokens": [
 				"--accent",
@@ -984,6 +1098,7 @@
 				"--border",
 				"--card",
 				"--destructive",
+				"--destructive-foreground",
 				"--destructive-soft",
 				"--duration-press",
 				"--duration-state",
@@ -991,12 +1106,21 @@
 				"--ease-overlay",
 				"--ease-spring",
 				"--foreground",
+				"--info",
+				"--info-foreground",
 				"--input",
 				"--input-strong",
 				"--muted",
 				"--muted-foreground",
 				"--primary",
-				"--radius"
+				"--primary-foreground",
+				"--radius",
+				"--secondary",
+				"--secondary-foreground",
+				"--success",
+				"--success-foreground",
+				"--warning",
+				"--warning-foreground"
 			]
 		},
 		{
@@ -1190,6 +1314,7 @@
 				"--border",
 				"--card",
 				"--destructive",
+				"--destructive-foreground",
 				"--destructive-soft",
 				"--duration-press",
 				"--duration-state",
@@ -1197,12 +1322,21 @@
 				"--ease-overlay",
 				"--ease-spring",
 				"--foreground",
+				"--info",
+				"--info-foreground",
 				"--input",
 				"--input-strong",
 				"--muted",
 				"--muted-foreground",
 				"--primary",
-				"--radius"
+				"--primary-foreground",
+				"--radius",
+				"--secondary",
+				"--secondary-foreground",
+				"--success",
+				"--success-foreground",
+				"--warning",
+				"--warning-foreground"
 			]
 		},
 		{
@@ -1268,6 +1402,7 @@
 				"--border",
 				"--card",
 				"--destructive",
+				"--destructive-foreground",
 				"--destructive-soft",
 				"--duration-press",
 				"--duration-state",
@@ -1275,12 +1410,21 @@
 				"--ease-overlay",
 				"--ease-spring",
 				"--foreground",
+				"--info",
+				"--info-foreground",
 				"--input",
 				"--input-strong",
 				"--muted",
 				"--muted-foreground",
 				"--primary",
-				"--radius"
+				"--primary-foreground",
+				"--radius",
+				"--secondary",
+				"--secondary-foreground",
+				"--success",
+				"--success-foreground",
+				"--warning",
+				"--warning-foreground"
 			]
 		},
 		{
@@ -1383,7 +1527,7 @@
 				"--popover",
 				"--popover-foreground",
 				"--radius",
-				"--shadow-lifted"
+				"--shadow-lg"
 			],
 			"sharedTokens": [
 				"--accent",
@@ -1392,6 +1536,7 @@
 				"--border",
 				"--card",
 				"--destructive",
+				"--destructive-foreground",
 				"--destructive-soft",
 				"--duration-press",
 				"--duration-state",
@@ -1399,12 +1544,21 @@
 				"--ease-overlay",
 				"--ease-spring",
 				"--foreground",
+				"--info",
+				"--info-foreground",
 				"--input",
 				"--input-strong",
 				"--muted",
 				"--muted-foreground",
 				"--primary",
-				"--radius"
+				"--primary-foreground",
+				"--radius",
+				"--secondary",
+				"--secondary-foreground",
+				"--success",
+				"--success-foreground",
+				"--warning",
+				"--warning-foreground"
 			]
 		},
 		{
@@ -1447,7 +1601,8 @@
 				"--muted",
 				"--muted-foreground",
 				"--primary",
-				"--radius"
+				"--radius",
+				"--shadow-sm"
 			],
 			"sharedTokens": []
 		},
@@ -1507,7 +1662,8 @@
 				"--muted-foreground",
 				"--primary",
 				"--primary-foreground",
-				"--radius"
+				"--radius",
+				"--shadow-sm"
 			],
 			"sharedTokens": []
 		},
@@ -1550,6 +1706,7 @@
 				"--border",
 				"--card",
 				"--destructive",
+				"--destructive-foreground",
 				"--destructive-soft",
 				"--duration-press",
 				"--duration-state",
@@ -1557,12 +1714,21 @@
 				"--ease-overlay",
 				"--ease-spring",
 				"--foreground",
+				"--info",
+				"--info-foreground",
 				"--input",
 				"--input-strong",
 				"--muted",
 				"--muted-foreground",
 				"--primary",
-				"--radius"
+				"--primary-foreground",
+				"--radius",
+				"--secondary",
+				"--secondary-foreground",
+				"--success",
+				"--success-foreground",
+				"--warning",
+				"--warning-foreground"
 			]
 		},
 		{
@@ -1589,6 +1755,7 @@
 				"--border",
 				"--card",
 				"--destructive",
+				"--destructive-foreground",
 				"--destructive-soft",
 				"--duration-press",
 				"--duration-state",
@@ -1596,12 +1763,21 @@
 				"--ease-overlay",
 				"--ease-spring",
 				"--foreground",
+				"--info",
+				"--info-foreground",
 				"--input",
 				"--input-strong",
 				"--muted",
 				"--muted-foreground",
 				"--primary",
-				"--radius"
+				"--primary-foreground",
+				"--radius",
+				"--secondary",
+				"--secondary-foreground",
+				"--success",
+				"--success-foreground",
+				"--warning",
+				"--warning-foreground"
 			]
 		},
 		{
@@ -1707,6 +1883,7 @@
 				"--border",
 				"--card",
 				"--destructive",
+				"--destructive-foreground",
 				"--destructive-soft",
 				"--duration-press",
 				"--duration-state",
@@ -1714,12 +1891,21 @@
 				"--ease-overlay",
 				"--ease-spring",
 				"--foreground",
+				"--info",
+				"--info-foreground",
 				"--input",
 				"--input-strong",
 				"--muted",
 				"--muted-foreground",
 				"--primary",
-				"--radius"
+				"--primary-foreground",
+				"--radius",
+				"--secondary",
+				"--secondary-foreground",
+				"--success",
+				"--success-foreground",
+				"--warning",
+				"--warning-foreground"
 			]
 		},
 		{
@@ -1781,7 +1967,8 @@
 				"--primary",
 				"--radius",
 				"--secondary",
-				"--secondary-foreground"
+				"--secondary-foreground",
+				"--shadow-sm"
 			],
 			"sharedTokens": [
 				"--accent",
@@ -1790,6 +1977,7 @@
 				"--border",
 				"--card",
 				"--destructive",
+				"--destructive-foreground",
 				"--destructive-soft",
 				"--duration-press",
 				"--duration-state",
@@ -1797,12 +1985,21 @@
 				"--ease-overlay",
 				"--ease-spring",
 				"--foreground",
+				"--info",
+				"--info-foreground",
 				"--input",
 				"--input-strong",
 				"--muted",
 				"--muted-foreground",
 				"--primary",
-				"--radius"
+				"--primary-foreground",
+				"--radius",
+				"--secondary",
+				"--secondary-foreground",
+				"--success",
+				"--success-foreground",
+				"--warning",
+				"--warning-foreground"
 			]
 		},
 		{
@@ -1810,7 +2007,7 @@
 			"category": "overlay",
 			"path": "components/ui/overlay/action-bar",
 			"props": [],
-			"tokens": ["--shadow-lifted"],
+			"tokens": ["--shadow-lg"],
 			"sharedTokens": []
 		},
 		{
@@ -2049,11 +2246,10 @@
 				"--duration-overlay",
 				"--ease-overlay",
 				"--foreground",
-				"--overlay",
 				"--popover",
 				"--popover-foreground",
 				"--radius",
-				"--shadow-overlay"
+				"--shadow-2xl"
 			],
 			"sharedTokens": []
 		},
@@ -2093,7 +2289,7 @@
 					"optional": true
 				}
 			],
-			"tokens": ["--border", "--popover", "--popover-foreground", "--radius", "--shadow-lifted"],
+			"tokens": ["--border", "--popover", "--popover-foreground", "--radius", "--shadow-lg"],
 			"sharedTokens": []
 		},
 		{
@@ -2122,7 +2318,7 @@
 					"optional": true
 				}
 			],
-			"tokens": ["--popover", "--popover-foreground", "--radius", "--shadow-lifted"],
+			"tokens": ["--popover", "--popover-foreground", "--radius", "--shadow-lg"],
 			"sharedTokens": [
 				"--accent",
 				"--accent-foreground",
@@ -2130,6 +2326,7 @@
 				"--border",
 				"--card",
 				"--destructive",
+				"--destructive-foreground",
 				"--destructive-soft",
 				"--duration-press",
 				"--duration-state",
@@ -2137,12 +2334,21 @@
 				"--ease-overlay",
 				"--ease-spring",
 				"--foreground",
+				"--info",
+				"--info-foreground",
 				"--input",
 				"--input-strong",
 				"--muted",
 				"--muted-foreground",
 				"--primary",
-				"--radius"
+				"--primary-foreground",
+				"--radius",
+				"--secondary",
+				"--secondary-foreground",
+				"--success",
+				"--success-foreground",
+				"--warning",
+				"--warning-foreground"
 			]
 		},
 		{
@@ -2186,7 +2392,7 @@
 					"optional": true
 				}
 			],
-			"tokens": ["--border", "--popover", "--popover-foreground", "--radius", "--shadow-lifted"],
+			"tokens": ["--border", "--popover", "--popover-foreground", "--radius", "--shadow-lg"],
 			"sharedTokens": []
 		},
 		{
@@ -2230,7 +2436,7 @@
 					"optional": true
 				}
 			],
-			"tokens": ["--primary", "--primary-foreground", "--radius", "--shadow-lifted"],
+			"tokens": ["--primary", "--primary-foreground", "--radius", "--shadow-lg"],
 			"sharedTokens": []
 		}
 	]

@@ -1,4 +1,29 @@
 import { cn } from '@/lib/utils';
+import type { Size } from './axes';
+
+export * from './axes';
+export * from './color';
+
+export const controlHeight = {
+	xs: 'h-(--control-h-xs)',
+	sm: 'h-(--control-h-sm)',
+	md: 'h-(--control-h-md)',
+	lg: 'h-(--control-h-lg)',
+} as const satisfies Partial<Record<Size, string>>;
+
+export const controlMinHeight = {
+	xs: 'min-h-(--control-h-xs)',
+	sm: 'min-h-(--control-h-sm)',
+	md: 'min-h-(--control-h-md)',
+	lg: 'min-h-(--control-h-lg)',
+} as const satisfies Partial<Record<Size, string>>;
+
+export const controlBox = {
+	xs: 'size-(--control-h-xs)',
+	sm: 'size-(--control-h-sm)',
+	md: 'size-(--control-h-md)',
+	lg: 'size-(--control-h-lg)',
+} as const satisfies Partial<Record<Size, string>>;
 
 export const stateLayer = cn(
 	'after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit]',
@@ -18,10 +43,11 @@ export const pressable = cn(
 export const iconSlot = '[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg]:size-[1em]';
 
 export const fieldText = {
+	xs: 'text-xs',
 	sm: 'text-sm',
 	md: 'text-sm',
 	lg: 'text-base',
-} as const;
+} as const satisfies Partial<Record<Size, string>>;
 
 export const clearButton = cn(
 	'relative flex size-5 shrink-0 cursor-pointer items-center justify-center rounded-full text-sm',
@@ -97,7 +123,7 @@ export const row = cn(
 
 export const rowDestructive = 'text-destructive data-highlighted:text-destructive';
 
-export type RowTone = 'default' | 'destructive';
+export type RowVariant = 'default' | 'destructive';
 
 export const rowGroupLabel = 'px-4 py-2 text-sm leading-4 text-muted-foreground select-none';
 

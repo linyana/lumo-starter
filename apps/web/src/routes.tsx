@@ -4,6 +4,7 @@ import {
 	DashboardPage,
 	DesignComponentPage,
 	DesignComponentsPage,
+	DesignConceptsPage,
 	DesignPlaygroundPage,
 	DesignTokensPage,
 	LoginPage,
@@ -19,6 +20,7 @@ const designRoutes: AppRoute[] = import.meta.env.DEV
 	? [
 			{ path: 'design', layout: 'bare', audience: 'public', page: DesignPlaygroundPage },
 			{ path: 'design/tokens', layout: 'bare', audience: 'public', page: DesignTokensPage },
+			{ path: 'design/concepts', layout: 'bare', audience: 'public', page: DesignConceptsPage },
 			{
 				path: 'design/components',
 				layout: 'bare',

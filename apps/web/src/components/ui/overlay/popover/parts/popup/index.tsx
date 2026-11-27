@@ -10,7 +10,7 @@ export function PopoverPopup({ className, ...props }: PopoverPopupProps) {
 		<BasePopover.Popup
 			data-slot="popover-popup"
 			className={cn(
-				'relative rounded-lg border bg-popover text-popover-foreground p-3 shadow-lifted',
+				'relative rounded-lg border bg-popover text-popover-foreground p-3 shadow-lg',
 				'has-[>[data-slot=popover-viewport]]:p-0',
 				'max-w-md',
 				popup,

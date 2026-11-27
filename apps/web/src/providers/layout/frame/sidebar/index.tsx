@@ -50,7 +50,7 @@ export function Sidebar({ className, collapsed = false, ...props }: SidebarProps
 			data-slot="layout-sidebar"
 			data-collapsed={collapsed ? '' : undefined}
 			className={cn(
-				'hidden h-full shrink-0 flex-col overflow-hidden md:flex',
+				'hidden h-full shrink-0 flex-col overflow-hidden bg-sidebar text-sidebar-foreground md:flex',
 				'transition-[width] duration-(--duration-state) ease-linear',
 				collapsed ? 'w-12' : 'w-64',
 				className,

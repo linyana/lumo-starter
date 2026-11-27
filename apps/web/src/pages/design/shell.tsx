@@ -1,4 +1,4 @@
-import { Boxes, FlaskConical, Palette } from 'lucide-react';
+import { Boxes, FlaskConical, Palette, Ruler } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { NavLink, useLocation } from 'react-router';
 import { Layout, type LayoutNavEntry } from '@/providers/layout';
@@ -27,6 +27,14 @@ const nav: LayoutNavEntry[] = [
 		href: '/design/tokens',
 		icon: <Palette />,
 		render: <NavLink to="/design/tokens" />,
+	},
+	{
+		type: 'item',
+		key: 'concepts',
+		label: 'Concepts',
+		href: '/design/concepts',
+		icon: <Ruler />,
+		render: <NavLink to="/design/concepts" />,
 	},
 	{
 		type: 'item',
